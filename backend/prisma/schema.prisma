@@ -1,0 +1,52 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Tenant {
+  id        String   @id
+  name      String
+  urlSlug   String   @unique
+  createdAt DateTime @default(now())
+  
+  users       User[]
+  invitations Invitation[]
+}
+
+model User {
+  id             String   @id
+  email          String
+  hashedPassword String
+  role           String   // 'SUPER_ADMIN', 'BUSINESS_OWNER', 'STAFF'
+  tenantId       String?
+  createdAt      DateTime @default(now())
+
+  tenant              Tenant?              @relation(fields: [tenantId], references: [id])
+  passwordResetTokens PasswordResetToken[]
+}
+
+model Invitation {
+  id         String    @id
+  tenantId   String
+  email      String
+  role       String
+  token      String    @unique
+  expiresAt  DateTime
+  acceptedAt DateTime?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+}
+
+model PasswordResetToken {
+  id        String    @id
+  userId    String
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+}

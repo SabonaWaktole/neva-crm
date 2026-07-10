@@ -1,0 +1,51 @@
+import { RequestPasswordResetUseCase } from '@auth/application/use-cases/RequestPasswordResetUseCase';
+import { IUserRepository } from '@auth/domain/repositories/IUserRepository';
+import { IPasswordResetTokenRepository } from '@auth/domain/repositories/IPasswordResetTokenRepository';
+import { IEmailSender } from '@auth/application/ports/IEmailSender';
+
+describe('RequestPasswordResetUseCase', () => {
+  let useCase: RequestPasswordResetUseCase;
+  let userRepository: jest.Mocked<IUserRepository>;
+  let prtRepository: jest.Mocked<IPasswordResetTokenRepository>;
+  let emailSender: jest.Mocked<IEmailSender>;
+
+  beforeEach(() => {
+    userRepository = {
+      create: jest.fn(),
+      findById: jest.fn(),
+      findByEmail: jest.fn(),
+      findSuperAdminByEmail: jest.fn(),
+      updatePassword: jest.fn(),
+    };
+    prtRepository = {
+      create: jest.fn(),
+      findByToken: jest.fn(),
+      markUsed: jest.fn(),
+    };
+    emailSender = {
+      sendInvitationEmail: jest.fn(),
+      sendPasswordResetEmail: jest.fn(),
+    };
+
+    useCase = new RequestPasswordResetUseCase(userRepository, prtRepository, emailSender);
+  });
+
+  it('should generate a token and send an email if user exists', async () => {
+    userRepository.findByEmail.mockResolvedValue({ id: 'user-1', email: 'test@example.com' } as any);
+    prtRepository.create.mockImplementation(async (token) => token);
+
+    await useCase.execute({ email: 'test@example.com', tenantId: 'tenant-1' });
+
+    expect(prtRepository.create).toHaveBeenCalled();
+    expect(emailSender.sendPasswordResetEmail).toHaveBeenCalledWith('test@example.com', expect.any(String));
+  });
+
+  it('should fail silently (not throw) if user does not exist', async () => {
+    userRepository.findByEmail.mockResolvedValue(null);
+
+    await expect(useCase.execute({ email: 'test@example.com', tenantId: 'tenant-1' })).resolves.not.toThrow();
+
+    expect(prtRepository.create).not.toHaveBeenCalled();
+    expect(emailSender.sendPasswordResetEmail).not.toHaveBeenCalled();
+  });
+});

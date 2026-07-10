@@ -1,0 +1,34 @@
+import { IInvitationRepository } from '../../domain/repositories/IInvitationRepository';
+import { Invitation } from '../../domain/entities/Invitation';
+import { UserRole } from '../../domain/enums/UserRole';
+import { prisma } from '../../../shared/infrastructure/prisma/client';
+
+export class PrismaInvitationRepository implements IInvitationRepository {
+  async create(invitation: Invitation): Promise<Invitation> {
+    await prisma.invitation.create({
+      data: {
+        id: invitation.id,
+        tenantId: invitation.tenantId,
+        email: invitation.email,
+        role: invitation.role,
+        token: invitation.token,
+        expiresAt: invitation.expiresAt,
+        acceptedAt: invitation.acceptedAt,
+      },
+    });
+    return invitation;
+  }
+
+  async findByToken(token: string): Promise<Invitation | null> {
+    const data = await prisma.invitation.findUnique({ where: { token } });
+    if (!data) return null;
+    return Invitation.create({ ...data, role: data.role as UserRole });
+  }
+
+  async markAccepted(id: string, acceptedAt: Date): Promise<void> {
+    await prisma.invitation.update({
+      where: { id },
+      data: { acceptedAt },
+    });
+  }
+}
