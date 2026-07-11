@@ -1,4 +1,5 @@
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import { createAuthRoutes } from '@auth/interfaces/http/routes/authRoutes';
 import { AuthController } from '@auth/interfaces/http/controllers/AuthController';
 import { RegisterBusinessOwnerUseCase } from '@auth/application/use-cases/RegisterBusinessOwnerUseCase';
@@ -38,6 +39,7 @@ export interface AppDependencies {
 export const createApp = (overrides?: Partial<AppDependencies>) => {
   const app = express();
   app.use(express.json());
+  app.use(cookieParser());
 
   // Dependencies — use overrides if provided, otherwise default to real implementations
   const userRepository = overrides?.userRepository ?? new PrismaUserRepository();

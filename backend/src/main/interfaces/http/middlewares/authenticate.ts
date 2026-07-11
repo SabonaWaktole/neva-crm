@@ -15,7 +15,11 @@ declare global {
 
 export const authenticate = (tokenService: ITokenService) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
+    let token = req.cookies?.jwt;
+
+    if (!token) {
+      token = req.header('Authorization')?.replace('Bearer ', '');
+    }
 
     if (!token) {
       return res.status(401).json({ error: 'Access denied. No token provided.' });

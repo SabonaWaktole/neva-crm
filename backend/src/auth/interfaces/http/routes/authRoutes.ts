@@ -20,6 +20,8 @@ export const createAuthRoutes = (
 
   router.post('/register', validateRequest(authSchemas.register), authController.register);
   router.post('/login', validateRequest(authSchemas.login), authController.login);
+  router.post('/logout', authController.logout);
+  router.get('/me', authMw, authController.getMe);
   
   router.post('/invitations/accept', validateRequest(authSchemas.acceptInvitation), authController.acceptInvitation);
   

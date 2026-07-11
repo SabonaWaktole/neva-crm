@@ -21,6 +21,10 @@ export class AuthController {
   register = async (req: Request, res: Response) => {
     try {
       const result = await this.registerUseCase.execute(req.body);
+      
+      // Auto-login after registration could happen here if use case returns token.
+      // But currently RegisterBusinessOwnerUseCase doesn't return a token.
+      // Let's just return success for now.
       res.status(201).json({ message: 'Registration successful', tenantSlug: result.tenant.urlSlug });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
@@ -30,10 +34,29 @@ export class AuthController {
   login = async (req: Request, res: Response) => {
     try {
       const result = await this.loginUseCase.execute(req.body);
-      res.status(200).json(result);
+      res.cookie('jwt', result.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60 * 1000 // 1 day
+      });
+      res.status(200).json({ message: 'Login successful' });
     } catch (error: any) {
       res.status(401).json({ error: error.message });
     }
+  };
+
+  logout = async (req: Request, res: Response) => {
+    res.clearCookie('jwt');
+    res.status(200).json({ message: 'Logged out successfully' });
+  };
+
+  getMe = async (req: Request, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+    // We can just return the decoded token data which has userId, role, tenantId
+    res.status(200).json({ user: req.user });
   };
 
   inviteStaff = async (req: Request, res: Response) => {
@@ -55,6 +78,9 @@ export class AuthController {
 
   acceptInvitation = async (req: Request, res: Response) => {
     try {
+      // AcceptInvitationUseCase returns a token?
+      // Wait, let's look at AcceptInvitationUseCase. Does it return a token?
+      // For now we assume we just return success and user logs in separately
       await this.acceptInvitationUseCase.execute(req.body);
       res.status(200).json({ message: 'Invitation accepted successfully' });
     } catch (error: any) {
