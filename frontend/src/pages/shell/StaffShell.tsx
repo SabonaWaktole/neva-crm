@@ -1,7 +1,11 @@
 import React from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { AppLayout } from '../../components/layout/AppLayout/AppLayout';
-import { Sidebar, NavItem } from '../../components/layout/Sidebar/Sidebar';
+import { Sidebar } from '../../components/layout/Sidebar/Sidebar';
+import type { NavItem } from '../../components/layout/Sidebar/Sidebar';
 import { Button } from '../../components/ui/Button/Button';
+import { useAuthStore } from '../../store/useAuthStore';
+import { useLogout } from '../../hooks/useLogout';
 
 const mockNavItems: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', isActive: true },
@@ -12,13 +16,26 @@ const mockNavItems: NavItem[] = [
 ];
 
 export const StaffShell = () => {
+  const navigate = useNavigate();
+  const { tenantSlug } = useParams();
+  const { user } = useAuthStore();
+  const { logout } = useLogout();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate(`/${tenantSlug || ''}/login`);
+  };
+
+  const userName = user?.userId ? `User ${user.userId.substring(0, 8)}` : 'Staff Member';
+
   return (
     <AppLayout
-      userName="John Smith"
-      userAvatarSrc="https://lh3.googleusercontent.com/aida-public/AB6AXuB6pZ_sIq55eWcIe2n4O7G_b1xJ5vXvR7OQ_gW3n5R_t3Z5h8V_x5Z3O_l6Z3O_l6Z3O_l6Z3O_l6Z3O_l6Z3O_l6Z3O_l6Z3O_l6Z3O_l6Z3O_l6Z3O_l6Z3O_l6Z3O_l6Z3O_l6Z3"
+      userName={userName}
+      onLogout={handleLogout}
+      onSettingsClick={() => navigate(`/${tenantSlug}/settings`)}
       sidebar={
         <Sidebar 
-          orgName="Corporate Modern" 
+          orgName="My Workspace" 
           orgTier="Sales Representative" 
           navItems={mockNavItems} 
         />
@@ -26,7 +43,7 @@ export const StaffShell = () => {
     >
       <div style={{ padding: 'var(--spacing-lg)' }}>
         <h1 style={{ fontFamily: 'var(--font-family-headline-lg)', fontSize: 'var(--font-size-headline-lg)', fontWeight: 600, margin: '0 0 24px 0', color: 'var(--color-on-surface)' }}>
-          Welcome back, John!
+          Welcome back!
         </h1>
         
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--spacing-md)', marginBottom: 'var(--spacing-xl)' }}>
@@ -50,7 +67,6 @@ export const StaffShell = () => {
         </h2>
         
         <div style={{ backgroundColor: 'var(--color-surface-container-lowest)', border: '1px solid var(--color-outline-variant)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
-          {/* Mock Schedule List */}
           <div style={{ padding: 'var(--spacing-md)', borderBottom: '1px solid var(--color-outline-variant)', display: 'flex', alignItems: 'center', gap: '16px' }}>
              <div style={{ width: '48px', height: '48px', backgroundColor: 'var(--color-secondary-container)', color: 'var(--color-on-secondary-container)', borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                <span style={{ fontSize: '12px', fontWeight: 600 }}>OCT</span>

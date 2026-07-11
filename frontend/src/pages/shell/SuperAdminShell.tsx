@@ -1,6 +1,7 @@
 import React from 'react';
 import { AppLayout } from '../../components/layout/AppLayout/AppLayout';
-import { Sidebar, NavItem } from '../../components/layout/Sidebar/Sidebar';
+import { Sidebar } from '../../components/layout/Sidebar/Sidebar';
+import type { NavItem } from '../../components/layout/Sidebar/Sidebar';
 import { Button } from '../../components/ui/Button/Button';
 import { Badge } from '../../components/ui/Badge/Badge';
 

@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '../../components/ui/Card/Card';
 import { Stepper } from '../../components/ui/Stepper/Stepper';
 import { TextInput } from '../../components/ui/TextInput/TextInput';
+import { PasswordInput } from '../../components/ui/PasswordInput/PasswordInput';
 import { Button } from '../../components/ui/Button/Button';
+import { useRegisterBusiness } from '../../hooks/useRegisterBusiness';
 import styles from './OnboardingPage.module.css';
 
 const steps = [
@@ -12,8 +15,13 @@ const steps = [
 ];
 
 export const OnboardingPage = () => {
+  const navigate = useNavigate();
+  const { register, isLoading, error, isSuccess, tenantSlug } = useRegisterBusiness();
   const [currentStep, setCurrentStep] = useState(1);
   const [companyName, setCompanyName] = useState('');
+  const [ownerEmail, setOwnerEmail] = useState('');
+  const [ownerPassword, setOwnerPassword] = useState('');
+  const [locale, setLocale] = useState('en');
 
   const nextStep = () => {
     if (currentStep < steps.length) {
@@ -30,6 +38,47 @@ export const OnboardingPage = () => {
   // Slug generation logic
   const slug = companyName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
   const displaySlug = slug || 'your-workspace';
+
+  const handleComplete = async () => {
+    try {
+      await register({
+        companyName,
+        urlSlug: slug,
+        ownerEmail,
+        ownerPassword,
+        locale,
+      });
+    } catch (err) {
+      // Error is handled by the hook — go back to step 1 to show error
+      setCurrentStep(1);
+    }
+  };
+
+  // If registration succeeded, show success and redirect
+  if (isSuccess && tenantSlug) {
+    return (
+      <div className={styles.container}>
+        <main className={styles.mainWrapper}>
+          <div className={styles.header}>
+            <h1 className={styles.title}>Nexus CRM</h1>
+          </div>
+          <Card padding="none" className={styles.cardContainer}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--spacing-lg)', padding: 'var(--spacing-2xl)' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 64, color: 'var(--color-success)' }}>check_circle</span>
+              <h2 className={styles.stepTitle}>Workspace Created!</h2>
+              <p className={styles.stepSubtitle}>Your workspace is ready at <strong>nexus.crm/{tenantSlug}</strong></p>
+              <Button
+                variant="primary"
+                onClick={() => navigate(`/${tenantSlug}/login`)}
+              >
+                Go to Login
+              </Button>
+            </div>
+          </Card>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
@@ -51,11 +100,34 @@ export const OnboardingPage = () => {
               <p className={styles.stepSubtitle}>This will be used to generate your dedicated workspace URL.</p>
               
               <div className={`${styles.formContent} ${styles.formContentMaxW}`}>
+                {error && (
+                  <div style={{ color: 'var(--color-error)', fontSize: 'var(--font-size-label-sm)', background: 'var(--color-error-light)', padding: 'var(--spacing-sm)', borderRadius: 'var(--radius-sm)', marginBottom: 'var(--spacing-sm)' }}>
+                    {error}
+                  </div>
+                )}
                 <TextInput 
                   label="Company Name" 
                   placeholder="e.g. Acme Corp" 
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
+                />
+
+                <TextInput
+                  label="Your Email"
+                  placeholder="you@company.com"
+                  type="email"
+                  value={ownerEmail}
+                  onChange={(e) => setOwnerEmail(e.target.value)}
+                  required
+                />
+
+                <PasswordInput
+                  label="Create Password"
+                  placeholder="••••••••"
+                  helperText="Min 8 chars, 1 uppercase, 1 lowercase, 1 digit."
+                  value={ownerPassword}
+                  onChange={(e) => setOwnerPassword(e.target.value)}
+                  required
                 />
                 
                 <div className={styles.urlPreviewBox}>
@@ -93,7 +165,12 @@ export const OnboardingPage = () => {
                 <div className={styles.gapXs} style={{ display: 'flex', flexDirection: 'column' }}>
                   <label className={styles.label} htmlFor="localeSelect">Region / Locale</label>
                   <div className={styles.selectWrapper}>
-                    <select id="localeSelect" className={styles.select} defaultValue="">
+                    <select
+                      id="localeSelect"
+                      className={styles.select}
+                      value={locale}
+                      onChange={(e) => setLocale(e.target.value)}
+                    >
                       <option disabled value="">Select a region...</option>
                       <option value="us">United States (USD)</option>
                       <option value="uk">United Kingdom (GBP)</option>
@@ -144,7 +221,8 @@ export const OnboardingPage = () => {
                 style={{ backgroundColor: 'var(--color-on-background)', color: 'white' }}
                 icon={<span className="material-symbols-outlined" style={{ fontSize: 18 }}>check_circle</span>}
                 iconPosition="right"
-                onClick={() => alert("Setup complete! Redirecting to dashboard...")}
+                onClick={handleComplete}
+                isLoading={isLoading}
               >
                 Complete Setup
               </Button>

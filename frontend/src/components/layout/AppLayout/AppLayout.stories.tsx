@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { AppLayout } from './AppLayout';
-import { Sidebar, NavItem } from '../Sidebar/Sidebar';
+import { Sidebar } from '../Sidebar/Sidebar';
+import type { NavItem } from '../Sidebar/Sidebar';
 
 const meta = {
   title: 'Layout/AppLayout',

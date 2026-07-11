@@ -1,5 +1,6 @@
 import React, { useState, forwardRef } from 'react';
-import { TextInput, TextInputProps } from '../TextInput/TextInput';
+import { TextInput } from '../TextInput/TextInput';
+import type { TextInputProps } from '../TextInput/TextInput';
 
 export interface PasswordInputProps extends Omit<TextInputProps, 'type' | 'iconRight' | 'onIconRightClick'> {}
 

@@ -1,35 +1,94 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { AuthLayout } from '../../components/layout/AuthLayout/AuthLayout';
-import { TextInput } from '../../components/ui/TextInput/TextInput';
+import { PasswordInput } from '../../components/ui/PasswordInput/PasswordInput';
 import { Button } from '../../components/ui/Button/Button';
+import { useAcceptInvitation } from '../../hooks/useAcceptInvitation';
 
 export const StaffInvitationPage = () => {
+  const { token } = useParams();
+  const { acceptInvitation, isLoading, error, isSuccess } = useAcceptInvitation();
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [localError, setLocalError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLocalError(null);
+
+    if (newPassword !== confirmPassword) {
+      setLocalError('Passwords do not match.');
+      return;
+    }
+
+    try {
+      await acceptInvitation({
+        token: token || '',
+        newPassword,
+      });
+    } catch (err) {
+      // Error handled by hook
+    }
+  };
+
   return (
     <AuthLayout
       title="Join Workspace"
-      subtitle="You've been invited to join Corporate Modern on Nexus CRM."
+      subtitle="You've been invited to join a workspace on Nexus CRM. Create a password to get started."
       logoIcon={<span className="material-symbols-outlined text-[32px] text-primary" style={{ fontSize: 32, color: 'var(--color-primary)' }}>handshake</span>}
     >
-      <form style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }} onSubmit={(e) => e.preventDefault()}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)' }}>
-          <p style={{ fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-label-sm)', color: 'var(--color-on-surface-variant)', margin: 0 }}>Invited Email</p>
-          <div style={{ padding: '8px 12px', backgroundColor: 'var(--color-surface-container-highest)', borderRadius: 'var(--radius-default)', border: '1px solid var(--color-outline-variant)' }}>
-            <span style={{ fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-body-md)', color: 'var(--color-on-surface)', fontWeight: 500 }}>jane.doe@example.com</span>
+      {isSuccess ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)', alignItems: 'center', textAlign: 'center' }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 48, color: 'var(--color-success)' }}>check_circle</span>
+          <p style={{ fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-body-md)', color: 'var(--color-on-surface)' }}>
+            Your account has been created successfully. You can now log in.
+          </p>
+          <Link 
+            to="/"
+            style={{ 
+              fontFamily: 'var(--font-family-base)', 
+              fontSize: 'var(--font-size-label-md)', 
+              color: 'var(--color-primary)', 
+              textDecoration: 'none'
+            }}
+          >
+            Go to Login
+          </Link>
+        </div>
+      ) : (
+        <form style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }} onSubmit={handleSubmit}>
+          {(error || localError) && (
+            <div style={{ color: 'var(--color-error)', fontSize: 'var(--font-size-label-sm)', background: 'var(--color-error-light)', padding: 'var(--spacing-sm)', borderRadius: 'var(--radius-sm)' }}>
+              {error || localError}
+            </div>
+          )}
+
+          <PasswordInput
+            label="Create Password"
+            placeholder="••••••••"
+            id="new-password"
+            helperText="Min 8 chars, 1 uppercase, 1 lowercase, 1 digit."
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            required
+          />
+
+          <PasswordInput
+            label="Confirm Password"
+            placeholder="••••••••"
+            id="confirm-password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
+
+          <div style={{ paddingTop: 'var(--spacing-sm)' }}>
+            <Button fullWidth variant="primary" type="submit" isLoading={isLoading}>
+              Accept Invitation
+            </Button>
           </div>
-        </div>
-
-        <TextInput 
-          label="Full Name" 
-          placeholder="Jane Doe" 
-          id="fullname"
-        />
-
-        <div style={{ paddingTop: 'var(--spacing-sm)' }}>
-          <Button fullWidth variant="primary" type="submit">
-            Accept Invitation
-          </Button>
-        </div>
-      </form>
+        </form>
+      )}
     </AuthLayout>
   );
 };

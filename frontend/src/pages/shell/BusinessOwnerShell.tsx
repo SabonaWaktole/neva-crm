@@ -1,7 +1,11 @@
 import React from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { AppLayout } from '../../components/layout/AppLayout/AppLayout';
-import { Sidebar, NavItem } from '../../components/layout/Sidebar/Sidebar';
+import { Sidebar } from '../../components/layout/Sidebar/Sidebar';
+import type { NavItem } from '../../components/layout/Sidebar/Sidebar';
 import { Button } from '../../components/ui/Button/Button';
+import { useAuthStore } from '../../store/useAuthStore';
+import { useLogout } from '../../hooks/useLogout';
 
 const mockNavItems: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', isActive: true },
@@ -14,27 +18,41 @@ const mockNavItems: NavItem[] = [
 ];
 
 export const BusinessOwnerShell = () => {
+  const navigate = useNavigate();
+  const { tenantSlug } = useParams();
+  const { user } = useAuthStore();
+  const { logout } = useLogout();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate(`/${tenantSlug || ''}/login`);
+  };
+
+  const userName = user?.userId ? `User ${user.userId.substring(0, 8)}` : 'Business Owner';
+
   return (
     <AppLayout
-      userName="Jane Doe"
-      userAvatarSrc="https://lh3.googleusercontent.com/aida-public/AB6AXuCUVO_U904UXtp4jWW0TlbxmzPuBGIREJnS7rJvUtLWgv77vYvS4vxvhNtsn7uCPM4v19ncCYsTNjqR9gmBTthGZKxWksFTi3WHzwUACJE3fdYz43ve1_UcjRrGN0DsSAnzWy8bcm_ue3gBSicCHOQXi3nTG59avgqC7yDJvl_xzAPCtNRbIGrfduLtU3kRkzKkv4b6G4JpGzlfYerk5A74tOh2EEID2ccvMJyWClcbv_w3W2yL1Gy2hiSvmpCVC63iIga-3SmPV8Nj"
+      userName={userName}
+      onLogout={handleLogout}
+      onSettingsClick={() => navigate(`/${tenantSlug}/settings`)}
       sidebar={
         <Sidebar 
-          orgName="Corporate Modern" 
+          orgName="My Workspace" 
           orgTier="Enterprise Tier" 
           navItems={mockNavItems} 
         />
       }
     >
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center' }}>
-        <div style={{ width: '256px', height: '256px', marginBottom: '16px', opacity: 0.8, backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuB00z6ndtEAp6bIUEee06YUTwTSaENCI8aGl8Vwbfv0VwlnE-nz76YF-1ATiSalKoGp2AnyW0ajxdKzbx0j3_jWB5JqXfeWDy8UuqpMCzwqi2Jgnf47sx5qqc6CkiQ-_T3Zg4Nf2ZLmK-10gZ6bmQsm_EM7bss4La3dSiValH1BCpbCIV5DUUaQa8MGeHKjd9AkMoE7znpc2s-1YMz4Rm_hCuDk5H6fdzmxxVp6jc3iJRPnNDScUPE5Eb1b4SmAJ2yrb5GHRTUft1Ky')", backgroundSize: 'cover' }}></div>
+        <div style={{ width: '256px', height: '256px', marginBottom: '16px', opacity: 0.8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 120, color: 'var(--color-primary)', opacity: 0.3 }}>hub</span>
+        </div>
         <h1 style={{ fontFamily: 'var(--font-family-display)', fontSize: 'var(--font-size-display)', fontWeight: 700, margin: '0 0 16px 0', color: 'var(--color-on-surface)' }}>Welcome to Nexus CRM</h1>
         <p style={{ fontFamily: 'var(--font-family-body-lg)', fontSize: 'var(--font-size-body-lg)', color: 'var(--color-on-surface-variant)', maxWidth: '600px', marginBottom: '32px' }}>
           Your workspace is ready. Let's get things set up so you can start managing your clients and growing your business efficiently.
         </p>
         
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 'var(--spacing-md)', width: '100%', maxWidth: '800px', textAlign: 'left' }}>
-          {/* We would typically use a grid system or flex layout here, but keeping it simple for the empty state placeholder */}
           <div style={{ 
             backgroundColor: 'var(--color-surface-container-lowest)', 
             border: '1px solid var(--color-outline-variant)', 
