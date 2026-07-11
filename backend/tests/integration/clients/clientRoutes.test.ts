@@ -115,6 +115,9 @@ describe('Client Routes', () => {
     if (res.status !== 201) {
       console.log('CREATE CLIENT ERROR:', res.body);
     }
+    if (res.status !== 201) {
+      console.log('CREATE CLIENT ERROR:', res.body);
+    }
     expect(res.status).toBe(201);
     expect(res.body.name).toBe('Routes Test Corp');
     createdClientId = res.body.id;
@@ -143,6 +146,30 @@ describe('Client Routes', () => {
     // Ensure omitted fields are NOT nulled out
     expect(res.body.status).toBe(ClientStatus.PROSPECT);
     expect(res.body.customFieldValues).toEqual({ industry: 'Software' });
+  });
+
+  it('PUT /:clientId merges customFieldValues instead of wholesale replacing', async () => {
+    // First, add another field definition
+    await request(app)
+      .post('/api/t1/clients/settings/custom-fields')
+      .set('Authorization', `Bearer ${validToken}`)
+      .send({ fieldName: 'region', fieldType: 'TEXT' });
+
+    // Update client to have two custom fields
+    await request(app)
+      .put(`/api/t1/clients/${createdClientId}`)
+      .set('Authorization', `Bearer ${validToken}`)
+      .send({ customFieldValues: { industry: 'Software', region: 'EU' } });
+
+    // Now do a partial update of ONLY the region
+    const res = await request(app)
+      .put(`/api/t1/clients/${createdClientId}`)
+      .set('Authorization', `Bearer ${validToken}`)
+      .send({ customFieldValues: { region: 'US' } });
+
+    expect(res.status).toBe(200);
+    // 'industry' should survive the merge!
+    expect(res.body.customFieldValues).toEqual({ industry: 'Software', region: 'US' });
   });
 
   it('PUT /:clientId merges customFieldValues instead of wholesale replacing', async () => {

@@ -1,9 +1,13 @@
-import React, { useState, forwardRef } from 'react';
+import { useState, forwardRef } from 'react';
+import type { InputHTMLAttributes } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { TextInput } from '../TextInput/TextInput';
-import type { TextInputProps } from '../TextInput/TextInput';
+import { TextInput } from '../TextInput';
 
-export interface PasswordInputProps extends Omit<TextInputProps, 'type' | 'iconRight' | 'onIconRightClick'> {}
+export interface PasswordInputProps extends InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+  helperText?: string;
+  error?: string;
+}
 
 export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
   (props, ref) => {
@@ -28,4 +32,3 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
 );
 
 PasswordInput.displayName = 'PasswordInput';
-

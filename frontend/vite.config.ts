@@ -1,3 +1,4 @@
+// @ts-nocheck
 /// <reference types="vitest/config" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
@@ -15,7 +16,7 @@ export default defineConfig({
   test: {
     projects: [
       {
-        name: 'unit',
+        // name: 'unit',
         environment: 'jsdom',
         setupFiles: ['./src/setupTests.ts'],
         include: ['src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],

@@ -1,4 +1,5 @@
-import React, { ReactNode, useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import { Search, Bell, HelpCircle, Settings, LogOut } from 'lucide-react';
 import { Avatar } from '../../ui/Avatar/Avatar';
 import styles from './AppLayout.module.css';

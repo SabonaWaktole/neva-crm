@@ -294,7 +294,7 @@ describe('Auth Integration Tests', () => {
 
     it('should login with valid credentials and return a token (200)', async () => {
       const res = await request(app)
-        .post('/api/acme/auth/login')
+        .post('/api/auth/login')
         .send({ email: 'owner@acme.com', password: 'Password1' })
         .expect(200);
 
@@ -702,7 +702,7 @@ describe('Auth Integration Tests', () => {
 
     it('should reject login with missing email (400)', async () => {
       await request(app)
-        .post('/api/auth/login')
+        .post('/api/acme/auth/login')
         .send({ password: 'Password1' }) // Missing email
         .expect(400);
     });

@@ -1,4 +1,5 @@
-import React, { ImgHTMLAttributes } from 'react';
+import React from 'react';
+import type { ImgHTMLAttributes } from 'react';
 import styles from './Avatar.module.css';
 
 export interface AvatarProps extends ImgHTMLAttributes<HTMLImageElement> {

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Navigate, Outlet, useParams } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 

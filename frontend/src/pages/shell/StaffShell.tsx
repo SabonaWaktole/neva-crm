@@ -1,6 +1,5 @@
-import React from 'react';
 import { Clock } from 'lucide-react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { AppLayout } from '../../components/layout/AppLayout/AppLayout';
 import { Sidebar } from '../../components/layout/Sidebar/Sidebar';
 import type { NavItem } from '../../components/layout/Sidebar/Sidebar';
@@ -21,6 +20,14 @@ export const StaffShell = () => {
   const { tenantSlug } = useParams();
   const { user } = useAuthStore();
   const { logout } = useLogout();
+  const location = useLocation();
+
+  const activeNavId = mockNavItems.find(item => location.pathname.includes(`/${tenantSlug}/${item.id}`))?.id || 'dashboard';
+
+  const navItemsWithActiveState = mockNavItems.map(item => ({
+    ...item,
+    isActive: item.id === activeNavId
+  }));
 
   const handleLogout = async () => {
     await logout();
@@ -38,7 +45,8 @@ export const StaffShell = () => {
         <Sidebar 
           orgName="My Workspace" 
           orgTier="Sales Representative" 
-          navItems={mockNavItems} 
+          navItems={navItemsWithActiveState} 
+          onNavItemClick={(id) => navigate(`/${tenantSlug}/${id}`)}
           onLogoutClick={handleLogout}
         />
       }

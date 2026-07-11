@@ -1,0 +1,309 @@
+/* ClientDetailContent.module.css */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Header Area */
+.headerArea {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-family: var(--font-family-label-sm);
+  font-size: var(--font-size-label-sm);
+  color: var(--color-on-surface-variant);
+}
+
+.breadcrumbLink {
+  color: var(--color-on-surface-variant);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.breadcrumbLink:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.breadcrumbSeparator {
+  color: var(--color-outline);
+}
+
+.breadcrumbCurrent {
+  color: var(--color-on-surface);
+  font-weight: 600;
+}
+
+.headerMain {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.companyLogo {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.companyInitials {
+  font-family: var(--font-family-headline-md);
+  font-size: var(--font-size-headline-md);
+  color: var(--color-on-primary);
+  font-weight: 700;
+}
+
+.companyInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.companyTitleRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.companyName {
+  font-family: var(--font-family-headline-lg);
+  font-size: var(--font-size-headline-lg);
+  color: var(--color-on-surface);
+  margin: 0;
+  font-weight: 700;
+}
+
+.companySubtitle {
+  font-family: var(--font-family-body-md);
+  font-size: var(--font-size-body-md);
+  color: var(--color-on-surface-variant);
+  margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+.iconButton {
+  padding: var(--spacing-xs) var(--spacing-sm) !important;
+  min-width: unset;
+}
+
+/* Grid Layout */
+.gridContainer {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-lg);
+}
+
+@media (min-width: 1024px) {
+  .gridContainer {
+    grid-template-columns: 4fr 8fr;
+  }
+}
+
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+/* Card shared styles */
+.cardTitle {
+  font-family: var(--font-family-headline-md);
+  font-size: var(--font-size-headline-md);
+  color: var(--color-on-surface);
+  margin: 0 0 var(--spacing-md) 0;
+  font-weight: 600;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+}
+
+/* Key Contact */
+.contactDetails {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--color-outline-variant);
+}
+
+.contactAvatar {
+  flex-shrink: 0;
+}
+
+.contactInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.contactName {
+  font-family: var(--font-family-label-md);
+  font-size: var(--font-size-label-md);
+  color: var(--color-on-surface);
+  margin: 0;
+  font-weight: 600;
+}
+
+.contactTitle {
+  font-family: var(--font-family-body-md);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-on-surface-variant);
+  margin: 0;
+}
+
+.contactActions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.contactLink {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-family: var(--font-family-body-md);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.contactLink:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+/* Custom Fields */
+.customFieldsCard {
+  /* No extra styles needed */
+}
+
+.settingsButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xs);
+  border: none;
+  background: none;
+  color: var(--color-on-surface-variant);
+  cursor: pointer;
+  border-radius: var(--radius-default);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.settingsButton:hover {
+  background-color: var(--color-surface-container-high);
+  color: var(--color-on-surface);
+}
+
+.fieldsList {
+  display: flex;
+  flex-direction: column;
+}
+
+.fieldRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid var(--color-outline-variant);
+}
+
+.fieldRow:last-child {
+  border-bottom: none;
+}
+
+.fieldLabel {
+  font-family: var(--font-family-label-sm);
+  font-size: var(--font-size-label-sm);
+  color: var(--color-on-surface-variant);
+}
+
+.fieldValue {
+  font-family: var(--font-family-body-md);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-on-surface);
+  font-weight: 500;
+  text-align: right;
+}
+
+/* Timeline Card */
+.timelineCard {
+  /* No extra styles */
+}
+
+.timelineActions {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.smallIconButton {
+  padding: var(--spacing-xs) !important;
+  min-width: unset;
+}
+
+.logActivityRow {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--color-outline-variant);
+}
+
+.logActivityButton {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-label-sm) !important;
+  padding: var(--spacing-xs) var(--spacing-sm) !important;
+}
+
+.timelineList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding-left: var(--spacing-xs);
+}

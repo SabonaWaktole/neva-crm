@@ -22,7 +22,7 @@ describe('resolveTenant middleware', () => {
 
   it('should resolve tenant and attach to request', async () => {
     req.params = { tenantSlug: 'acme' };
-    req.user = { userId: 'u1', role: UserRole.STAFF, tenantId: 't1' };
+    req.user = { userId: 'u1', role: UserRole.STAFF, tenantId: 't1', tenantSlug: 'tenant-1' };
     mockTenantRepository.findBySlug.mockResolvedValue({ id: 't1', urlSlug: 'acme' } as any);
 
     const middleware = resolveTenant(mockTenantRepository);
@@ -46,7 +46,7 @@ describe('resolveTenant middleware', () => {
 
   it('should return 403 if user belongs to a different tenant', async () => {
     req.params = { tenantSlug: 'acme' };
-    req.user = { userId: 'u1', role: UserRole.STAFF, tenantId: 'different-t' }; // User is logged in to a different tenant
+    req.user = { userId: 'u1', role: UserRole.STAFF, tenantId: 'different-t', tenantSlug: 'different-t' }; // User is logged in to a different tenant
     mockTenantRepository.findBySlug.mockResolvedValue({ id: 't1', urlSlug: 'acme' } as any);
 
     const middleware = resolveTenant(mockTenantRepository);
@@ -59,7 +59,7 @@ describe('resolveTenant middleware', () => {
 
   it('should allow SUPER_ADMIN to access any tenant', async () => {
     req.params = { tenantSlug: 'acme' };
-    req.user = { userId: 'sa', role: UserRole.SUPER_ADMIN, tenantId: null };
+    req.user = { userId: 'sa', role: UserRole.SUPER_ADMIN, tenantId: null, tenantSlug: null };
     mockTenantRepository.findBySlug.mockResolvedValue({ id: 't1', urlSlug: 'acme' } as any);
 
     const middleware = resolveTenant(mockTenantRepository);

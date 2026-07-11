@@ -1,4 +1,3 @@
-import React from 'react';
 import { Check } from 'lucide-react';
 import styles from './Stepper.module.css';
 
@@ -29,7 +28,6 @@ export const Stepper: React.FC<StepperProps> = ({ steps, currentStep }) => {
         const stepNum = index + 1;
         const isCompleted = stepNum < currentStep;
         const isActive = stepNum === currentStep;
-        const isFuture = stepNum > currentStep;
 
         const circleClass = isCompleted 
           ? styles.stepCircleCompleted 

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Network, ArrowRight, Building2, ShieldCheck, Zap } from 'lucide-react';
 import { Button } from '../../components/ui/Button/Button';

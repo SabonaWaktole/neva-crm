@@ -1,4 +1,3 @@
-import React from 'react';
 import { Plus, Building2, TrendingUp, CircleDollarSign, Activity, AlertTriangle, Filter, Download, MoreVertical } from 'lucide-react';
 import { AppLayout } from '../../components/layout/AppLayout/AppLayout';
 import { Sidebar } from '../../components/layout/Sidebar/Sidebar';

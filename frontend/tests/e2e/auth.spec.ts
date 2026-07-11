@@ -12,6 +12,10 @@ test.describe('Authentication & Onboarding Flow', () => {
     page.on('pageerror', err => console.log(`PAGE ERROR: ${err.message}`));
     page.on('response', response => console.log(`<< ${response.status()} ${response.url()}`));
 
+    page.on('console', msg => console.log(`PAGE LOG: ${msg.text()}`));
+    page.on('pageerror', err => console.log(`PAGE ERROR: ${err.message}`));
+    page.on('response', response => console.log(`<< ${response.status()} ${response.url()}`));
+
     // 1. Go to Onboarding page
     await page.goto('/register-business');
     await expect(page).toHaveTitle(/Nexus CRM/);

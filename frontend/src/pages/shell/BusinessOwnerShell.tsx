@@ -1,6 +1,5 @@
-import React from 'react';
 import { Network, UserPlus } from 'lucide-react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { AppLayout } from '../../components/layout/AppLayout/AppLayout';
 import { Sidebar } from '../../components/layout/Sidebar/Sidebar';
 import type { NavItem } from '../../components/layout/Sidebar/Sidebar';
@@ -23,6 +22,14 @@ export const BusinessOwnerShell = () => {
   const { tenantSlug } = useParams();
   const { user } = useAuthStore();
   const { logout } = useLogout();
+  const location = useLocation();
+
+  const activeNavId = mockNavItems.find(item => location.pathname.includes(`/${tenantSlug}/${item.id}`))?.id || 'dashboard';
+
+  const navItemsWithActiveState = mockNavItems.map(item => ({
+    ...item,
+    isActive: item.id === activeNavId
+  }));
 
   const handleLogout = async () => {
     await logout();
@@ -40,7 +47,8 @@ export const BusinessOwnerShell = () => {
         <Sidebar 
           orgName="My Workspace" 
           orgTier="Enterprise Tier" 
-          navItems={mockNavItems} 
+          navItems={navItemsWithActiveState} 
+          onNavItemClick={(id) => navigate(`/${tenantSlug}/${id}`)}
           onLogoutClick={handleLogout}
         />
       }

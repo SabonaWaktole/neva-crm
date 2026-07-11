@@ -1,4 +1,5 @@
-import React, { HTMLAttributes, ReactNode } from 'react';
+import React from 'react';
+import type { HTMLAttributes, ReactNode } from 'react';
 import styles from './Badge.module.css';
 
 export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
