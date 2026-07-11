@@ -1,0 +1,157 @@
+import React, { useState } from 'react';
+import { Card } from '../../components/ui/Card/Card';
+import { Stepper } from '../../components/ui/Stepper/Stepper';
+import { TextInput } from '../../components/ui/TextInput/TextInput';
+import { Button } from '../../components/ui/Button/Button';
+import styles from './OnboardingPage.module.css';
+
+const steps = [
+  { id: 'org', label: 'Organization' },
+  { id: 'brand', label: 'Branding' },
+  { id: 'locale', label: 'Localization' },
+];
+
+export const OnboardingPage = () => {
+  const [currentStep, setCurrentStep] = useState(1);
+  const [companyName, setCompanyName] = useState('');
+
+  const nextStep = () => {
+    if (currentStep < steps.length) {
+      setCurrentStep(prev => prev + 1);
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(prev => prev - 1);
+    }
+  };
+
+  // Slug generation logic
+  const slug = companyName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+  const displaySlug = slug || 'your-workspace';
+
+  return (
+    <div className={styles.container}>
+      <main className={styles.mainWrapper}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>Nexus CRM</h1>
+          <p className={styles.subtitle}>Let's set up your workspace.</p>
+        </div>
+
+        <Card padding="none" className={styles.cardContainer}>
+          <div className={styles.stepperHeader}>
+            <Stepper steps={steps} currentStep={currentStep} />
+          </div>
+
+          <div className={styles.contentArea}>
+            {/* Step 1: Organization */}
+            <div className={`${styles.stepContent} ${currentStep === 1 ? styles.stepContentActive : currentStep > 1 ? styles.stepContentHiddenLeft : styles.stepContentHiddenRight}`}>
+              <h2 className={styles.stepTitle}>What's your company name?</h2>
+              <p className={styles.stepSubtitle}>This will be used to generate your dedicated workspace URL.</p>
+              
+              <div className={`${styles.formContent} ${styles.formContentMaxW}`}>
+                <TextInput 
+                  label="Company Name" 
+                  placeholder="e.g. Acme Corp" 
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                />
+                
+                <div className={styles.urlPreviewBox}>
+                  <span className="material-symbols-outlined" style={{ color: 'var(--color-outline)', fontSize: 20 }}>link</span>
+                  <div className={styles.urlText}>
+                    <span>nexus.crm/</span><span className={styles.urlSlug}>{displaySlug}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 2: Branding */}
+            <div className={`${styles.stepContent} ${currentStep === 2 ? styles.stepContentActive : currentStep > 2 ? styles.stepContentHiddenLeft : styles.stepContentHiddenRight}`}>
+              <h2 className={styles.stepTitle}>Upload your logo</h2>
+              <p className={styles.stepSubtitle}>Personalize your workspace for your team and clients.</p>
+              
+              <div className={`${styles.formContent} ${styles.formContentMaxW}`}>
+                <div className={styles.uploadBox}>
+                  <div className={styles.uploadIconBox}>
+                    <span className={`material-symbols-outlined ${styles.uploadIcon}`}>cloud_upload</span>
+                  </div>
+                  <span className={styles.uploadTitle}>Click to upload</span>
+                  <span className={styles.uploadSubtitle}>or drag and drop</span>
+                  <span className={styles.uploadHelp}>SVG, PNG, JPG (max. 5MB)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 3: Localization */}
+            <div className={`${styles.stepContent} ${currentStep === 3 ? styles.stepContentActive : currentStep > 3 ? styles.stepContentHiddenLeft : styles.stepContentHiddenRight}`}>
+              <h2 className={styles.stepTitle}>Set your region</h2>
+              <p className={styles.stepSubtitle}>This helps us configure date, time, and currency formats correctly.</p>
+              
+              <div className={`${styles.formContent} ${styles.formContentMaxW} ${styles.gapLg}`}>
+                <div className={styles.gapXs} style={{ display: 'flex', flexDirection: 'column' }}>
+                  <label className={styles.label} htmlFor="localeSelect">Region / Locale</label>
+                  <div className={styles.selectWrapper}>
+                    <select id="localeSelect" className={styles.select} defaultValue="">
+                      <option disabled value="">Select a region...</option>
+                      <option value="us">United States (USD)</option>
+                      <option value="uk">United Kingdom (GBP)</option>
+                      <option value="eu">European Union (EUR)</option>
+                      <option value="au">Australia (AUD)</option>
+                      <option value="ca">Canada (CAD)</option>
+                    </select>
+                    <span className={`material-symbols-outlined ${styles.selectIcon}`}>expand_more</span>
+                  </div>
+                </div>
+
+                <div className={styles.gapXs} style={{ display: 'flex', flexDirection: 'column' }}>
+                  <label className={styles.label} htmlFor="langSelect">System Language</label>
+                  <div className={styles.selectWrapper}>
+                    <select id="langSelect" className={styles.select} defaultValue="en">
+                      <option value="en">English (US)</option>
+                      <option value="es">Español</option>
+                      <option value="fr">Français</option>
+                      <option value="de">Deutsch</option>
+                    </select>
+                    <span className={`material-symbols-outlined ${styles.selectIcon}`}>expand_more</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.footer}>
+            <button 
+              className={`${styles.btnBack} ${currentStep === 1 ? styles.btnBackHidden : ''}`} 
+              onClick={prevStep}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>arrow_back</span>
+              Back
+            </button>
+
+            {currentStep < steps.length ? (
+              <Button 
+                variant="primary" 
+                icon={<span className="material-symbols-outlined" style={{ fontSize: 18 }}>arrow_forward</span>}
+                iconPosition="right"
+                onClick={nextStep}
+              >
+                Continue
+              </Button>
+            ) : (
+              <Button 
+                style={{ backgroundColor: 'var(--color-on-background)', color: 'white' }}
+                icon={<span className="material-symbols-outlined" style={{ fontSize: 18 }}>check_circle</span>}
+                iconPosition="right"
+                onClick={() => alert("Setup complete! Redirecting to dashboard...")}
+              >
+                Complete Setup
+              </Button>
+            )}
+          </div>
+        </Card>
+      </main>
+    </div>
+  );
+};

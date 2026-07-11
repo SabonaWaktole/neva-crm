@@ -1,0 +1,241 @@
+<!DOCTYPE html><html class="h-full" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Nexus CRM - Welcome</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-tertiary-container": "#ffd2be",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "error": "#ba1a1a",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-fixed": "#001e2f",
+                        "on-surface-variant": "#464555",
+                        "primary": "#3525cd",
+                        "error-container": "#ffdad6",
+                        "outline-variant": "#c7c4d8",
+                        "surface-dim": "#cbdbf5",
+                        "on-background": "#0b1c30",
+                        "surface-container": "#e5eeff",
+                        "on-error": "#ffffff",
+                        "background": "#f8f9ff",
+                        "on-primary-container": "#dad7ff",
+                        "secondary-container": "#39b8fd",
+                        "inverse-primary": "#c3c0ff",
+                        "on-tertiary-fixed": "#351000",
+                        "on-error-container": "#93000a",
+                        "surface": "#f8f9ff",
+                        "outline": "#777587",
+                        "surface-container-low": "#eff4ff",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "surface-tint": "#4d44e3",
+                        "tertiary-fixed-dim": "#ffb695",
+                        "secondary-fixed": "#c9e6ff",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "on-primary": "#ffffff",
+                        "on-surface": "#0b1c30",
+                        "surface-container-highest": "#d3e4fe",
+                        "tertiary": "#7e3000",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#0f0069",
+                        "primary-container": "#4f46e5",
+                        "secondary": "#006591",
+                        "tertiary-container": "#a44100",
+                        "surface-container-high": "#dce9ff",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#004c6e",
+                        "surface-variant": "#d3e4fe",
+                        "surface-bright": "#f8f9ff",
+                        "on-secondary-container": "#004666",
+                        "secondary-fixed-dim": "#89ceff",
+                        "tertiary-fixed": "#ffdbcc",
+                        "primary-fixed": "#e2dfff",
+                        "inverse-surface": "#213145"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "sm": "8px",
+                        "md": "16px",
+                        "sidebar-width": "240px",
+                        "2xl": "48px",
+                        "xs": "4px",
+                        "xl": "32px",
+                        "base": "4px",
+                        "max-content-width": "1280px",
+                        "sidebar-collapsed": "64px",
+                        "lg": "24px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter"],
+                        "display": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "display": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["18px", { "lineHeight": "26px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-sm": ["11px", { "lineHeight": "14px", "fontWeight": "600" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["20px", { "lineHeight": "28px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-background h-full text-on-surface flex flex-col overflow-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-lg h-16 bg-surface dark:bg-inverse-surface text-primary dark:text-inverse-primary border-b border-outline-variant dark:border-outline flat no shadows">
+<div class="flex items-center gap-md">
+<span class="text-headline-md font-headline-md font-bold text-primary dark:text-inverse-primary">Nexus CRM</span>
+</div>
+<div class="flex-1 max-w-md mx-lg hidden md:flex items-center relative">
+<span class="material-symbols-outlined absolute left-3 text-outline" data-icon="search">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-DEFAULT focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-body-md font-body-md h-[36px]" placeholder="Search..." type="text">
+</div>
+<div class="flex items-center gap-md">
+<button class="p-2 hover:bg-surface-container-low dark:hover:bg-surface-variant transition-colors rounded-full cursor-pointer active:opacity-80 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 hover:bg-surface-container-low dark:hover:bg-surface-variant transition-colors rounded-full cursor-pointer active:opacity-80 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<button class="flex items-center gap-2 p-1 hover:bg-surface-container-low dark:hover:bg-surface-variant transition-colors rounded-full cursor-pointer active:opacity-80">
+<img alt="User profile photo" class="w-8 h-8 rounded-full object-cover border border-outline-variant" data-alt="A professional headshot of a business executive in a modern office environment, wearing a dark suit. Lighting is clean and natural, projecting reliability and competence. The image is cropped in a tight circle to serve as a user profile photo, blending seamlessly into a light corporate UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUVO_U904UXtp4jWW0TlbxmzPuBGIREJnS7rJvUtLWgv77vYvS4vxvhNtsn7uCPM4v19ncCYsTNjqR9gmBTthGZKxWksFTi3WHzwUACJE3fdYz43ve1_UcjRrGN0DsSAnzWy8bcm_ue3gBSicCHOQXi3nTG59avgqC7yDJvl_xzAPCtNRbIGrfduLtU3kRkzKkv4b6G4JpGzlfYerk5A74tOh2EEID2ccvMJyWClcbv_w3W2yL1Gy2hiSvmpCVC63iIga-3SmPV8Nj">
+</button>
+</div>
+</header>
+<div class="flex flex-1 pt-16 h-full w-full">
+<!-- SideNavBar -->
+<nav class="fixed left-0 top-16 h-[calc(100vh-64px)] z-40 flex flex-col py-md bg-surface dark:bg-inverse-surface border-r border-outline-variant dark:border-outline w-sidebar-width transition-width duration-300 ease-in-out hidden md:flex flex-shrink-0">
+<div class="px-md mb-lg flex items-center gap-3">
+<div class="w-10 h-10 bg-primary-container rounded-DEFAULT flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined" data-icon="apartment">apartment</span>
+</div>
+<div>
+<h2 class="font-headline-md text-headline-md text-primary">Corporate Modern</h2>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Enterprise Tier</p>
+</div>
+</div>
+<div class="px-md mb-md">
+<button class="w-full bg-primary hover:bg-surface-tint text-on-primary font-label-md text-label-md py-2 px-4 rounded-DEFAULT flex items-center justify-center gap-2 transition-colors h-[36px]">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+                    New Entry
+                </button>
+</div>
+<div class="flex-1 overflow-y-auto px-sm">
+<a class="flex items-center gap-3 px-3 py-2 bg-surface-container-highest dark:bg-primary-container text-primary dark:text-on-primary-container border-l-2 border-primary mb-1 cursor-pointer" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="dashboard">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low mb-1 cursor-pointer transition-all border-l-2 border-transparent" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="group">group</span>
+<span class="font-label-md text-label-md">Clients</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low mb-1 cursor-pointer transition-all border-l-2 border-transparent" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="event">event</span>
+<span class="font-label-md text-label-md">Appointments</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low mb-1 cursor-pointer transition-all border-l-2 border-transparent" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="inventory_2">inventory_2</span>
+<span class="font-label-md text-label-md">Products &amp; Stock</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low mb-1 cursor-pointer transition-all border-l-2 border-transparent" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="description">description</span>
+<span class="font-label-md text-label-md">Quotations</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low mb-1 cursor-pointer transition-all border-l-2 border-transparent" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="bar_chart">bar_chart</span>
+<span class="font-label-md text-label-md">Reports</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low mb-1 cursor-pointer transition-all border-l-2 border-transparent" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="settings">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</div>
+<div class="px-sm mt-auto border-t border-outline-variant pt-2">
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low mb-1 cursor-pointer transition-all border-l-2 border-transparent" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="contact_support">contact_support</span>
+<span class="font-label-md text-label-md">Support</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low cursor-pointer transition-all border-l-2 border-transparent text-error" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="logout">logout</span>
+<span class="font-label-md text-label-md">Log Out</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area (Empty State) -->
+<main class="flex-1 md:ml-sidebar-width p-lg lg:p-2xl overflow-y-auto w-full h-full bg-background flex flex-col items-center justify-center">
+<div class="max-w-3xl w-full flex flex-col items-center text-center space-y-6">
+<!-- Empty State Illustration Placeholder -->
+<div class="w-64 h-64 mb-4 opacity-80" data-alt="A minimalist, greyscale vector illustration of a clean, organized desk with a blank digital tablet, a subtle plant, and abstract geometric shapes floating softly in the background. The style is modern corporate, very light, with thin precise lines denoting a fresh start or empty slate in a professional CRM environment." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB00z6ndtEAp6bIUEee06YUTwTSaENCI8aGl8Vwbfv0VwlnE-nz76YF-1ATiSalKoGp2AnyW0ajxdKzbx0j3_jWB5JqXfeWDy8UuqpMCzwqi2Jgnf47sx5qqc6CkiQ-_T3Zg4Nf2ZLmK-10gZ6bmQsm_EM7bss4La3dSiValH1BCpbCIV5DUUaQa8MGeHKjd9AkMoE7znpc2s-1YMz4Rm_hCuDk5H6fdzmxxVp6jc3iJRPnNDScUPE5Eb1b4SmAJ2yrb5GHRTUft1Ky')"></div>
+<h1 class="font-display text-display text-on-surface">Welcome to Nexus CRM</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl">
+                    Your workspace is ready. Let's get things set up so you can start managing your clients and growing your business efficiently.
+                </p>
+<!-- Getting Started Bento Layout -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md w-full mt-8 text-left">
+<!-- Primary Action Card -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-lg flex flex-col items-start gap-4 hover:border-primary transition-colors cursor-pointer group shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),_0px_2px_4px_-2px_rgba(0,0,0,0.05)]">
+<div class="w-12 h-12 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-2xl" data-icon="group_add">group_add</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Add your first client</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Start building your database by adding contact details and organizational structure.</p>
+</div>
+<button class="mt-auto bg-primary hover:bg-surface-tint text-on-primary font-label-md text-label-md py-2 px-6 rounded-DEFAULT h-[36px] transition-colors">
+                            Add Client
+                        </button>
+</div>
+<!-- Secondary Setup Options -->
+<div class="flex flex-col gap-md h-full">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-md flex items-center gap-4 hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="w-10 h-10 bg-surface-variant text-on-surface rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+</div>
+<div class="flex-1">
+<h4 class="font-headline-md text-body-lg font-medium text-on-surface">Import Products</h4>
+<p class="font-body-md text-label-md text-on-surface-variant">Upload your catalog via CSV</p>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="chevron_right">chevron_right</span>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-md flex items-center gap-4 hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="w-10 h-10 bg-surface-variant text-on-surface rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</div>
+<div class="flex-1">
+<h4 class="font-headline-md text-body-lg font-medium text-on-surface">Configure Settings</h4>
+<p class="font-body-md text-label-md text-on-surface-variant">Set up company profile &amp; taxes</p>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

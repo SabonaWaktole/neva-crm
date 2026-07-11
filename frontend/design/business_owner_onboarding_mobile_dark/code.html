@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Nexus CRM - Onboarding</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b1326;
+            color: #dae2fd;
+        }
+        .onboarding-gradient {
+            background: radial-gradient(circle at 50% -20%, #1e293b 0%, #0b1326 100%);
+        }
+        .input-glow:focus-within {
+            box-shadow: 0 0 15px -3px rgba(128, 131, 255, 0.3);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#0b1326",
+                        "primary-container": "#8083ff",
+                        "on-secondary-fixed-variant": "#39485a",
+                        "on-primary": "#1000a9",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "tertiary": "#ffb783",
+                        "surface-container-highest": "#2d3449",
+                        "tertiary-fixed-dim": "#ffb783",
+                        "on-primary-container": "#0d0096",
+                        "inverse-primary": "#494bd6",
+                        "tertiary-container": "#d97721",
+                        "inverse-surface": "#dae2fd",
+                        "secondary": "#b9c8de",
+                        "on-tertiary": "#4f2500",
+                        "surface-container-lowest": "#060e20",
+                        "on-error-container": "#ffdad6",
+                        "surface-dim": "#0b1326",
+                        "on-secondary-fixed": "#0d1c2d",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "on-surface": "#dae2fd",
+                        "error": "#ffb4ab",
+                        "background": "#0b1326",
+                        "surface-variant": "#2d3449",
+                        "surface-container-low": "#131b2e",
+                        "surface-bright": "#31394d",
+                        "outline-variant": "#464554",
+                        "on-error": "#690005",
+                        "on-secondary": "#233143",
+                        "secondary-fixed-dim": "#b9c8de",
+                        "error-container": "#93000a",
+                        "on-surface-variant": "#c7c4d7",
+                        "surface-container": "#171f33",
+                        "primary": "#c0c1ff",
+                        "tertiary-fixed": "#ffdcc5",
+                        "on-background": "#dae2fd",
+                        "surface-tint": "#c0c1ff",
+                        "secondary-fixed": "#d4e4fa",
+                        "outline": "#908fa0",
+                        "on-tertiary-fixed-variant": "#703700",
+                        "on-tertiary-fixed": "#301400",
+                        "on-secondary-container": "#a7b6cc",
+                        "surface-container-high": "#222a3d",
+                        "on-tertiary-container": "#452000",
+                        "on-primary-fixed": "#07006c",
+                        "primary-fixed": "#e1e0ff",
+                        "inverse-on-surface": "#283044",
+                        "secondary-container": "#39485a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "40px",
+                        "lg": "24px",
+                        "xl": "32px",
+                        "unit": "4px",
+                        "sm": "8px",
+                        "gutter": "24px",
+                        "xs": "4px",
+                        "md": "16px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background min-h-screen flex flex-col items-center justify-between overflow-hidden">
+<!-- Header Section (Subtle Shell) -->
+<header class="w-full h-16 flex items-center justify-center px-md z-10">
+<span class="text-primary font-headline-md text-headline-md tracking-tight">Nexus CRM</span>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow w-full max-w-md px-md onboarding-gradient relative flex flex-col">
+<!-- Atmospheric Background Element -->
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary-container opacity-5 blur-[100px] pointer-events-none"></div>
+<section class="mt-xl">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-sm">
+                Tell us about your organization
+            </h1>
+<p class="font-body-md text-body-md text-on-surface-variant mb-xl">
+                This helps us set up your workspace and collaborative environment.
+            </p>
+<form class="space-y-lg" id="onboardingForm">
+<!-- Organization Name Field -->
+<div class="space-y-sm">
+<label class="font-label-md text-label-md text-on-surface flex items-center gap-xs" for="org_name">
+                        Organization Name
+                        <span class="text-error">*</span>
+</label>
+<div class="relative input-glow group transition-all duration-200">
+<input class="w-full bg-surface-container-low border border-outline-variant rounded-lg px-md py-sm font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary transition-all" id="org_name" name="org_name" placeholder="Acme Industries" type="text"/>
+</div>
+</div>
+<!-- Workspace URL Field -->
+<div class="space-y-sm">
+<label class="font-label-md text-label-md text-on-surface flex items-center gap-xs" for="workspace_url">
+                        Workspace URL
+                        <span class="text-error">*</span>
+</label>
+<div class="flex items-stretch rounded-lg overflow-hidden border border-outline-variant focus-within:border-primary input-glow transition-all">
+<div class="bg-surface-container-high px-md flex items-center border-r border-outline-variant">
+<span class="font-body-sm text-body-sm text-on-surface-variant">nexus.io/</span>
+</div>
+<input class="flex-grow bg-surface-container-low px-md py-sm font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none" id="workspace_url" name="workspace_url" placeholder="acme" type="text"/>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                        Lowercase letters, numbers, and dashes only.
+                    </p>
+</div>
+<!-- Logo Upload Area -->
+<div class="space-y-sm pt-sm">
+<label class="font-label-md text-label-md text-on-surface">Organization Logo (Optional)</label>
+<div class="relative group">
+<div class="w-full h-32 border-2 border-dashed border-outline-variant rounded-xl flex flex-col items-center justify-center gap-sm bg-surface-container hover:bg-surface-container-high hover:border-primary transition-all cursor-pointer" id="drop_zone">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">cloud_upload</span>
+<div class="text-center">
+<p class="font-label-md text-label-md text-on-surface">Click or drag to upload</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">PNG, JPG up to 5MB</p>
+</div>
+</div>
+<input accept="image/*" class="hidden" id="logo_upload" type="file"/>
+</div>
+</div>
+</form>
+</section>
+<!-- Spacer for mobile scrollability if keyboard pops -->
+<div class="h-24"></div>
+</main>
+<!-- Bottom Navigation Shell (Fixed) -->
+<footer class="w-full max-w-md px-md pb-xl pt-lg bg-background flex flex-col gap-lg border-t border-outline-variant/20">
+<!-- Progress Bar -->
+<div class="w-full space-y-sm">
+<div class="flex justify-between items-center px-xs">
+<span class="font-label-sm text-label-sm text-primary uppercase tracking-wider">Step 2 of 4</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">50% Complete</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary transition-all duration-700 ease-out" id="progress_bar" style="width: 50%;"></div>
+</div>
+</div>
+<!-- Action Button -->
+<button class="w-full bg-primary-container text-on-primary-container font-label-md text-label-md h-14 rounded-xl flex items-center justify-center gap-sm active:scale-[0.98] transition-transform shadow-lg shadow-primary-container/10" id="continueBtn">
+            Continue
+            <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</footer>
+<script>
+        // Simple Micro-interactions
+        const dropZone = document.getElementById('drop_zone');
+        const fileInput = document.getElementById('logo_upload');
+        const continueBtn = document.getElementById('continueBtn');
+        const inputs = document.querySelectorAll('input');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('border-primary', 'bg-surface-container-high');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('border-primary', 'bg-surface-container-high');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-primary', 'bg-surface-container-high');
+            // Handle file logic here if needed
+            alert('File selected');
+        });
+
+        continueBtn.addEventListener('click', () => {
+            // Visual feedback
+            continueBtn.innerHTML = `<span class="material-symbols-outlined animate-spin">progress_activity</span>`;
+            setTimeout(() => {
+                window.location.reload();
+            }, 800);
+        });
+
+        // Dynamic URL generator preview
+        const orgInput = document.getElementById('org_name');
+        const urlInput = document.getElementById('workspace_url');
+
+        orgInput.addEventListener('input', (e) => {
+            if (!urlInput.dataset.touched) {
+                const val = e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+                urlInput.value = val;
+            }
+        });
+
+        urlInput.addEventListener('focus', () => {
+            urlInput.dataset.touched = "true";
+        });
+    </script>
+</body></html>

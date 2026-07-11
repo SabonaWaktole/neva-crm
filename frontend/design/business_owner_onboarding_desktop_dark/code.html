@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Nexus CRM - Onboarding</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b1326;
+            color: #dae2fd;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar for enterprise density */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b1326;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2d3449;
+            border-radius: 10px;
+        }
+        .step-transition {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .input-glow:focus {
+            box-shadow: 0 0 15px -3px rgba(128, 131, 255, 0.4);
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid #334155;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface": "#0b1326",
+                      "primary-container": "#8083ff",
+                      "on-secondary-fixed-variant": "#39485a",
+                      "on-primary": "#1000a9",
+                      "on-primary-fixed-variant": "#2f2ebe",
+                      "tertiary": "#ffb783",
+                      "surface-container-highest": "#2d3449",
+                      "tertiary-fixed-dim": "#ffb783",
+                      "on-primary-container": "#0d0096",
+                      "inverse-primary": "#494bd6",
+                      "tertiary-container": "#d97721",
+                      "inverse-surface": "#dae2fd",
+                      "secondary": "#b9c8de",
+                      "on-tertiary": "#4f2500",
+                      "surface-container-lowest": "#060e20",
+                      "on-error-container": "#ffdad6",
+                      "surface-dim": "#0b1326",
+                      "on-secondary-fixed": "#0d1c2d",
+                      "primary-fixed-dim": "#c0c1ff",
+                      "on-surface": "#dae2fd",
+                      "error": "#ffb4ab",
+                      "background": "#0b1326",
+                      "surface-variant": "#2d3449",
+                      "surface-container-low": "#131b2e",
+                      "surface-bright": "#31394d",
+                      "outline-variant": "#464554",
+                      "on-error": "#690005",
+                      "on-secondary": "#233143",
+                      "secondary-fixed-dim": "#b9c8de",
+                      "error-container": "#93000a",
+                      "on-surface-variant": "#c7c4d7",
+                      "surface-container": "#171f33",
+                      "primary": "#c0c1ff",
+                      "tertiary-fixed": "#ffdcc5",
+                      "on-background": "#dae2fd",
+                      "surface-tint": "#c0c1ff",
+                      "secondary-fixed": "#d4e4fa",
+                      "outline": "#908fa0",
+                      "on-tertiary-fixed-variant": "#703700",
+                      "on-tertiary-fixed": "#301400",
+                      "on-secondary-container": "#a7b6cc",
+                      "surface-container-high": "#222a3d",
+                      "on-tertiary-container": "#452000",
+                      "on-primary-fixed": "#07006c",
+                      "primary-fixed": "#e1e0ff",
+                      "inverse-on-surface": "#283044",
+                      "secondary-container": "#39485a"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-desktop": "40px",
+                      "lg": "24px",
+                      "xl": "32px",
+                      "unit": "4px",
+                      "sm": "8px",
+                      "gutter": "24px",
+                      "xs": "4px",
+                      "md": "16px",
+                      "margin-mobile": "16px"
+              },
+              "fontFamily": {
+                      "headline-md": ["Inter"],
+                      "label-sm": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "body-md": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "label-md": ["Inter"],
+                      "headline-sm": ["Inter"]
+              },
+              "fontSize": {
+                      "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-sm": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "400"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                      "headline-sm": ["20px", {"lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface overflow-hidden min-h-screen">
+<!-- Top Navigation Bar (Shell Replacement for Onboarding) -->
+<nav class="fixed top-0 w-full z-50 h-16 px-xl bg-surface border-b border-outline-variant flex items-center justify-between">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary" style="font-variation-settings: 'FILL' 1;">hub</span>
+</div>
+<span class="text-headline-md font-bold text-primary tracking-tight">Nexus CRM</span>
+</div>
+<div class="flex items-center gap-md">
+<span class="text-label-md text-on-surface-variant">Step 1 of 4</span>
+<div class="w-px h-4 bg-outline-variant"></div>
+<button class="text-label-md text-on-surface-variant hover:text-primary transition-colors">Save &amp; Exit</button>
+</div>
+</nav>
+<!-- Main Background Scene -->
+<div class="absolute inset-0 z-0">
+
+</div>
+<!-- Content Canvas -->
+<main class="relative z-10 w-full h-screen flex flex-col items-center pt-24">
+<!-- Multi-step Progress Bar -->
+<div class="w-full max-w-4xl px-xl mb-12">
+<div class="flex items-center justify-between relative">
+<!-- Progress Line -->
+<div class="absolute top-1/2 left-0 w-full h-0.5 bg-surface-container-highest -translate-y-1/2 z-0"></div>
+<div class="absolute top-1/2 left-0 w-1/4 h-0.5 bg-primary -translate-y-1/2 z-0 transition-all duration-700"></div>
+<!-- Step 1: Active -->
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center border-4 border-surface shadow-lg">
+<span class="material-symbols-outlined text-on-primary text-[20px]" style="font-variation-settings: 'FILL' 1;">corporate_fare</span>
+</div>
+<span class="mt-2 text-label-sm text-primary font-bold">Organization</span>
+</div>
+<!-- Step 2: Pending -->
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center border-4 border-surface">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">group_add</span>
+</div>
+<span class="mt-2 text-label-sm text-on-surface-variant">Team</span>
+</div>
+<!-- Step 3: Pending -->
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center border-4 border-surface">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">tune</span>
+</div>
+<span class="mt-2 text-label-sm text-on-surface-variant">Preferences</span>
+</div>
+<!-- Step 4: Pending -->
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center border-4 border-surface">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">rocket_launch</span>
+</div>
+<span class="mt-2 text-label-sm text-on-surface-variant">Ready</span>
+</div>
+</div>
+</div>
+<!-- Onboarding Card -->
+<div class="w-full max-w-xl px-md">
+<div class="glass-panel rounded-xl p-xl shadow-2xl flex flex-col">
+<div class="mb-sm">
+<span class="text-label-md text-primary-container font-semibold uppercase tracking-widest">Initialization</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-xl">What's your company name?</h1>
+<div class="space-y-lg">
+<!-- Company Name Input -->
+<div class="group">
+<label class="block text-label-md font-medium text-on-surface-variant mb-xs ml-1" for="company_name">Company Name</label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-md flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-on-surface-variant group-focus-within:text-primary transition-colors">business</span>
+</div>
+<input class="w-full bg-surface-container-low border border-outline-variant text-on-surface text-body-md rounded-lg pl-11 pr-md py-md outline-none focus:border-primary-container input-glow transition-all" id="company_name" oninput="updateUrl(this.value)" placeholder="e.g. Acme Corp" type="text"/>
+</div>
+<p class="mt-2 text-body-sm text-on-surface-variant">This will be used for your billing and organization settings.</p>
+</div>
+<!-- Workspace URL (Read-only aesthetic) -->
+<div>
+<label class="block text-label-md font-medium text-on-surface-variant mb-xs ml-1">Your Workspace URL</label>
+<div class="flex items-center bg-surface-container-highest border border-outline rounded-lg px-md py-md cursor-not-allowed opacity-80">
+<span class="text-body-md text-on-surface-variant font-mono">nexus.app/</span>
+<span class="text-body-md text-primary font-mono font-semibold" id="url_preview">acme-corp</span>
+</div>
+</div>
+</div>
+<div class="mt-xl pt-lg border-t border-outline-variant flex items-center justify-between">
+<button class="px-lg py-md text-label-md text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all">
+                        Help Center
+                    </button>
+<button class="px-xl py-md bg-primary-container hover:bg-opacity-90 active:scale-95 text-on-primary-container font-bold rounded-lg flex items-center gap-sm transition-all shadow-lg" onclick="handleContinue()">
+                        Continue
+                        <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Contextual Insight Card -->
+<div class="mt-lg flex gap-md items-start p-md bg-primary/10 rounded-lg border border-primary/20">
+<span class="material-symbols-outlined text-primary-container">info</span>
+<div>
+<p class="text-body-sm text-primary-container">
+<strong>Why we ask:</strong> Setting your organization name now allows us to pre-configure your global workspace and custom sub-domain automatically.
+                    </p>
+</div>
+</div>
+</div>
+<!-- Bottom Graphic/Atmosphere -->
+<div class="mt-auto w-full max-w-screen-xl px-xl pb-xl flex justify-between items-end opacity-40">
+<div class="flex flex-col">
+<div class="flex gap-xs items-center">
+<div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+<span class="text-label-sm font-mono tracking-tighter">NODE_SYSTEM: ONLINE</span>
+</div>
+<span class="text-label-sm font-mono text-outline">SECURE_TUNNEL: 256-BIT_AES</span>
+</div>
+<div class="flex gap-md">
+<div class="w-12 h-0.5 bg-outline-variant"></div>
+<div class="w-12 h-0.5 bg-outline-variant"></div>
+<div class="w-24 h-0.5 bg-primary"></div>
+</div>
+</div>
+</main>
+<script>
+        function updateUrl(val) {
+            const preview = document.getElementById('url_preview');
+            const slug = val.toLowerCase()
+                            .replace(/[^a-z0-9]/g, '-')
+                            .replace(/-+/g, '-')
+                            .replace(/^-|-$/g, '');
+            preview.textContent = slug || 'your-company';
+        }
+
+        function handleContinue() {
+            const input = document.getElementById('company_name');
+            if(!input.value.trim()) {
+                input.classList.add('border-error');
+                input.focus();
+                return;
+            }
+            
+            // Simulating transition
+            const main = document.querySelector('main');
+            main.style.opacity = '0';
+            main.style.transform = 'translateY(-20px)';
+            main.style.transition = 'all 0.5s ease-out';
+            
+            setTimeout(() => {
+                alert('Proceeding to Step 2: Team Setup');
+                location.reload(); // Refresh to reset for demo purposes
+            }, 600);
+        }
+
+        // Add subtle interaction sound (metaphorically) or focus effects
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('focus', () => {
+                    input.parentElement.querySelector('.material-symbols-outlined').style.transform = 'scale(1.1)';
+                });
+                input.addEventListener('blur', () => {
+                    input.parentElement.querySelector('.material-symbols-outlined').style.transform = 'scale(1.0)';
+                });
+            });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Nexus CRM - Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#494bd6",
+                        "surface-container-lowest": "#060e20",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "on-tertiary": "#4f2500",
+                        "surface-dim": "#0b1326",
+                        "primary-fixed": "#e1e0ff",
+                        "outline": "#908fa0",
+                        "on-secondary-fixed": "#0d1c2d",
+                        "on-error": "#690005",
+                        "tertiary-fixed": "#ffdcc5",
+                        "surface-variant": "#2d3449",
+                        "tertiary-fixed-dim": "#ffb783",
+                        "surface-container": "#171f33",
+                        "secondary-fixed": "#d4e4fa",
+                        "surface-container-high": "#222a3d",
+                        "on-secondary-fixed-variant": "#39485a",
+                        "surface": "#0b1326",
+                        "secondary-fixed-dim": "#b9c8de",
+                        "error": "#ffb4ab",
+                        "on-secondary": "#233143",
+                        "surface-container-low": "#131b2e",
+                        "secondary": "#b9c8de",
+                        "on-tertiary-fixed": "#301400",
+                        "inverse-surface": "#dae2fd",
+                        "on-secondary-container": "#a7b6cc",
+                        "on-primary-container": "#0d0096",
+                        "on-error-container": "#ffdad6",
+                        "background": "#0b1326",
+                        "surface-container-highest": "#2d3449",
+                        "primary-container": "#8083ff",
+                        "error-container": "#93000a",
+                        "tertiary-container": "#d97721",
+                        "secondary-container": "#39485a",
+                        "on-background": "#dae2fd",
+                        "on-surface": "#dae2fd",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "primary": "#c0c1ff",
+                        "outline-variant": "#464554",
+                        "on-primary-fixed": "#07006c",
+                        "inverse-on-surface": "#283044",
+                        "surface-bright": "#31394d",
+                        "on-tertiary-fixed-variant": "#703700",
+                        "on-primary": "#1000a9",
+                        "on-tertiary-container": "#452000",
+                        "tertiary": "#ffb783",
+                        "surface-tint": "#c0c1ff",
+                        "on-surface-variant": "#c7c4d7"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "40px",
+                        "gutter": "24px",
+                        "xs": "4px",
+                        "margin-mobile": "16px",
+                        "sm": "8px",
+                        "xl": "32px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen flex flex-col justify-center px-margin-mobile py-xl md:px-margin-desktop bg-background text-on-background antialiased selection:bg-primary-container selection:text-on-primary-container">
+<main class="w-full max-w-md mx-auto flex flex-col gap-xl">
+<!-- Header / Logo -->
+<header class="flex flex-col items-center justify-center gap-md text-center">
+<div class="w-16 h-16 rounded-xl bg-surface-container-high border border-outline-variant flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-4xl text-primary" data-weight="fill" style="font-variation-settings: 'FILL' 1;">
+                    hub
+                </span>
+</div>
+<div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Nexus CRM</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-sm">Enterprise Data Management</p>
+</div>
+</header>
+<!-- Login Card -->
+<div class="bg-surface-container border border-surface-variant rounded-xl p-lg flex flex-col gap-lg shadow-lg relative overflow-hidden">
+<!-- Subtle Inner Glow -->
+<div class="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none"></div>
+<form class="flex flex-col gap-md relative z-10" onsubmit="event.preventDefault();">
+<!-- Org ID -->
+<div class="flex flex-col gap-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant" for="orgId">Organization ID</label>
+<div class="relative">
+<span class="absolute inset-y-0 left-0 flex items-center pl-sm pointer-events-none">
+<span class="material-symbols-outlined text-outline text-[20px]">domain</span>
+</span>
+<input class="w-full bg-surface-container-high border border-surface-variant rounded-lg pl-xl pr-sm py-sm font-body-md text-body-md text-on-surface placeholder-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all duration-200" id="orgId" name="orgId" placeholder="Enter Org ID" required="" type="text"/>
+</div>
+</div>
+<!-- Email -->
+<div class="flex flex-col gap-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant" for="email">Email Address</label>
+<div class="relative">
+<span class="absolute inset-y-0 left-0 flex items-center pl-sm pointer-events-none">
+<span class="material-symbols-outlined text-outline text-[20px]">mail</span>
+</span>
+<input class="w-full bg-surface-container-high border border-surface-variant rounded-lg pl-xl pr-sm py-sm font-body-md text-body-md text-on-surface placeholder-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all duration-200" id="email" name="email" placeholder="name@company.com" required="" type="email"/>
+</div>
+</div>
+<!-- Password -->
+<div class="flex flex-col gap-xs">
+<div class="flex justify-between items-center">
+<label class="font-label-sm text-label-sm text-on-surface-variant" for="password">Password</label>
+<a class="font-label-sm text-label-sm text-primary hover:text-primary-fixed transition-colors" href="#">Forgot password?</a>
+</div>
+<div class="relative">
+<span class="absolute inset-y-0 left-0 flex items-center pl-sm pointer-events-none">
+<span class="material-symbols-outlined text-outline text-[20px]">lock</span>
+</span>
+<input class="w-full bg-surface-container-high border border-surface-variant rounded-lg pl-xl pr-sm py-sm font-body-md text-body-md text-on-surface placeholder-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all duration-200" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+</div>
+</div>
+<!-- Submit Button -->
+<button class="mt-sm w-full bg-inverse-primary hover:bg-primary-container text-surface-container-lowest font-label-md text-label-md py-md rounded-lg flex items-center justify-center gap-sm transition-all duration-200 active:scale-[0.98]" type="submit">
+<span>Sign In to Nexus</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</form>
+</div>
+<!-- Footer Links -->
+<footer class="flex justify-center gap-lg">
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors flex items-center gap-xs" href="#">
+<span class="material-symbols-outlined text-[16px]">support_agent</span>
+                Contact Support
+            </a>
+<span class="text-outline-variant">•</span>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">
+                System Status
+            </a>
+</footer>
+</main>
+</body></html>
