@@ -40,7 +40,7 @@ export class AuthController {
         sameSite: 'strict',
         maxAge: 24 * 60 * 60 * 1000 // 1 day
       });
-      res.status(200).json({ message: 'Login successful' });
+      res.status(200).json({ message: 'Login successful', token: result.token });
     } catch (error: any) {
       res.status(401).json({ error: error.message });
     }

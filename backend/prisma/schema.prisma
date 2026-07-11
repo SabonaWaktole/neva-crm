@@ -15,6 +15,10 @@ model Tenant {
   
   users       User[]
   invitations Invitation[]
+  clients                Client[]
+  customFieldDefinitions CustomFieldDefinition[]
+  outcomeCategories      OutcomeCategory[]
+  interactions           Interaction[]
 }
 
 model User {
@@ -27,6 +31,9 @@ model User {
 
   tenant              Tenant?              @relation(fields: [tenantId], references: [id])
   passwordResetTokens PasswordResetToken[]
+  assignedClients     Client[]      @relation("AssignedClients")
+  updatedClients      Client[]      @relation("LastUpdatedClients")
+  interactions        Interaction[]
 }
 
 model Invitation {
@@ -49,4 +56,69 @@ model PasswordResetToken {
   usedAt    DateTime?
 
   user User @relation(fields: [userId], references: [id])
+}
+
+model Client {
+  id                  String   @id
+  tenantId            String
+  name                String
+  email               String?
+  phone               String?
+  status              String   // 'PROSPECT', 'ACTIVE', 'INACTIVE'
+  assignedUserId      String?
+  customFieldValues   Json
+  lastUpdatedByUserId String
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  tenant              Tenant   @relation(fields: [tenantId], references: [id])
+  assignedUser        User?    @relation("AssignedClients", fields: [assignedUserId], references: [id])
+  lastUpdatedByUser   User     @relation("LastUpdatedClients", fields: [lastUpdatedByUserId], references: [id])
+  interactions        Interaction[]
+
+  @@index([tenantId, status])
+  @@index([tenantId, assignedUserId])
+  @@index([tenantId, name])
+}
+
+model CustomFieldDefinition {
+  id        String   @id
+  tenantId  String
+  fieldName String
+  fieldType String   // 'TEXT', 'NUMBER', 'DATE', 'SINGLE_SELECT'
+  options   String[] // for SINGLE_SELECT
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, fieldName])
+}
+
+model OutcomeCategory {
+  id       String @id
+  tenantId String
+  label    String
+
+  tenant       Tenant        @relation(fields: [tenantId], references: [id])
+  interactions Interaction[]
+
+  @@unique([tenantId, label])
+}
+
+model Interaction {
+  id                String   @id
+  tenantId          String
+  clientId          String
+  authorUserId      String
+  content           String
+  channel           String   // 'MEETING', 'CALL', 'NOTE', 'EMAIL'
+  outcomeCategoryId String?
+  createdAt         DateTime @default(now())
+
+  tenant          Tenant           @relation(fields: [tenantId], references: [id])
+  client          Client           @relation(fields: [clientId], references: [id])
+  authorUser      User             @relation(fields: [authorUserId], references: [id])
+  outcomeCategory OutcomeCategory? @relation(fields: [outcomeCategoryId], references: [id])
+
+  @@index([tenantId, clientId])
+  @@index([tenantId, authorUserId])
 }

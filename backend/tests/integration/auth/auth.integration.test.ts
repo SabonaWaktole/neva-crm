@@ -391,6 +391,7 @@ describe('Auth Integration Tests', () => {
         userId: staffUser.id,
         role: UserRole.STAFF,
         tenantId: staffUser.tenantId,
+        tenantSlug: 'acme',
       });
 
       await request(app)
@@ -674,6 +675,7 @@ describe('Auth Integration Tests', () => {
         userId: sa.id,
         role: UserRole.SUPER_ADMIN,
         tenantId: null,
+        tenantSlug: null,
       });
 
       // SUPER_ADMIN can invite on Tenant A

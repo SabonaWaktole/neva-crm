@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { createAuthRoutes } from '@auth/interfaces/http/routes/authRoutes';
 import { AuthController } from '@auth/interfaces/http/controllers/AuthController';
@@ -38,6 +39,7 @@ export interface AppDependencies {
 
 export const createApp = (overrides?: Partial<AppDependencies>) => {
   const app = express();
+  app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
   app.use(express.json());
   app.use(cookieParser());
 
