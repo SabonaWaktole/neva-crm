@@ -1,4 +1,6 @@
 
+import { clientHandlers } from './clientHandlers';
+
 export const handlers = [
-  // Add handlers here as we build out hooks
+  ...clientHandlers
 ];

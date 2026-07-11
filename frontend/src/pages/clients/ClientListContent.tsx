@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import {} from 'react';
+import { useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { 
   Plus, 
   Filter, 
@@ -19,60 +20,16 @@ import { TextInput } from '../../components/ui/TextInput/TextInput';
 import { DropdownMenu } from '../../components/ui/DropdownMenu/DropdownMenu';
 import styles from './ClientListContent.module.css';
 
-const MOCK_CLIENTS = [
-  {
-    id: 'CL-1001',
-    name: 'Acme Corporation',
-    email: 'contact@acmecorp.com',
-    avatar: 'https://i.pravatar.cc/150?u=1001',
-    status: 'active',
-    assignedTo: {
-      name: 'Sarah Jenkins',
-      avatar: 'https://i.pravatar.cc/150?u=sarah',
-    },
-    recentActivity: 'Email sent 2 hrs ago',
-  },
-  {
-    id: 'CL-1002',
-    name: 'Globex Inc',
-    email: 'info@globex.com',
-    avatar: undefined,
-    fallback: 'GI',
-    status: 'prospect',
-    assignedTo: {
-      name: 'Mike Ross',
-      avatar: 'https://i.pravatar.cc/150?u=mike',
-    },
-    recentActivity: 'Meeting scheduled',
-  },
-  {
-    id: 'CL-1003',
-    name: 'Initech',
-    email: 'billing@initech.com',
-    avatar: 'https://i.pravatar.cc/150?u=1003',
-    status: 'inactive',
-    assignedTo: {
-      name: 'Sarah Jenkins',
-      avatar: 'https://i.pravatar.cc/150?u=sarah',
-    },
-    recentActivity: 'Account suspended',
-  },
-  {
-    id: 'CL-1004',
-    name: 'Stark Industries',
-    email: 'tony@stark.com',
-    avatar: 'https://i.pravatar.cc/150?u=1004',
-    status: 'active',
-    assignedTo: {
-      name: 'Mike Ross',
-      avatar: 'https://i.pravatar.cc/150?u=mike',
-    },
-    recentActivity: 'Contract renewed',
-  }
-];
-
+import { useClients } from '../../hooks/useClients';
 export const ClientListContent: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const { tenantSlug } = useParams();
+  const navigate = useNavigate();
+  const { clients, total, isLoading, fetchClients } = useClients();
+
+  useEffect(() => {
+    fetchClients({ name: searchTerm });
+  }, [fetchClients, searchTerm]);
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
@@ -99,7 +56,7 @@ export const ClientListContent: React.FC = () => {
           <Button variant="outline" icon={<Filter size={18} />}>
             Filter
           </Button>
-          <Button variant="primary" icon={<Plus size={18} />}>
+          <Button variant="primary" icon={<Plus size={18} />} onClick={() => navigate(`/${tenantSlug}/clients/new`)}>
             Add Client
           </Button>
         </div>
@@ -132,34 +89,35 @@ export const ClientListContent: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {MOCK_CLIENTS.map((client) => (
+              {isLoading && <tr><td colSpan={5} style={{textAlign:'center', padding:'20px'}}>Loading...</td></tr>}
+              {!isLoading && clients.map((client) => (
                 <tr key={client.id}>
                   <td>
-                    <div className={styles.clientCell}>
+                    <div className={styles.clientCell} style={{ cursor: 'pointer' }} onClick={() => navigate(`/${tenantSlug}/clients/${client.id}`)}>
                       <Avatar 
-                        src={client.avatar} 
-                        fallback={client.fallback || client.name.substring(0, 2).toUpperCase()} 
+                        src={undefined} 
+                        fallback={client.name.substring(0, 2).toUpperCase()} 
                         size="md" 
                       />
                       <div className={styles.clientInfo}>
                         <span className={styles.clientName}>{client.name}</span>
-                        <span className={styles.clientEmail}>{client.email}</span>
+                        <span className={styles.clientEmail}>{client.contactInfo?.email}</span>
                       </div>
                     </div>
                   </td>
                   <td>
-                    <Badge variant={getStatusBadgeVariant(client.status) as any}>
-                      {getStatusLabel(client.status)}
+                    <Badge variant={getStatusBadgeVariant(client.status.toLowerCase()) as any}>
+                      {getStatusLabel(client.status.toLowerCase())}
                     </Badge>
                   </td>
                   <td>
                     <div className={styles.assigneeCell}>
-                      <Avatar src={client.assignedTo.avatar} size="sm" />
-                      <span className={styles.assigneeName}>{client.assignedTo.name}</span>
+                      <Avatar src={undefined} size="sm" fallback={client.assignedUserId?.substring(0,2).toUpperCase() || 'UN'} />
+                      <span className={styles.assigneeName}>{client.assignedUserId || 'Unassigned'}</span>
                     </div>
                   </td>
                   <td>
-                    <span className={styles.recentActivity}>{client.recentActivity}</span>
+                    <span className={styles.recentActivity}>-</span>
                   </td>
                   <td className={styles.tdAction}>
                     <DropdownMenu
@@ -169,10 +127,7 @@ export const ClientListContent: React.FC = () => {
                         </button>
                       }
                       items={[
-                        { id: 'view', label: 'View Details', icon: <Edit size={16} />, onClick: () => {} },
-                        { id: 'email', label: 'Send Email', icon: <Mail size={16} />, onClick: () => {} },
-                        { id: 'call', label: 'Log Call', icon: <Phone size={16} />, onClick: () => {} },
-                        { id: 'delete', label: 'Delete', icon: <Trash2 size={16} />, danger: true, onClick: () => {} },
+                        { id: 'view', label: 'View Details', icon: <Edit size={16} />, onClick: () => navigate(`/${tenantSlug}/clients/${client.id}`) },
                       ]}
                     />
                   </td>
@@ -184,7 +139,7 @@ export const ClientListContent: React.FC = () => {
 
         {/* Pagination Footer */}
         <div className={styles.pagination}>
-          <span className={styles.paginationText}>Showing 1 to {MOCK_CLIENTS.length} of {MOCK_CLIENTS.length} entries</span>
+          <span className={styles.paginationText}>Showing {clients.length} of {total} entries</span>
           <div className={styles.paginationControls}>
             <Button variant="outline" disabled icon={<ChevronLeft size={18} />}>
               Prev

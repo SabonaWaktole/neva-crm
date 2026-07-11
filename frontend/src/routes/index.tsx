@@ -8,6 +8,10 @@ import { BusinessOwnerShell } from '../pages/shell/BusinessOwnerShell';
 import { StaffShell } from '../pages/shell/StaffShell';
 import { SuperAdminShell } from '../pages/shell/SuperAdminShell';
 import { AccountSettingsPage } from '../pages/settings/AccountSettingsPage';
+import { ClientListPage } from '../pages/clients/ClientListPage';
+import { ClientDetailPage } from '../pages/clients/ClientDetailPage';
+import { ClientFormPage } from '../pages/clients/ClientFormPage';
+import { ClientSettingsPage } from '../pages/settings/ClientSettingsPage';
 import { ProtectedRoute } from './ProtectedRoute';
 import { RoleGuard } from './RoleGuard';
 import { TenantGuard } from './TenantGuard';
@@ -77,6 +81,46 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <AccountSettingsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'clients',
+        element: (
+          <ProtectedRoute>
+            <ClientListPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'clients/new',
+        element: (
+          <ProtectedRoute>
+            <ClientFormPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'clients/:clientId',
+        element: (
+          <ProtectedRoute>
+            <ClientDetailPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'clients/:clientId/edit',
+        element: (
+          <ProtectedRoute>
+            <ClientFormPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'settings/client-management',
+        element: (
+          <ProtectedRoute>
+            <ClientSettingsPage />
           </ProtectedRoute>
         ),
       },
