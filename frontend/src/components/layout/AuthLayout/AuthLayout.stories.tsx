@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { Network } from 'lucide-react';
 import { AuthLayout } from './AuthLayout';
 import { TextInput } from '../../ui/TextInput/TextInput';
 import { PasswordInput } from '../../ui/PasswordInput/PasswordInput';
@@ -20,7 +21,7 @@ export const LoginExample: Story = {
   args: {
     title: 'Nexus CRM',
     subtitle: 'Sign in to your workspace',
-    logoIcon: <span className="material-symbols-outlined text-[32px] text-primary">hub</span>,
+    logoIcon: <Network size={32} color="var(--color-primary)" />,
     children: (
       <form style={{ display: 'flex', flexDirection: 'column', gap: '16px' }} onSubmit={(e) => e.preventDefault()}>
         <TextInput label="Email" placeholder="name@company.com" />

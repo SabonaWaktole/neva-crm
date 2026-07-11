@@ -1,8 +1,9 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { tenantSlug } = useParams();
   const { isAuthenticated, isInitializing } = useAuthStore();
 
   if (isInitializing) {
@@ -10,7 +11,7 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to={tenantSlug ? `/${tenantSlug}/login` : '/login'} replace />;
   }
 
   return <>{children}</>;

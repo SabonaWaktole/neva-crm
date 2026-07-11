@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { Handshake, CheckCircle2 } from 'lucide-react';
 import { AuthLayout } from '../../components/layout/AuthLayout/AuthLayout';
 import { PasswordInput } from '../../components/ui/PasswordInput/PasswordInput';
 import { Button } from '../../components/ui/Button/Button';
@@ -35,11 +36,11 @@ export const StaffInvitationPage = () => {
     <AuthLayout
       title="Join Workspace"
       subtitle="You've been invited to join a workspace on Nexus CRM. Create a password to get started."
-      logoIcon={<span className="material-symbols-outlined text-[32px] text-primary" style={{ fontSize: 32, color: 'var(--color-primary)' }}>handshake</span>}
+      logoIcon={<Handshake size={32} color="var(--color-primary)" />}
     >
       {isSuccess ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)', alignItems: 'center', textAlign: 'center' }}>
-          <span className="material-symbols-outlined" style={{ fontSize: 48, color: 'var(--color-success)' }}>check_circle</span>
+          <CheckCircle2 size={48} color="var(--color-success)" />
           <p style={{ fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-body-md)', color: 'var(--color-on-surface)' }}>
             Your account has been created successfully. You can now log in.
           </p>

@@ -1,10 +1,12 @@
 import { create } from 'zustand';
-import { UserRole } from '../../../backend/src/auth/domain/enums/UserRole';
+
+export type Role = 'SUPER_ADMIN' | 'BUSINESS_OWNER' | 'STAFF';
 
 export interface User {
   userId: string;
-  role: UserRole;
+  role: Role;
   tenantId: string | null;
+  tenantSlug: string | null;
 }
 
 interface AuthState {

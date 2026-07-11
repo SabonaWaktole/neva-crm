@@ -1,11 +1,12 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
-import { UserRole } from '../../../backend/src/auth/domain/enums/UserRole';
+
+type Role = 'SUPER_ADMIN' | 'BUSINESS_OWNER' | 'STAFF';
 
 interface RoleGuardProps {
   children: React.ReactNode;
-  allowedRoles: UserRole[];
+  allowedRoles: Role[];
 }
 
 export const RoleGuard = ({ children, allowedRoles }: RoleGuardProps) => {

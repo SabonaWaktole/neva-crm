@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { Settings, ArrowRight } from 'lucide-react';
 import { Button } from './Button';
 
 const meta = {
@@ -48,7 +49,7 @@ export const WithIconLeft: Story = {
   args: {
     children: 'Settings',
     variant: 'primary',
-    icon: <span className="material-symbols-outlined">settings</span>,
+    icon: <Settings size={18} />,
     iconPosition: 'left',
   },
 };
@@ -57,7 +58,7 @@ export const WithIconRight: Story = {
   args: {
     children: 'Continue',
     variant: 'primary',
-    icon: <span className="material-symbols-outlined">arrow_forward</span>,
+    icon: <ArrowRight size={18} />,
     iconPosition: 'right',
   },
 };

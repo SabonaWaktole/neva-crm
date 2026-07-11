@@ -12,8 +12,8 @@ export const TenantGuard = () => {
   // Assuming our mock token sets tenantId to the slug directly for simplicity,
   // or we add tenantSlug to the User interface. Let's assume tenantId === tenantSlug for tests.
   
-  // If the user's tenantId doesn't match the slug in the URL, block them.
-  if (user && user.tenantId !== tenantSlug) {
+  // If the user's tenantSlug doesn't match the slug in the URL, block them.
+  if (user && user.role !== 'SUPER_ADMIN' && user.tenantSlug !== tenantSlug) {
     return <Navigate to="/unauthorized" replace />;
   }
 

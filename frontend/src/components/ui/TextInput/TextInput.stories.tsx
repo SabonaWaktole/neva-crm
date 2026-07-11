@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { Mail } from 'lucide-react';
 import { TextInput } from './TextInput';
 
 const meta = {
@@ -47,6 +48,6 @@ export const WithIconLeft: Story = {
   args: {
     label: 'Email Address',
     placeholder: 'name@company.com',
-    iconLeft: <span className="material-symbols-outlined text-[18px]">mail</span>,
+    iconLeft: <Mail size={18} />,
   },
 };

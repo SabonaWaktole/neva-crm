@@ -1,4 +1,5 @@
 import React from 'react';
+import { Clock } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppLayout } from '../../components/layout/AppLayout/AppLayout';
 import { Sidebar } from '../../components/layout/Sidebar/Sidebar';
@@ -38,6 +39,7 @@ export const StaffShell = () => {
           orgName="My Workspace" 
           orgTier="Sales Representative" 
           navItems={mockNavItems} 
+          onLogoutClick={handleLogout}
         />
       }
     >
@@ -75,7 +77,7 @@ export const StaffShell = () => {
              <div>
                <h4 style={{ margin: '0 0 4px 0', color: 'var(--color-on-surface)', fontSize: '16px', fontWeight: 500 }}>Introductory Call - Acme Corp</h4>
                <p style={{ margin: 0, color: 'var(--color-on-surface-variant)', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                 <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>schedule</span>
+                 <Clock size={16} />
                  10:00 AM - 10:30 AM
                </p>
              </div>

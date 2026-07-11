@@ -1,4 +1,5 @@
 import React from 'react';
+import { ChevronRight, ImagePlus, Globe } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppLayout } from '../../components/layout/AppLayout/AppLayout';
 import { Sidebar } from '../../components/layout/Sidebar/Sidebar';
@@ -54,7 +55,7 @@ export const AccountSettingsPage = () => {
           <nav aria-label="Breadcrumb" style={{ display: 'flex', alignItems: 'center', color: 'var(--color-on-surface-variant)', fontSize: 'var(--font-size-label-sm)', marginBottom: 'var(--spacing-xs)' }}>
             <ol style={{ display: 'flex', alignItems: 'center', listStyle: 'none', padding: 0, margin: 0, gap: '8px' }}>
               <li><a href="#settings" style={{ color: 'inherit', textDecoration: 'none' }}>Settings</a></li>
-              <li><span className="material-symbols-outlined" style={{ fontSize: '14px' }}>chevron_right</span></li>
+              <li><ChevronRight size={14} /></li>
               <li aria-current="page" style={{ color: 'var(--color-on-surface)', fontWeight: 600 }}>Company Settings</li>
             </ol>
           </nav>
@@ -81,7 +82,7 @@ export const AccountSettingsPage = () => {
                     border: '1px dashed var(--color-outline-variant)', borderRadius: 'var(--radius-lg)', 
                     display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' 
                   }}>
-                    <span className="material-symbols-outlined" style={{ color: 'var(--color-outline-variant)' }}>add_photo_alternate</span>
+                    <ImagePlus color="var(--color-outline-variant)" />
                   </div>
                   <div>
                     <h3 style={{ fontFamily: 'var(--font-family-label-md)', fontSize: 'var(--font-size-label-md)', margin: '0 0 var(--spacing-xs) 0', color: 'var(--color-on-surface)' }}>Company Logo</h3>
@@ -146,7 +147,7 @@ export const AccountSettingsPage = () => {
 
               <Card padding="lg">
                 <div style={{ borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: 'var(--spacing-md)', marginBottom: 'var(--spacing-md)', display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
-                  <span className="material-symbols-outlined" style={{ color: 'var(--color-on-surface-variant)' }}>language</span>
+                  <Globe color="var(--color-on-surface-variant)" />
                   <h2 style={{ fontFamily: 'var(--font-family-headline-md)', fontSize: 'var(--font-size-headline-md)', margin: 0, color: 'var(--color-on-surface)' }}>Language</h2>
                 </div>
                 

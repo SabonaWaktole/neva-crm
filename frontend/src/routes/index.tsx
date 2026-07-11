@@ -12,7 +12,8 @@ import { AccountSettingsPage } from '../pages/settings/AccountSettingsPage';
 import { ProtectedRoute } from './ProtectedRoute';
 import { RoleGuard } from './RoleGuard';
 import { TenantGuard } from './TenantGuard';
-import { UserRole } from '../../../backend/src/auth/domain/enums/UserRole';
+
+import { LandingPage } from '../pages/landing/LandingPage';
 
 // Temporary dashboard wrapper that chooses the right shell based on role
 // We will refine this as we build out the AppShell properly
@@ -21,7 +22,7 @@ import { useAuthStore } from '../store/useAuthStore';
 const DashboardSelector = () => {
   const { user } = useAuthStore();
   
-  if (user?.role === UserRole.BUSINESS_OWNER) {
+  if (user?.role === 'BUSINESS_OWNER') {
     return <BusinessOwnerShell />;
   }
   return <StaffShell />;
@@ -30,7 +31,7 @@ const DashboardSelector = () => {
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <div>Welcome to Nexus CRM. <a href="/login">Login</a> or <a href="/register-business">Register</a></div>,
+    element: <LandingPage />,
   },
   {
     path: '/register-business',
@@ -86,7 +87,7 @@ export const router = createBrowserRouter([
     path: '/admin',
     element: (
       <ProtectedRoute>
-        <RoleGuard allowedRoles={[UserRole.SUPER_ADMIN]}>
+        <RoleGuard allowedRoles={['SUPER_ADMIN']}>
           <SuperAdminShell />
         </RoleGuard>
       </ProtectedRoute>

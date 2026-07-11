@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { CheckCircle2, Link as LinkIcon, UploadCloud, ChevronDown, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Card } from '../../components/ui/Card/Card';
 import { Stepper } from '../../components/ui/Stepper/Stepper';
 import { TextInput } from '../../components/ui/TextInput/TextInput';
@@ -64,7 +65,7 @@ export const OnboardingPage = () => {
           </div>
           <Card padding="none" className={styles.cardContainer}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--spacing-lg)', padding: 'var(--spacing-2xl)' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: 64, color: 'var(--color-success)' }}>check_circle</span>
+              <CheckCircle2 size={64} color="var(--color-success)" />
               <h2 className={styles.stepTitle}>Workspace Created!</h2>
               <p className={styles.stepSubtitle}>Your workspace is ready at <strong>nexus.crm/{tenantSlug}</strong></p>
               <Button
@@ -131,7 +132,7 @@ export const OnboardingPage = () => {
                 />
                 
                 <div className={styles.urlPreviewBox}>
-                  <span className="material-symbols-outlined" style={{ color: 'var(--color-outline)', fontSize: 20 }}>link</span>
+                  <LinkIcon size={20} color="var(--color-outline)" />
                   <div className={styles.urlText}>
                     <span>nexus.crm/</span><span className={styles.urlSlug}>{displaySlug}</span>
                   </div>
@@ -147,7 +148,7 @@ export const OnboardingPage = () => {
               <div className={`${styles.formContent} ${styles.formContentMaxW}`}>
                 <div className={styles.uploadBox}>
                   <div className={styles.uploadIconBox}>
-                    <span className={`material-symbols-outlined ${styles.uploadIcon}`}>cloud_upload</span>
+                    <UploadCloud className={styles.uploadIcon} />
                   </div>
                   <span className={styles.uploadTitle}>Click to upload</span>
                   <span className={styles.uploadSubtitle}>or drag and drop</span>
@@ -178,7 +179,7 @@ export const OnboardingPage = () => {
                       <option value="au">Australia (AUD)</option>
                       <option value="ca">Canada (CAD)</option>
                     </select>
-                    <span className={`material-symbols-outlined ${styles.selectIcon}`}>expand_more</span>
+                    <ChevronDown className={styles.selectIcon} />
                   </div>
                 </div>
 
@@ -191,7 +192,7 @@ export const OnboardingPage = () => {
                       <option value="fr">Français</option>
                       <option value="de">Deutsch</option>
                     </select>
-                    <span className={`material-symbols-outlined ${styles.selectIcon}`}>expand_more</span>
+                    <ChevronDown className={styles.selectIcon} />
                   </div>
                 </div>
               </div>
@@ -203,14 +204,14 @@ export const OnboardingPage = () => {
               className={`${styles.btnBack} ${currentStep === 1 ? styles.btnBackHidden : ''}`} 
               onClick={prevStep}
             >
-              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>arrow_back</span>
+              <ArrowLeft size={18} />
               Back
             </button>
 
             {currentStep < steps.length ? (
               <Button 
                 variant="primary" 
-                icon={<span className="material-symbols-outlined" style={{ fontSize: 18 }}>arrow_forward</span>}
+                icon={<ArrowRight size={18} />}
                 iconPosition="right"
                 onClick={nextStep}
               >
@@ -219,7 +220,7 @@ export const OnboardingPage = () => {
             ) : (
               <Button 
                 style={{ backgroundColor: 'var(--color-on-background)', color: 'white' }}
-                icon={<span className="material-symbols-outlined" style={{ fontSize: 18 }}>check_circle</span>}
+                icon={<CheckCircle2 size={18} />}
                 iconPosition="right"
                 onClick={handleComplete}
                 isLoading={isLoading}

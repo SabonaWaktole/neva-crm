@@ -31,9 +31,24 @@ export class AuthController {
     }
   };
 
-  login = async (req: Request, res: Response) => {
+  loginTenant = async (req: Request, res: Response) => {
     try {
-      const result = await this.loginUseCase.execute(req.body);
+      const result = await this.loginUseCase.execute({ ...req.body, tenantSlug: req.tenant!.urlSlug });
+      res.cookie('jwt', result.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60 * 1000 // 1 day
+      });
+      res.status(200).json({ message: 'Login successful', token: result.token });
+    } catch (error: any) {
+      res.status(401).json({ error: error.message });
+    }
+  };
+
+  loginGlobal = async (req: Request, res: Response) => {
+    try {
+      const result = await this.loginUseCase.execute({ ...req.body, tenantSlug: null });
       res.cookie('jwt', result.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -78,9 +93,6 @@ export class AuthController {
 
   acceptInvitation = async (req: Request, res: Response) => {
     try {
-      // AcceptInvitationUseCase returns a token?
-      // Wait, let's look at AcceptInvitationUseCase. Does it return a token?
-      // For now we assume we just return success and user logs in separately
       await this.acceptInvitationUseCase.execute(req.body);
       res.status(200).json({ message: 'Invitation accepted successfully' });
     } catch (error: any) {
@@ -90,15 +102,9 @@ export class AuthController {
 
   requestPasswordReset = async (req: Request, res: Response) => {
     try {
-      let tenantId = null;
-      if (req.body.tenantSlug) {
-        const tenant = await this.tenantRepository.findBySlug(req.body.tenantSlug);
-        if (tenant) tenantId = tenant.id;
-      }
-
       await this.requestPasswordResetUseCase.execute({
         email: req.body.email,
-        tenantId,
+        tenantId: req.tenant!.id,
       });
       res.status(200).json({ message: 'If the email exists, a reset link has been sent.' });
     } catch (error: any) {

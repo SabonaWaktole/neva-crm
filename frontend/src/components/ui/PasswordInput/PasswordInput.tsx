@@ -1,4 +1,5 @@
 import React, { useState, forwardRef } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import { TextInput } from '../TextInput/TextInput';
 import type { TextInputProps } from '../TextInput/TextInput';
 
@@ -17,9 +18,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
         ref={ref}
         type={showPassword ? 'text' : 'password'}
         iconRight={
-          <span className="material-symbols-outlined text-[18px]">
-            {showPassword ? 'visibility' : 'visibility_off'}
-          </span>
+          showPassword ? <Eye size={18} /> : <EyeOff size={18} />
         }
         onIconRightClick={togglePasswordVisibility}
         {...props}
@@ -29,3 +28,4 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
 );
 
 PasswordInput.displayName = 'PasswordInput';
+

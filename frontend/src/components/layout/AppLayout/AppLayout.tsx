@@ -1,4 +1,5 @@
 import React, { ReactNode, useState, useRef, useEffect } from 'react';
+import { Search, Bell, HelpCircle, Settings, LogOut } from 'lucide-react';
 import { Avatar } from '../../ui/Avatar/Avatar';
 import styles from './AppLayout.module.css';
 
@@ -43,7 +44,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         </div>
         
         <div className={styles.headerCenter}>
-          <span className={`material-symbols-outlined ${styles.searchIcon}`}>search</span>
+          <Search className={styles.searchIcon} size={18} />
           <input 
             type="text" 
             placeholder="Search..." 
@@ -53,10 +54,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         
         <div className={styles.headerRight}>
           <button className={styles.iconBtn} aria-label="Notifications">
-            <span className="material-symbols-outlined">notifications</span>
+            <Bell size={20} />
           </button>
           <button className={styles.iconBtn} aria-label="Help">
-            <span className="material-symbols-outlined">help</span>
+            <HelpCircle size={20} />
           </button>
           <div style={{ position: 'relative' }} ref={dropdownRef}>
             <button 
@@ -97,7 +98,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                       fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-body-md)', color: 'var(--color-on-surface)',
                     }}
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: 18 }}>settings</span>
+                    <Settings size={18} />
                     Settings
                   </button>
                 )}
@@ -110,7 +111,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                       fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-body-md)', color: 'var(--color-error)',
                     }}
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: 18 }}>logout</span>
+                    <LogOut size={18} />
                     Log Out
                   </button>
                 )}

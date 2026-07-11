@@ -3,79 +3,253 @@ import express from 'express';
 import { createClientRouter } from '../../../src/clients/interfaces/http/routes/clientRoutes';
 import { PrismaClient } from '@prisma/client';
 import { ClientStatus } from '../../../src/clients/domain/enums/ClientStatus';
+import { ITokenService } from '../../../src/auth/application/ports/ITokenService';
+import { ITenantRepository } from '../../../src/tenant/domain/repositories/ITenantRepository';
+import { UserRole } from '../../../src/auth/domain/enums/UserRole';
 
 const prisma = new PrismaClient();
+
+class FakeTokenService implements ITokenService {
+  sign(payload: any): string {
+    return Buffer.from(JSON.stringify(payload)).toString('base64');
+  }
+  verify(token: string): any {
+    try {
+      return JSON.parse(Buffer.from(token, 'base64').toString('utf-8'));
+    } catch {
+      throw new Error('Invalid token');
+    }
+  }
+}
+
+const stubTokenService = new FakeTokenService();
+const validToken = stubTokenService.sign({ userId: 'u1', role: UserRole.BUSINESS_OWNER, tenantId: 't1', tenantSlug: 't1' });
+
+// Stub tenantRepository so real resolveTenant middleware can resolve by slug
+const stubTenantRepo: ITenantRepository = {
+  findById: async () => null,
+  findBySlug: async (slug: string) => {
+    if (slug === 't1') return { id: 't1', name: 'Tenant 1', urlSlug: 't1', createdAt: new Date() };
+    if (slug === 't2') return { id: 't2', name: 'Tenant 2', urlSlug: 't2', createdAt: new Date() };
+    return null;
+  },
+  create: async (t: any) => t,
+};
+
+// We removed the authenticate mock so we can test the real JWT extraction and validation.
+// We removed the resolveTenant mock so we can test the real cross-tenant isolation.
+
 const app = express();
-
 app.use(express.json());
-
-// Mock middleware
-jest.mock('../../../src/main/interfaces/http/middlewares/authenticate', () => ({
-  authenticate: (req: any, res: any, next: any) => {
-    req.user = { id: 'u1', email: 'test@test.com', role: req.headers['x-role'] || 'BUSINESS_OWNER', tenantId: 't1' };
-    next();
-  }
-}));
-
-jest.mock('../../../src/main/interfaces/http/middlewares/resolveTenant', () => ({
-  resolveTenant: () => (req: any, res: any, next: any) => {
-    req.tenant = { id: 't1', name: 'Tenant 1' };
-    next();
-  }
-}));
-
-app.use('/api/clients', createClientRouter(prisma));
+app.use('/api/:tenantSlug/clients', createClientRouter(prisma, stubTokenService, stubTenantRepo));
 
 describe('Client Routes', () => {
   beforeAll(async () => {
-    await prisma.tenant.createMany({
-      data: [{ id: 't1', name: 'Tenant 1', urlSlug: 't1' }],
-      skipDuplicates: true,
+    await prisma.tenant.upsert({
+      where: { id: 't1' },
+      create: { id: 't1', name: 'Tenant 1', urlSlug: 't1' },
+      update: {},
     });
-    // clean
+    
+    // Create the mock user to satisfy foreign key constraints
+    await prisma.user.upsert({
+      where: { id: 'u1' },
+      create: {
+        id: 'u1',
+        email: 'test@test.com',
+        hashedPassword: 'hash',
+        role: 'BUSINESS_OWNER',
+        tenantId: 't1'
+      },
+      update: {},
+    });
+
+    // Clean up leftover data
+    await prisma.interaction.deleteMany({ where: { client: { tenantId: 't1' } } });
     await prisma.client.deleteMany({ where: { tenantId: 't1' } });
     await prisma.customFieldDefinition.deleteMany({ where: { tenantId: 't1' } });
+    await prisma.outcomeCategory.deleteMany({ where: { tenantId: 't1' } });
   });
 
   afterAll(async () => {
+    await prisma.interaction.deleteMany({ where: { client: { tenantId: 't1' } } });
     await prisma.client.deleteMany({ where: { tenantId: 't1' } });
     await prisma.customFieldDefinition.deleteMany({ where: { tenantId: 't1' } });
-    await prisma.tenant.deleteMany({ where: { id: 't1' } });
+    await prisma.outcomeCategory.deleteMany({ where: { tenantId: 't1' } });
+    await prisma.user.deleteMany({ where: { id: 'u1' } });
     await prisma.$disconnect();
   });
 
-  it('POST /api/clients/settings/custom-fields defines a field', async () => {
+  it('POST /settings/custom-fields defines a field', async () => {
     const res = await request(app)
-      .post('/api/clients/settings/custom-fields')
-      .set('x-role', 'BUSINESS_OWNER')
+      .post('/api/t1/clients/settings/custom-fields')
+      .set('Authorization', `Bearer ${validToken}`)
       .send({ fieldName: 'industry', fieldType: 'TEXT' });
     
     expect(res.status).toBe(201);
     expect(res.body.fieldName).toBe('industry');
   });
 
-  it('POST /api/clients creates a client', async () => {
+  it('POST /settings/outcome-categories defines a category', async () => {
     const res = await request(app)
-      .post('/api/clients')
-      .set('x-role', 'BUSINESS_OWNER')
+      .post('/api/t1/clients/settings/outcome-categories')
+      .set('Authorization', `Bearer ${validToken}`)
+      .send({ label: 'Closed Won' });
+    
+    expect(res.status).toBe(201);
+    expect(res.body.label).toBe('Closed Won');
+  });
+
+  let createdClientId: string;
+
+  it('POST / creates a client', async () => {
+    const res = await request(app)
+      .post('/api/t1/clients')
+      .set('Authorization', `Bearer ${validToken}`)
       .send({
-        name: 'New Corp',
+        name: 'Routes Test Corp',
         status: ClientStatus.PROSPECT,
         customFieldValues: { industry: 'Software' }
       });
     
+    if (res.status !== 201) {
+      console.log('CREATE CLIENT ERROR:', res.body);
+    }
     expect(res.status).toBe(201);
-    expect(res.body.name).toBe('New Corp');
+    expect(res.body.name).toBe('Routes Test Corp');
+    createdClientId = res.body.id;
   });
 
-  it('GET /api/clients/search returns clients', async () => {
+  it('GET /search returns clients', async () => {
     const res = await request(app)
-      .get('/api/clients/search')
-      .set('x-role', 'BUSINESS_OWNER')
-      .query({ name: 'New Corp' });
+      .get('/api/t1/clients/search')
+      .set('Authorization', `Bearer ${validToken}`)
+      .query({ name: 'Routes Test' });
     
     expect(res.status).toBe(200);
     expect(res.body.items.length).toBe(1);
-    expect(res.body.items[0].name).toBe('New Corp');
+    expect(res.body.items[0].name).toBe('Routes Test Corp');
+    expect(res.body.total).toBe(1);
+  });
+
+  it('PUT /:clientId updates a client partially', async () => {
+    const res = await request(app)
+      .put(`/api/t1/clients/${createdClientId}`)
+      .set('Authorization', `Bearer ${validToken}`)
+      .send({ name: 'Updated Corp' }); // ONLY sending name
+    
+    expect(res.status).toBe(200);
+    expect(res.body.name).toBe('Updated Corp');
+    // Ensure omitted fields are NOT nulled out
+    expect(res.body.status).toBe(ClientStatus.PROSPECT);
+    expect(res.body.customFieldValues).toEqual({ industry: 'Software' });
+  });
+
+  it('PUT /:clientId merges customFieldValues instead of wholesale replacing', async () => {
+    // First, add another field definition
+    await request(app)
+      .post('/api/t1/clients/settings/custom-fields')
+      .set('Authorization', `Bearer ${validToken}`)
+      .send({ fieldName: 'region', fieldType: 'TEXT' });
+
+    // Update client to have two custom fields
+    await request(app)
+      .put(`/api/t1/clients/${createdClientId}`)
+      .set('Authorization', `Bearer ${validToken}`)
+      .send({ customFieldValues: { industry: 'Software', region: 'EU' } });
+
+    // Now do a partial update of ONLY the region
+    const res = await request(app)
+      .put(`/api/t1/clients/${createdClientId}`)
+      .set('Authorization', `Bearer ${validToken}`)
+      .send({ customFieldValues: { region: 'US' } });
+
+    expect(res.status).toBe(200);
+    // 'industry' should survive the merge!
+    expect(res.body.customFieldValues).toEqual({ industry: 'Software', region: 'US' });
+  });
+
+  it('GET /:clientId returns client details', async () => {
+    const res = await request(app)
+      .get(`/api/t1/clients/${createdClientId}`)
+      .set('Authorization', `Bearer ${validToken}`);
+    
+    expect(res.status).toBe(200);
+    expect(res.body.id).toBe(createdClientId);
+    expect(res.body.name).toBe('Updated Corp');
+  });
+
+  it('GET /settings/custom-fields returns defined fields', async () => {
+    const res = await request(app)
+      .get('/api/t1/clients/settings/custom-fields')
+      .set('Authorization', `Bearer ${validToken}`);
+    
+    expect(res.status).toBe(200);
+    expect(res.body.length).toBeGreaterThanOrEqual(1);
+    expect(res.body[0].fieldName).toBe('industry');
+  });
+
+  it('GET /settings/outcome-categories returns defined categories', async () => {
+    const res = await request(app)
+      .get('/api/t1/clients/settings/outcome-categories')
+      .set('Authorization', `Bearer ${validToken}`);
+    
+    expect(res.status).toBe(200);
+    expect(res.body.length).toBeGreaterThanOrEqual(1);
+    expect(res.body[0].label).toBe('Closed Won');
+  });
+
+  it('POST /:clientId/interactions adds an interaction', async () => {
+    const res = await request(app)
+      .post(`/api/t1/clients/${createdClientId}/interactions`)
+      .set('Authorization', `Bearer ${validToken}`)
+      .send({ content: 'Great call!', channel: 'CALL' });
+    
+    expect(res.status).toBe(201);
+    expect(res.body.content).toBe('Great call!');
+  });
+
+  it('GET /:clientId/history returns history', async () => {
+    const res = await request(app)
+      .get(`/api/t1/clients/${createdClientId}/history`)
+      .set('Authorization', `Bearer ${validToken}`);
+    
+    expect(res.status).toBe(200);
+    expect(res.body.timeline.length).toBeGreaterThanOrEqual(1);
+  });
+
+  // Validation tests
+  it('POST / returns 400 for missing name', async () => {
+    const res = await request(app)
+      .post('/api/t1/clients')
+      .set('Authorization', `Bearer ${validToken}`)
+      .send({ status: ClientStatus.PROSPECT });
+    
+    expect(res.status).toBe(400);
+  });
+
+  it('POST /settings/custom-fields returns 400 for missing fieldName', async () => {
+    const res = await request(app)
+      .post('/api/t1/clients/settings/custom-fields')
+      .set('Authorization', `Bearer ${validToken}`)
+      .send({ fieldType: 'TEXT' });
+    
+    expect(res.status).toBe(400);
+  });
+
+  it('Cross-Tenant Isolation: returns 403 when Tenant 1 user acts on Tenant 2 slug', async () => {
+    // req.user is mocked to belong to tenantId 't1' in our authenticate mock.
+    // We try to POST to /api/t2/clients. resolveTenant will find tenant 't2'.
+    // The cross-tenant check in resolveTenant should see user.tenantId ('t1') !== req.tenant.id ('t2') and return 403.
+    const res = await request(app)
+      .post('/api/t2/clients')
+      .set('Authorization', `Bearer ${validToken}`)
+      .send({
+        name: 'Sneaky Corp',
+        status: ClientStatus.PROSPECT,
+      });
+    
+    expect(res.status).toBe(403);
+    expect(res.body.error).toContain('Cross-tenant access forbidden');
   });
 });

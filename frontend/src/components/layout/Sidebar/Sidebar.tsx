@@ -1,6 +1,28 @@
 import React from 'react';
+import {
+  LayoutDashboard, Users, Calendar, Package, FileText, BarChart3,
+  Settings, Building, CreditCard, Search, ClipboardCheck, Plus,
+  HelpCircle, LogOut,
+  type LucideIcon,
+} from 'lucide-react';
 import { Button } from '../../ui/Button/Button';
 import styles from './Sidebar.module.css';
+
+// Map material-symbols icon names to Lucide components
+const iconMap: Record<string, LucideIcon> = {
+  dashboard: LayoutDashboard,
+  group: Users,
+  event: Calendar,
+  inventory_2: Package,
+  description: FileText,
+  bar_chart: BarChart3,
+  settings: Settings,
+  settings_applications: Settings,
+  domain: Building,
+  credit_card: CreditCard,
+  manage_search: Search,
+  task_alt: ClipboardCheck,
+};
 
 export interface NavItem {
   id: string;
@@ -30,7 +52,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     <nav className={styles.sidebar}>
       <div className={styles.orgSection}>
         <div className={styles.orgIcon}>
-          <span className="material-symbols-outlined">apartment</span>
+          <Building size={20} />
         </div>
         <div className={styles.orgInfo}>
           <h2 className={styles.orgName}>{orgName}</h2>
@@ -42,7 +64,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <Button 
           variant="primary" 
           fullWidth 
-          icon={<span className="material-symbols-outlined">add</span>}
+          icon={<Plus size={18} />}
           onClick={onNewEntryClick}
         >
           New Entry
@@ -50,20 +72,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       <div className={styles.navSection}>
-        {navItems.map((item) => (
-          <a
-            key={item.id}
-            className={`${styles.navItem} ${item.isActive ? styles.navItemActive : ''}`}
-            onClick={(e) => {
-              e.preventDefault();
-              if (onNavItemClick) onNavItemClick(item.id);
-            }}
-            href={`#${item.id}`}
-          >
-            <span className={`material-symbols-outlined ${styles.navIcon}`}>{item.icon}</span>
-            <span className={styles.navLabel}>{item.label}</span>
-          </a>
-        ))}
+        {navItems.map((item) => {
+          const IconComponent = iconMap[item.icon] || LayoutDashboard;
+          return (
+            <a
+              key={item.id}
+              className={`${styles.navItem} ${item.isActive ? styles.navItemActive : ''}`}
+              onClick={(e) => {
+                e.preventDefault();
+                if (onNavItemClick) onNavItemClick(item.id);
+              }}
+              href={`#${item.id}`}
+            >
+              <IconComponent className={styles.navIcon} size={20} />
+              <span className={styles.navLabel}>{item.label}</span>
+            </a>
+          );
+        })}
       </div>
 
       <div className={styles.bottomSection}>
@@ -72,7 +97,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           href="#support"
           onClick={(e) => e.preventDefault()}
         >
-          <span className={`material-symbols-outlined ${styles.navIcon}`}>contact_support</span>
+          <HelpCircle className={styles.navIcon} size={20} />
           <span className={styles.navLabel}>Support</span>
         </a>
         <a 
@@ -83,7 +108,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             if (onLogoutClick) onLogoutClick();
           }}
         >
-          <span className={`material-symbols-outlined ${styles.navIcon}`}>logout</span>
+          <LogOut className={styles.navIcon} size={20} />
           <span className={styles.navLabel}>Log Out</span>
         </a>
       </div>

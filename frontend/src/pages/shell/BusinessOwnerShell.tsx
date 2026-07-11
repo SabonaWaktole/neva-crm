@@ -1,4 +1,5 @@
 import React from 'react';
+import { Network, UserPlus } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppLayout } from '../../components/layout/AppLayout/AppLayout';
 import { Sidebar } from '../../components/layout/Sidebar/Sidebar';
@@ -40,12 +41,13 @@ export const BusinessOwnerShell = () => {
           orgName="My Workspace" 
           orgTier="Enterprise Tier" 
           navItems={mockNavItems} 
+          onLogoutClick={handleLogout}
         />
       }
     >
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center' }}>
         <div style={{ width: '256px', height: '256px', marginBottom: '16px', opacity: 0.8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span className="material-symbols-outlined" style={{ fontSize: 120, color: 'var(--color-primary)', opacity: 0.3 }}>hub</span>
+          <Network size={120} color="var(--color-primary)" style={{ opacity: 0.3 }} />
         </div>
         <h1 style={{ fontFamily: 'var(--font-family-display)', fontSize: 'var(--font-size-display)', fontWeight: 700, margin: '0 0 16px 0', color: 'var(--color-on-surface)' }}>Welcome to Nexus CRM</h1>
         <p style={{ fontFamily: 'var(--font-family-body-lg)', fontSize: 'var(--font-size-body-lg)', color: 'var(--color-on-surface-variant)', maxWidth: '600px', marginBottom: '32px' }}>
@@ -64,7 +66,7 @@ export const BusinessOwnerShell = () => {
             boxShadow: 'var(--elevation-1)'
           }}>
              <div style={{ width: '48px', height: '48px', backgroundColor: 'var(--color-primary-container)', color: 'var(--color-on-primary-container)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>group_add</span>
+                <UserPlus size={24} />
              </div>
              <div>
                <h3 style={{ fontFamily: 'var(--font-family-headline-md)', fontSize: 'var(--font-size-headline-md)', fontWeight: 600, margin: '0 0 8px 0', color: 'var(--color-on-surface)' }}>Add your first client</h3>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useSearchParams, Link } from 'react-router-dom';
+import { Key, CheckCircle2 } from 'lucide-react';
 import { AuthLayout } from '../../components/layout/AuthLayout/AuthLayout';
 import { PasswordInput } from '../../components/ui/PasswordInput/PasswordInput';
 import { Button } from '../../components/ui/Button/Button';
@@ -34,11 +35,11 @@ export const ResetPasswordPage = () => {
     <AuthLayout
       title="Create new password"
       subtitle="Your new password must be different from previously used passwords."
-      logoIcon={<span className="material-symbols-outlined text-[32px] text-primary" style={{ fontSize: 32, color: 'var(--color-primary)' }}>password</span>}
+      logoIcon={<Key size={32} color="var(--color-primary)" />}
     >
       {isSuccess ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)', alignItems: 'center', textAlign: 'center' }}>
-          <span className="material-symbols-outlined" style={{ fontSize: 48, color: 'var(--color-success)' }}>check_circle</span>
+          <CheckCircle2 size={48} color="var(--color-success)" />
           <p style={{ fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-body-md)', color: 'var(--color-on-surface)' }}>
             Your password has been reset successfully.
           </p>

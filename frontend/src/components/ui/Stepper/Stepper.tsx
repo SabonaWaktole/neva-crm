@@ -1,4 +1,5 @@
 import React from 'react';
+import { Check } from 'lucide-react';
 import styles from './Stepper.module.css';
 
 export interface Step {
@@ -46,7 +47,7 @@ export const Stepper: React.FC<StepperProps> = ({ steps, currentStep }) => {
           <div key={step.id} className={styles.stepWrapper}>
             <div className={`${styles.stepCircle} ${circleClass}`}>
               {isCompleted ? (
-                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>check</span>
+                <Check size={18} />
               ) : (
                 stepNum
               )}

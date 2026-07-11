@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { KeyRound, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { AuthLayout } from '../../components/layout/AuthLayout/AuthLayout';
 import { TextInput } from '../../components/ui/TextInput/TextInput';
 import { Button } from '../../components/ui/Button/Button';
@@ -23,11 +24,11 @@ export const ForgotPasswordPage = () => {
     <AuthLayout
       title="Reset your password"
       subtitle="Enter your email and we'll send you a link to reset your password."
-      logoIcon={<span className="material-symbols-outlined text-[32px] text-primary" style={{ fontSize: 32, color: 'var(--color-primary)' }}>lock_reset</span>}
+      logoIcon={<KeyRound size={32} color="var(--color-primary)" />}
     >
       {isSuccess ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)', alignItems: 'center', textAlign: 'center' }}>
-          <span className="material-symbols-outlined" style={{ fontSize: 48, color: 'var(--color-success)' }}>check_circle</span>
+          <CheckCircle2 size={48} color="var(--color-success)" />
           <p style={{ fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-body-md)', color: 'var(--color-on-surface)' }}>
             If an account exists with that email, we've sent a password reset link.
           </p>
@@ -43,7 +44,7 @@ export const ForgotPasswordPage = () => {
               gap: 'var(--spacing-xs)'
             }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>arrow_back</span>
+            <ArrowLeft size={18} />
             Back to Login
           </Link>
         </div>
@@ -82,7 +83,7 @@ export const ForgotPasswordPage = () => {
                   gap: 'var(--spacing-xs)'
                 }}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>arrow_back</span>
+                <ArrowLeft size={18} />
                 Back to Login
               </Link>
             </div>

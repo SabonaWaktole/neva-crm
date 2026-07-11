@@ -2,7 +2,8 @@ import { apiClient } from '../api';
 
 export const authService = {
   login: async (email: string, password: string, tenantSlug: string | null) => {
-    const response = await apiClient.post('/auth/login', { email, password, tenantSlug });
+    const url = tenantSlug ? `/${tenantSlug}/auth/login` : '/auth/login';
+    const response = await apiClient.post(url, { email, password });
     return response.data;
   },
 
@@ -16,7 +17,8 @@ export const authService = {
   },
 
   requestPasswordReset: async (email: string, tenantSlug: string | null) => {
-    await apiClient.post('/auth/password-reset/request', { email, tenantSlug });
+    const url = tenantSlug ? `/${tenantSlug}/auth/password-reset/request` : '/auth/password-reset/request';
+    await apiClient.post(url, { email });
   },
 
   resetPassword: async (token: string, newPassword: string) => {

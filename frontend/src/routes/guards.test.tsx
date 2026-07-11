@@ -6,7 +6,6 @@ import { ProtectedRoute } from './ProtectedRoute';
 import { RoleGuard } from './RoleGuard';
 import { TenantGuard } from './TenantGuard';
 import { useAuthStore } from '../store/useAuthStore';
-import { UserRole } from '../../../backend/src/auth/domain/enums/UserRole';
 
 describe('Route Guards', () => {
   beforeEach(() => {
@@ -43,7 +42,7 @@ describe('Route Guards', () => {
     it('renders children if authenticated', () => {
       useAuthStore.setState({ 
         isAuthenticated: true, 
-        user: { userId: '1', role: UserRole.STAFF, tenantId: 'tenant-1' } 
+        user: { userId: '1', role: 'STAFF', tenantId: 'tenant-1', tenantSlug: 'tenant-1' } 
       });
       render(
         <MemoryRouter initialEntries={['/protected']}>
@@ -60,13 +59,13 @@ describe('Route Guards', () => {
     it('blocks user without required role and renders fallback', () => {
       useAuthStore.setState({ 
         isAuthenticated: true, 
-        user: { userId: '1', role: UserRole.STAFF, tenantId: 'tenant-1' } 
+        user: { userId: '1', role: 'STAFF', tenantId: 'tenant-1', tenantSlug: 'tenant-1' } 
       });
       render(
         <MemoryRouter initialEntries={['/admin-only']}>
           <Routes>
             <Route path="/admin-only" element={
-              <RoleGuard allowedRoles={[UserRole.BUSINESS_OWNER, UserRole.SUPER_ADMIN]}>
+              <RoleGuard allowedRoles={['BUSINESS_OWNER', 'SUPER_ADMIN']}>
                 <p>Admin Content</p>
               </RoleGuard>
             } />
@@ -79,13 +78,13 @@ describe('Route Guards', () => {
     it('allows user with required role', () => {
       useAuthStore.setState({ 
         isAuthenticated: true, 
-        user: { userId: '1', role: UserRole.BUSINESS_OWNER, tenantId: 'tenant-1' } 
+        user: { userId: '1', role: 'BUSINESS_OWNER', tenantId: 'tenant-1', tenantSlug: 'tenant-1' } 
       });
       render(
         <MemoryRouter initialEntries={['/admin-only']}>
           <Routes>
             <Route path="/admin-only" element={
-              <RoleGuard allowedRoles={[UserRole.BUSINESS_OWNER, UserRole.SUPER_ADMIN]}>
+              <RoleGuard allowedRoles={['BUSINESS_OWNER', 'SUPER_ADMIN']}>
                 <p>Admin Content</p>
               </RoleGuard>
             } />
@@ -100,7 +99,7 @@ describe('Route Guards', () => {
     it('blocks user authenticated for a different tenant', () => {
       useAuthStore.setState({ 
         isAuthenticated: true, 
-        user: { userId: '1', role: UserRole.STAFF, tenantId: 'tenant-A' } 
+        user: { userId: '1', role: 'STAFF', tenantId: 'id-A', tenantSlug: 'tenant-A' } 
       });
       render(
         <MemoryRouter initialEntries={['/tenant-B/dashboard']}>
@@ -119,7 +118,7 @@ describe('Route Guards', () => {
     it('allows user authenticated for the same tenant', () => {
       useAuthStore.setState({ 
         isAuthenticated: true, 
-        user: { userId: '1', role: UserRole.STAFF, tenantId: 'tenant-A' } 
+        user: { userId: '1', role: 'STAFF', tenantId: 'id-A', tenantSlug: 'tenant-A' } 
       });
       render(
         <MemoryRouter initialEntries={['/tenant-A/dashboard']}>

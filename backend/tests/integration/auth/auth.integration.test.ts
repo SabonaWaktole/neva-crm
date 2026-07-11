@@ -294,8 +294,8 @@ describe('Auth Integration Tests', () => {
 
     it('should login with valid credentials and return a token (200)', async () => {
       const res = await request(app)
-        .post('/api/auth/login')
-        .send({ email: 'owner@acme.com', password: 'Password1', tenantSlug: 'acme' })
+        .post('/api/acme/auth/login')
+        .send({ email: 'owner@acme.com', password: 'Password1' })
         .expect(200);
 
       expect(res.body.token).toBeDefined();
@@ -305,8 +305,8 @@ describe('Auth Integration Tests', () => {
 
     it('should reject invalid password (401)', async () => {
       const res = await request(app)
-        .post('/api/auth/login')
-        .send({ email: 'owner@acme.com', password: 'WrongPass1', tenantSlug: 'acme' })
+        .post('/api/acme/auth/login')
+        .send({ email: 'owner@acme.com', password: 'WrongPass1' })
         .expect(401);
 
       expect(res.body.error).toBeDefined();
@@ -314,9 +314,9 @@ describe('Auth Integration Tests', () => {
 
     it('should reject login with non-existent tenant slug (401)', async () => {
       const res = await request(app)
-        .post('/api/auth/login')
-        .send({ email: 'owner@acme.com', password: 'Password1', tenantSlug: 'no-such-tenant' })
-        .expect(401);
+        .post('/api/no-such-tenant/auth/login')
+        .send({ email: 'owner@acme.com', password: 'Password1' })
+        .expect(404); // Expect 404 since tenant doesn't exist
 
       expect(res.body.error).toBeDefined();
     });
@@ -342,15 +342,15 @@ describe('Auth Integration Tests', () => {
 
       // Login
       const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({ email: 'owner@acme.com', password: 'Password1', tenantSlug: 'acme' });
+        .post('/api/acme/auth/login')
+        .send({ email: 'owner@acme.com', password: 'Password1' });
 
       ownerToken = loginRes.body.token;
     });
 
     it('should allow BUSINESS_OWNER to invite staff (200)', async () => {
       const res = await request(app)
-        .post('/api/auth/acme/invitations')
+        .post('/api/acme/auth/invitations')
         .set('Authorization', `Bearer ${ownerToken}`)
         .send({ email: 'staff@acme.com', role: 'STAFF' })
         .expect(200);
@@ -370,7 +370,7 @@ describe('Auth Integration Tests', () => {
 
     it('should reject invitation from unauthenticated user (401)', async () => {
       await request(app)
-        .post('/api/auth/acme/invitations')
+        .post('/api/acme/auth/invitations')
         .send({ email: 'staff@acme.com', role: 'STAFF' })
         .expect(401);
     });
@@ -395,7 +395,7 @@ describe('Auth Integration Tests', () => {
       });
 
       await request(app)
-        .post('/api/auth/acme/invitations')
+        .post('/api/acme/auth/invitations')
         .set('Authorization', `Bearer ${staffToken}`)
         .send({ email: 'another@acme.com', role: 'STAFF' })
         .expect(403);
@@ -413,7 +413,7 @@ describe('Auth Integration Tests', () => {
 
       // Owner of acme tries to invite on other-corp
       await request(app)
-        .post('/api/auth/other-corp/invitations')
+        .post('/api/other-corp/auth/invitations')
         .set('Authorization', `Bearer ${ownerToken}`)
         .send({ email: 'staff@other.com', role: 'STAFF' })
         .expect(403);
@@ -532,8 +532,8 @@ describe('Auth Integration Tests', () => {
     describe('POST /api/auth/password-reset/request', () => {
       it('should send a reset email for existing user (200)', async () => {
         const res = await request(app)
-          .post('/api/auth/password-reset/request')
-          .send({ email: 'user@acme.com', tenantSlug: 'acme' })
+          .post('/api/acme/auth/password-reset/request')
+          .send({ email: 'user@acme.com' })
           .expect(200);
 
         expect(res.body.message).toContain('reset link');
@@ -548,7 +548,7 @@ describe('Auth Integration Tests', () => {
 
       it('should return 200 even if user does not exist (silent fail)', async () => {
         const res = await request(app)
-          .post('/api/auth/password-reset/request')
+          .post('/api/acme/auth/password-reset/request')
           .send({ email: 'nonexistent@acme.com' })
           .expect(200);
 
@@ -563,8 +563,8 @@ describe('Auth Integration Tests', () => {
       beforeEach(async () => {
         // Request a password reset
         await request(app)
-          .post('/api/auth/password-reset/request')
-          .send({ email: 'user@acme.com', tenantSlug: 'acme' });
+          .post('/api/acme/auth/password-reset/request')
+          .send({ email: 'user@acme.com' });
 
         // Get the token from the email sender
         resetToken = emailSender.sentEmails[0].token;
@@ -581,8 +581,8 @@ describe('Auth Integration Tests', () => {
         // Verify the user can now login with the new password
         // First, we need the login route to work — seed the tenant slug lookup
         const loginRes = await request(app)
-          .post('/api/auth/login')
-          .send({ email: 'user@acme.com', password: 'NewPassword1', tenantSlug: 'acme' });
+          .post('/api/acme/auth/login')
+          .send({ email: 'user@acme.com', password: 'NewPassword1' });
 
         expect(loginRes.status).toBe(200);
         expect(loginRes.body.token).toBeDefined();
@@ -632,20 +632,20 @@ describe('Auth Integration Tests', () => {
 
       // Login as Tenant A owner
       const loginA = await request(app)
-        .post('/api/auth/login')
-        .send({ email: 'owner@tenant-a.com', password: 'Password1', tenantSlug: 'tenant-a' });
+        .post('/api/tenant-a/auth/login')
+        .send({ email: 'owner@tenant-a.com', password: 'Password1' });
       tenantAOwnerToken = loginA.body.token;
 
       // Login as Tenant B owner
       const loginB = await request(app)
-        .post('/api/auth/login')
-        .send({ email: 'owner@tenant-b.com', password: 'Password1', tenantSlug: 'tenant-b' });
+        .post('/api/tenant-b/auth/login')
+        .send({ email: 'owner@tenant-b.com', password: 'Password1' });
       tenantBOwnerToken = loginB.body.token;
     });
 
     it('should return 403 when Tenant A owner tries to access Tenant B', async () => {
       await request(app)
-        .post('/api/auth/tenant-b/invitations')
+        .post('/api/tenant-b/auth/invitations')
         .set('Authorization', `Bearer ${tenantAOwnerToken}`)
         .send({ email: 'staff@b.com', role: 'STAFF' })
         .expect(403);
@@ -653,7 +653,7 @@ describe('Auth Integration Tests', () => {
 
     it('should return 403 when Tenant B owner tries to access Tenant A', async () => {
       await request(app)
-        .post('/api/auth/tenant-a/invitations')
+        .post('/api/tenant-a/auth/invitations')
         .set('Authorization', `Bearer ${tenantBOwnerToken}`)
         .send({ email: 'staff@a.com', role: 'STAFF' })
         .expect(403);
@@ -680,7 +680,7 @@ describe('Auth Integration Tests', () => {
 
       // SUPER_ADMIN can invite on Tenant A
       const res = await request(app)
-        .post('/api/auth/tenant-a/invitations')
+        .post('/api/tenant-a/auth/invitations')
         .set('Authorization', `Bearer ${saToken}`)
         .send({ email: 'new-staff@a.com', role: 'STAFF' })
         .expect(200);

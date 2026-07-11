@@ -8,6 +8,10 @@ test.describe('Authentication & Onboarding Flow', () => {
   const password = 'Password123!';
 
   test('registers a new business, logs out, and logs back in', async ({ page }) => {
+    page.on('console', msg => console.log(`PAGE LOG: ${msg.text()}`));
+    page.on('pageerror', err => console.log(`PAGE ERROR: ${err.message}`));
+    page.on('response', response => console.log(`<< ${response.status()} ${response.url()}`));
+
     // 1. Go to Onboarding page
     await page.goto('/register-business');
     await expect(page).toHaveTitle(/Nexus CRM/);
@@ -30,7 +34,7 @@ test.describe('Authentication & Onboarding Flow', () => {
 
     // 2. Login Page
     await expect(page).toHaveURL(new RegExp(`/${slug}/login`));
-    await page.getByPlaceholder('jane@example.com').fill(email);
+    await page.getByPlaceholder('name@company.com').fill(email);
     await page.getByPlaceholder('••••••••').fill(password);
     await page.getByRole('button', { name: 'Sign In' }).click();
 
@@ -40,9 +44,9 @@ test.describe('Authentication & Onboarding Flow', () => {
     await expect(page.getByText('Add your first client')).toBeVisible();
 
     // 4. Test Logout
-    // The AppLayout has a profile button we can click
-    await page.getByLabel('User Profile').click();
-    await page.getByRole('button', { name: 'Log Out' }).click();
+    // The AppLayout has a profile button, but the Sidebar also has a "Log Out" button
+    // Let's use the Sidebar one to avoid viewport issues with fixed headers in Playwright
+    await page.getByRole('link', { name: 'Log Out' }).click();
 
     // Verify we are back on the login page
     await expect(page).toHaveURL(new RegExp(`/${slug}/login`));

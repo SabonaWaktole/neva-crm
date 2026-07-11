@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import { createAuthRoutes } from '@auth/interfaces/http/routes/authRoutes';
+// Removed createAuthRoutes import
 import { AuthController } from '@auth/interfaces/http/controllers/AuthController';
 import { RegisterBusinessOwnerUseCase } from '@auth/application/use-cases/RegisterBusinessOwnerUseCase';
 import { LoginUseCase } from '@auth/application/use-cases/LoginUseCase';
@@ -25,6 +25,8 @@ import { IPasswordHasher } from '@auth/application/ports/IPasswordHasher';
 import { ITokenService } from '@auth/application/ports/ITokenService';
 import { IEmailSender } from '@auth/application/ports/IEmailSender';
 import { IUnitOfWork } from '@shared/application/ports/IUnitOfWork';
+
+import { createClientRouter } from '../clients/interfaces/http/routes/clientRoutes';
 
 export interface AppDependencies {
   userRepository: IUserRepository;
@@ -72,9 +74,18 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
     tenantRepository
   );
 
-  // Routes
-  const authRoutes = createAuthRoutes(authController, tokenService, tenantRepository);
-  app.use('/api/auth', authRoutes);
+  // Auth Routes
+  const { createGlobalAuthRoutes, createTenantAuthRoutes } = require('@auth/interfaces/http/routes/authRoutes');
+  const globalAuthRoutes = createGlobalAuthRoutes(authController, tokenService);
+  const tenantAuthRoutes = createTenantAuthRoutes(authController, tokenService, tenantRepository);
+  
+  app.use('/api/auth', globalAuthRoutes);
+  app.use('/api/:tenantSlug/auth', tenantAuthRoutes);
+
+  // Client routes require PrismaClient, TokenService, TenantRepository
+  const { prisma } = require('@shared/infrastructure/prisma/client');
+  const clientRoutes = createClientRouter(prisma, tokenService, tenantRepository);
+  app.use('/api/:tenantSlug/clients', clientRoutes);
 
   return app;
 };

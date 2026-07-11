@@ -7,6 +7,9 @@ import { GetClientHistoryUseCase } from '../../../application/use-cases/GetClien
 import { AddInteractionUseCase } from '../../../application/use-cases/AddInteractionUseCase';
 import { DefineCustomFieldUseCase } from '../../../application/use-cases/DefineCustomFieldUseCase';
 import { DefineOutcomeCategoryUseCase } from '../../../application/use-cases/DefineOutcomeCategoryUseCase';
+import { GetClientUseCase } from '../../../application/use-cases/GetClientUseCase';
+import { GetCustomFieldsUseCase } from '../../../application/use-cases/GetCustomFieldsUseCase';
+import { GetOutcomeCategoriesUseCase } from '../../../application/use-cases/GetOutcomeCategoriesUseCase';
 import { PrismaClientRepository } from '../../../infrastructure/repositories/PrismaClientRepository';
 import { PrismaCustomFieldDefinitionRepository } from '../../../infrastructure/repositories/PrismaCustomFieldDefinitionRepository';
 import { PrismaInteractionRepository } from '../../../infrastructure/repositories/PrismaInteractionRepository';
@@ -16,9 +19,15 @@ import { authenticate } from '../../../../main/interfaces/http/middlewares/authe
 import { resolveTenant } from '../../../../main/interfaces/http/middlewares/resolveTenant';
 import { authorize } from '../../../../main/interfaces/http/middlewares/authorize';
 import { UserRole } from '../../../../auth/domain/enums/UserRole';
+import { ITokenService } from '../../../../auth/application/ports/ITokenService';
+import { ITenantRepository } from '../../../../tenant/domain/repositories/ITenantRepository';
 
-export const createClientRouter = (prisma: PrismaClient): Router => {
-  const router = Router();
+export const createClientRouter = (
+  prisma: PrismaClient,
+  tokenService: ITokenService,
+  tenantRepository: ITenantRepository
+): Router => {
+  const router = Router({ mergeParams: true });
 
   // Repositories
   const clientRepo = new PrismaClientRepository(prisma);
@@ -34,6 +43,9 @@ export const createClientRouter = (prisma: PrismaClient): Router => {
   const addInteractionUseCase = new AddInteractionUseCase(clientRepo, interactionRepo, outcomeCategoryRepo);
   const defineCustomFieldUseCase = new DefineCustomFieldUseCase(customFieldRepo);
   const defineOutcomeCategoryUseCase = new DefineOutcomeCategoryUseCase(outcomeCategoryRepo);
+  const getClientUseCase = new GetClientUseCase(clientRepo);
+  const getCustomFieldsUseCase = new GetCustomFieldsUseCase(customFieldRepo);
+  const getOutcomeCategoriesUseCase = new GetOutcomeCategoriesUseCase(outcomeCategoryRepo);
 
   // Controller
   const clientController = new ClientController(
@@ -43,17 +55,26 @@ export const createClientRouter = (prisma: PrismaClient): Router => {
     getClientHistoryUseCase,
     addInteractionUseCase,
     defineCustomFieldUseCase,
-    defineOutcomeCategoryUseCase
+    defineOutcomeCategoryUseCase,
+    getClientUseCase,
+    getCustomFieldsUseCase,
+    getOutcomeCategoriesUseCase
   );
 
-  // Middlewares: All client routes require authentication and tenant resolution
-  router.use(authenticate);
-  router.use(resolveTenant(prisma));
+  // Middlewares applied to all routes in this router
+  const authMw = authenticate(tokenService);
+  const resolveTenantMw = resolveTenant(tenantRepository);
+
+  router.use(authMw);
+  router.use(resolveTenantMw);
   router.use(authorize([UserRole.BUSINESS_OWNER, UserRole.STAFF]));
 
-  // Routes
+  router.get('/settings/custom-fields', clientController.getCustomFields);
+  router.get('/settings/outcome-categories', clientController.getOutcomeCategories);
+
   router.post('/', clientController.createClient);
   router.get('/search', clientController.searchClients);
+  router.get('/:clientId', clientController.getClient);
   router.put('/:clientId', clientController.updateClient);
   router.get('/:clientId/history', clientController.getHistory);
   router.post('/:clientId/interactions', clientController.addInteraction);

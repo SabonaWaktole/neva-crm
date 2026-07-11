@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { Network } from 'lucide-react';
 import { AuthLayout } from '../../components/layout/AuthLayout/AuthLayout';
 import { TextInput } from '../../components/ui/TextInput/TextInput';
 import { PasswordInput } from '../../components/ui/PasswordInput/PasswordInput';
@@ -28,7 +29,7 @@ export const LoginPage = () => {
     <AuthLayout
       title="Welcome back"
       subtitle="Sign in to your Nexus CRM account"
-      logoIcon={<span className="material-symbols-outlined text-[32px] text-primary" style={{ fontSize: 32, color: 'var(--color-primary)' }}>hub</span>}
+      logoIcon={<Network size={32} color="var(--color-primary)" />}
     >
       <form style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }} onSubmit={handleSubmit}>
         {error && (
