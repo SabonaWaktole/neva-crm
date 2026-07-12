@@ -145,7 +145,8 @@ class FakePasswordHasher implements IPasswordHasher {
 }
 
 /** Minimal JWT-like token service using base64 encoding for speed. */
-class FakeTokenService implements ITokenService {
+// Deliberately skips signature verification, purely to test authorization/business logic in isolation.
+class NonCryptographicStubTokenService implements ITokenService {
   sign(payload: TokenPayload): string {
     return Buffer.from(JSON.stringify(payload)).toString('base64');
   }
@@ -188,7 +189,7 @@ describe('Auth Integration Tests', () => {
   let invitationRepo: InMemoryInvitationRepository;
   let prtRepo: InMemoryPasswordResetTokenRepository;
   let passwordHasher: FakePasswordHasher;
-  let tokenService: FakeTokenService;
+  let tokenService: NonCryptographicStubTokenService;
   let emailSender: FakeEmailSender;
   let unitOfWork: FakeUnitOfWork;
 
@@ -198,7 +199,7 @@ describe('Auth Integration Tests', () => {
     invitationRepo = new InMemoryInvitationRepository();
     prtRepo = new InMemoryPasswordResetTokenRepository();
     passwordHasher = new FakePasswordHasher();
-    tokenService = new FakeTokenService();
+    tokenService = new NonCryptographicStubTokenService();
     emailSender = new FakeEmailSender();
     unitOfWork = new FakeUnitOfWork();
 

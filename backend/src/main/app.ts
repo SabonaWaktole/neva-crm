@@ -87,5 +87,10 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const clientRoutes = createClientRouter(prisma, tokenService, tenantRepository);
   app.use('/api/:tenantSlug/clients', clientRoutes);
 
+  // Appointment routes
+  const { createAppointmentRouter } = require('../appointments/interfaces/http/routes/appointmentRoutes');
+  const appointmentRoutes = createAppointmentRouter(prisma, tokenService, tenantRepository);
+  app.use('/api/:tenantSlug/appointments', appointmentRoutes);
+
   return app;
 };

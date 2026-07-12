@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Nexus CRM - Schedule Appointment</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface": "#dae2fd",
+                        "surface-variant": "#2d3449",
+                        "tertiary-container": "#d97721",
+                        "surface-dim": "#0b1326",
+                        "surface-container-highest": "#2d3449",
+                        "secondary": "#b9c8de",
+                        "primary-container": "#8083ff",
+                        "on-secondary": "#233143",
+                        "on-primary": "#1000a9",
+                        "surface-container-lowest": "#060e20",
+                        "on-tertiary-fixed": "#301400",
+                        "surface-container-low": "#131b2e",
+                        "error-container": "#93000a",
+                        "surface": "#0b1326",
+                        "on-tertiary": "#4f2500",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "on-error-container": "#ffdad6",
+                        "outline": "#908fa0",
+                        "secondary-fixed-dim": "#b9c8de",
+                        "surface-tint": "#c0c1ff",
+                        "secondary-container": "#39485a",
+                        "primary-fixed": "#e1e0ff",
+                        "secondary-fixed": "#d4e4fa",
+                        "on-background": "#dae2fd",
+                        "on-secondary-fixed": "#0d1c2d",
+                        "on-secondary-container": "#a7b6cc",
+                        "inverse-surface": "#dae2fd",
+                        "tertiary": "#ffb783",
+                        "surface-container-high": "#222a3d",
+                        "inverse-primary": "#494bd6",
+                        "background": "#0b1326",
+                        "tertiary-fixed-dim": "#ffb783",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "outline-variant": "#464554",
+                        "inverse-on-surface": "#283044",
+                        "on-primary-container": "#0d0096",
+                        "on-tertiary-container": "#452000",
+                        "on-surface-variant": "#c7c4d7",
+                        "error": "#ffb4ab",
+                        "tertiary-fixed": "#ffdcc5",
+                        "surface-container": "#171f33",
+                        "on-error": "#690005",
+                        "on-tertiary-fixed-variant": "#703700",
+                        "primary": "#c0c1ff",
+                        "on-secondary-fixed-variant": "#39485a",
+                        "surface-bright": "#31394d",
+                        "on-primary-fixed": "#07006c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "md": "16px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "margin-desktop": "40px",
+                        "xl": "32px",
+                        "xs": "4px",
+                        "sm": "8px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "label-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #0f172a; /* Base Level 0 from Style Guidance */
+            color: #dae2fd;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0b1326;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 10px;
+        }
+        .form-input-focus:focus {
+            border-color: #8083ff;
+            box-shadow: 0 0 0 2px rgba(128, 131, 255, 0.2);
+            outline: none;
+        }
+        /* Elevation Level 1 */
+        .card-bg {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="antialiased select-none overflow-x-hidden">
+<!-- Header / TopAppBar (Modified for Transactional Task) -->
+<header class="fixed top-0 left-0 w-full z-50 bg-surface-container-low border-b border-outline-variant h-16 flex items-center justify-between px-md">
+<button aria-label="Cancel" class="w-10 h-10 flex items-center justify-center text-on-surface-variant active:scale-90 transition-transform">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm text-on-surface">Schedule Appointment</h1>
+<button class="bg-primary text-on-primary px-lg py-sm rounded-lg font-label-md text-label-md font-bold active:scale-95 transition-all shadow-md">
+            Save
+        </button>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-20 pb-24 px-md max-w-lg mx-auto space-y-lg">
+<!-- Subtle Atmospheric Background Shader (Linear/Focused Task) -->
+<div class="fixed inset-0 -z-10 opacity-20 pointer-events-none">
+
+</div>
+<!-- Section: Client Selection -->
+<section class="space-y-sm">
+<label class="block font-label-md text-label-md text-on-surface-variant ml-1">Client</label>
+<div class="relative group">
+<div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</div>
+<input class="w-full h-14 pl-12 pr-4 card-bg rounded-xl font-body-md text-body-md text-on-surface placeholder:text-outline form-input-focus transition-all" placeholder="Search or select client..." type="text"/>
+<div class="absolute inset-y-0 right-3 flex items-center">
+<span class="material-symbols-outlined text-outline" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<!-- Quick Suggestion Chip (Optional but UX friendly) -->
+<div class="flex gap-sm overflow-x-auto pb-1 custom-scrollbar">
+<button class="flex-shrink-0 px-md py-xs bg-secondary-container/30 text-on-secondary-container border border-outline-variant rounded-full font-label-sm text-label-sm whitespace-nowrap">
+                    Acme Corp
+                </button>
+<button class="flex-shrink-0 px-md py-xs bg-secondary-container/30 text-on-secondary-container border border-outline-variant rounded-full font-label-sm text-label-sm whitespace-nowrap">
+                    John Doe
+                </button>
+<button class="flex-shrink-0 px-md py-xs bg-secondary-container/30 text-on-secondary-container border border-outline-variant rounded-full font-label-sm text-label-sm whitespace-nowrap">
+                    TechNova LLC
+                </button>
+</div>
+</section>
+<!-- Section: Date & Time Pickers -->
+<section class="grid grid-cols-2 gap-md">
+<div class="space-y-sm">
+<label class="block font-label-md text-label-md text-on-surface-variant ml-1">Date</label>
+<div class="relative">
+<input class="w-full h-14 px-4 card-bg rounded-xl font-body-md text-body-md text-on-surface form-input-focus transition-all [color-scheme:dark]" type="date" value="2023-11-24"/>
+<div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+</div>
+</div>
+</div>
+<div class="space-y-sm">
+<label class="block font-label-md text-label-md text-on-surface-variant ml-1">Time</label>
+<div class="relative">
+<input class="w-full h-14 px-4 card-bg rounded-xl font-body-md text-body-md text-on-surface form-input-focus transition-all [color-scheme:dark]" type="time" value="09:00"/>
+<div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="schedule">schedule</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section: Appointment Type & Staff -->
+<section class="space-y-lg">
+<div class="space-y-sm">
+<label class="block font-label-md text-label-md text-on-surface-variant ml-1">Appointment Type</label>
+<div class="grid grid-cols-2 gap-sm">
+<button class="flex items-center gap-sm px-md py-sm border-2 border-primary-container bg-primary-container/10 text-on-primary-container rounded-xl transition-all">
+<span class="material-symbols-outlined" data-icon="handshake">handshake</span>
+<span class="font-label-md text-label-md">Meeting</span>
+</button>
+<button class="flex items-center gap-sm px-md py-sm border border-outline-variant bg-surface-container-high/50 text-on-surface-variant rounded-xl active:bg-surface-variant transition-all">
+<span class="material-symbols-outlined" data-icon="videocam">videocam</span>
+<span class="font-label-md text-label-md">Video Call</span>
+</button>
+</div>
+</div>
+<div class="space-y-sm">
+<label class="block font-label-md text-label-md text-on-surface-variant ml-1">Assigned Staff</label>
+<div class="flex items-center gap-md p-md card-bg rounded-xl">
+<div class="w-12 h-12 rounded-full overflow-hidden border-2 border-primary/20">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a corporate account manager with a friendly expression, wearing modern business attire. The image is set against a soft-focus dark office background with subtle indigo neon accents, matching a high-performance SaaS aesthetic. High-quality studio lighting creates a sharp, authoritative yet approachable look." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDhM9Wd44sarKo0nHfubgYiInAQQqoukyt3yHRB4hJOAIGkrJStTEoX82iR4xpqHAIrJuwKjQhj6u4t3WAazllpn3OrDXhvkJczL1n9mqgQgF1SYo8VK7cm9J9qhadu_KMaUGmw6Tq5c56Uf3wT8EOD8ZPkpDpxk4fvvpQFpSJ6OG-w94sVci_L_yAN4tplhXdsXosUXX0VUt4koaGRiCYPMxDvAUNsfC8pMkFLo-Z93D_7oVE60O64xqcUKXsQsKgcgcA2J4C-5mp"/>
+</div>
+<div class="flex-1">
+<h4 class="font-label-md text-label-md text-on-surface">Alex Rivera</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Senior Account Executive</p>
+</div>
+<button class="text-primary active:scale-90 transition-transform">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Section: Notes -->
+<section class="space-y-sm">
+<div class="flex justify-between items-center px-1">
+<label class="block font-label-md text-label-md text-on-surface-variant">Appointment Notes</label>
+<span class="font-label-sm text-label-sm text-outline">0/500</span>
+</div>
+<textarea class="w-full min-h-[120px] p-md card-bg rounded-xl font-body-sm text-body-sm text-on-surface placeholder:text-outline form-input-focus transition-all resize-none" placeholder="Mention key topics, objectives, or preparatory requirements..."></textarea>
+</section>
+<!-- Advanced Options Toggle -->
+<div class="pt-4">
+<button class="flex items-center justify-between w-full py-md border-t border-outline-variant group" onclick="toggleAdvanced()">
+<span class="font-label-md text-label-md text-on-surface-variant group-active:text-primary transition-colors">Advanced Settings</span>
+<span class="material-symbols-outlined text-outline transition-transform duration-300" data-icon="expand_more" id="advanced-chevron">expand_more</span>
+</button>
+<div class="hidden space-y-md mt-sm overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300" id="advanced-content">
+<div class="flex items-center justify-between px-1">
+<span class="font-body-md text-body-md text-on-surface">Send Reminder SMS</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-surface-variant rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="flex items-center justify-between px-1">
+<span class="font-body-md text-body-md text-on-surface">Recurrence</span>
+<span class="font-label-md text-label-md text-primary">None</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Success Modal (Hidden by default) -->
+<div class="fixed inset-0 z-[100] bg-surface-dim/80 backdrop-blur-sm hidden items-center justify-center p-lg" id="success-overlay">
+<div class="card-bg rounded-2xl w-full max-w-sm p-xl flex flex-col items-center text-center shadow-2xl scale-95 transition-transform duration-300" id="success-card">
+<div class="w-20 h-20 rounded-full bg-primary-container/20 flex items-center justify-center mb-lg">
+<span class="material-symbols-outlined text-primary text-5xl" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-sm">Appointment Scheduled</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-xl">Invitation has been sent to the client and staff members.</p>
+<button class="w-full bg-primary text-on-primary py-md rounded-xl font-label-md text-label-md font-bold shadow-lg" onclick="closeModal()">
+                Return to Dashboard
+            </button>
+</div>
+</div>
+<!-- Bottom Action Bar (Mobile Priority) -->
+<div class="fixed bottom-0 left-0 w-full bg-surface-container-highest/80 backdrop-blur-md border-t border-outline-variant p-md flex items-center gap-md lg:hidden">
+<button class="flex-1 h-14 bg-surface-variant text-on-surface rounded-xl font-label-md text-label-md active:bg-outline-variant transition-colors">
+            Discard
+        </button>
+<button class="flex-[2] h-14 bg-primary text-on-primary rounded-xl font-label-md text-label-md font-bold shadow-lg active:scale-95 transition-all" onclick="showSuccess()">
+            Confirm Appointment
+        </button>
+</div>
+<script>
+        function toggleAdvanced() {
+            const content = document.getElementById('advanced-content');
+            const chevron = document.getElementById('advanced-chevron');
+            const isHidden = content.classList.contains('hidden');
+            
+            if (isHidden) {
+                content.classList.remove('hidden');
+                chevron.classList.add('rotate-180');
+            } else {
+                content.classList.add('hidden');
+                chevron.classList.remove('rotate-180');
+            }
+        }
+
+        function showSuccess() {
+            const overlay = document.getElementById('success-overlay');
+            const card = document.getElementById('success-card');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+            setTimeout(() => {
+                card.classList.remove('scale-95');
+                card.classList.add('scale-100');
+            }, 50);
+        }
+
+        function closeModal() {
+            const overlay = document.getElementById('success-overlay');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+        }
+
+        // Lightweight atmospheric interaction: Ripple effect on main buttons
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                let ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                this.appendChild(ripple);
+                let x = e.clientX - e.target.offsetLeft;
+                let y = e.clientY - e.target.offsetTop;
+                ripple.style.left = `${x}px`;
+                ripple.style.top = `${y}px`;
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+    </script>
+<style>
+        .ripple {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple-effect 0.6s linear;
+            pointer-events: none;
+        }
+        @keyframes ripple-effect {
+            to { transform: scale(4); opacity: 0; }
+        }
+        
+        /* Smooth Fade In */
+        main {
+            animation: main-entrance 0.5s ease-out forwards;
+        }
+        @keyframes main-entrance {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</body></html>

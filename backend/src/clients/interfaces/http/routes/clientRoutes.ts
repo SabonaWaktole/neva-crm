@@ -14,6 +14,7 @@ import { PrismaClientRepository } from '../../../infrastructure/repositories/Pri
 import { PrismaCustomFieldDefinitionRepository } from '../../../infrastructure/repositories/PrismaCustomFieldDefinitionRepository';
 import { PrismaInteractionRepository } from '../../../infrastructure/repositories/PrismaInteractionRepository';
 import { PrismaOutcomeCategoryRepository } from '../../../infrastructure/repositories/PrismaOutcomeCategoryRepository';
+import { PrismaAppointmentRepository } from '../../../../appointments/infrastructure/repositories/PrismaAppointmentRepository';
 import { PrismaClient } from '@prisma/client';
 import { authenticate } from '../../../../main/interfaces/http/middlewares/authenticate';
 import { resolveTenant } from '../../../../main/interfaces/http/middlewares/resolveTenant';
@@ -34,12 +35,13 @@ export const createClientRouter = (
   const customFieldRepo = new PrismaCustomFieldDefinitionRepository(prisma);
   const interactionRepo = new PrismaInteractionRepository(prisma);
   const outcomeCategoryRepo = new PrismaOutcomeCategoryRepository(prisma);
+  const appointmentRepo = new PrismaAppointmentRepository(prisma);
 
   // Use Cases
   const createClientUseCase = new CreateClientUseCase(clientRepo, customFieldRepo);
   const updateClientUseCase = new UpdateClientUseCase(clientRepo, customFieldRepo);
   const searchClientsUseCase = new SearchClientsUseCase(clientRepo);
-  const getClientHistoryUseCase = new GetClientHistoryUseCase(clientRepo, interactionRepo);
+  const getClientHistoryUseCase = new GetClientHistoryUseCase(clientRepo, interactionRepo, appointmentRepo);
   const addInteractionUseCase = new AddInteractionUseCase(clientRepo, interactionRepo, outcomeCategoryRepo);
   const defineCustomFieldUseCase = new DefineCustomFieldUseCase(customFieldRepo);
   const defineOutcomeCategoryUseCase = new DefineOutcomeCategoryUseCase(outcomeCategoryRepo);

@@ -9,7 +9,8 @@ import { UserRole } from '../../../src/auth/domain/enums/UserRole';
 
 const prisma = new PrismaClient();
 
-class FakeTokenService implements ITokenService {
+// Deliberately skips signature verification, purely to test authorization/business logic in isolation.
+class NonCryptographicStubTokenService implements ITokenService {
   sign(payload: any): string {
     return Buffer.from(JSON.stringify(payload)).toString('base64');
   }
@@ -22,7 +23,7 @@ class FakeTokenService implements ITokenService {
   }
 }
 
-const stubTokenService = new FakeTokenService();
+const stubTokenService = new NonCryptographicStubTokenService();
 const validToken = stubTokenService.sign({ userId: 'u1', role: UserRole.BUSINESS_OWNER, tenantId: 't1', tenantSlug: 't1' });
 
 // Stub tenantRepository so real resolveTenant middleware can resolve by slug
@@ -236,13 +237,36 @@ describe('Client Routes', () => {
     expect(res.body.content).toBe('Great call!');
   });
 
-  it('GET /:clientId/history returns history', async () => {
+  it('GET /:clientId/history returns history interleaved with appointments', async () => {
+    // Create an appointment for this client
+    await prisma.appointment.create({
+      data: {
+        id: 'appt-history-1',
+        tenantId: 't1',
+        clientId: createdClientId,
+        assignedUserId: 'u1',
+        scheduledAt: new Date(Date.now() + 86400000), // Tomorrow
+        status: 'SCHEDULED'
+      }
+    });
+
     const res = await request(app)
       .get(`/api/t1/clients/${createdClientId}/history`)
       .set('Authorization', `Bearer ${validToken}`);
     
     expect(res.status).toBe(200);
-    expect(res.body.timeline.length).toBeGreaterThanOrEqual(1);
+    expect(res.body.timeline.length).toBeGreaterThanOrEqual(2);
+    
+    const types = res.body.timeline.map((t: any) => t.type);
+    expect(types).toContain('INTERACTION_ADDED');
+    expect(types).toContain('APPOINTMENT_SCHEDULED');
+
+    // Verify sort order: descending timestamp
+    const t1 = new Date(res.body.timeline[0].timestamp).getTime();
+    const t2 = new Date(res.body.timeline[1].timestamp).getTime();
+    expect(t1).toBeGreaterThanOrEqual(t2);
+
+    await prisma.appointment.delete({ where: { id: 'appt-history-1' } });
   });
 
   // Validation tests
