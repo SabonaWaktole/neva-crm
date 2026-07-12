@@ -1,26 +1,19 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import React from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { AppLayout } from '../../components/layout/AppLayout/AppLayout';
 import { Sidebar } from '../../components/layout/Sidebar/Sidebar';
-import type { NavItem } from '../../components/layout/Sidebar/Sidebar';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useLogout } from '../../hooks/useLogout';
 import { ClientFormContent } from './ClientFormContent';
-
-const mockNavItems: NavItem[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
-  { id: 'clients', label: 'Clients', icon: 'group', isActive: true },
-  { id: 'appointments', label: 'Appointments', icon: 'event' },
-  { id: 'inventory', label: 'Products & Stock', icon: 'inventory_2' },
-  { id: 'quotes', label: 'Quotations', icon: 'description' },
-  { id: 'reports', label: 'Reports', icon: 'bar_chart' },
-  { id: 'settings', label: 'Settings', icon: 'settings' },
-];
+import { useNavigation } from '../../hooks/useNavigation';
 
 export const ClientFormPage: React.FC = () => {
   const navigate = useNavigate();
   const { tenantSlug } = useParams();
   const { user } = useAuthStore();
   const { logout } = useLogout();
+  const location = useLocation();
+  const navItems = useNavigation(user?.role, location.pathname);
 
   const handleLogout = async () => {
     await logout();
@@ -28,7 +21,7 @@ export const ClientFormPage: React.FC = () => {
   };
 
   const userName = user?.userId ? `User ${user.userId.substring(0, 8)}` : 'Business Owner';
-  const roleName = user?.role === 'SUPER_ADMIN' ? 'Super Admin' : user?.role === 'BUSINESS_OWNER' ? 'Business Owner' : 'Staff';
+  const roleName = user?.role === 'STAFF' ? 'Sales Representative' : 'Enterprise Tier';
 
   return (
     <AppLayout
@@ -40,8 +33,9 @@ export const ClientFormPage: React.FC = () => {
         <Sidebar 
           orgName={tenantSlug || 'Workspace'} 
           orgTier={roleName} 
-          navItems={mockNavItems} 
+          navItems={navItems} 
           onLogoutClick={handleLogout}
+          onNavItemClick={(id) => navigate(`/${tenantSlug || ''}/${id === 'dashboard' ? '' : id}`)}
         />
       }
     >

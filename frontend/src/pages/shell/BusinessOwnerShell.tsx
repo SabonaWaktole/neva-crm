@@ -2,20 +2,10 @@ import { Network, UserPlus } from 'lucide-react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { AppLayout } from '../../components/layout/AppLayout/AppLayout';
 import { Sidebar } from '../../components/layout/Sidebar/Sidebar';
-import type { NavItem } from '../../components/layout/Sidebar/Sidebar';
 import { Button } from '../../components/ui/Button/Button';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useLogout } from '../../hooks/useLogout';
-
-const mockNavItems: NavItem[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', isActive: true },
-  { id: 'clients', label: 'Clients', icon: 'group' },
-  { id: 'appointments', label: 'Appointments', icon: 'event' },
-  { id: 'inventory', label: 'Products & Stock', icon: 'inventory_2' },
-  { id: 'quotes', label: 'Quotations', icon: 'description' },
-  { id: 'reports', label: 'Reports', icon: 'bar_chart' },
-  { id: 'settings', label: 'Settings', icon: 'settings' },
-];
+import { useNavigation } from '../../hooks/useNavigation';
 
 export const BusinessOwnerShell = () => {
   const navigate = useNavigate();
@@ -24,12 +14,7 @@ export const BusinessOwnerShell = () => {
   const { logout } = useLogout();
   const location = useLocation();
 
-  const activeNavId = mockNavItems.find(item => location.pathname.includes(`/${tenantSlug}/${item.id}`))?.id || 'dashboard';
-
-  const navItemsWithActiveState = mockNavItems.map(item => ({
-    ...item,
-    isActive: item.id === activeNavId
-  }));
+  const navItemsWithActiveState = useNavigation(user?.role, location.pathname);
 
   const handleLogout = async () => {
     await logout();

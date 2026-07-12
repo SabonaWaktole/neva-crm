@@ -1,8 +1,10 @@
-export enum ClientStatus {
-  PROSPECT = 'PROSPECT',
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-}
+export const ClientStatus = {
+  PROSPECT: 'PROSPECT',
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+} as const;
+
+export type ClientStatus = typeof ClientStatus[keyof typeof ClientStatus];
 
 export interface Client {
   id: string;

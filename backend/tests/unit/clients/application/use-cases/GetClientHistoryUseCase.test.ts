@@ -53,8 +53,33 @@ describe('GetClientHistoryUseCase', () => {
 
     // Should be sorted by createdAt descending
     expect(result.timeline.length).toBe(2);
-    expect(result.timeline[0].id).toBe('i2'); // newest
-    expect(result.timeline[1].id).toBe('i1'); // oldest
+    
+    // Assert the exact mapped shape expected by the frontend
+    expect(result.timeline[0]).toEqual({
+      id: 'i2',
+      timestamp: '2023-01-02T10:00:00.000Z',
+      type: 'INTERACTION_ADDED',
+      description: 'Interaction (CALL)',
+      actor: 'u1',
+      details: {
+        channel: 'CALL',
+        content: 'Follow up',
+        outcomeCategoryId: null
+      }
+    });
+    
+    expect(result.timeline[1]).toEqual({
+      id: 'i1',
+      timestamp: '2023-01-01T10:00:00.000Z',
+      type: 'INTERACTION_ADDED',
+      description: 'Interaction (NOTE)',
+      actor: 'u1',
+      details: {
+        channel: 'NOTE',
+        content: 'Hello',
+        outcomeCategoryId: null
+      }
+    });
   });
 
   it('throws if client belongs to a different tenant', async () => {

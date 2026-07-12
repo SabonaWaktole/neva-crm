@@ -30,6 +30,10 @@ export const ClientSettingsPage: React.FC = () => {
   const userName = user?.userId ? `User ${user.userId.substring(0, 8)}` : 'Business Owner';
   const roleName = user?.role === 'SUPER_ADMIN' ? 'Super Admin' : user?.role === 'BUSINESS_OWNER' ? 'Business Owner' : 'Staff';
 
+  const handleNavClick = (id: string) => {
+    navigate(`/${tenantSlug || ''}/${id === 'dashboard' ? '' : id}`);
+  };
+
   return (
     <AppLayout
       userName={userName}
@@ -42,6 +46,7 @@ export const ClientSettingsPage: React.FC = () => {
           orgTier={roleName} 
           navItems={mockNavItems} 
           onLogoutClick={handleLogout}
+          onNavItemClick={handleNavClick}
         />
       }
     >

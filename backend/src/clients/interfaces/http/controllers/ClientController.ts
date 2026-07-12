@@ -224,23 +224,4 @@ export class ClientController {
     }
   };
 
-  getCustomFields = async (req: Request, res: Response) => {
-    try {
-      const tenantId = req.tenant!.id;
-      const fields = await this.getCustomFieldsUseCase.execute(tenantId);
-      res.status(200).json(fields);
-    } catch (error: any) {
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  };
-
-  getOutcomeCategories = async (req: Request, res: Response) => {
-    try {
-      const tenantId = req.tenant!.id;
-      const categories = await this.getOutcomeCategoriesUseCase.execute(tenantId);
-      res.status(200).json(categories);
-    } catch (error: any) {
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  };
 }

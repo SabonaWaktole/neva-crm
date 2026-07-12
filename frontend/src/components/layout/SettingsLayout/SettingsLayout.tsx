@@ -1,5 +1,6 @@
 import React from 'react';
 import type { ReactNode } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { User, Building2, Sliders, UsersRound, Puzzle } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import styles from './SettingsLayout.module.css';
@@ -27,6 +28,8 @@ export const SettingsLayout: React.FC<SettingsLayoutProps> = ({
   children,
   activeNavId,
 }) => {
+  const { tenantSlug } = useParams();
+  
   return (
     <div className={styles.layout}>
       {/* Left Sidebar for Settings */}
@@ -42,14 +45,14 @@ export const SettingsLayout: React.FC<SettingsLayoutProps> = ({
             ].filter(Boolean).join(' ');
 
             return (
-              <a
+              <Link
                 key={item.id}
-                href={`#${item.id}`} // Using hash for navigation, could be replaced with Link depending on routing
+                to={`/${tenantSlug}/settings${item.id === 'profile' ? '' : `/${item.id}`}`}
                 className={itemClasses}
               >
                 <Icon className={styles.navIcon} size={20} />
                 <span className={styles.navLabel}>{item.label}</span>
-              </a>
+              </Link>
             );
           })}
         </nav>

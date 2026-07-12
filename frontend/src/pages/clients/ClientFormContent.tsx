@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { User, Building2, FileText, Save, Puzzle } from 'lucide-react';
+import { User, FileText, Save, Puzzle } from 'lucide-react';
 import { Button } from '../../components/ui/Button/Button';
 import { Card } from '../../components/ui/Card/Card';
 import { TextInput } from '../../components/ui/TextInput/TextInput';

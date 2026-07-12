@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
   Plus, 
@@ -8,10 +7,7 @@ import {
   MoreVertical, 
   ChevronLeft, 
   ChevronRight, 
-  Mail, 
-  Phone, 
   Edit, 
-  Trash2
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button/Button';
 import { Badge } from '../../components/ui/Badge/Badge';

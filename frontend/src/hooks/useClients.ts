@@ -1,7 +1,7 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { clientService } from '../services/clientService';
 import { useParams } from 'react-router-dom';
-import type { Client, SearchClientsParams, CustomFieldDefinition, OutcomeCategory, ClientHistory, Interaction, ClientStatus } from '../types/client';
+import type { Client, SearchClientsParams, CustomFieldDefinition, OutcomeCategory, ClientHistory } from '../types/client';
 
 export const useClients = () => {
   const { tenantSlug } = useParams();

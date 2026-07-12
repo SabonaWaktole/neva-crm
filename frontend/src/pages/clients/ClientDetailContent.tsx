@@ -6,14 +6,37 @@ import { Card } from '../../components/ui/Card/Card';
 import { Badge } from '../../components/ui/Badge/Badge';
 import { Avatar } from '../../components/ui/Avatar/Avatar';
 import { Button } from '../../components/ui/Button/Button';
+import { SlideOver } from '../../components/ui/SlideOver';
+import { TextInput } from '../../components/ui/TextInput/TextInput';
+import { SelectInput } from '../../components/ui/SelectInput/SelectInput';
+import { TextareaInput } from '../../components/ui/TextareaInput/TextareaInput';
 import { TimelineItem } from '../../components/ui/TimelineItem/TimelineItem';
+import { useAddInteraction } from '../../hooks/useClients';
 import styles from './ClientDetailContent.module.css';
 
 export const ClientDetailContent: React.FC = () => {
-  const { tenantSlug, clientId } = useParams();
+  const { clientId } = useParams();
   const { client, isLoading: isClientLoading, fetchClient } = useClientDetail(clientId || '');
   const { history, isLoading: isHistoryLoading, fetchHistory } = useClientHistory(clientId || '');
-  const { customFields, fetchSettings } = useClientSettings();
+  const { customFields, outcomeCategories, fetchSettings } = useClientSettings();
+  const { addInteraction, isLoading: isAddingInteraction } = useAddInteraction();
+
+  const [isInteractionSlideOverOpen, setIsInteractionSlideOverOpen] = useState(false);
+  const [interactionChannel, setInteractionChannel] = useState('NOTE');
+  const [interactionContent, setInteractionContent] = useState('');
+  const [interactionOutcomeId, setInteractionOutcomeId] = useState('');
+
+  const handleAddInteraction = async () => {
+    if (!clientId || !interactionContent) return;
+    await addInteraction(clientId, {
+      channel: interactionChannel,
+      content: interactionContent,
+      outcomeCategoryId: interactionOutcomeId || undefined
+    });
+    setInteractionContent('');
+    setIsInteractionSlideOverOpen(false);
+    fetchHistory();
+  };
 
   useEffect(() => {
     fetchClient();
@@ -135,16 +158,16 @@ export const ClientDetailContent: React.FC = () => {
             </div>
 
             <div className={styles.logActivityRow}>
-              <Button variant="outline" className={styles.logActivityButton}>
+              <Button variant="outline" className={styles.logActivityButton} onClick={() => { setInteractionChannel('CALL'); setIsInteractionSlideOverOpen(true); }}>
                 <PhoneCall size={16} /> Log Call
               </Button>
-              <Button variant="outline" className={styles.logActivityButton}>
+              <Button variant="outline" className={styles.logActivityButton} onClick={() => { setInteractionChannel('EMAIL'); setIsInteractionSlideOverOpen(true); }}>
                 <Mail size={16} /> Email
               </Button>
-              <Button variant="outline" className={styles.logActivityButton}>
+              <Button variant="outline" className={styles.logActivityButton} onClick={() => { setInteractionChannel('MEETING'); setIsInteractionSlideOverOpen(true); }}>
                 <Video size={16} /> Meeting
               </Button>
-              <Button variant="outline" className={styles.logActivityButton}>
+              <Button variant="outline" className={styles.logActivityButton} onClick={() => { setInteractionChannel('NOTE'); setIsInteractionSlideOverOpen(true); }}>
                 <FileText size={16} /> Note
               </Button>
             </div>
@@ -179,6 +202,44 @@ export const ClientDetailContent: React.FC = () => {
           </Card>
         </div>
       </div>
+
+      <SlideOver
+        isOpen={isInteractionSlideOverOpen}
+        onClose={() => setIsInteractionSlideOverOpen(false)}
+        title="Add Interaction"
+        footer={
+          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+            <Button variant="outline" onClick={() => setIsInteractionSlideOverOpen(false)}>Cancel</Button>
+            <Button onClick={handleAddInteraction} disabled={isAddingInteraction || !interactionContent}>
+              {isAddingInteraction ? 'Saving...' : 'Save Interaction'}
+            </Button>
+          </div>
+        }
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px' }}>
+          <SelectInput label="Channel" value={interactionChannel} onChange={e => setInteractionChannel(e.target.value)}>
+            <option value="CALL">Call</option>
+            <option value="EMAIL">Email</option>
+            <option value="MEETING">Meeting</option>
+            <option value="NOTE">Note</option>
+          </SelectInput>
+          <TextareaInput 
+            label="Notes" 
+            placeholder="Add details about this interaction..." 
+            rows={5}
+            value={interactionContent}
+            onChange={e => setInteractionContent(e.target.value)}
+          />
+          {outcomeCategories && outcomeCategories.length > 0 && (
+            <SelectInput label="Outcome" value={interactionOutcomeId} onChange={e => setInteractionOutcomeId(e.target.value)}>
+              <option value="">No Outcome</option>
+              {outcomeCategories.map(oc => (
+                <option key={oc.id} value={oc.id}>{oc.label}</option>
+              ))}
+            </SelectInput>
+          )}
+        </div>
+      </SlideOver>
     </div>
   );
 };

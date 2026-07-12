@@ -5,7 +5,6 @@ import { SlideOver } from '../../components/ui/SlideOver';
 import { Button } from '../../components/ui/Button';
 import { TextInput } from '../../components/ui/TextInput';
 import { SelectInput } from '../../components/ui/SelectInput';
-import { TextareaInput } from '../../components/ui/TextareaInput';
 import { useClientSettings, useDefineCustomField, useDefineOutcomeCategory } from '../../hooks/useClients';
 import styles from './ClientSettingsContent.module.css';
 

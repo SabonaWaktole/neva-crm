@@ -22,11 +22,22 @@ export class GetClientHistoryUseCase {
 
     const interactions = await this.interactionRepo.findByClientId(dto.tenantId, dto.clientId);
 
-    // TODO: Merge with Appointments and Quotations in future milestones
-    const timeline = [...interactions];
+    // Map interactions to the timeline format expected by the frontend
+    const timeline = interactions.map((interaction: Interaction) => ({
+      id: interaction.id,
+      timestamp: interaction.createdAt.toISOString(),
+      type: 'INTERACTION_ADDED',
+      description: `Interaction (${interaction.channel})`,
+      actor: interaction.authorUserId,
+      details: {
+        channel: interaction.channel,
+        content: interaction.content,
+        outcomeCategoryId: interaction.outcomeCategory?.id || null,
+      },
+    }));
 
-    // Sort descending by createdAt
-    timeline.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    // Sort descending by timestamp
+    timeline.sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
     return { timeline };
   }

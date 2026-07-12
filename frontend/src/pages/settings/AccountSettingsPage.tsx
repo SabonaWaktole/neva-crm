@@ -34,6 +34,10 @@ export const AccountSettingsPage = () => {
   const userName = user?.userId ? `User ${user.userId.substring(0, 8)}` : 'Settings User';
   const roleName = user?.role === 'SUPER_ADMIN' ? 'Super Admin' : user?.role === 'BUSINESS_OWNER' ? 'Business Owner' : 'Staff';
 
+  const handleNavClick = (id: string) => {
+    navigate(`/${tenantSlug || ''}/${id === 'dashboard' ? '' : id}`);
+  };
+
   return (
     <AppLayout
       userName={userName}
@@ -45,6 +49,8 @@ export const AccountSettingsPage = () => {
           orgName={tenantSlug || 'Workspace'} 
           orgTier={roleName} 
           navItems={mockNavItems} 
+          onLogoutClick={handleLogout}
+          onNavItemClick={handleNavClick}
         />
       }
     >
