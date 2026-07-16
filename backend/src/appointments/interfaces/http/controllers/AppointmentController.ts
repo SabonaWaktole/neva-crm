@@ -15,6 +15,20 @@ import {
   searchAppointmentsSchema,
   getUpcomingAppointmentsSchema,
 } from '../schemas/appointmentSchemas';
+import { Appointment } from '../../../domain/entities/Appointment';
+
+const mapToDTO = (appointment: Appointment) => ({
+  id: appointment.id,
+  tenantId: appointment.tenantId,
+  clientId: appointment.clientId,
+  assignedUserId: appointment.assignedUserId,
+  scheduledAt: appointment.scheduledAt,
+  status: appointment.status,
+  notes: appointment.notes,
+  history: appointment.history,
+  createdAt: appointment.createdAt,
+  updatedAt: appointment.updatedAt,
+});
 
 export class AppointmentController {
   constructor(
@@ -37,7 +51,7 @@ export class AppointmentController {
         ...validatedData,
       });
 
-      res.status(201).json(appointment);
+      res.status(201).json(mapToDTO(appointment));
     } catch (error: any) {
       if (error.message.includes('not found')) {
         res.status(404).json({ error: error.message });
@@ -56,7 +70,7 @@ export class AppointmentController {
       const id = req.params.appointmentId as string;
       const changedByUserId = req.user!.userId;
 
-      await this.rescheduleAppointmentUseCase.execute({
+      const appointment = await this.rescheduleAppointmentUseCase.execute({
         id,
         tenantId,
         newDate: validatedData.newDate,
@@ -64,7 +78,7 @@ export class AppointmentController {
         changedByUserId,
       });
 
-      res.status(200).json({ message: 'Appointment rescheduled successfully' });
+      res.status(200).json(mapToDTO(appointment));
     } catch (error: any) {
       if (error.message.includes('not found')) {
         res.status(404).json({ error: error.message });
@@ -83,14 +97,14 @@ export class AppointmentController {
       const id = req.params.appointmentId as string;
       const changedByUserId = req.user!.userId;
 
-      await this.cancelAppointmentUseCase.execute({
+      const appointment = await this.cancelAppointmentUseCase.execute({
         id,
         tenantId,
         reason: validatedData.reason,
         changedByUserId,
       });
 
-      res.status(200).json({ message: 'Appointment cancelled successfully' });
+      res.status(200).json(mapToDTO(appointment));
     } catch (error: any) {
       if (error.message.includes('not found')) {
         res.status(404).json({ error: error.message });
@@ -108,13 +122,13 @@ export class AppointmentController {
       const tenantId = req.tenant!.id;
       const id = req.params.appointmentId as string;
 
-      await this.updateAppointmentStatusUseCase.execute({
+      const appointment = await this.updateAppointmentStatusUseCase.execute({
         id,
         tenantId,
         status: validatedData.status,
       });
 
-      res.status(200).json({ message: `Appointment marked as ${validatedData.status}` });
+      res.status(200).json(mapToDTO(appointment));
     } catch (error: any) {
       if (error.message.includes('not found')) {
         res.status(404).json({ error: error.message });

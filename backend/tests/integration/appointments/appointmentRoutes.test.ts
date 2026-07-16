@@ -97,8 +97,17 @@ describe('Appointment Routes (Integration)', () => {
       });
     
     expect(res.status).toBe(201);
-    expect(res.body.id).toBeDefined();
-    expect(res.body.status).toBe(AppointmentStatus.SCHEDULED);
+    expect(res.body).toEqual(expect.objectContaining({
+      id: expect.any(String),
+      tenantId: 't1',
+      clientId: 'c1-t1',
+      assignedUserId: 'u1-staff',
+      status: AppointmentStatus.SCHEDULED,
+      notes: 'Initial consultation',
+      history: expect.any(Array),
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String)
+    }));
     createdAppointmentId = res.body.id;
   });
 
@@ -112,7 +121,13 @@ describe('Appointment Routes (Integration)', () => {
       });
     
     expect(res.status).toBe(200);
-    expect(res.body.message).toBe('Appointment rescheduled successfully');
+    expect(res.body).toEqual(expect.objectContaining({
+      id: createdAppointmentId,
+      status: AppointmentStatus.SCHEDULED,
+      updatedAt: expect.any(String)
+    }));
+    // Also confirm the new date was applied
+    expect(new Date(res.body.scheduledAt).getTime()).toBeGreaterThan(Date.now());
   });
 
   it('GET /:id/history returns audit logs including the reschedule', async () => {
@@ -132,6 +147,36 @@ describe('Appointment Routes (Integration)', () => {
       .send({ status: 'CONFIRMED' });
     
     expect(res.status).toBe(200);
+    expect(res.body).toEqual(expect.objectContaining({
+      id: createdAppointmentId,
+      status: AppointmentStatus.CONFIRMED,
+      updatedAt: expect.any(String)
+    }));
+  });
+
+  it('PUT /:id/cancel updates the status to CANCELLED', async () => {
+    // We create a new appointment just for the cancel test, as the other one is CONFIRMED and might be used in other tests
+    const createRes = await request(app)
+      .post('/api/t1/appointments')
+      .set('Authorization', `Bearer ${t1OwnerToken}`)
+      .send({
+        clientId: 'c1-t1',
+        assignedUserId: 'u1-staff',
+        scheduledAt: new Date(Date.now() + 86400000).toISOString(), // Tomorrow
+      });
+    const cancelId = createRes.body.id;
+
+    const res = await request(app)
+      .put(`/api/t1/appointments/${cancelId}/cancel`)
+      .set('Authorization', `Bearer ${t1OwnerToken}`)
+      .send({ reason: 'Client requested cancellation' });
+    
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual(expect.objectContaining({
+      id: cancelId,
+      status: AppointmentStatus.CANCELLED,
+      updatedAt: expect.any(String)
+    }));
   });
 
   it('GET /search returns appointments in date range', async () => {
@@ -144,8 +189,9 @@ describe('Appointment Routes (Integration)', () => {
       });
     
     expect(res.status).toBe(200);
-    expect(res.body).toHaveLength(1);
-    expect(res.body[0].id).toBe(createdAppointmentId);
+    expect(res.body).toHaveLength(2);
+    const ids = res.body.map((a: any) => a.id);
+    expect(ids).toContain(createdAppointmentId);
   });
 
   it('GET /upcoming (Staff Role) returns only assigned appointments', async () => {

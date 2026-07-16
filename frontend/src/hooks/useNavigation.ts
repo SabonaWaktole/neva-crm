@@ -24,6 +24,6 @@ export const useNavigation = (role?: Role | null, currentPath?: string) => {
   
   return baseItems.map(item => ({
     ...item,
-    isActive: currentPath?.includes(`/${item.id}`) || (item.id === 'dashboard' && (currentPath?.endsWith('/login') === false && !currentPath?.includes('/clients') && !currentPath?.includes('/settings'))) // Simplified active logic
+    isActive: currentPath?.includes(`/${item.id}`) || (item.id === 'dashboard' && (currentPath?.endsWith('/login') === false && !currentPath?.includes('/clients') && !currentPath?.includes('/settings') && !currentPath?.includes('/appointments')))
   }));
 };

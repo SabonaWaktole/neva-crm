@@ -1,4 +1,5 @@
 import { IAppointmentRepository } from '../../domain/repositories/IAppointmentRepository';
+import { Appointment } from '../../domain/entities/Appointment';
 
 export interface UpdateAppointmentStatusDTO {
   id: string;
@@ -9,7 +10,7 @@ export interface UpdateAppointmentStatusDTO {
 export class UpdateAppointmentStatusUseCase {
   constructor(private readonly appointmentRepository: IAppointmentRepository) {}
 
-  async execute(dto: UpdateAppointmentStatusDTO): Promise<void> {
+  async execute(dto: UpdateAppointmentStatusDTO): Promise<Appointment> {
     const appointment = await this.appointmentRepository.findById(dto.id, dto.tenantId);
     if (!appointment) {
       throw new Error('Appointment not found');
@@ -24,5 +25,6 @@ export class UpdateAppointmentStatusUseCase {
     }
 
     await this.appointmentRepository.update(appointment);
+    return appointment;
   }
 }

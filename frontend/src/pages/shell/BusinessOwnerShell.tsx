@@ -6,6 +6,7 @@ import { Button } from '../../components/ui/Button/Button';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useLogout } from '../../hooks/useLogout';
 import { useNavigation } from '../../hooks/useNavigation';
+import { UpcomingAppointmentsWidget } from '../../components/widgets/UpcomingAppointmentsWidget';
 
 export const BusinessOwnerShell = () => {
   const navigate = useNavigate();
@@ -48,6 +49,7 @@ export const BusinessOwnerShell = () => {
         </p>
         
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 'var(--spacing-md)', width: '100%', maxWidth: '800px', textAlign: 'left' }}>
+          <UpcomingAppointmentsWidget />
           <div style={{ 
             backgroundColor: 'var(--color-surface-container-lowest)', 
             border: '1px solid var(--color-outline-variant)', 

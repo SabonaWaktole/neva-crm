@@ -17,7 +17,7 @@ export class CreateAppointmentUseCase {
     private readonly userRepository: any // IUserRepository in reality
   ) {}
 
-  async execute(dto: CreateAppointmentDTO): Promise<{ id: string; status: string; tenantId: string }> {
+  async execute(dto: CreateAppointmentDTO): Promise<Appointment> {
     const client = await this.clientRepository.findById(dto.tenantId, dto.clientId);
     if (!client) {
       throw new Error('Client not found');
@@ -47,10 +47,6 @@ export class CreateAppointmentUseCase {
 
     await this.appointmentRepository.save(appointment);
 
-    return {
-      id: appointment.id,
-      status: appointment.status,
-      tenantId: appointment.tenantId,
-    };
+    return appointment;
   }
 }

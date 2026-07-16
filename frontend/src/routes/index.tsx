@@ -11,6 +11,7 @@ import { AccountSettingsPage } from '../pages/settings/AccountSettingsPage';
 import { ClientListPage } from '../pages/clients/ClientListPage';
 import { ClientDetailPage } from '../pages/clients/ClientDetailPage';
 import { ClientFormPage } from '../pages/clients/ClientFormPage';
+import { AppointmentsPage } from '../pages/appointments/AppointmentsPage';
 import { ClientSettingsPage } from '../pages/settings/ClientSettingsPage';
 import { ProtectedRoute } from './ProtectedRoute';
 import { RoleGuard } from './RoleGuard';
@@ -113,6 +114,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <ClientFormPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'appointments',
+        element: (
+          <ProtectedRoute>
+            <AppointmentsPage />
           </ProtectedRoute>
         ),
       },

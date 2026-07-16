@@ -4,7 +4,7 @@ import styles from './Badge.module.css';
 
 export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   children: ReactNode;
-  variant?: 'primary' | 'secondary' | 'outline' | 'error';
+  variant?: 'primary' | 'secondary' | 'outline' | 'error' | 'emerald' | 'slate' | 'amber';
 }
 
 export const Badge: React.FC<BadgeProps> = ({

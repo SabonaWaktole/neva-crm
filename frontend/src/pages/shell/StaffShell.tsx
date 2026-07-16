@@ -1,11 +1,10 @@
-import { Clock } from 'lucide-react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { AppLayout } from '../../components/layout/AppLayout/AppLayout';
 import { Sidebar } from '../../components/layout/Sidebar/Sidebar';
-import { Button } from '../../components/ui/Button/Button';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useLogout } from '../../hooks/useLogout';
 import { useNavigation } from '../../hooks/useNavigation';
+import { UpcomingAppointmentsWidget } from '../../components/widgets/UpcomingAppointmentsWidget';
 
 export const StaffShell = () => {
   const navigate = useNavigate();
@@ -21,7 +20,7 @@ export const StaffShell = () => {
     navigate(`/${tenantSlug || ''}/login`);
   };
 
-  const userName = user?.userId ? `User ${user.userId.substring(0, 8)}` : 'Staff Member';
+  const userName = user?.userId ? `Staff ${user.userId.substring(0, 8)}` : 'Staff Member';
 
   return (
     <AppLayout
@@ -59,28 +58,7 @@ export const StaffShell = () => {
           </div>
         </div>
 
-        <h2 style={{ fontFamily: 'var(--font-family-headline-md)', fontSize: 'var(--font-size-headline-md)', fontWeight: 600, margin: '0 0 16px 0', color: 'var(--color-on-surface)' }}>
-          Upcoming Schedule
-        </h2>
-        
-        <div style={{ backgroundColor: 'var(--color-surface-container-lowest)', border: '1px solid var(--color-outline-variant)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
-          <div style={{ padding: 'var(--spacing-md)', borderBottom: '1px solid var(--color-outline-variant)', display: 'flex', alignItems: 'center', gap: '16px' }}>
-             <div style={{ width: '48px', height: '48px', backgroundColor: 'var(--color-secondary-container)', color: 'var(--color-on-secondary-container)', borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-               <span style={{ fontSize: '12px', fontWeight: 600 }}>OCT</span>
-               <span style={{ fontSize: '18px', fontWeight: 700 }}>24</span>
-             </div>
-             <div>
-               <h4 style={{ margin: '0 0 4px 0', color: 'var(--color-on-surface)', fontSize: '16px', fontWeight: 500 }}>Introductory Call - Acme Corp</h4>
-               <p style={{ margin: 0, color: 'var(--color-on-surface-variant)', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                 <Clock size={16} />
-                 10:00 AM - 10:30 AM
-               </p>
-             </div>
-             <div style={{ marginLeft: 'auto' }}>
-               <Button variant="outline">View</Button>
-             </div>
-          </div>
-        </div>
+        <UpcomingAppointmentsWidget />
       </div>
     </AppLayout>
   );

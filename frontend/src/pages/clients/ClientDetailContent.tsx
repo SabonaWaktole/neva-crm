@@ -1,17 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { ChevronRight, Edit3, Mail, MoreVertical, Phone, Settings, Filter, Search, PhoneCall, Video, FileText } from 'lucide-react';
+import { ChevronRight, Edit3, Mail, MoreVertical, Phone, Settings, Filter, Search, PhoneCall, Video, FileText, Calendar, CalendarCheck, CalendarX } from 'lucide-react';
 import { useClientDetail, useClientHistory, useClientSettings } from '../../hooks/useClients';
+import { useClientAppointments } from '../../hooks/useAppointments';
 import { Card } from '../../components/ui/Card/Card';
 import { Badge } from '../../components/ui/Badge/Badge';
 import { Avatar } from '../../components/ui/Avatar/Avatar';
 import { Button } from '../../components/ui/Button/Button';
 import { SlideOver } from '../../components/ui/SlideOver';
-import { TextInput } from '../../components/ui/TextInput/TextInput';
 import { SelectInput } from '../../components/ui/SelectInput/SelectInput';
 import { TextareaInput } from '../../components/ui/TextareaInput/TextareaInput';
 import { TimelineItem } from '../../components/ui/TimelineItem/TimelineItem';
+import { AppointmentDetailPanel } from '../../components/panels/AppointmentDetailPanel/AppointmentDetailPanel';
+import { AppointmentForm } from '../../components/forms/AppointmentForm/AppointmentForm';
 import { useAddInteraction } from '../../hooks/useClients';
+import type { Appointment } from '../../types/appointment';
 import styles from './ClientDetailContent.module.css';
 
 export const ClientDetailContent: React.FC = () => {
@@ -20,8 +23,13 @@ export const ClientDetailContent: React.FC = () => {
   const { history, isLoading: isHistoryLoading, fetchHistory } = useClientHistory(clientId || '');
   const { customFields, outcomeCategories, fetchSettings } = useClientSettings();
   const { addInteraction, isLoading: isAddingInteraction } = useAddInteraction();
+  const { appointments, isLoading: isAppointmentsLoading, updateAppointmentLocally, fetchClientAppointments } = useClientAppointments(clientId || '');
 
+  const [activeTab, setActiveTab] = useState<'timeline' | 'appointments'>('timeline');
   const [isInteractionSlideOverOpen, setIsInteractionSlideOverOpen] = useState(false);
+  const [isAppointmentSlideOverOpen, setIsAppointmentSlideOverOpen] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  
   const [interactionChannel, setInteractionChannel] = useState('NOTE');
   const [interactionContent, setInteractionContent] = useState('');
   const [interactionOutcomeId, setInteractionOutcomeId] = useState('');
@@ -36,6 +44,13 @@ export const ClientDetailContent: React.FC = () => {
     setInteractionContent('');
     setIsInteractionSlideOverOpen(false);
     fetchHistory();
+  };
+
+
+  const handleAppointmentUpdated = (updated: Appointment) => {
+    updateAppointmentLocally(updated);
+    setSelectedAppointment(updated);
+    fetchHistory(); // Refresh timeline when an appointment status changes
   };
 
   useEffect(() => {
@@ -144,18 +159,50 @@ export const ClientDetailContent: React.FC = () => {
 
         {/* Right Column */}
         <div className={styles.rightColumn}>
-          <Card padding="lg" className={styles.timelineCard}>
-            <div className={styles.cardHeader}>
-              <h2 className={styles.cardTitle}>Interactions</h2>
-              <div className={styles.timelineActions}>
-                <Button variant="outline" className={styles.smallIconButton}>
-                  <Filter size={16} />
-                </Button>
-                <Button variant="outline" className={styles.smallIconButton}>
-                  <Search size={16} />
-                </Button>
+          <div className={styles.tabsContainer} style={{ display: 'flex', gap: '16px', marginBottom: '16px', borderBottom: '1px solid var(--color-outline-variant)' }}>
+            <button 
+              onClick={() => setActiveTab('timeline')}
+              style={{ 
+                background: 'none', 
+                border: 'none', 
+                padding: '8px 16px', 
+                cursor: 'pointer',
+                fontWeight: activeTab === 'timeline' ? 600 : 400,
+                borderBottom: activeTab === 'timeline' ? '2px solid var(--color-primary)' : '2px solid transparent',
+                color: activeTab === 'timeline' ? 'var(--color-primary)' : 'var(--color-on-surface-variant)'
+              }}
+            >
+              Timeline
+            </button>
+            <button 
+              onClick={() => setActiveTab('appointments')}
+              style={{ 
+                background: 'none', 
+                border: 'none', 
+                padding: '8px 16px', 
+                cursor: 'pointer',
+                fontWeight: activeTab === 'appointments' ? 600 : 400,
+                borderBottom: activeTab === 'appointments' ? '2px solid var(--color-primary)' : '2px solid transparent',
+                color: activeTab === 'appointments' ? 'var(--color-primary)' : 'var(--color-on-surface-variant)'
+              }}
+            >
+              Appointments
+            </button>
+          </div>
+
+          {activeTab === 'timeline' ? (
+            <Card padding="lg" className={styles.timelineCard}>
+              <div className={styles.cardHeader}>
+                <h2 className={styles.cardTitle}>Interactions</h2>
+                <div className={styles.timelineActions}>
+                  <Button variant="outline" className={styles.smallIconButton}>
+                    <Filter size={16} />
+                  </Button>
+                  <Button variant="outline" className={styles.smallIconButton}>
+                    <Search size={16} />
+                  </Button>
+                </div>
               </div>
-            </div>
 
             <div className={styles.logActivityRow}>
               <Button variant="outline" className={styles.logActivityButton} onClick={() => { setInteractionChannel('CALL'); setIsInteractionSlideOverOpen(true); }}>
@@ -180,26 +227,131 @@ export const ClientDetailContent: React.FC = () => {
                 </div>
               )}
               {!isHistoryLoading && history?.timeline.map((item, index) => {
+                // Page-level mapping: resolve icon, title, and colors based on entry type.
+                // Interaction entries use channel-based icons; appointment entries use calendar icons.
+                // This mapping lives here (not in TimelineItem) per our design agreement.
                 let icon = <FileText size={16} />;
-                if (item.details?.channel === 'CALL') icon = <PhoneCall size={16} />;
-                if (item.details?.channel === 'EMAIL') icon = <Mail size={16} />;
-                if (item.details?.channel === 'MEETING') icon = <Video size={16} />;
+                let iconBg = 'var(--color-surface-container-high)';
+                let iconColor = 'var(--color-on-surface-variant)';
+                let title = item.description;
+                let statusLabel: string | undefined;
+                let statusColor: string | undefined;
+                let statusBgColor: string | undefined;
+
+                if (item.type === 'INTERACTION_ADDED') {
+                  title = `Interaction (${item.details?.channel})`;
+                  if (item.details?.channel === 'CALL') icon = <PhoneCall size={16} />;
+                  if (item.details?.channel === 'EMAIL') icon = <Mail size={16} />;
+                  if (item.details?.channel === 'MEETING') icon = <Video size={16} />;
+                } else if (item.type === 'APPOINTMENT_SCHEDULED') {
+                  icon = <Calendar size={16} />;
+                  iconBg = 'var(--color-primary-container)';
+                  iconColor = 'var(--color-on-primary-container)';
+                  title = item.details?.purposeTitle || 'Appointment Scheduled';
+                  statusLabel = 'Scheduled';
+                  statusBgColor = 'rgba(192, 193, 255, 0.15)';
+                  statusColor = 'var(--color-primary)';
+                } else if (item.type === 'APPOINTMENT_STATUS_CHANGED') {
+                  const status = item.details?.statusLabel || item.details?.status;
+                  if (status === 'Completed') {
+                    icon = <CalendarCheck size={16} />;
+                    iconBg = 'rgba(16, 185, 129, 0.15)';
+                    iconColor = '#10b981';
+                    statusLabel = 'Completed';
+                    statusBgColor = 'rgba(16, 185, 129, 0.15)';
+                    statusColor = '#10b981';
+                  } else if (status === 'Cancelled') {
+                    icon = <CalendarX size={16} />;
+                    iconBg = 'rgba(255, 180, 171, 0.15)';
+                    iconColor = 'var(--color-error)';
+                    statusLabel = 'Cancelled';
+                    statusBgColor = 'rgba(255, 180, 171, 0.15)';
+                    statusColor = 'var(--color-error)';
+                  } else if (status === 'Confirmed') {
+                    // Confirmed is the only remaining status in the approved enum
+                    // (SCHEDULED, CONFIRMED, COMPLETED, CANCELLED). Using emerald to
+                    // match the design's Confirmed color token from the Calendar Queue.
+                    icon = <CalendarCheck size={16} />;
+                    iconBg = 'rgba(16, 185, 129, 0.15)';
+                    iconColor = '#10b981';
+                    statusLabel = 'Confirmed';
+                    statusBgColor = 'rgba(16, 185, 129, 0.15)';
+                    statusColor = '#10b981';
+                  } else {
+                    // Defensive fallback — should not be reached with the current enum,
+                    // but kept to avoid a silent rendering gap if statuses expand later.
+                    icon = <Calendar size={16} />;
+                    iconBg = 'var(--color-surface-container-high)';
+                    iconColor = 'var(--color-on-surface-variant)';
+                    statusLabel = status;
+                    statusBgColor = 'var(--color-surface-container-high)';
+                    statusColor = 'var(--color-on-surface-variant)';
+                  }
+                  title = item.details?.purposeTitle || `Appointment ${status}`;
+                }
 
                 return (
                   <TimelineItem
                     key={item.id}
-                    title={item.type === 'INTERACTION_ADDED' ? `Interaction (${item.details?.channel})` : item.description}
+                    title={title}
                     subtitle={`${new Date(item.timestamp).toLocaleString()} · by ${item.actor}`}
                     content={item.details?.content}
                     icon={icon}
-                    iconBgColor="var(--color-surface-container-high)"
-                    iconTextColor="var(--color-on-surface-variant)"
+                    iconBgColor={iconBg}
+                    iconTextColor={iconColor}
+                    statusLabel={statusLabel}
+                    statusColor={statusColor}
+                    statusBgColor={statusBgColor}
                     isLast={index === history.timeline.length - 1}
                   />
                 );
               })}
             </div>
           </Card>
+          ) : (
+            <Card padding="lg">
+              <div className={styles.cardHeader}>
+                <h2 className={styles.cardTitle}>Appointments</h2>
+                <Button variant="primary" icon={<Calendar size={16} />} onClick={() => setIsAppointmentSlideOverOpen(true)}>
+                  New Appointment
+                </Button>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
+                {isAppointmentsLoading && <div>Loading appointments...</div>}
+                {!isAppointmentsLoading && appointments.length === 0 && (
+                  <div style={{ padding: '20px', textAlign: 'center', color: 'var(--color-on-surface-variant)' }}>
+                    No appointments scheduled.
+                  </div>
+                )}
+                {!isAppointmentsLoading && appointments.map(app => (
+                  <div 
+                    key={app.id} 
+                    onClick={() => setSelectedAppointment(app)}
+                    style={{ 
+                      padding: '16px', 
+                      borderRadius: '8px', 
+                      border: '1px solid var(--color-outline-variant)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontWeight: 600, color: 'var(--color-on-surface)' }}>{new Date(app.scheduledAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</div>
+                      <div style={{ fontSize: '14px', color: 'var(--color-on-surface-variant)' }}>{app.notes || 'No notes'}</div>
+                    </div>
+                    <Badge variant={
+                      app.status === 'SCHEDULED' ? 'primary' :
+                      app.status === 'CONFIRMED' ? 'emerald' :
+                      app.status === 'COMPLETED' ? 'slate' :
+                      app.status === 'CANCELLED' ? 'error' : 'amber'
+                    }>{app.status}</Badge>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
         </div>
       </div>
 
@@ -240,6 +392,31 @@ export const ClientDetailContent: React.FC = () => {
           )}
         </div>
       </SlideOver>
+
+      <SlideOver
+        isOpen={isAppointmentSlideOverOpen}
+        onClose={() => setIsAppointmentSlideOverOpen(false)}
+        title="Schedule Appointment"
+      >
+        <div style={{ padding: '16px' }}>
+          <AppointmentForm 
+            lockedClientId={clientId}
+            onSubmit={() => {
+              setIsAppointmentSlideOverOpen(false);
+              fetchClientAppointments();
+              fetchHistory();
+            }}
+            onCancel={() => setIsAppointmentSlideOverOpen(false)}
+          />
+        </div>
+      </SlideOver>
+
+      <AppointmentDetailPanel
+        isOpen={!!selectedAppointment}
+        onClose={() => setSelectedAppointment(null)}
+        appointment={selectedAppointment}
+        onAppointmentUpdated={handleAppointmentUpdated}
+      />
     </div>
   );
 };
