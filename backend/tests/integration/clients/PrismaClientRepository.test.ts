@@ -124,4 +124,22 @@ describe('PrismaClientRepository Integration', () => {
     expect(resultTenant2.items.length).toBe(1);
     expect(resultTenant2.total).toBe(1);
   });
+
+  it('proves countByTenant correctly counts only the requested tenant', async () => {
+    const count1 = await repo.countByTenant(tenant1Id);
+    expect(count1).toBe(15);
+
+    const count2 = await repo.countByTenant(tenant2Id);
+    expect(count2).toBe(1);
+  });
+
+  it('proves findRecentByTenant strictly isolates to the requested tenant and respects limit', async () => {
+    const recentT1 = await repo.findRecentByTenant(tenant1Id, 5);
+    expect(recentT1.length).toBe(5);
+    recentT1.forEach(c => expect(c.tenantId).toBe(tenant1Id));
+
+    const recentT2 = await repo.findRecentByTenant(tenant2Id, 5);
+    expect(recentT2.length).toBe(1);
+    expect(recentT2[0].tenantId).toBe(tenant2Id);
+  });
 });

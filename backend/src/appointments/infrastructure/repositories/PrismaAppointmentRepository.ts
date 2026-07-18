@@ -96,6 +96,23 @@ export class PrismaAppointmentRepository implements IAppointmentRepository {
     return records.map(r => this.mapToDomain(r));
   }
 
+  async findRecentByTenant(tenantId: string, limit: number, assignedUserId?: string): Promise<Appointment[]> {
+    const where: Prisma.AppointmentWhereInput = { tenantId };
+    
+    if (assignedUserId) {
+      where.assignedUserId = assignedUserId;
+    }
+
+    const records = await this.prisma.appointment.findMany({
+      where,
+      take: limit,
+      include: { auditLogs: { orderBy: { createdAt: 'asc' } } },
+      orderBy: { updatedAt: 'desc' }
+    });
+
+    return records.map(r => this.mapToDomain(r));
+  }
+
   async save(appointment: Appointment): Promise<void> {
     await this.prisma.$transaction(async (tx) => {
       await tx.appointment.create({

@@ -91,6 +91,27 @@ export class PrismaClientRepository implements IClientRepository {
     }
   }
 
+  async countByTenant(tenantId: string, createdBefore?: Date): Promise<number> {
+    const where: Prisma.ClientWhereInput = { tenantId };
+    if (createdBefore) {
+      where.createdAt = { lt: createdBefore };
+    }
+    return this.prisma.client.count({ where });
+  }
+
+  async findRecentByTenant(tenantId: string, limit: number, assignedUserId?: string): Promise<Client[]> {
+    const where: Prisma.ClientWhereInput = { tenantId };
+    if (assignedUserId) {
+      where.assignedUserId = assignedUserId;
+    }
+    const records = await this.prisma.client.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
+    return records.map(r => this.mapToDomain(r));
+  }
+
   async save(tenantId: string, client: Client): Promise<void> {
     await this.prisma.client.create({
       data: {

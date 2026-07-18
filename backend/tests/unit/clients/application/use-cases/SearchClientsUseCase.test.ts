@@ -13,7 +13,9 @@ describe('SearchClientsUseCase', () => {
       search: jest.fn(),
       save: jest.fn(),
       update: jest.fn(),
-    };
+      countByTenant: jest.fn(),
+      findRecentByTenant: jest.fn(),
+    } as any;
     useCase = new SearchClientsUseCase(clientRepo);
   });
 

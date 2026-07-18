@@ -82,7 +82,7 @@ const CalendarDesktopView = ({
         <section className={styles.calendarCanvas}>
           <div className={styles.calendarToolbar}>
             <div className={styles.monthSelector}>
-              <h2>October 2024</h2>
+              <h2>October 2026</h2>
               <div className={styles.monthControls}>
                 <button><ChevronLeft size={16} /></button>
                 <span>Today</span>

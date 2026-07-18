@@ -92,5 +92,35 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const appointmentRoutes = createAppointmentRouter(prisma, tokenService, tenantRepository);
   app.use('/api/:tenantSlug/appointments', appointmentRoutes);
 
+  // Tenant Routes
+  // NOTE: /api/tenants does NOT have a :tenantSlug prefix because GetTenantsUseCase is a platform-level
+  // operation used by SUPER_ADMIN to list all tenants across the system. It is not scoped to a single tenant.
+  const { GetTenantsUseCase } = require('../tenant/application/use-cases/GetTenantsUseCase');
+  const getTenantsUseCase = new GetTenantsUseCase(tenantRepository);
+  const { createTenantRouter } = require('../tenant/interfaces/http/routes/tenantRoutes');
+  const tenantRoutes = createTenantRouter(getTenantsUseCase, tokenService);
+  app.use('/api/tenants', tenantRoutes);
+
+  // Dashboard Routes
+  // NOTE: /api/:tenantSlug/dashboard DOES have a :tenantSlug prefix because dashboard metrics and feeds
+  // are inherently tenant-scoped. The middleware ensures data is only returned for the requested tenant.
+  const { GetTenantClientMetricsUseCase } = require('../dashboard/application/use-cases/GetTenantClientMetricsUseCase');
+  const { GetTenantActivityFeedUseCase } = require('../dashboard/application/use-cases/GetTenantActivityFeedUseCase');
+  const { PrismaInteractionRepository } = require('../clients/infrastructure/repositories/PrismaInteractionRepository');
+  const { PrismaAppointmentRepository } = require('../appointments/infrastructure/repositories/PrismaAppointmentRepository');
+  const { PrismaClientRepository } = require('../clients/infrastructure/repositories/PrismaClientRepository');
+  
+  // Create the concrete repositories needed for Dashboard
+  const prismaClientRepository = new PrismaClientRepository(prisma);
+  const interactionRepository = new PrismaInteractionRepository(prisma);
+  const appointmentRepository = new PrismaAppointmentRepository(prisma);
+  
+  const getTenantClientMetricsUseCase = new GetTenantClientMetricsUseCase(prismaClientRepository);
+  const getTenantActivityFeedUseCase = new GetTenantActivityFeedUseCase(prismaClientRepository, interactionRepository, appointmentRepository);
+  
+  const { createDashboardRouter } = require('../dashboard/interfaces/http/routes/dashboardRoutes');
+  const dashboardRoutes = createDashboardRouter(getTenantClientMetricsUseCase, getTenantActivityFeedUseCase, tokenService, tenantRepository);
+  app.use('/api/:tenantSlug/dashboard', dashboardRoutes);
+
   return app;
 };

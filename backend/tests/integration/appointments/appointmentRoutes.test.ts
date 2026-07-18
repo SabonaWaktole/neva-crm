@@ -42,6 +42,7 @@ const stubTenantRepo: ITenantRepository = {
     return null;
   },
   create: async (t: any) => t,
+  findAll: async () => ({ items: [], total: 0 }),
 };
 
 const app = express();

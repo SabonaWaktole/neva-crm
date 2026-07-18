@@ -16,7 +16,9 @@ describe('CreateClientUseCase', () => {
       search: jest.fn(),
       save: jest.fn(),
       update: jest.fn(),
-    };
+      countByTenant: jest.fn(),
+      findRecentByTenant: jest.fn(),
+    } as any;
 
     customFieldRepo = {
       findByTenantId: jest.fn(),

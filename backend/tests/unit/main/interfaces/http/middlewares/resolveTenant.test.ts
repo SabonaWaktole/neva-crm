@@ -14,7 +14,8 @@ describe('resolveTenant middleware', () => {
       findById: jest.fn(),
       findBySlug: jest.fn(),
       create: jest.fn(),
-    };
+      findAll: jest.fn(),
+    } as any;
     req = { params: {}, user: undefined };
     res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
     next = jest.fn();

@@ -15,13 +15,18 @@ describe('GetClientHistoryUseCase', () => {
     clientRepo = {
       findById: jest.fn(),
       search: jest.fn(),
+      countByTenant: jest.fn(),
+      findRecentByTenant: jest.fn(),
       save: jest.fn(),
       update: jest.fn(),
-    };
+    } as any;
+
     interactionRepo = {
+      findById: jest.fn(),
       findByClientId: jest.fn(),
+      findRecentByTenant: jest.fn(),
       save: jest.fn(),
-    };
+    } as any;
     useCase = new GetClientHistoryUseCase(clientRepo, interactionRepo);
   });
 

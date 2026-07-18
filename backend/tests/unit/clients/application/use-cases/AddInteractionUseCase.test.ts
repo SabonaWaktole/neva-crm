@@ -14,9 +14,9 @@ describe('AddInteractionUseCase', () => {
   let outcomeRepo: jest.Mocked<IOutcomeCategoryRepository>;
 
   beforeEach(() => {
-    clientRepo = { findById: jest.fn(), search: jest.fn(), save: jest.fn(), update: jest.fn() };
-    interactionRepo = { findByClientId: jest.fn(), save: jest.fn() };
-    outcomeRepo = { findByTenantId: jest.fn(), findById: jest.fn(), save: jest.fn() };
+    clientRepo = { findById: jest.fn(), search: jest.fn(), save: jest.fn(), update: jest.fn(), countByTenant: jest.fn(), findRecentByTenant: jest.fn() } as any;
+    interactionRepo = { findByClientId: jest.fn(), save: jest.fn(), findById: jest.fn(), findRecentByTenant: jest.fn() } as any;
+    outcomeRepo = { findByTenantId: jest.fn(), findById: jest.fn(), save: jest.fn() } as any;
     useCase = new AddInteractionUseCase(clientRepo, interactionRepo, outcomeRepo);
   });
 
