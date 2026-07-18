@@ -21,6 +21,7 @@ import { Button } from '../../components/ui/Button/Button';
 import { KPICard } from '../../components/ui/KPICard';
 import { UpcomingAppointmentsWidget } from '../../components/widgets/UpcomingAppointmentsWidget';
 import { TimelineItem } from '../../components/ui/TimelineItem';
+import { getActivityConfig } from '../../utils/activityMapper';
 
 // Mock data matching TimelineMerger schema
 const mockActivities = [
@@ -59,27 +60,6 @@ const mockActivities = [
     details: { notes: 'Onboarding call', status: 'COMPLETED' }
   }
 ];
-
-const getActivityConfig = (type: string, details?: any) => {
-  switch (type) {
-    case 'CLIENT_CREATED':
-      return { icon: <UserPlus size={20} />, color: 'var(--color-primary)', bg: 'var(--color-primary-fixed)' };
-    case 'APPOINTMENT_SCHEDULED':
-      return { icon: <CalendarPlus size={20} />, color: 'var(--color-secondary)', bg: 'var(--color-secondary-fixed)' };
-    case 'APPOINTMENT_CONFIRMED':
-    case 'APPOINTMENT_COMPLETED':
-      return { icon: <CalendarCheck size={20} />, color: 'var(--color-primary)', bg: 'var(--color-primary-fixed)' };
-    case 'APPOINTMENT_CANCELLED':
-      return { icon: <CalendarX size={20} />, color: 'var(--color-error)', bg: 'var(--color-error-container)' };
-    case 'INTERACTION_ADDED':
-      if (details?.channel === 'CALL') return { icon: <PhoneCall size={20} />, color: 'var(--color-outline)', bg: 'var(--color-surface-variant)' };
-      if (details?.channel === 'EMAIL') return { icon: <Mail size={20} />, color: 'var(--color-outline)', bg: 'var(--color-surface-variant)' };
-      if (details?.channel === 'MEETING') return { icon: <Video size={20} />, color: 'var(--color-outline)', bg: 'var(--color-surface-variant)' };
-      return { icon: <FileText size={20} />, color: 'var(--color-outline)', bg: 'var(--color-surface-variant)' };
-    default:
-      return { icon: <History size={20} />, color: 'var(--color-outline)', bg: 'var(--color-surface-variant)' };
-  }
-};
 
 const formatTimeAgo = (isoString: string) => {
   const date = new Date(isoString);

@@ -1,10 +1,11 @@
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { AppLayout } from '../../components/layout/AppLayout/AppLayout';
 import { Sidebar } from '../../components/layout/Sidebar/Sidebar';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useLogout } from '../../hooks/useLogout';
 import { useNavigation } from '../../hooks/useNavigation';
-import { UpcomingAppointmentsWidget } from '../../components/widgets/UpcomingAppointmentsWidget';
+import { StaffDashboard } from '../dashboard/StaffDashboard';
+import { ClientsShell } from './ClientsShell';
 
 export const StaffShell = () => {
   const navigate = useNavigate();
@@ -37,29 +38,11 @@ export const StaffShell = () => {
         />
       }
     >
-      <div style={{ padding: 'var(--spacing-lg)' }}>
-        <h1 style={{ fontFamily: 'var(--font-family-headline-lg)', fontSize: 'var(--font-size-headline-lg)', fontWeight: 600, margin: '0 0 24px 0', color: 'var(--color-on-surface)' }}>
-          Welcome back!
-        </h1>
-        
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--spacing-md)', marginBottom: 'var(--spacing-xl)' }}>
-          {/* Quick Stat Cards */}
-          <div style={{ backgroundColor: 'var(--color-surface-container-lowest)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-outline-variant)' }}>
-             <p style={{ color: 'var(--color-on-surface-variant)', margin: '0 0 8px 0', fontSize: 'var(--font-size-label-md)' }}>Pending Quotes</p>
-             <h2 style={{ color: 'var(--color-primary)', margin: 0, fontSize: 'var(--font-size-display)' }}>12</h2>
-          </div>
-          <div style={{ backgroundColor: 'var(--color-surface-container-lowest)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-outline-variant)' }}>
-             <p style={{ color: 'var(--color-on-surface-variant)', margin: '0 0 8px 0', fontSize: 'var(--font-size-label-md)' }}>Today's Meetings</p>
-             <h2 style={{ color: 'var(--color-primary)', margin: 0, fontSize: 'var(--font-size-display)' }}>3</h2>
-          </div>
-          <div style={{ backgroundColor: 'var(--color-surface-container-lowest)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-outline-variant)' }}>
-             <p style={{ color: 'var(--color-on-surface-variant)', margin: '0 0 8px 0', fontSize: 'var(--font-size-label-md)' }}>New Clients (This Week)</p>
-             <h2 style={{ color: 'var(--color-primary)', margin: 0, fontSize: 'var(--font-size-display)' }}>5</h2>
-          </div>
-        </div>
-
-        <UpcomingAppointmentsWidget />
-      </div>
+      <Routes>
+        <Route path="/" element={<Navigate to="dashboard" replace />} />
+        <Route path="/dashboard" element={<StaffDashboard />} />
+        <Route path="/clients/*" element={<ClientsShell />} />
+      </Routes>
     </AppLayout>
   );
 };

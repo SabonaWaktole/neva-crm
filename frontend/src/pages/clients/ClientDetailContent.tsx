@@ -11,6 +11,7 @@ import { SlideOver } from '../../components/ui/SlideOver';
 import { SelectInput } from '../../components/ui/SelectInput/SelectInput';
 import { TextareaInput } from '../../components/ui/TextareaInput/TextareaInput';
 import { TimelineItem } from '../../components/ui/TimelineItem/TimelineItem';
+import { getActivityConfig } from '../../utils/activityMapper';
 import { AppointmentDetailPanel } from '../../components/panels/AppointmentDetailPanel/AppointmentDetailPanel';
 import { AppointmentForm } from '../../components/forms/AppointmentForm/AppointmentForm';
 import { useAddInteraction } from '../../hooks/useClients';
@@ -227,67 +228,13 @@ export const ClientDetailContent: React.FC = () => {
                 </div>
               )}
               {!isHistoryLoading && history?.timeline.map((item, index) => {
-                // Page-level mapping: resolve icon, title, and colors based on entry type.
-                // Interaction entries use channel-based icons; appointment entries use calendar icons.
-                // This mapping lives here (not in TimelineItem) per our design agreement.
-                let icon = <FileText size={16} />;
-                let iconBg = 'var(--color-surface-container-high)';
-                let iconColor = 'var(--color-on-surface-variant)';
+                const config = getActivityConfig(item.type, item.details);
+                
                 let title = item.description;
-                let statusLabel: string | undefined;
-                let statusColor: string | undefined;
-                let statusBgColor: string | undefined;
-
                 if (item.type === 'INTERACTION_ADDED') {
                   title = `Interaction (${item.details?.channel})`;
-                  if (item.details?.channel === 'CALL') icon = <PhoneCall size={16} />;
-                  if (item.details?.channel === 'EMAIL') icon = <Mail size={16} />;
-                  if (item.details?.channel === 'MEETING') icon = <Video size={16} />;
-                } else if (item.type === 'APPOINTMENT_SCHEDULED') {
-                  icon = <Calendar size={16} />;
-                  iconBg = 'var(--color-primary-container)';
-                  iconColor = 'var(--color-on-primary-container)';
-                  title = item.details?.purposeTitle || 'Appointment Scheduled';
-                  statusLabel = 'Scheduled';
-                  statusBgColor = 'rgba(192, 193, 255, 0.15)';
-                  statusColor = 'var(--color-primary)';
-                } else if (item.type === 'APPOINTMENT_STATUS_CHANGED') {
-                  const status = item.details?.statusLabel || item.details?.status;
-                  if (status === 'Completed') {
-                    icon = <CalendarCheck size={16} />;
-                    iconBg = 'rgba(16, 185, 129, 0.15)';
-                    iconColor = '#10b981';
-                    statusLabel = 'Completed';
-                    statusBgColor = 'rgba(16, 185, 129, 0.15)';
-                    statusColor = '#10b981';
-                  } else if (status === 'Cancelled') {
-                    icon = <CalendarX size={16} />;
-                    iconBg = 'rgba(255, 180, 171, 0.15)';
-                    iconColor = 'var(--color-error)';
-                    statusLabel = 'Cancelled';
-                    statusBgColor = 'rgba(255, 180, 171, 0.15)';
-                    statusColor = 'var(--color-error)';
-                  } else if (status === 'Confirmed') {
-                    // Confirmed is the only remaining status in the approved enum
-                    // (SCHEDULED, CONFIRMED, COMPLETED, CANCELLED). Using emerald to
-                    // match the design's Confirmed color token from the Calendar Queue.
-                    icon = <CalendarCheck size={16} />;
-                    iconBg = 'rgba(16, 185, 129, 0.15)';
-                    iconColor = '#10b981';
-                    statusLabel = 'Confirmed';
-                    statusBgColor = 'rgba(16, 185, 129, 0.15)';
-                    statusColor = '#10b981';
-                  } else {
-                    // Defensive fallback — should not be reached with the current enum,
-                    // but kept to avoid a silent rendering gap if statuses expand later.
-                    icon = <Calendar size={16} />;
-                    iconBg = 'var(--color-surface-container-high)';
-                    iconColor = 'var(--color-on-surface-variant)';
-                    statusLabel = status;
-                    statusBgColor = 'var(--color-surface-container-high)';
-                    statusColor = 'var(--color-on-surface-variant)';
-                  }
-                  title = item.details?.purposeTitle || `Appointment ${status}`;
+                } else if (item.type.startsWith('APPOINTMENT_')) {
+                  title = item.details?.purposeTitle || `Appointment ${config.statusLabel || ''}`;
                 }
 
                 return (
@@ -296,12 +243,12 @@ export const ClientDetailContent: React.FC = () => {
                     title={title}
                     subtitle={`${new Date(item.timestamp).toLocaleString()} · by ${item.actor}`}
                     content={item.details?.content}
-                    icon={icon}
-                    iconBgColor={iconBg}
-                    iconTextColor={iconColor}
-                    statusLabel={statusLabel}
-                    statusColor={statusColor}
-                    statusBgColor={statusBgColor}
+                    icon={config.icon}
+                    iconBgColor={config.bg}
+                    iconTextColor={config.color}
+                    statusLabel={config.statusLabel}
+                    statusColor={config.statusColor}
+                    statusBgColor={config.statusBgColor}
                     isLast={index === history.timeline.length - 1}
                   />
                 );
