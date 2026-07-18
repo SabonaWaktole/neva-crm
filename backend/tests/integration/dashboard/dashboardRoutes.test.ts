@@ -43,15 +43,25 @@ describe('Dashboard Routes (Integration)', () => {
     t2BusinessOwnerToken = tokenService.sign({ userId: t2BoId, role: 'BUSINESS_OWNER', tenantId: tenant2Id, tenantSlug: 't-dash-2' });
 
     // Seed some basic data so metrics aren't zero
-    await prisma.client.create({
-      data: {
-        id: randomUUID(),
-        tenantId: tenant1Id,
-        name: 'Dash Client',
-        status: ClientStatus.PROSPECT,
-        lastUpdatedByUserId: t1BoId,
-        customFieldValues: {},
-      }
+    await prisma.client.createMany({
+      data: [
+        {
+          id: randomUUID(),
+          tenantId: tenant1Id,
+          name: 'Dash Client',
+          status: ClientStatus.PROSPECT,
+          lastUpdatedByUserId: t1BoId,
+          customFieldValues: {},
+        },
+        {
+          id: randomUUID(),
+          tenantId: tenant2Id,
+          name: 'Tenant 2 Client Leak Test',
+          status: ClientStatus.PROSPECT,
+          lastUpdatedByUserId: t2BoId,
+          customFieldValues: {},
+        }
+      ]
     });
   });
 
@@ -71,7 +81,7 @@ describe('Dashboard Routes (Integration)', () => {
     it('returns 200 and metrics for BUSINESS_OWNER', async () => {
       const response = await request(app)
         .get(`/api/t-dash-1/dashboard/metrics`)
-        .set('Cookie', [`token=${t1BusinessOwnerToken}`]);
+        .set('Cookie', [`jwt=${t1BusinessOwnerToken}`]);
       
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('totalClients');
@@ -81,7 +91,7 @@ describe('Dashboard Routes (Integration)', () => {
     it('returns 200 and metrics for STAFF', async () => {
       const response = await request(app)
         .get(`/api/t-dash-1/dashboard/metrics`)
-        .set('Cookie', [`token=${t1StaffToken}`]);
+        .set('Cookie', [`jwt=${t1StaffToken}`]);
       
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('totalClients');
@@ -91,30 +101,33 @@ describe('Dashboard Routes (Integration)', () => {
     it('returns 403 when Tenant 2 tries to access Tenant 1 metrics', async () => {
       const response = await request(app)
         .get(`/api/t-dash-1/dashboard/metrics`)
-        .set('Cookie', [`token=${t2BusinessOwnerToken}`]);
+        .set('Cookie', [`jwt=${t2BusinessOwnerToken}`]);
       
       expect(response.status).toBe(403);
     });
   });
 
   describe('GET /api/:tenantSlug/dashboard/feed', () => {
-    it('returns 200 and timeline for BUSINESS_OWNER', async () => {
+    it('returns 200 and timeline for BUSINESS_OWNER without leaking other tenants data', async () => {
       const response = await request(app)
         .get(`/api/t-dash-1/dashboard/feed?limit=5`)
-        .set('Cookie', [`token=${t1BusinessOwnerToken}`]);
+        .set('Cookie', [`jwt=${t1BusinessOwnerToken}`]);
       
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('timeline');
       expect(Array.isArray(response.body.timeline)).toBe(true);
-      // We inserted 1 client, so we should have 1 item
+      // We inserted 1 client for T1 and 1 client for T2, so we should have exactly 1 item
       expect(response.body.timeline.length).toBe(1);
       expect(response.body.timeline[0].type).toBe('CLIENT_CREATED');
+      // Assert that the returned data is strictly Tenant 1's data
+      const jsonStr = JSON.stringify(response.body.timeline);
+      expect(jsonStr).not.toContain('Tenant 2 Client Leak Test');
     });
 
     it('returns 403 when Tenant 2 tries to access Tenant 1 feed', async () => {
       const response = await request(app)
         .get(`/api/t-dash-1/dashboard/feed`)
-        .set('Cookie', [`token=${t2BusinessOwnerToken}`]);
+        .set('Cookie', [`jwt=${t2BusinessOwnerToken}`]);
       
       expect(response.status).toBe(403);
     });

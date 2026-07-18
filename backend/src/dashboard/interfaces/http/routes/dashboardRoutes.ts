@@ -26,7 +26,7 @@ export function createDashboardRouter(
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const tenantId = (req as any).tenant.id;
-        const result = await metricsUseCase.execute({ tenantId });
+        const result = await metricsUseCase.execute(tenantId);
         res.json(result);
       } catch (error) {
         next(error);

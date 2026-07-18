@@ -55,21 +55,21 @@ describe('Tenant Routes (Integration)', () => {
   it('GET /api/tenants should return 403 if BUSINESS_OWNER', async () => {
     const response = await request(app)
       .get('/api/tenants')
-      .set('Cookie', [`token=${businessOwnerToken}`]);
+      .set('Cookie', [`jwt=${businessOwnerToken}`]);
     expect(response.status).toBe(403);
   });
 
   it('GET /api/tenants should return 403 if STAFF', async () => {
     const response = await request(app)
       .get('/api/tenants')
-      .set('Cookie', [`token=${staffToken}`]);
+      .set('Cookie', [`jwt=${staffToken}`]);
     expect(response.status).toBe(403);
   });
 
   it('GET /api/tenants should return 200 with tenants if SUPER_ADMIN', async () => {
     const response = await request(app)
       .get('/api/tenants')
-      .set('Cookie', [`token=${superAdminToken}`]);
+      .set('Cookie', [`jwt=${superAdminToken}`]);
     
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty('items');
