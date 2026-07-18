@@ -18,115 +18,43 @@ import {
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button/Button';
 import { KPICard } from '../../components/ui/KPICard';
-import { StaffScheduleTable } from '../../components/widgets/StaffScheduleTable';
 import { TimelineItem } from '../../components/ui/TimelineItem';
+import { StaffScheduleTable } from '../../components/widgets/StaffScheduleTable';
 import { getActivityConfig } from '../../utils/activityMapper';
-
-// Mock data matching GetTenantActivityFeedUseCase / TimelineMerger schema
-const mockActivities = [
-  {
-    id: '1',
-    timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-    type: 'INTERACTION_ADDED',
-    description: 'Interaction (CALL)',
-    actor: 'Alex Carter',
-    details: { channel: 'CALL', content: 'Spoke with Sarah Jenkins re enterprise proposal' }
-  },
-  {
-    id: '2',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-    type: 'INTERACTION_ADDED',
-    description: 'Interaction (NOTE)',
-    actor: 'Alex Carter',
-    details: { channel: 'NOTE', content: 'Added note to Global Logistics Deal' }
-  },
-  {
-    id: '3',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(),
-    type: 'INTERACTION_ADDED',
-    description: 'Interaction (EMAIL)',
-    actor: 'Alex Carter',
-    details: { channel: 'EMAIL', content: 'Sent welcome package to David Miller' }
-  },
-  {
-    id: '4',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-    type: 'APPOINTMENT_SCHEDULED',
-    description: 'Appointment (SCHEDULED)',
-    actor: 'Alex Carter',
-    statusLabel: 'SCHEDULED',
-    details: { notes: 'Demo with Acme Corp for tomorrow 11:30 AM', status: 'SCHEDULED' }
-  }
-];
-
-const mockAppointments = [
-  {
-    id: 'app-1',
-    clientId: 'Jordan Smith',
-    notes: 'Contract Review',
-    type: 'Video Call',
-    status: 'COMPLETED' as const,
-    scheduledAt: new Date(new Date().setHours(9, 0, 0, 0)).toISOString(),
-    assignedUserId: 'Alex Carter',
-    tenantId: 'tenant-1',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 'app-2',
-    clientId: 'Acme Corp',
-    notes: 'Product Walkthrough',
-    type: 'On-Site',
-    status: 'CONFIRMED' as const,
-    scheduledAt: new Date(new Date().setHours(11, 30, 0, 0)).toISOString(),
-    assignedUserId: 'Alex Carter',
-    tenantId: 'tenant-1',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 'app-3',
-    clientId: 'Elena Rodriguez',
-    notes: 'Quarterly Update',
-    type: 'Video Call',
-    status: 'SCHEDULED' as const,
-    scheduledAt: new Date(new Date().setHours(14, 0, 0, 0)).toISOString(),
-    assignedUserId: 'Alex Carter',
-    tenantId: 'tenant-1',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 'app-4',
-    clientId: 'Markus Vane',
-    notes: 'Onboarding Session',
-    type: 'Phone',
-    status: 'SCHEDULED' as const,
-    scheduledAt: new Date(new Date().setHours(16, 30, 0, 0)).toISOString(),
-    assignedUserId: 'Alex Carter',
-    tenantId: 'tenant-1',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }
-];
-
-const formatTimeAgo = (isoString: string) => {
-  const date = new Date(isoString);
-  const diffInMinutes = Math.floor((Date.now() - date.getTime()) / 60000);
-  
-  if (diffInMinutes < 60) return `${diffInMinutes} mins ago`;
-  if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} hours ago`;
-  return 'Yesterday';
-};
+import { useDashboardMetrics, useActivityFeed } from '../../hooks/useDashboard';
+import { useAppointmentsByDateRange } from '../../hooks/useAppointments';
 
 export const StaffDashboard = () => {
+  const { metrics, isLoading: isLoadingMetrics } = useDashboardMetrics();
+  const { activities, isLoading: isLoadingFeed } = useActivityFeed(5);
+  
+  // Today's boundaries for appointments
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date();
+  endOfDay.setHours(23, 59, 59, 999);
+  
+  const { appointments, isLoading: isLoadingAppointments } = useAppointmentsByDateRange(
+    startOfDay.toISOString(),
+    endOfDay.toISOString()
+  );
+
+  const calculateGrowth = (current: number, past: number) => {
+    if (past === 0) return current > 0 ? '+100%' : '0%';
+    const pct = ((current - past) / past) * 100;
+    return pct > 0 ? `+${pct.toFixed(1)}%` : `${pct.toFixed(1)}%`;
+  };
+
+  const growthPct = metrics ? calculateGrowth(metrics.totalClients, metrics.totalClientsLastWeek) : '0%';
+  const isGrowthUp = metrics && metrics.totalClients >= metrics.totalClientsLastWeek;
+
   return (
     <div className={styles.dashboardContainer}>
       
       {/* Mobile-Only Header */}
       <div className={styles.mobileHeader}>
         <h1 className={styles.titleMobile}>Hello, Alex</h1>
-        <p className={styles.subtitleMobile}>You have 4 appointments scheduled for today.</p>
+        <p className={styles.subtitleMobile}>You have {appointments?.length || 0} appointments scheduled for today.</p>
       </div>
 
       {/* Mobile-Only Quick Actions */}
@@ -161,12 +89,12 @@ export const StaffDashboard = () => {
       <section className={styles.kpiGridDesktop}>
         <div className={styles.kpiItem}>
           <KPICard 
-            title="MY APPOINTMENTS TODAY"
-            value="8"
-            icon={<CalendarCheck size={24} />}
-            trendValue="+2"
-            trendLabel="from yesterday"
-            trendDirection="up"
+            title="NEW CLIENTS"
+            value={isLoadingMetrics ? '...' : (metrics?.totalClients || 0)}
+            icon={<Users size={24} />}
+            trendValue={isLoadingMetrics ? '...' : growthPct}
+            trendLabel="vs last week"
+            trendDirection={isGrowthUp ? 'up' : 'down'}
           />
         </div>
         <div className={styles.kpiItem}>
@@ -197,7 +125,20 @@ export const StaffDashboard = () => {
         {/* Left Column: Schedule Table & Actions */}
         <div className={styles.leftColumn}>
           
-          <StaffScheduleTable appointments={mockAppointments} />
+          <div className={styles.scheduleCard}>
+            <div className={styles.scheduleHeader}>
+              <div className={styles.scheduleTitleGroup}>
+                <CalendarCheck size={20} color="var(--color-primary)" />
+                <h2>My Schedule</h2>
+              </div>
+              <Button variant="ghost" size="small">View Calendar</Button>
+            </div>
+            {isLoadingAppointments ? (
+              <p style={{ padding: '1rem', color: 'var(--color-on-surface-variant)' }}>Loading appointments...</p>
+            ) : (
+              <StaffScheduleTable appointments={appointments || []} />
+            )}
+          </div>
           
           {/* Mobile-Only Horizontal Stats Scroll */}
           <div className={styles.mobileStatsSection}>
@@ -247,37 +188,32 @@ export const StaffDashboard = () => {
             <div className={styles.feedHeader}>
               <div className={styles.feedTitleGroup}>
                 <History size={20} color="var(--color-on-surface-variant)" />
-                <h2>{/* Mobile says "Recent Activity", Desktop says "My Activity", we'll just say "My Activity" */}My Activity</h2>
+                <h2>My Activity</h2>
               </div>
             </div>
             
             <div className={styles.feedList}>
-              {mockActivities.map((activity, index) => {
-                const config = getActivityConfig(activity.type, activity.details);
-                
-                let title = activity.description;
-                if (activity.type === 'INTERACTION_ADDED') {
-                  title = `Interaction (${activity.details?.channel})`;
-                } else if (activity.type.startsWith('APPOINTMENT_')) {
-                  title = activity.details?.purposeTitle || `Appointment ${config.statusLabel || ''}`;
-                }
-
-                return (
-                  <TimelineItem 
-                    key={activity.id}
-                    title={title}
-                    subtitle={formatTimeAgo(activity.timestamp)}
-                    content={activity.details?.content || activity.details?.notes}
-                    icon={config.icon}
-                    iconBgColor={config.bg}
-                    iconTextColor={config.color}
-                    statusLabel={config.statusLabel}
-                    statusColor={config.statusColor}
-                    statusBgColor={config.statusBgColor}
-                    isLast={index === mockActivities.length - 1}
-                  />
-                );
-              })}
+              {isLoadingFeed ? (
+                <p style={{ padding: '1rem', color: 'var(--color-on-surface-variant)' }}>Loading activity...</p>
+              ) : activities.length === 0 ? (
+                <p style={{ padding: '1rem', color: 'var(--color-on-surface-variant)' }}>No recent activity.</p>
+              ) : (
+                activities.map((activity, index) => {
+                  const config = getActivityConfig(activity.type);
+                  return (
+                    <TimelineItem 
+                      key={activity.id}
+                      title={config.label}
+                      subtitle={new Date(activity.timestamp).toLocaleString()}
+                      content={`${activity.actor.name}: ${activity.description}`}
+                      icon={config.icon}
+                      iconTextColor={config.color}
+                      iconBgColor={config.bgColor}
+                      isLast={index === activities.length - 1}
+                    />
+                  );
+                })
+              )}
             </div>
             
             <div className={styles.feedFooter}>

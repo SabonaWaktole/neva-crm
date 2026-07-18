@@ -21,56 +21,21 @@ import { Button } from '../../components/ui/Button/Button';
 import { KPICard } from '../../components/ui/KPICard';
 import { UpcomingAppointmentsWidget } from '../../components/widgets/UpcomingAppointmentsWidget';
 import { TimelineItem } from '../../components/ui/TimelineItem';
-import { getActivityConfig } from '../../utils/activityMapper';
-
-// Mock data matching TimelineMerger schema
-const mockActivities = [
-  {
-    id: '1',
-    timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-    type: 'CLIENT_CREATED',
-    description: 'Client Added',
-    actor: 'Alex Carter',
-    details: { name: 'Sarah Jenkins', status: 'ACTIVE' }
-  },
-  {
-    id: '2',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-    type: 'INTERACTION_ADDED',
-    description: 'Interaction (NOTE)',
-    actor: 'Alex Carter',
-    details: { channel: 'NOTE', content: 'Added a note to Global Logistics Deal' }
-  },
-  {
-    id: '3',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-    type: 'APPOINTMENT_SCHEDULED',
-    description: 'Appointment (SCHEDULED)',
-    actor: 'Alex Carter',
-    statusLabel: 'SCHEDULED',
-    details: { notes: 'Demo with Acme Corp', status: 'SCHEDULED' }
-  },
-  {
-    id: '4',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 26).toISOString(),
-    type: 'APPOINTMENT_COMPLETED',
-    description: 'Appointment (COMPLETED)',
-    actor: 'Alex Carter',
-    statusLabel: 'COMPLETED',
-    details: { notes: 'Onboarding call', status: 'COMPLETED' }
-  }
-];
-
-const formatTimeAgo = (isoString: string) => {
-  const date = new Date(isoString);
-  const diffInMinutes = Math.floor((Date.now() - date.getTime()) / 60000);
-  
-  if (diffInMinutes < 60) return `${diffInMinutes} mins ago`;
-  if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} hours ago`;
-  return 'Yesterday';
-};
+// Replaced mockActivities with real data
 
 export const BusinessOwnerDashboard = () => {
+  const { metrics, isLoading: isLoadingMetrics } = useDashboardMetrics();
+  const { activities, isLoading: isLoadingFeed } = useActivityFeed(5);
+
+  const calculateGrowth = (current: number, past: number) => {
+    if (past === 0) return current > 0 ? '+100%' : '0%';
+    const pct = ((current - past) / past) * 100;
+    return pct > 0 ? `+${pct.toFixed(1)}%` : `${pct.toFixed(1)}%`;
+  };
+
+  const growthPct = metrics ? calculateGrowth(metrics.totalClients, metrics.totalClientsLastWeek) : '0%';
+  const isGrowthUp = metrics && metrics.totalClients >= metrics.totalClientsLastWeek;
+
   return (
     <div className={styles.dashboardContainer}>
       <header className={styles.header}>
@@ -93,11 +58,11 @@ export const BusinessOwnerDashboard = () => {
         <div className={styles.kpiItem}>
           <KPICard 
             title="TOTAL CLIENTS"
-            value="156"
+            value={isLoadingMetrics ? '...' : (metrics?.totalClients || 0)}
             icon={<Users size={24} />}
-            trendValue="+12"
-            trendLabel="vs last month"
-            trendDirection="up"
+            trendValue={isLoadingMetrics ? '...' : growthPct}
+            trendLabel="vs last week"
+            trendDirection={isGrowthUp ? 'up' : 'down'}
           />
         </div>
         <div className={styles.kpiItem}>
@@ -167,21 +132,27 @@ export const BusinessOwnerDashboard = () => {
             </div>
             
             <div className={styles.feedList}>
-              {mockActivities.map((activity, index) => {
-                const config = getActivityConfig(activity.type, activity.details);
-                return (
-                  <TimelineItem 
-                    key={activity.id}
-                    title={activity.actor}
-                    subtitle={formatTimeAgo(activity.timestamp)}
-                    content={activity.description}
-                    icon={config.icon}
-                    iconBgColor={config.bg}
-                    iconTextColor={config.color}
-                    isLast={index === mockActivities.length - 1}
-                  />
-                );
-              })}
+              {isLoadingFeed ? (
+                <p style={{ padding: '1rem', color: 'var(--color-on-surface-variant)' }}>Loading activity...</p>
+              ) : activities.length === 0 ? (
+                <p style={{ padding: '1rem', color: 'var(--color-on-surface-variant)' }}>No recent activity.</p>
+              ) : (
+                activities.map((activity, index) => {
+                  const config = getActivityConfig(activity.type);
+                  return (
+                    <TimelineItem 
+                      key={activity.id}
+                      title={config.label}
+                      subtitle={new Date(activity.timestamp).toLocaleString()}
+                      content={`${activity.actor.name}: ${activity.description}`}
+                      icon={config.icon}
+                      iconTextColor={config.color}
+                      iconBgColor={config.bgColor}
+                      isLast={index === activities.length - 1}
+                    />
+                  );
+                })
+              )}
             </div>
             
             <div className={styles.feedFooter}>

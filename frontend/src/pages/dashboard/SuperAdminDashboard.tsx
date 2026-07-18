@@ -14,34 +14,7 @@ import { Button } from '../../components/ui/Button/Button';
 import { KPICard } from '../../components/ui/KPICard';
 import { TenantManagementTable } from '../../components/widgets/TenantManagementTable';
 import { TimelineItem } from '../../components/ui/TimelineItem';
-
-// Mock data matching GetTenantsUseCase response schema (no plan/status in this entity)
-const mockTenants = [
-  {
-    id: 't-1',
-    name: 'Starlight Logistics',
-    urlSlug: 'TEN-9021',
-    createdAt: new Date('2023-10-12').toISOString(),
-  },
-  {
-    id: 't-2',
-    name: 'Vertex Financials',
-    urlSlug: 'TEN-8442',
-    createdAt: new Date('2023-10-10').toISOString(),
-  },
-  {
-    id: 't-3',
-    name: 'Global Health IT',
-    urlSlug: 'TEN-7719',
-    createdAt: new Date('2023-10-09').toISOString(),
-  },
-  {
-    id: 't-4',
-    name: 'Nexus AI Agency',
-    urlSlug: 'TEN-6623',
-    createdAt: new Date('2023-10-05').toISOString(),
-  }
-];
+import { useTenants } from '../../hooks/useDashboard';
 
 // Completely fake placeholder data for the activity log
 const mockGlobalEvents = [
@@ -88,6 +61,8 @@ const mockGlobalEvents = [
 ];
 
 export const SuperAdminDashboard = () => {
+  const { tenants, total, isLoading: isLoadingTenants } = useTenants();
+
   return (
     <div className={styles.dashboardContainer}>
       
@@ -106,7 +81,7 @@ export const SuperAdminDashboard = () => {
       <section className={styles.kpiGrid}>
         <KPICard 
           title="Active Tenants"
-          value="1,248"
+          value={isLoadingTenants ? '...' : total}
           icon={<Users size={24} />}
           trendValue="+12%"
           trendLabel="vs last month"
@@ -138,7 +113,7 @@ export const SuperAdminDashboard = () => {
         
         {/* Left Column: Tenant Table */}
         <div className={styles.leftColumn}>
-          <TenantManagementTable tenants={mockTenants} />
+          <TenantManagementTable tenants={tenants} isLoading={isLoadingTenants} />
         </div>
 
         {/* Right Column: Platform Activity Feed (PLACEHOLDER) */}
