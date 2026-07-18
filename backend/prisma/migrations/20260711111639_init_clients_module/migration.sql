@@ -99,8 +99,3 @@ ALTER TABLE "Interaction" ADD CONSTRAINT "Interaction_outcomeCategoryId_fkey" FO
 
 -- CreateIndex (Raw SQL for JSONB GIN Index with jsonb_path_ops)
 CREATE INDEX "Client_customFieldValues_gin_idx" ON "Client" USING GIN ("customFieldValues" jsonb_path_ops);
-
-
--- CreateIndex (Raw SQL for JSONB GIN Index with jsonb_path_ops)
-CREATE INDEX "Client_customFieldValues_gin_idx" ON "Client" USING GIN ("customFieldValues" jsonb_path_ops);
-

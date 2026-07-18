@@ -122,5 +122,54 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const dashboardRoutes = createDashboardRouter(getTenantClientMetricsUseCase, getTenantActivityFeedUseCase, tokenService, tenantRepository);
   app.use('/api/:tenantSlug/dashboard', dashboardRoutes);
 
+  // Inventory Routes
+  const { PrismaProductRepository } = require('../inventory/infrastructure/repositories/PrismaProductRepository');
+  const { PrismaWarehouseRepository } = require('../inventory/infrastructure/repositories/PrismaWarehouseRepository');
+  const { PrismaCategoryRepository } = require('../inventory/infrastructure/repositories/PrismaCategoryRepository');
+  const { PrismaStockLevelRepository } = require('../inventory/infrastructure/repositories/PrismaStockLevelRepository');
+  const { PrismaStockMovementRepository } = require('../inventory/infrastructure/repositories/PrismaStockMovementRepository');
+  const { PrismaStockTransactionManager } = require('../inventory/infrastructure/repositories/PrismaStockTransactionManager');
+  
+  const { CreateProductUseCase } = require('../inventory/application/use-cases/CreateProductUseCase');
+  const { UpdateProductUseCase } = require('../inventory/application/use-cases/UpdateProductUseCase');
+  const { AdjustStockUseCase } = require('../inventory/application/use-cases/AdjustStockUseCase');
+  const { TransferStockUseCase } = require('../inventory/application/use-cases/TransferStockUseCase');
+  const { SearchProductsUseCase } = require('../inventory/application/use-cases/SearchProductsUseCase');
+  const { GetProductStockBreakdownUseCase } = require('../inventory/application/use-cases/GetProductStockBreakdownUseCase');
+  const { CreateWarehouseUseCase } = require('../inventory/application/use-cases/CreateWarehouseUseCase');
+  const { UpdateWarehouseUseCase } = require('../inventory/application/use-cases/UpdateWarehouseUseCase');
+  const { DeleteWarehouseUseCase } = require('../inventory/application/use-cases/DeleteWarehouseUseCase');
+  const { CreateCategoryUseCase } = require('../inventory/application/use-cases/CreateCategoryUseCase');
+  const { UpdateCategoryUseCase } = require('../inventory/application/use-cases/UpdateCategoryUseCase');
+  const { DeleteCategoryUseCase } = require('../inventory/application/use-cases/DeleteCategoryUseCase');
+  
+  const { InventoryController } = require('../inventory/interfaces/http/inventoryController');
+  const { createInventoryRouter } = require('../inventory/interfaces/http/inventoryRoutes');
+
+  const productRepo = new PrismaProductRepository(prisma);
+  const warehouseRepo = new PrismaWarehouseRepository(prisma);
+  const categoryRepo = new PrismaCategoryRepository(prisma);
+  const stockLevelRepo = new PrismaStockLevelRepository(prisma);
+  const stockMovementRepo = new PrismaStockMovementRepository(prisma);
+  const stockTxManager = new PrismaStockTransactionManager(prisma);
+
+  const inventoryController = new InventoryController(
+    new CreateProductUseCase(productRepo, warehouseRepo, stockTxManager),
+    new UpdateProductUseCase(productRepo),
+    new AdjustStockUseCase(stockLevelRepo, stockMovementRepo),
+    new TransferStockUseCase(stockLevelRepo, stockTxManager),
+    new SearchProductsUseCase(productRepo),
+    new GetProductStockBreakdownUseCase(productRepo, stockLevelRepo),
+    new CreateWarehouseUseCase(warehouseRepo),
+    new UpdateWarehouseUseCase(warehouseRepo),
+    new DeleteWarehouseUseCase(warehouseRepo, stockLevelRepo),
+    new CreateCategoryUseCase(categoryRepo),
+    new UpdateCategoryUseCase(categoryRepo),
+    new DeleteCategoryUseCase(categoryRepo, productRepo)
+  );
+
+  const inventoryRoutes = createInventoryRouter(inventoryController, tokenService, tenantRepository);
+  app.use('/api/:tenantSlug/inventory', inventoryRoutes);
+
   return app;
 };
