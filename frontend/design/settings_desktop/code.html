@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Nexus CRM - Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#ffb695",
+                        "surface-container-high": "#dce9ff",
+                        "tertiary-container": "#a44100",
+                        "secondary": "#006591",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "surface-tint": "#4d44e3",
+                        "on-secondary-container": "#004666",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#f8f9ff",
+                        "on-error": "#ffffff",
+                        "primary": "#3525cd",
+                        "on-tertiary-fixed": "#351000",
+                        "surface-container": "#e5eeff",
+                        "tertiary-fixed": "#ffdbcc",
+                        "surface-dim": "#cbdbf5",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed": "#0f0069",
+                        "primary-container": "#4f46e5",
+                        "tertiary": "#7e3000",
+                        "on-secondary-fixed-variant": "#004c6e",
+                        "secondary-fixed": "#c9e6ff",
+                        "surface-variant": "#d3e4fe",
+                        "on-error-container": "#93000a",
+                        "outline": "#777587",
+                        "primary-fixed": "#e2dfff",
+                        "on-surface-variant": "#464555",
+                        "on-primary-container": "#dad7ff",
+                        "inverse-primary": "#c3c0ff",
+                        "on-tertiary": "#ffffff",
+                        "outline-variant": "#c7c4d8",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-container": "#ffd2be",
+                        "background": "#f8f9ff",
+                        "on-surface": "#0b1c30",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "on-secondary-fixed": "#001e2f",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "secondary-container": "#39b8fd",
+                        "on-background": "#0b1c30",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-container-low": "#eff4ff",
+                        "inverse-surface": "#213145",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#d3e4fe",
+                        "surface": "#f8f9ff",
+                        "secondary-fixed-dim": "#89ceff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "2xl": "48px",
+                        "xl": "32px",
+                        "lg": "24px",
+                        "max-content-width": "1280px",
+                        "sidebar-width": "240px",
+                        "md": "16px",
+                        "base": "4px",
+                        "xs": "4px",
+                        "sm": "8px",
+                        "sidebar-collapsed": "64px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "display": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["18px", { "lineHeight": "26px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "display": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-sm": ["11px", { "lineHeight": "14px", "fontWeight": "600" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .fill-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3525cd; /* primary */
+            box-shadow: 0 0 0 2px #e2dfff; /* primary-fixed */
+        }
+        .card-elevation {
+            box-shadow: 0px 4px 6px -1px rgba(0, 0, 0, 0.05), 0px 2px 4px -2px rgba(0, 0, 0, 0.02);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex font-body-md text-body-md antialiased">
+<!-- SideNavBar (Hidden on Mobile, Visible on Desktop) -->
+<nav class="hidden md:flex flex-col fixed left-0 top-16 h-[calc(100vh-64px)] z-40 py-md bg-surface border-r border-outline-variant w-sidebar-width transition-width duration-300 ease-in-out">
+<div class="px-md pb-lg mb-lg border-b border-outline-variant">
+<div class="flex items-center gap-sm mb-xs">
+<img alt="Organization Logo" class="w-8 h-8 rounded-lg object-cover" data-alt="A small, professional corporate logo placeholder with a minimalist geometric design in white and light blue, set against a dark blue background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2gei7R_09Orz3du4_fjBgn7O0UbYUCE_6t73EEz9XHqUTLZEE9bqL373Cjvu_Thc1uWakA99gFGVBGXWvL4hn8EYu_zTlvbhTvEJtG3X6fFrabFtgWujlnbm9bK_illQb-ic4FolFFBwKsKjTMCxUT45r21_aoomKGMZX3C_HLx-O8Dcr6zhwyTiBiTz5JZP3SIDln1oCnjPLQzjKZVbhV5f5KrH__M1A3i6Q7T1J2LH_uImQOHWOHTfeeZDGjgvr9NAjww7XRPBz"/>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface truncate">Corporate Modern</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Enterprise Tier</p>
+</div>
+</div>
+<button class="w-full mt-md bg-primary hover:bg-surface-tint text-on-primary font-label-md text-label-md py-sm px-md rounded-DEFAULT flex items-center justify-center gap-xs transition-colors">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                New Entry
+            </button>
+</div>
+<ul class="flex-1 px-sm space-y-xs overflow-y-auto">
+<li>
+<a class="flex items-center gap-md px-sm py-xs rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-md px-sm py-xs rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-label-md text-label-md">Clients</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-md px-sm py-xs rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="event">event</span>
+<span class="font-label-md text-label-md">Appointments</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-md px-sm py-xs rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="font-label-md text-label-md">Products &amp; Stock</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-md px-sm py-xs rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="font-label-md text-label-md">Quotations</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-md px-sm py-xs rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
+<span class="font-label-md text-label-md">Reports</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-md px-sm py-xs rounded-DEFAULT bg-surface-container-highest text-primary border-l-2 border-primary hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined fill-icon" data-icon="settings" data-weight="fill">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</li>
+</ul>
+<div class="px-sm pt-md mt-md border-t border-outline-variant">
+<ul class="space-y-xs">
+<li>
+<a class="flex items-center gap-md px-sm py-xs rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="contact_support">contact_support</span>
+<span class="font-label-md text-label-md">Support</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-md px-sm py-xs rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-label-md text-label-md">Log Out</span>
+</a>
+</li>
+</ul>
+</div>
+</nav>
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-lg h-16 bg-surface border-b border-outline-variant">
+<div class="flex items-center gap-md">
+<!-- Mobile Menu Toggle -->
+<button class="md:hidden text-on-surface-variant p-xs rounded-DEFAULT hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="text-headline-md font-headline-md font-bold text-primary">Nexus CRM</div>
+</div>
+<div class="flex-1 max-w-md mx-lg hidden md:block">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-sm top-1/2 transform -translate-y-1/2 text-on-surface-variant pointer-events-none text-[20px]">search</span>
+<input class="w-full h-[36px] pl-xl pr-sm bg-surface-container-low border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:border-primary focus:ring-2 focus:ring-primary-fixed transition-all" placeholder="Search..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-sm">
+<button class="p-xs text-on-surface-variant rounded-full hover:bg-surface-container-low transition-colors cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-xs text-on-surface-variant rounded-full hover:bg-surface-container-low transition-colors cursor-pointer active:opacity-80 hidden md:block">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<button class="ml-sm flex items-center gap-xs p-xs rounded-full hover:bg-surface-container-low transition-colors cursor-pointer active:opacity-80">
+<img alt="User profile photo" class="w-8 h-8 rounded-full border border-outline-variant object-cover" data-alt="A professional headshot of a corporate user with a neutral, friendly expression. The lighting is soft and studio-quality, set against a light grey background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkGevAuy8H1Rx4lWKjmiu_nCHJSd2LKBjrFyoNU6iIbtbQWXxc8DVcctaThIu-YFkc9d2mVMbt5ccvAIUlvB3nXz_B3a24KSsLMQtn9iOG966FInuKb-Xs_PD8buFvxQODTr-4N7R25oIHoiqBWJgC5gl8Y0S9gHMSUZyw-sN1mW2pfxN-pID_g8tPt6RBOrs9uUPIlyb61arU9MkLlqks3FTXkiEOQ0sCjIspT-IMQFmevKcG7zRIbZBgbbO8yiGrpY5BoDSBZUO6"/>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 w-full pt-16 md:pl-sidebar-width bg-background min-h-screen pb-2xl md:pb-lg">
+<div class="max-w-[1024px] mx-auto p-md md:p-lg space-y-lg">
+<!-- Page Header -->
+<div class="mb-lg">
+<nav aria-label="Breadcrumb" class="flex items-center text-on-surface-variant font-label-sm text-label-sm mb-xs">
+<ol class="flex items-center space-x-2">
+<li><a class="hover:text-primary transition-colors" href="#">Settings</a></li>
+<li><span class="material-symbols-outlined text-[14px]">chevron_right</span></li>
+<li aria-current="page" class="text-on-surface font-semibold">Company Settings</li>
+</ol>
+</nav>
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">Company Settings</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-xs">Manage your organization's core details, localization, and preferences.</p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+<!-- Left Column (Main Settings) -->
+<div class="lg:col-span-2 space-y-lg">
+<!-- Company Profile Section -->
+<section class="bg-surface rounded-xl border border-outline-variant p-lg card-elevation">
+<div class="border-b border-outline-variant pb-md mb-md flex items-center justify-between">
+<h2 class="font-headline-md text-headline-md text-on-surface">Company Profile</h2>
+</div>
+<div class="space-y-lg">
+<!-- Logo Upload -->
+<div class="flex items-start gap-lg">
+<div class="w-20 h-20 bg-surface-container border border-outline-variant border-dashed rounded-lg flex items-center justify-center flex-shrink-0 relative overflow-hidden group cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors">add_photo_alternate</span>
+<input aria-label="Upload company logo" class="absolute inset-0 opacity-0 cursor-pointer" type="file"/>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface mb-xs">Company Logo</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-sm text-[13px]">Upload a square logo. JPG, PNG, or SVG. Maximum file size 5MB.</p>
+<button class="text-primary font-label-sm text-label-sm hover:underline">Upload Image</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<!-- Company Name -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-xs" for="companyName">Company Name *</label>
+<input class="w-full h-[36px] px-sm bg-surface border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-surface" id="companyName" type="text" value="Corporate Modern Inc."/>
+</div>
+<!-- Registration Number -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-xs" for="regNumber">Registration Number</label>
+<input class="w-full h-[36px] px-sm bg-surface border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-surface placeholder:text-outline" id="regNumber" placeholder="e.g. 12345678" type="text"/>
+</div>
+</div>
+<!-- Address -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-xs" for="address">Registered Address</label>
+<input class="w-full h-[36px] px-sm mb-sm bg-surface border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-surface placeholder:text-outline" id="address" placeholder="Street address" type="text"/>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-md">
+<input class="col-span-2 h-[36px] px-sm bg-surface border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-surface placeholder:text-outline" placeholder="City" type="text"/>
+<input class="h-[36px] px-sm bg-surface border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-surface placeholder:text-outline" placeholder="State/Region" type="text"/>
+<input class="h-[36px] px-sm bg-surface border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-surface placeholder:text-outline" placeholder="Postal Code" type="text"/>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<!-- Contact Email -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-xs" for="contactEmail">Primary Contact Email *</label>
+<input class="w-full h-[36px] px-sm bg-surface border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-surface" id="contactEmail" type="email" value="billing@corporatemodern.com"/>
+</div>
+<!-- Phone -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-xs" for="contactPhone">Contact Phone</label>
+<input class="w-full h-[36px] px-sm bg-surface border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-surface placeholder:text-outline" id="contactPhone" placeholder="+1 (555) 000-0000" type="tel"/>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column (Meta Settings) -->
+<div class="space-y-lg">
+<!-- Localization Section -->
+<section class="bg-surface rounded-xl border border-outline-variant p-lg card-elevation">
+<div class="border-b border-outline-variant pb-md mb-md">
+<h2 class="font-headline-md text-headline-md text-on-surface">Localization</h2>
+<p class="font-body-md text-[13px] text-on-surface-variant mt-xs">Regional formats for the organization.</p>
+</div>
+<div class="space-y-md">
+<!-- Timezone -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-xs" for="timezone">Timezone</label>
+<select class="w-full h-[36px] px-sm bg-surface border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-surface appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%208l5%205%205-5%22%20stroke%3D%22%23777587%22%20stroke-width%3D%221.5%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[position:right_8px_center]" id="timezone">
+<option>UTC-08:00 Pacific Time (US &amp; Canada)</option>
+<option>UTC-05:00 Eastern Time (US &amp; Canada)</option>
+<option>UTC+00:00 London</option>
+<option>UTC+01:00 Central European Time</option>
+</select>
+</div>
+<!-- Date Format -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-xs" for="dateFormat">Date Format</label>
+<select class="w-full h-[36px] px-sm bg-surface border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-surface appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%208l5%205%205-5%22%20stroke%3D%22%23777587%22%20stroke-width%3D%221.5%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[position:right_8px_center]" id="dateFormat">
+<option>MM/DD/YYYY (12/31/2023)</option>
+<option>DD/MM/YYYY (31/12/2023)</option>
+<option>YYYY-MM-DD (2023-12-31)</option>
+</select>
+</div>
+<!-- Currency -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-xs" for="currency">Base Currency</label>
+<select class="w-full h-[36px] px-sm bg-surface border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-surface appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%208l5%205%205-5%22%20stroke%3D%22%23777587%22%20stroke-width%3D%221.5%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[position:right_8px_center]" id="currency">
+<option>USD - US Dollar ($)</option>
+<option>EUR - Euro (€)</option>
+<option>GBP - British Pound (£)</option>
+<option>JPY - Japanese Yen (¥)</option>
+</select>
+<p class="font-body-md text-[12px] text-outline mt-xs">Changing base currency affects all historical reporting.</p>
+</div>
+</div>
+</section>
+<!-- Language Section -->
+<section class="bg-surface rounded-xl border border-outline-variant p-lg card-elevation">
+<div class="border-b border-outline-variant pb-md mb-md flex items-center gap-sm">
+<span class="material-symbols-outlined text-on-surface-variant">language</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">Language</h2>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-xs" for="language">Default System Language</label>
+<select class="w-full h-[36px] px-sm bg-surface border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-surface appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%208l5%205%205-5%22%20stroke%3D%22%23777587%22%20stroke-width%3D%221.5%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[position:right_8px_center]" id="language">
+<option>English (US)</option>
+<option>English (UK)</option>
+<option>Spanish (ES)</option>
+<option>French (FR)</option>
+<option>German (DE)</option>
+</select>
+</div>
+</section>
+</div>
+</div>
+<!-- Page Action Footer -->
+<div class="mt-xl pt-lg border-t border-outline-variant flex justify-end gap-md">
+<button class="px-lg py-sm rounded-DEFAULT border border-outline-variant bg-surface text-on-surface font-label-md text-label-md hover:bg-surface-container-low transition-colors">
+                    Discard Changes
+                </button>
+<button class="px-lg py-sm rounded-DEFAULT bg-primary text-on-primary font-label-md text-label-md hover:bg-surface-tint transition-colors shadow-[0_2px_4px_rgba(53,37,205,0.2)]">
+                    Save Changes
+                </button>
+</div>
+</div>
+</main>
+</body></html>

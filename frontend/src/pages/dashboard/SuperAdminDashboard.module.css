@@ -1,0 +1,254 @@
+.dashboardContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+  height: 100%;
+  overflow-y: auto;
+  padding: var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+  .dashboardContainer {
+    padding: var(--spacing-lg);
+  }
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+  .header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+}
+
+.headerContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.title {
+  font-family: var(--font-family-headline-lg);
+  font-size: var(--font-size-headline-lg);
+  font-weight: var(--font-weight-headline-lg);
+  color: var(--color-on-surface);
+  margin: 0;
+}
+
+.subtitle {
+  font-family: var(--font-family-body-md);
+  font-size: var(--font-size-body-md);
+  color: var(--color-on-surface-variant);
+  margin: 0;
+}
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-lg);
+}
+
+@media (min-width: 768px) {
+  .kpiGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.mainGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-lg);
+}
+
+@media (min-width: 1024px) {
+  .mainGrid {
+    grid-template-columns: repeat(12, 1fr);
+  }
+}
+
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+@media (min-width: 1024px) {
+  .leftColumn {
+    grid-column: span 8;
+  }
+}
+
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+@media (min-width: 1024px) {
+  .rightColumn {
+    grid-column: span 4;
+  }
+}
+
+/* Feed Placeholder Overlay setup */
+.feedCardWrapper {
+  position: relative;
+  height: 100%;
+}
+
+.feedCard {
+  background-color: var(--color-surface-container-lowest);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--elevation-1);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid var(--color-outline-variant);
+  opacity: 0.6; /* Placeholder treatment */
+}
+
+.feedHeader {
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--color-outline-variant);
+}
+
+.feedTitle {
+  font-family: var(--font-family-headline-sm);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-on-surface);
+  margin: 0;
+}
+
+.feedList {
+  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md) var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.feedFooter {
+  padding: var(--spacing-md);
+  border-top: 1px solid var(--color-outline-variant);
+  margin-top: auto;
+}
+
+/* Latency Visualizer Placeholder setup */
+.latencyVisualizerWrapper {
+  position: relative;
+  margin-top: var(--spacing-md);
+}
+
+.latencyVisualizer {
+  background-color: rgba(30, 41, 59, 0.7);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  opacity: 0.6; /* Placeholder treatment */
+}
+
+@media (min-width: 768px) {
+  .latencyVisualizer {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.latencyStats {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xl);
+}
+
+.latencyLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-on-surface-variant);
+  margin: 0 0 4px 0;
+}
+
+.latencyValueGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.pulseDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #10b981;
+}
+
+.latencyValue {
+  font-family: var(--font-family-headline-md);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--color-on-surface);
+}
+
+.latencyDivider {
+  height: 40px;
+  width: 1px;
+  background-color: var(--color-outline-variant);
+}
+
+.trafficChart {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.chartBars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 32px;
+}
+
+.bar {
+  width: 4px;
+  background-color: var(--color-primary);
+  border-radius: 4px;
+}
+
+.chartLabel {
+  font-size: 13px;
+  color: var(--color-on-surface-variant);
+}
+
+/* Reusable Overlay */
+.placeholderOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent; /* No tint, just relying on opacity of child */
+  z-index: 10;
+}
+
+.placeholderBadge {
+  background-color: var(--color-surface-container-high);
+  color: var(--color-on-surface-variant);
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--color-outline);
+}

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Staff Invitation</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-fixed-dim": "#ffb695",
+                      "surface-container-high": "#dce9ff",
+                      "tertiary-container": "#a44100",
+                      "secondary": "#006591",
+                      "primary-fixed-dim": "#c3c0ff",
+                      "surface-tint": "#4d44e3",
+                      "on-secondary-container": "#004666",
+                      "surface-container-lowest": "#ffffff",
+                      "on-primary": "#ffffff",
+                      "surface-bright": "#f8f9ff",
+                      "on-error": "#ffffff",
+                      "primary": "#3525cd",
+                      "on-tertiary-fixed": "#351000",
+                      "surface-container": "#e5eeff",
+                      "tertiary-fixed": "#ffdbcc",
+                      "surface-dim": "#cbdbf5",
+                      "error": "#ba1a1a",
+                      "on-primary-fixed": "#0f0069",
+                      "primary-container": "#4f46e5",
+                      "tertiary": "#7e3000",
+                      "on-secondary-fixed-variant": "#004c6e",
+                      "secondary-fixed": "#c9e6ff",
+                      "surface-variant": "#d3e4fe",
+                      "on-error-container": "#93000a",
+                      "outline": "#777587",
+                      "primary-fixed": "#e2dfff",
+                      "on-surface-variant": "#464555",
+                      "on-primary-container": "#dad7ff",
+                      "inverse-primary": "#c3c0ff",
+                      "on-tertiary": "#ffffff",
+                      "outline-variant": "#c7c4d8",
+                      "on-secondary": "#ffffff",
+                      "on-tertiary-container": "#ffd2be",
+                      "background": "#f8f9ff",
+                      "on-surface": "#0b1c30",
+                      "on-tertiary-fixed-variant": "#7b2f00",
+                      "on-secondary-fixed": "#001e2f",
+                      "on-primary-fixed-variant": "#3323cc",
+                      "secondary-container": "#39b8fd",
+                      "on-background": "#0b1c30",
+                      "inverse-on-surface": "#eaf1ff",
+                      "surface-container-low": "#eff4ff",
+                      "inverse-surface": "#213145",
+                      "error-container": "#ffdad6",
+                      "surface-container-highest": "#d3e4fe",
+                      "surface": "#f8f9ff",
+                      "secondary-fixed-dim": "#89ceff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "2xl": "48px",
+                      "xl": "32px",
+                      "lg": "24px",
+                      "max-content-width": "1280px",
+                      "sidebar-width": "240px",
+                      "md": "16px",
+                      "base": "4px",
+                      "xs": "4px",
+                      "sm": "8px",
+                      "sidebar-collapsed": "64px"
+              },
+              "fontFamily": {
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "headline-lg-mobile": [
+                              "Inter"
+                      ],
+                      "display": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "label-sm": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "18px",
+                              {
+                                      "lineHeight": "26px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display": [
+                              "36px",
+                              {
+                                      "lineHeight": "44px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-sm": [
+                              "11px",
+                              {
+                                      "lineHeight": "14px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "500"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex flex-col md:flex-row md:items-center md:justify-center">
+<!-- Mobile Stacked Layout (Responsive adaptation) -->
+<main class="w-full flex-1 flex flex-col md:flex-row md:max-w-4xl md:bg-surface md:shadow-sm md:rounded-xl md:overflow-hidden md:min-h-[600px]">
+<!-- Top Section / Left Section on Desktop (Welcome & Inviter Info) -->
+<section class="bg-primary-container text-on-primary px-lg py-xl flex flex-col justify-center items-center text-center md:w-2/5 md:px-xl">
+<div class="mb-lg">
+<!-- Brand Logo Placeholder -->
+<div class="w-16 h-16 bg-surface-container-lowest rounded-lg flex items-center justify-center shadow-sm mb-md mx-auto">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">corporate_fare</span>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg mb-sm">Welcome to Nexus CRM</h1>
+<p class="font-body-md text-body-md text-on-primary-container opacity-90">Join your team to start managing relationships and scaling operations.</p>
+</div>
+<!-- Inviter Card -->
+<div class="bg-surface-container-highest/20 rounded-lg p-md w-full max-w-sm backdrop-blur-sm border border-surface-container-highest/30">
+<p class="font-label-sm text-label-sm uppercase tracking-wider text-on-primary-container mb-sm">Invited by</p>
+<div class="flex items-center gap-md text-left">
+<img class="w-12 h-12 rounded-full object-cover border-2 border-surface-container-lowest" data-alt="A professional headshot of a corporate manager smiling warmly. The lighting is bright and modern, suggesting a friendly yet focused B2B tech environment. The colors are crisp, with subtle indigo tones in the background reflecting the corporate modern aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXpr0tGWKs89bWrUxTIEGxnWAGhyWyu0WF9PnSLtF-k_Gh1LAIDR8TG_6PnYYPo5SLz9uQ7nFKAu1-PTlpaZ2H5DSJFC5wvR9ZAfiLZyxxWUpqyix4cfENHzYwmg-lxoHtWA-V9e5j4HnLFi8aMYSNjvJd7irxmvJ99VqL9HhQc_mKbUakOwbqLPO5S6xgpx6IMWyMdxXslRDamipocM-Ug9OU_9JlaGLgXvEOxkwLUX1qzOIIb53yHEMiJbMBpSS4rBeI6KkAxBKz"/>
+<div>
+<p class="font-headline-md text-headline-md text-surface-container-lowest">Sarah Jenkins</p>
+<p class="font-body-md text-body-md text-on-primary-container">Regional Director</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom Section / Right Section on Desktop (Profile Setup Form) -->
+<section class="bg-surface px-lg py-xl flex flex-col justify-center md:w-3/5 md:px-2xl rounded-t-xl -mt-4 md:mt-0 md:rounded-none z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] md:shadow-none">
+<div class="max-w-sm w-full mx-auto">
+<div class="mb-lg">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-xs">Set up your profile</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Complete your details to access the workspace.</p>
+</div>
+<form class="space-y-md">
+<!-- Email Field (Pre-filled/Read-only typically for invites, but showing as input here) -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-base" for="email">Work Email</label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline-variant text-sm">mail</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-2 h-9 border border-outline-variant rounded bg-surface-container-low text-on-surface-variant font-body-md text-body-md focus:ring-primary-container focus:border-primary-container sm:text-sm cursor-not-allowed" id="email" name="email" readonly="" type="email" value="alex.newhire@example.com"/>
+</div>
+</div>
+<!-- Full Name Field -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-base" for="fullName">Full Name</label>
+<input class="block w-full px-3 py-2 h-9 border border-outline-variant rounded bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:ring-2 focus:ring-primary focus:border-primary focus:outline-none transition-shadow" id="fullName" name="fullName" placeholder="e.g. Alex Morgan" type="text"/>
+</div>
+<!-- Password Field -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-base" for="password">Create Password</label>
+<div class="relative">
+<input class="block w-full px-3 py-2 h-9 border border-outline-variant rounded bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:ring-2 focus:ring-primary focus:border-primary focus:outline-none transition-shadow" id="password" name="password" placeholder="••••••••" type="password"/>
+<button class="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface" type="button">
+<span class="material-symbols-outlined text-sm">visibility_off</span>
+</button>
+</div>
+<p class="mt-1 font-body-md text-[12px] text-on-surface-variant">Must be at least 8 characters long.</p>
+</div>
+<!-- Submit Button -->
+<div class="pt-sm">
+<button class="w-full flex justify-center py-2 px-4 border border-transparent rounded bg-[#4f46e5] text-white font-label-md text-label-md hover:bg-[#3525cd] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4f46e5] transition-colors shadow-sm" type="button">
+                            Join Workspace
+                        </button>
+</div>
+</form>
+<p class="mt-lg text-center font-body-md text-[12px] text-on-surface-variant">
+                    By joining, you agree to our <a class="text-primary hover:underline" href="#">Terms of Service</a> and <a class="text-primary hover:underline" href="#">Privacy Policy</a>.
+                </p>
+</div>
+</section>
+</main>
+</body></html>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Nexus CRM - Client Details</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#494bd6",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "on-secondary": "#233143",
+                        "on-tertiary": "#4f2500",
+                        "tertiary-fixed": "#ffdcc5",
+                        "primary-fixed": "#e1e0ff",
+                        "on-primary": "#1000a9",
+                        "surface-bright": "#31394d",
+                        "on-tertiary-fixed": "#301400",
+                        "secondary": "#b9c8de",
+                        "on-error": "#690005",
+                        "error-container": "#93000a",
+                        "on-primary-fixed": "#07006c",
+                        "secondary-fixed-dim": "#b9c8de",
+                        "secondary-fixed": "#d4e4fa",
+                        "surface-container-highest": "#2d3449",
+                        "on-surface-variant": "#c7c4d7",
+                        "on-background": "#dae2fd",
+                        "on-tertiary-container": "#452000",
+                        "inverse-on-surface": "#283044",
+                        "tertiary-fixed-dim": "#ffb783",
+                        "surface-container": "#171f33",
+                        "on-error-container": "#ffdad6",
+                        "inverse-surface": "#dae2fd",
+                        "outline-variant": "#464554",
+                        "on-secondary-fixed-variant": "#39485a",
+                        "on-secondary-fixed": "#0d1c2d",
+                        "on-primary-container": "#0d0096",
+                        "tertiary-container": "#d97721",
+                        "tertiary": "#ffb783",
+                        "surface-container-high": "#222a3d",
+                        "primary": "#c0c1ff",
+                        "on-tertiary-fixed-variant": "#703700",
+                        "error": "#ffb4ab",
+                        "surface-dim": "#0b1326",
+                        "outline": "#908fa0",
+                        "surface-container-lowest": "#060e20",
+                        "primary-container": "#8083ff",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "background": "#0b1326",
+                        "surface-container-low": "#131b2e",
+                        "on-secondary-container": "#a7b6cc",
+                        "surface": "#0b1326",
+                        "on-surface": "#dae2fd",
+                        "surface-tint": "#c0c1ff",
+                        "secondary-container": "#39485a",
+                        "surface-variant": "#2d3449"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "margin-desktop": "40px",
+                        "unit": "4px",
+                        "xs": "4px",
+                        "md": "16px",
+                        "gutter": "24px",
+                        "xl": "32px",
+                        "margin-mobile": "16px",
+                        "sm": "8px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", {"lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}]
+                    }
+                }
+            }
+        }
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+        /* Custom Scrollbar for better dark mode look */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #39485a;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #464554;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md antialiased md:max-w-md md:mx-auto md:border-x md:border-outline-variant min-h-screen relative overflow-x-hidden">
+<!-- TopAppBar Semantic Shell Override (Transactional/Sub-page Context) -->
+<header class="bg-surface-container dark:bg-surface-container flex justify-between items-center w-full px-md h-16 sticky top-0 z-40 border-b border-outline-variant shadow-lg backdrop-blur-md bg-opacity-90">
+<div class="flex items-center gap-sm">
+<button aria-label="Go back" class="p-2 -ml-2 rounded-full hover:bg-secondary-container/20 transition-colors text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm text-on-surface">Client Details</h1>
+</div>
+<div class="flex items-center gap-xs">
+<button class="p-2 rounded-full hover:bg-secondary-container/20 transition-colors text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+</div>
+</header>
+<main class="pb-24">
+<!-- Client Profile Header Area -->
+<section class="p-md bg-surface-container-low border-b border-outline-variant">
+<div class="flex items-start gap-md">
+<div class="w-16 h-16 rounded-full overflow-hidden flex-shrink-0 border-2 border-primary-container">
+<img alt="Sarah Jenkins Profile" class="w-full h-full object-cover" data-alt="Professional headshot of a corporate executive. Soft studio lighting, dark modern aesthetic, sharp focus on the face. Background is a subtle out-of-focus deep blue office setting. The subject is wearing a tailored grey suit. High-end corporate portrait." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCHULmRre0U4C1gUFOnK2his0kdKjD-fYl3PbQGY1qYPCAb_JpUM43GwGqtQsHvxPP-JCA1_LN3DF29ZmDv0qxRtJDvXUprgWjorGcBrsMwE0PdWEQ2o8oQtl9bwpBIsgETmeb924vGfbK4vmt0J6vEe4lW7AeIWz1LsEOD1kn92VNXwX9oruGbnoH1xGUCKxPYZpQ8wF2y4FsIH4_zr638bcQhkF0IFXq1zrNZ6fVPMJ8qySOCZag_6AyJFEC8kNCxeM3ZFZbPVCbg"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Sarah Jenkins</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">CTO, Vertex Analytics</p>
+</div>
+<span class="px-2 py-1 rounded-full bg-tertiary-container/20 text-tertiary font-label-sm text-label-sm border border-tertiary/30">Active</span>
+</div>
+<!-- Quick Actions Bento -->
+<div class="grid grid-cols-3 gap-sm mt-md">
+<button class="flex flex-col items-center justify-center p-sm rounded-lg bg-surface-container hover:bg-surface-variant transition-colors border border-outline-variant/50 group">
+<span class="material-symbols-outlined text-primary mb-xs group-hover:scale-110 transition-transform" data-icon="call" style="font-variation-settings: 'FILL' 1;">call</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Call</span>
+</button>
+<button class="flex flex-col items-center justify-center p-sm rounded-lg bg-surface-container hover:bg-surface-variant transition-colors border border-outline-variant/50 group">
+<span class="material-symbols-outlined text-primary mb-xs group-hover:scale-110 transition-transform" data-icon="mail" style="font-variation-settings: 'FILL' 1;">mail</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Email</span>
+</button>
+<button class="flex flex-col items-center justify-center p-sm rounded-lg bg-surface-container hover:bg-surface-variant transition-colors border border-outline-variant/50 group">
+<span class="material-symbols-outlined text-primary mb-xs group-hover:scale-110 transition-transform" data-icon="calendar_month" style="font-variation-settings: 'FILL' 1;">calendar_month</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Meet</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Custom Fields Expandable Area -->
+<section class="px-md py-sm border-b border-outline-variant bg-surface" id="custom-fields-section">
+<button class="flex justify-between items-center w-full py-sm text-left group" onclick="document.getElementById('custom-fields-content').classList.toggle('hidden'); document.getElementById('expand-icon').innerText = document.getElementById('custom-fields-content').classList.contains('hidden') ? 'expand_more' : 'expand_less';">
+<span class="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">Client Data &amp; Custom Fields</span>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors" data-icon="expand_more" id="expand-icon">expand_more</span>
+</button>
+<div class="hidden mt-xs mb-sm grid grid-cols-2 gap-x-md gap-y-sm" id="custom-fields-content">
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface-variant">Industry</span>
+<span class="font-body-sm text-body-sm text-on-surface">Data Science</span>
+</div>
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface-variant">Timezone</span>
+<span class="font-body-sm text-body-sm text-on-surface">PST (UTC-8)</span>
+</div>
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface-variant">LTV Estimate</span>
+<span class="font-body-sm text-body-sm text-primary">$125,000</span>
+</div>
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface-variant">Renewal Date</span>
+<span class="font-body-sm text-body-sm text-on-surface">Oct 14, 2026</span>
+</div>
+</div>
+</section>
+<!-- Interaction Timeline -->
+<section class="p-md">
+<h3 class="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider mb-md">Interaction Timeline</h3>
+<div class="relative border-l-2 border-surface-container-highest ml-sm pl-md space-y-lg">
+<!-- Interaction Card 1 -->
+<div class="relative group">
+<div class="absolute -left-[27px] top-1 w-6 h-6 rounded-full bg-surface-container-high border-2 border-surface flex items-center justify-center z-10">
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="videocam" style="font-variation-settings: 'FILL' 1;">videocam</span>
+</div>
+<div class="bg-surface-container rounded-lg p-md border border-outline-variant/30 shadow-sm hover:border-primary/50 transition-colors">
+<div class="flex justify-between items-start mb-xs">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Q3 Review Call</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">2h ago</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-sm line-clamp-2">Discussed upcoming feature rollout and potential expansion to European team. Sarah expressed concerns about integration timeline.</p>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-xs">
+<div class="w-5 h-5 rounded-full bg-secondary-container flex items-center justify-center text-[10px] font-bold text-on-secondary-container">
+                                    ME
+                                </div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">By You</span>
+</div>
+<span class="px-2 py-1 bg-primary/10 text-primary rounded text-[10px] font-bold tracking-wide uppercase border border-primary/20">Follow-up Req</span>
+</div>
+</div>
+</div>
+<!-- Interaction Card 2 -->
+<div class="relative group">
+<div class="absolute -left-[27px] top-1 w-6 h-6 rounded-full bg-surface-container-high border-2 border-surface flex items-center justify-center z-10">
+<span class="material-symbols-outlined text-[14px] text-tertiary" data-icon="mail" style="font-variation-settings: 'FILL' 1;">mail</span>
+</div>
+<div class="bg-surface-container rounded-lg p-md border border-outline-variant/30 shadow-sm hover:border-primary/50 transition-colors">
+<div class="flex justify-between items-start mb-xs">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Security Addendum Sent</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Yesterday</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-sm line-clamp-2">Emailed the requested SOC2 compliance documents and the revised custom SLA.</p>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-xs">
+<div class="w-5 h-5 rounded-full overflow-hidden border border-outline-variant">
+<img alt="Alex Desk" class="w-full h-full object-cover" data-alt="Small thumbnail portrait of an administrative assistant. Dark professional background, soft lighting, wearing glasses. Modern corporate aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOhI1jYnnF1QM686UEkepEfZpRDu-GRIPd8h_413i8ybH9BmOTabWTx-3v-em4H5n8CXH_IlxsmsLqeOnesDtDljPWu0ozuM8rrZqpyoq__7wt3w4delqzI4tYLO6KWBtjf1Sp5RUQ_xLkrzgUiI4jnwIyWdtXsT6yPaIvS6nMcFg0i23FG1M1nCfYbMDH8TuwzYIztIATKs9qY9Wk3tyryKBcvLPbblSp-cSVGV8e4Kja9OLv-riB7JPKqjJrbQ570nnRvowuf1Mf"/>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">By Alex D.</span>
+</div>
+<span class="px-2 py-1 bg-surface-variant text-on-surface-variant rounded text-[10px] font-bold tracking-wide uppercase border border-outline-variant/50">Sent</span>
+</div>
+</div>
+</div>
+<!-- Interaction Card 3 -->
+<div class="relative group">
+<div class="absolute -left-[27px] top-1 w-6 h-6 rounded-full bg-surface-container-high border-2 border-surface flex items-center justify-center z-10">
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant" data-icon="edit_note" style="font-variation-settings: 'FILL' 1;">edit_note</span>
+</div>
+<div class="bg-surface-container rounded-lg p-md border border-outline-variant/30 shadow-sm hover:border-primary/50 transition-colors">
+<div class="flex justify-between items-start mb-xs">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Internal Note</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Oct 2</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-sm">Sarah mentioned they are evaluating competitor X. We need to prepare a side-by-side comparison deck before the next sync.</p>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-xs">
+<div class="w-5 h-5 rounded-full bg-secondary-container flex items-center justify-center text-[10px] font-bold text-on-secondary-container">
+                                    ME
+                                </div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">By You</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- FAB for "Add Interaction" -->
+<button aria-label="Add Interaction" class="fixed bottom-6 right-6 w-14 h-14 bg-primary text-on-primary rounded-xl shadow-lg flex items-center justify-center hover:bg-primary/90 active:scale-95 transition-all z-40 border border-primary-fixed/20" onclick="document.getElementById('add-interaction-modal').classList.remove('translate-y-full'); document.getElementById('modal-backdrop').classList.remove('hidden');">
+<span class="material-symbols-outlined" data-icon="add" style="font-variation-settings: 'FILL' 1;">add</span>
+</button>
+<!-- Full Screen Modal: Add Interaction -->
+<div class="fixed inset-0 bg-surface-dim/80 backdrop-blur-sm z-50 hidden transition-opacity" id="modal-backdrop"></div>
+<div class="fixed inset-x-0 bottom-0 top-12 bg-surface-container rounded-t-2xl z-50 transform translate-y-full transition-transform duration-300 ease-in-out flex flex-col shadow-2xl border-t border-outline-variant" id="add-interaction-modal">
+<!-- Modal Header -->
+<div class="flex justify-between items-center p-md border-b border-outline-variant bg-surface-container rounded-t-2xl">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Log Interaction</h2>
+<button aria-label="Close modal" class="p-2 rounded-full hover:bg-surface-variant text-on-surface-variant transition-colors" onclick="document.getElementById('add-interaction-modal').classList.add('translate-y-full'); setTimeout(() =&gt; document.getElementById('modal-backdrop').classList.add('hidden'), 300);">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+<!-- Modal Body -->
+<div class="flex-1 overflow-y-auto p-md space-y-md bg-surface">
+<!-- Channel Selection (Bento Style) -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider mb-sm">Channel</label>
+<div class="grid grid-cols-4 gap-sm">
+<button class="flex flex-col items-center justify-center p-sm rounded-lg bg-primary-container/20 text-primary border border-primary transition-colors">
+<span class="material-symbols-outlined mb-xs" data-icon="call" style="font-variation-settings: 'FILL' 1;">call</span>
+<span class="font-label-sm text-label-sm">Call</span>
+</button>
+<button class="flex flex-col items-center justify-center p-sm rounded-lg bg-surface-container hover:bg-surface-variant text-on-surface-variant border border-outline-variant/50 transition-colors">
+<span class="material-symbols-outlined mb-xs" data-icon="mail" style="font-variation-settings: 'FILL' 1;">mail</span>
+<span class="font-label-sm text-label-sm">Email</span>
+</button>
+<button class="flex flex-col items-center justify-center p-sm rounded-lg bg-surface-container hover:bg-surface-variant text-on-surface-variant border border-outline-variant/50 transition-colors">
+<span class="material-symbols-outlined mb-xs" data-icon="videocam" style="font-variation-settings: 'FILL' 1;">videocam</span>
+<span class="font-label-sm text-label-sm">Meeting</span>
+</button>
+<button class="flex flex-col items-center justify-center p-sm rounded-lg bg-surface-container hover:bg-surface-variant text-on-surface-variant border border-outline-variant/50 transition-colors">
+<span class="material-symbols-outlined mb-xs" data-icon="edit_note" style="font-variation-settings: 'FILL' 1;">edit_note</span>
+<span class="font-label-sm text-label-sm">Note</span>
+</button>
+</div>
+</div>
+<!-- Notes Area -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider mb-sm" for="interaction-notes">Notes</label>
+<textarea class="w-full bg-surface-container border border-outline-variant rounded-lg p-sm text-on-surface font-body-md focus:border-primary focus:ring-1 focus:ring-primary transition-colors resize-none" id="interaction-notes" placeholder="Details about the interaction..." rows="6"></textarea>
+</div>
+<!-- Outcome Dropdown -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider mb-sm" for="interaction-outcome">Outcome</label>
+<div class="relative">
+<select class="w-full bg-surface-container border border-outline-variant rounded-lg p-sm pl-3 pr-10 text-on-surface font-body-md appearance-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" id="interaction-outcome">
+<option value="none">No specific outcome</option>
+<option value="followup">Follow-up Required</option>
+<option value="meeting_set">Meeting Scheduled</option>
+<option value="escalated">Escalated</option>
+<option value="closed">Deal Closed</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="arrow_drop_down">arrow_drop_down</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Modal Footer Actions -->
+<div class="p-md border-t border-outline-variant bg-surface-container">
+<button class="w-full py-3 bg-primary text-on-primary rounded-lg font-label-md text-label-md font-bold shadow-sm hover:bg-primary/90 active:scale-[0.98] transition-all" onclick="document.getElementById('add-interaction-modal').classList.add('translate-y-full'); setTimeout(() =&gt; document.getElementById('modal-backdrop').classList.add('hidden'), 300);">
+                Save Interaction
+            </button>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,298 @@
+.dashboardContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+  height: 100%;
+  overflow-y: auto;
+  padding: var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+  .dashboardContainer {
+    padding: var(--spacing-lg);
+  }
+}
+
+/* Mobile Header Elements */
+.mobileHeader {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.titleMobile {
+  font-family: var(--font-family-headline-lg);
+  font-size: var(--font-size-headline-lg-mobile);
+  font-weight: var(--font-weight-headline-lg);
+  color: var(--color-on-surface);
+  margin: 0;
+}
+
+.subtitleMobile {
+  font-family: var(--font-family-body-md);
+  font-size: var(--font-size-body-md);
+  color: var(--color-on-surface-variant);
+  margin: 0;
+}
+
+.mobileQuickActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-sm);
+}
+
+.quickActionButtonPrimary, .quickActionButtonSecondary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  height: 80px;
+  border-radius: var(--radius-lg);
+  border: none;
+  font-family: var(--font-family-label-md);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.quickActionButtonPrimary {
+  background-color: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+}
+
+.quickActionButtonSecondary {
+  background-color: var(--color-secondary-container);
+  color: var(--color-on-secondary-container);
+}
+
+/* Hide mobile elements on desktop */
+@media (min-width: 1024px) {
+  .mobileHeader, .mobileQuickActions, .mobileStatsSection {
+    display: none !important;
+  }
+}
+
+/* Desktop Header Elements */
+.desktopHeader {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .desktopHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+}
+
+.headerContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.title {
+  font-family: var(--font-family-headline-lg);
+  font-size: var(--font-size-headline-lg);
+  font-weight: var(--font-weight-headline-lg);
+  color: var(--color-on-surface);
+  margin: 0;
+}
+
+.subtitle {
+  font-family: var(--font-family-body-lg);
+  font-size: var(--font-size-body-lg);
+  color: var(--color-on-surface-variant);
+  margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+/* Desktop KPI Bento */
+.kpiGridDesktop {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .kpiGridDesktop {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-lg);
+  }
+}
+
+/* Main Layout Grid */
+.mainGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-lg);
+}
+
+@media (min-width: 1024px) {
+  .mainGrid {
+    grid-template-columns: repeat(12, 1fr);
+  }
+}
+
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+@media (min-width: 1024px) {
+  .leftColumn {
+    grid-column: span 8;
+  }
+}
+
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+@media (min-width: 1024px) {
+  .rightColumn {
+    grid-column: span 4;
+  }
+}
+
+/* Mobile Stats Scroll */
+.mobileStatsSection h3 {
+  font-family: var(--font-family-headline-sm);
+  font-size: 16px;
+  color: var(--color-on-surface);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.statsScrollContainer {
+  display: flex;
+  gap: var(--spacing-sm);
+  overflow-x: auto;
+  padding-bottom: var(--spacing-sm);
+  margin: 0 calc(-1 * var(--spacing-md));
+  padding-left: var(--spacing-md);
+  padding-right: var(--spacing-md);
+}
+
+.statCard {
+  min-width: 120px;
+  background-color: var(--color-surface-container-low);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.statLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-on-surface-variant);
+}
+
+.statValue {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-on-surface);
+}
+
+.statTrendUp { color: #10b981; display: flex; align-items: center; gap: 4px; font-size: 12px; }
+.statTrendDown { color: var(--color-error); display: flex; align-items: center; gap: 4px; font-size: 12px; }
+.statTrendNeutral { color: var(--color-on-surface-variant); display: flex; align-items: center; gap: 4px; font-size: 12px; }
+
+/* Desktop Quick Actions */
+.desktopQuickActions {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .desktopQuickActions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-lg);
+  }
+}
+
+.glassButton {
+  background-color: rgba(30, 41, 59, 0.7); /* Approximate glass-card */
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg);
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.glassButton:hover {
+  background-color: var(--color-surface-container-highest);
+}
+
+.glassButtonContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.glassButtonContent h3 {
+  margin: 0;
+  font-family: var(--font-family-label-md);
+  font-size: 14px;
+  color: var(--color-on-surface);
+}
+
+.glassButtonContent p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-on-surface-variant);
+}
+
+/* Feed Card */
+.feedCard {
+  background-color: var(--color-surface-container-lowest);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--elevation-1);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid var(--color-outline-variant);
+}
+
+.feedHeader {
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--color-outline-variant);
+}
+
+.feedTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.feedTitleGroup h2 {
+  font-family: var(--font-family-headline-sm);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-on-surface);
+  margin: 0;
+}
+
+.feedList {
+  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md) var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.feedFooter {
+  padding: var(--spacing-md);
+  border-top: 1px solid var(--color-outline-variant);
+  margin-top: auto;
+}

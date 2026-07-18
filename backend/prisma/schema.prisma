@@ -12,21 +12,38 @@ model Tenant {
   name      String
   urlSlug   String   @unique
   createdAt DateTime @default(now())
-  
-  users       User[]
-  invitations Invitation[]
+
+  users                  User[]
+  invitations            Invitation[]
+  clients                Client[]
+  customFieldDefinitions CustomFieldDefinition[]
+  outcomeCategories      OutcomeCategory[]
+  interactions           Interaction[]
+  appointments           Appointment[]
+
+  // Inventory
+  categories     Category[]
+  warehouses     Warehouse[]
+  products       Product[]
+  stockLevels    StockLevel[]
+  stockMovements StockMovement[]
 }
 
 model User {
   id             String   @id
   email          String
   hashedPassword String
-  role           String   // 'SUPER_ADMIN', 'BUSINESS_OWNER', 'STAFF'
+  role           String // 'SUPER_ADMIN', 'BUSINESS_OWNER', 'STAFF'
   tenantId       String?
   createdAt      DateTime @default(now())
 
-  tenant              Tenant?              @relation(fields: [tenantId], references: [id])
-  passwordResetTokens PasswordResetToken[]
+  tenant               Tenant?              @relation(fields: [tenantId], references: [id])
+  passwordResetTokens  PasswordResetToken[]
+  assignedClients      Client[]             @relation("AssignedClients")
+  updatedClients       Client[]             @relation("LastUpdatedClients")
+  interactions         Interaction[]
+  assignedAppointments Appointment[]        @relation("AssignedAppointments")
+  inventoryMovements   StockMovement[]
 }
 
 model Invitation {
@@ -49,4 +66,194 @@ model PasswordResetToken {
   usedAt    DateTime?
 
   user User @relation(fields: [userId], references: [id])
+}
+
+model Client {
+  id                  String   @id
+  tenantId            String
+  name                String
+  email               String?
+  phone               String?
+  status              String // 'PROSPECT', 'ACTIVE', 'INACTIVE'
+  assignedUserId      String?
+  customFieldValues   Json
+  lastUpdatedByUserId String
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  tenant            Tenant        @relation(fields: [tenantId], references: [id])
+  assignedUser      User?         @relation("AssignedClients", fields: [assignedUserId], references: [id])
+  lastUpdatedByUser User          @relation("LastUpdatedClients", fields: [lastUpdatedByUserId], references: [id])
+  interactions      Interaction[]
+  appointments      Appointment[]
+
+  @@index([tenantId, status])
+  @@index([tenantId, assignedUserId])
+  @@index([tenantId, name])
+}
+
+model CustomFieldDefinition {
+  id        String   @id
+  tenantId  String
+  fieldName String
+  fieldType String // 'TEXT', 'NUMBER', 'DATE', 'SINGLE_SELECT'
+  options   String[] // for SINGLE_SELECT
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, fieldName])
+}
+
+model OutcomeCategory {
+  id       String @id
+  tenantId String
+  label    String
+
+  tenant       Tenant        @relation(fields: [tenantId], references: [id])
+  interactions Interaction[]
+
+  @@unique([tenantId, label])
+}
+
+model Interaction {
+  id                String   @id
+  tenantId          String
+  clientId          String
+  authorUserId      String
+  content           String
+  channel           String // 'MEETING', 'CALL', 'NOTE', 'EMAIL'
+  outcomeCategoryId String?
+  createdAt         DateTime @default(now())
+
+  tenant          Tenant           @relation(fields: [tenantId], references: [id])
+  client          Client           @relation(fields: [clientId], references: [id])
+  authorUser      User             @relation(fields: [authorUserId], references: [id])
+  outcomeCategory OutcomeCategory? @relation(fields: [outcomeCategoryId], references: [id])
+
+  @@index([tenantId, clientId])
+  @@index([tenantId, authorUserId])
+}
+
+model Appointment {
+  id             String   @id
+  tenantId       String
+  clientId       String
+  assignedUserId String
+  scheduledAt    DateTime
+  status         String // 'SCHEDULED', 'CONFIRMED', 'COMPLETED', 'CANCELLED'
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  tenant       Tenant                @relation(fields: [tenantId], references: [id])
+  client       Client                @relation(fields: [clientId], references: [id])
+  assignedUser User                  @relation("AssignedAppointments", fields: [assignedUserId], references: [id])
+  auditLogs    AppointmentAuditLog[]
+
+  @@index([tenantId, scheduledAt])
+  @@index([tenantId, assignedUserId])
+  @@index([tenantId, clientId])
+}
+
+model AppointmentAuditLog {
+  id            String   @id @default(uuid())
+  appointmentId String
+  previousDate  DateTime
+  newDate       DateTime
+  reason        String
+  changedBy     String
+  createdAt     DateTime @default(now())
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  @@index([appointmentId])
+}
+
+// ==========================================
+// INVENTORY MODULE
+// ==========================================
+
+model Category {
+  id       String @id
+  tenantId String
+  name     String
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id])
+  products Product[]
+
+  @@unique([tenantId, name])
+}
+
+model Warehouse {
+  id       String  @id
+  tenantId String
+  name     String
+  address  String?
+
+  tenant        Tenant          @relation(fields: [tenantId], references: [id])
+  stockLevels   StockLevel[]
+  movementsFrom StockMovement[] @relation("FromWarehouse")
+  movementsTo   StockMovement[] @relation("ToWarehouse")
+
+  @@unique([tenantId, name])
+}
+
+model Product {
+  id                String   @id
+  tenantId          String
+  name              String
+  description       String
+  categoryId        String?
+  price             Float
+  lowStockThreshold Int      @default(10)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  tenant      Tenant          @relation(fields: [tenantId], references: [id])
+  category    Category?       @relation(fields: [categoryId], references: [id])
+  stockLevels StockLevel[]
+  movements   StockMovement[]
+
+  @@index([tenantId, categoryId])
+  @@index([tenantId, name])
+}
+
+model StockLevel {
+  id                String @id
+  tenantId          String
+  productId         String
+  productTenantId   String
+  warehouseId       String
+  warehouseTenantId String
+  quantity          Int
+
+  tenant    Tenant    @relation(fields: [tenantId], references: [id])
+  product   Product   @relation(fields: [productId], references: [id])
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+
+  @@unique([tenantId, productId, warehouseId])
+}
+
+model StockMovement {
+  id              String   @id
+  tenantId        String
+  productId       String
+  fromWarehouseId String?
+  toWarehouseId   String?
+  quantity        Int
+  type            String // 'ADJUSTMENT', 'TRANSFER'
+  reason          String?
+  createdBy       String
+  createdAt       DateTime @default(now())
+
+  tenant        Tenant     @relation(fields: [tenantId], references: [id])
+  product       Product    @relation(fields: [productId], references: [id])
+  fromWarehouse Warehouse? @relation("FromWarehouse", fields: [fromWarehouseId], references: [id])
+  toWarehouse   Warehouse? @relation("ToWarehouse", fields: [toWarehouseId], references: [id])
+  authorUser    User       @relation(fields: [createdBy], references: [id])
+
+  @@index([tenantId, productId])
+  @@index([tenantId, fromWarehouseId])
+  @@index([tenantId, toWarehouseId])
+  @@index([tenantId, createdAt])
 }

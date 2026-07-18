@@ -1,0 +1,207 @@
+.dashboardContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+  height: 100%;
+  overflow-y: auto;
+  padding: var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+  .dashboardContainer {
+    padding: var(--spacing-lg);
+  }
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+  .header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+}
+
+.headerContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.title {
+  font-family: var(--font-family-headline-lg);
+  font-size: var(--font-size-headline-lg-mobile);
+  font-weight: var(--font-weight-headline-lg);
+  color: var(--color-on-surface);
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .title {
+    font-size: var(--font-size-headline-lg);
+  }
+}
+
+.subtitle {
+  font-family: var(--font-family-body-md);
+  font-size: var(--font-size-body-md);
+  color: var(--color-on-surface-variant);
+  margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+/* Bento Grid */
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md);
+}
+
+@media (min-width: 1024px) {
+  .kpiGrid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 1023px) {
+  .mobileHidden {
+    display: none;
+  }
+}
+
+/* Main Layout Grid */
+.mainGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-lg);
+}
+
+@media (min-width: 1024px) {
+  .mainGrid {
+    grid-template-columns: repeat(12, 1fr);
+  }
+}
+
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+@media (min-width: 1024px) {
+  .leftColumn {
+    grid-column: span 8;
+  }
+}
+
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+@media (min-width: 1024px) {
+  .rightColumn {
+    grid-column: span 4;
+  }
+}
+
+/* Placeholders grid (Bottom of left column) */
+.placeholdersGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+  .placeholdersGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.dashedPlaceholder {
+  border: 2px dashed var(--color-outline-variant);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--spacing-sm);
+  background-color: transparent;
+  opacity: 0.6;
+}
+
+.placeholderIcon {
+  color: var(--color-outline);
+}
+
+.dashedPlaceholder h3 {
+  font-family: var(--font-family-label-md);
+  font-size: var(--font-size-label-md);
+  font-weight: var(--font-weight-label-md);
+  color: var(--color-on-surface-variant);
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.dashedPlaceholder p {
+  font-family: var(--font-family-body-sm);
+  font-size: 13px;
+  color: var(--color-outline);
+  margin: 0;
+}
+
+/* Feed Card */
+.feedCard {
+  background-color: var(--color-surface-container-lowest);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--elevation-1);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid var(--color-outline-variant);
+}
+
+.feedHeader {
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--color-outline-variant);
+}
+
+.feedTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.feedTitleGroup h2 {
+  font-family: var(--font-family-headline-sm);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-on-surface);
+  margin: 0;
+}
+
+.feedList {
+  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md) var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.feedFooter {
+  padding: var(--spacing-md);
+  border-top: 1px solid var(--color-outline-variant);
+  margin-top: auto;
+}

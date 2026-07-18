@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Settings - Custom Fields &amp; Outcomes</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface": "#f8f9ff",
+                      "on-secondary": "#ffffff",
+                      "on-primary-fixed": "#0f0069",
+                      "on-surface": "#0b1c30",
+                      "tertiary": "#7e3000",
+                      "secondary": "#006591",
+                      "inverse-surface": "#213145",
+                      "primary-container": "#4f46e5",
+                      "error": "#ba1a1a",
+                      "tertiary-fixed-dim": "#ffb695",
+                      "primary": "#3525cd",
+                      "error-container": "#ffdad6",
+                      "surface-tint": "#4d44e3",
+                      "secondary-fixed": "#c9e6ff",
+                      "outline": "#777587",
+                      "on-secondary-fixed-variant": "#004c6e",
+                      "on-primary": "#ffffff",
+                      "surface-variant": "#d3e4fe",
+                      "secondary-container": "#39b8fd",
+                      "inverse-on-surface": "#eaf1ff",
+                      "on-tertiary-container": "#ffd2be",
+                      "outline-variant": "#c7c4d8",
+                      "on-error-container": "#93000a",
+                      "on-tertiary-fixed-variant": "#7b2f00",
+                      "background": "#f8f9ff",
+                      "surface-container-high": "#dce9ff",
+                      "inverse-primary": "#c3c0ff",
+                      "tertiary-fixed": "#ffdbcc",
+                      "tertiary-container": "#a44100",
+                      "surface-bright": "#f8f9ff",
+                      "on-surface-variant": "#464555",
+                      "on-primary-container": "#dad7ff",
+                      "surface-container-low": "#eff4ff",
+                      "secondary-fixed-dim": "#89ceff",
+                      "surface-container": "#e5eeff",
+                      "on-background": "#0b1c30",
+                      "on-secondary-fixed": "#001e2f",
+                      "on-primary-fixed-variant": "#3323cc",
+                      "surface-container-highest": "#d3e4fe",
+                      "on-error": "#ffffff",
+                      "primary-fixed": "#e2dfff",
+                      "on-secondary-container": "#004666",
+                      "surface-container-lowest": "#ffffff",
+                      "primary-fixed-dim": "#c3c0ff",
+                      "on-tertiary": "#ffffff",
+                      "on-tertiary-fixed": "#351000",
+                      "surface-dim": "#cbdbf5"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "md": "16px",
+                      "lg": "24px",
+                      "base": "4px",
+                      "sm": "8px",
+                      "xl": "32px",
+                      "sidebar-collapsed": "64px",
+                      "xs": "4px",
+                      "2xl": "48px",
+                      "max-content-width": "1280px",
+                      "sidebar-width": "240px"
+              },
+              "fontFamily": {
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "label-sm": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "display": [
+                              "Inter"
+                      ],
+                      "headline-lg-mobile": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "18px",
+                              {
+                                      "lineHeight": "26px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-sm": [
+                              "11px",
+                              {
+                                      "lineHeight": "14px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-lg": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display": [
+                              "36px",
+                              {
+                                      "lineHeight": "44px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        .swipe-item {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            touch-action: pan-y;
+        }
+        .swipe-actions {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            display: flex;
+            align-items: stretch;
+            z-index: 0;
+        }
+        .swipe-content {
+            position: relative;
+            z-index: 10;
+            background-color: #f8f9ff;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen antialiased flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-surface-container text-primary font-body-md border-b border-outline-variant flat no shadows docked full-width top-0 z-50">
+<div class="flex justify-between items-center w-full px-md h-16">
+<div class="flex items-center gap-sm cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined hover:bg-secondary-container/20 transition-colors p-sm rounded-full">arrow_back</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold">Settings</span>
+</div>
+<div class="flex items-center gap-sm">
+<button class="flex items-center justify-center p-sm rounded-full hover:bg-secondary-container/20 transition-colors cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 overflow-y-auto pb-2xl lg:hidden">
+<!-- Section: Custom Fields -->
+<section class="mt-lg">
+<div class="px-md mb-sm flex justify-between items-end">
+<h2 class="font-headline-md text-headline-md text-on-surface">Custom Fields</h2>
+</div>
+<div class="border-t border-b border-outline-variant bg-surface">
+<!-- Swipeable List Item 1 -->
+<div class="relative overflow-hidden border-b border-outline-variant last:border-b-0 swipe-container">
+<div class="swipe-actions">
+<button class="bg-secondary-container text-on-secondary-container px-lg flex items-center justify-center">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="bg-error text-on-error px-lg flex items-center justify-center">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+<div class="swipe-content p-md flex items-center justify-between swipe-item">
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant mb-xs">Text Input</p>
+<p class="font-body-lg text-body-lg font-medium">Company Size</p>
+</div>
+<span class="material-symbols-outlined text-outline">drag_indicator</span>
+</div>
+</div>
+<!-- Swipeable List Item 2 -->
+<div class="relative overflow-hidden border-b border-outline-variant last:border-b-0 swipe-container">
+<div class="swipe-actions">
+<button class="bg-secondary-container text-on-secondary-container px-lg flex items-center justify-center">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="bg-error text-on-error px-lg flex items-center justify-center">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+<div class="swipe-content p-md flex items-center justify-between swipe-item">
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant mb-xs">Dropdown</p>
+<p class="font-body-lg text-body-lg font-medium">Industry</p>
+</div>
+<span class="material-symbols-outlined text-outline">drag_indicator</span>
+</div>
+</div>
+<!-- Swipeable List Item 3 -->
+<div class="relative overflow-hidden border-b border-outline-variant last:border-b-0 swipe-container">
+<div class="swipe-actions">
+<button class="bg-secondary-container text-on-secondary-container px-lg flex items-center justify-center">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="bg-error text-on-error px-lg flex items-center justify-center">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+<div class="swipe-content p-md flex items-center justify-between swipe-item" style="transform: translateX(-120px);">
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant mb-xs">Date Picker</p>
+<p class="font-body-lg text-body-lg font-medium">Renewal Date</p>
+</div>
+<span class="material-symbols-outlined text-outline">drag_indicator</span>
+</div>
+</div>
+</div>
+<div class="px-md mt-sm">
+<button class="w-full flex items-center justify-center gap-sm py-sm text-primary font-label-md text-label-md bg-surface-container-low rounded-lg border border-dashed border-primary/30 hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                    Add Custom Field
+                </button>
+</div>
+</section>
+<!-- Section: Outcome Categories -->
+<section class="mt-lg">
+<div class="px-md mb-sm flex justify-between items-end">
+<h2 class="font-headline-md text-headline-md text-on-surface">Outcome Categories</h2>
+</div>
+<div class="border-t border-b border-outline-variant bg-surface">
+<!-- Swipeable List Item 1 -->
+<div class="relative overflow-hidden border-b border-outline-variant last:border-b-0 swipe-container">
+<div class="swipe-actions">
+<button class="bg-secondary-container text-on-secondary-container px-lg flex items-center justify-center">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="bg-error text-on-error px-lg flex items-center justify-center">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+<div class="swipe-content p-md flex items-center justify-between swipe-item">
+<div class="flex items-center gap-sm">
+<div class="w-4 h-4 rounded-full bg-[#10b981]"></div>
+<p class="font-body-lg text-body-lg font-medium">Closed Won</p>
+</div>
+<span class="material-symbols-outlined text-outline">drag_indicator</span>
+</div>
+</div>
+<!-- Swipeable List Item 2 -->
+<div class="relative overflow-hidden border-b border-outline-variant last:border-b-0 swipe-container">
+<div class="swipe-actions">
+<button class="bg-secondary-container text-on-secondary-container px-lg flex items-center justify-center">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="bg-error text-on-error px-lg flex items-center justify-center">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+<div class="swipe-content p-md flex items-center justify-between swipe-item">
+<div class="flex items-center gap-sm">
+<div class="w-4 h-4 rounded-full bg-[#ef4444]"></div>
+<p class="font-body-lg text-body-lg font-medium">Closed Lost</p>
+</div>
+<span class="material-symbols-outlined text-outline">drag_indicator</span>
+</div>
+</div>
+<!-- Swipeable List Item 3 -->
+<div class="relative overflow-hidden border-b border-outline-variant last:border-b-0 swipe-container">
+<div class="swipe-actions">
+<button class="bg-secondary-container text-on-secondary-container px-lg flex items-center justify-center">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="bg-error text-on-error px-lg flex items-center justify-center">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+<div class="swipe-content p-md flex items-center justify-between swipe-item">
+<div class="flex items-center gap-sm">
+<div class="w-4 h-4 rounded-full bg-[#f59e0b]"></div>
+<p class="font-body-lg text-body-lg font-medium">Pending Review</p>
+</div>
+<span class="material-symbols-outlined text-outline">drag_indicator</span>
+</div>
+</div>
+</div>
+<div class="px-md mt-sm">
+<button class="w-full flex items-center justify-center gap-sm py-sm text-primary font-label-md text-label-md bg-surface-container-low rounded-lg border border-dashed border-primary/30 hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                    Add Category
+                </button>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="bg-surface-container-highest text-primary font-label-sm border-t border-outline-variant shadow-lg lg:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-16 px-sm docked full-width bottom-0 rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant active:scale-90 transition-transform p-sm rounded-xl" href="#">
+<span class="material-symbols-outlined mb-xs">home</span>
+<span>Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant active:scale-90 transition-transform p-sm rounded-xl" href="#">
+<span class="material-symbols-outlined mb-xs">groups</span>
+<span>Clients</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant active:scale-90 transition-transform p-sm rounded-xl" href="#">
+<span class="material-symbols-outlined mb-xs">event</span>
+<span>Calendar</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined mb-xs">menu</span>
+<span>More</span>
+</a>
+</nav>
+<script>
+        // Simple swipe-to-reveal logic simulation
+        document.querySelectorAll('.swipe-container').forEach(container => {
+            const item = container.querySelector('.swipe-item');
+            let startX;
+            let currentX = 0;
+            const threshold = -120; // width of actions
+
+            container.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                item.style.transition = 'none';
+            });
+
+            container.addEventListener('touchmove', (e) => {
+                const diffX = e.touches[0].clientX - startX;
+                if (diffX < 0 && diffX >= threshold) {
+                    item.style.transform = `translateX(${diffX}px)`;
+                }
+            });
+
+            container.addEventListener('touchend', (e) => {
+                item.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                const currentTransform = new WebKitCSSMatrix(window.getComputedStyle(item).transform).m41;
+                
+                if (currentTransform < threshold / 2) {
+                    item.style.transform = `translateX(${threshold}px)`;
+                } else {
+                    item.style.transform = `translateX(0)`;
+                }
+            });
+        });
+    </script>
+</body></html>

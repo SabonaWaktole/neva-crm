@@ -14,7 +14,7 @@ describe('authorize middleware', () => {
   });
 
   it('should allow access if user has required role', () => {
-    req.user = { userId: 'u1', role: UserRole.BUSINESS_OWNER, tenantId: 't1' };
+    req.user = { userId: 'u1', role: UserRole.BUSINESS_OWNER, tenantId: 't1', tenantSlug: 't1-slug' };
 
     const middleware = authorize([UserRole.BUSINESS_OWNER, UserRole.SUPER_ADMIN]);
     middleware(req as Request, res as Response, next);
@@ -23,7 +23,7 @@ describe('authorize middleware', () => {
   });
 
   it('should return 403 if user lacks required role', () => {
-    req.user = { userId: 'u1', role: UserRole.STAFF, tenantId: 't1' };
+    req.user = { userId: 'u1', role: UserRole.STAFF, tenantId: 't1', tenantSlug: 't1-slug' };
 
     const middleware = authorize([UserRole.BUSINESS_OWNER, UserRole.SUPER_ADMIN]);
     middleware(req as Request, res as Response, next);

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Nexus CRM - Staff Invitation</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#0b1326",
+                        "primary-container": "#8083ff",
+                        "on-secondary-fixed-variant": "#39485a",
+                        "on-primary": "#1000a9",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "tertiary": "#ffb783",
+                        "surface-container-highest": "#2d3449",
+                        "tertiary-fixed-dim": "#ffb783",
+                        "on-primary-container": "#0d0096",
+                        "inverse-primary": "#494bd6",
+                        "tertiary-container": "#d97721",
+                        "inverse-surface": "#dae2fd",
+                        "secondary": "#b9c8de",
+                        "on-tertiary": "#4f2500",
+                        "surface-container-lowest": "#060e20",
+                        "on-error-container": "#ffdad6",
+                        "surface-dim": "#0b1326",
+                        "on-secondary-fixed": "#0d1c2d",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "on-surface": "#dae2fd",
+                        "error": "#ffb4ab",
+                        "background": "#0b1326",
+                        "surface-variant": "#2d3449",
+                        "surface-container-low": "#131b2e",
+                        "surface-bright": "#31394d",
+                        "outline-variant": "#464554",
+                        "on-error": "#690005",
+                        "on-secondary": "#233143",
+                        "secondary-fixed-dim": "#b9c8de",
+                        "error-container": "#93000a",
+                        "on-surface-variant": "#c7c4d7",
+                        "surface-container": "#171f33",
+                        "primary": "#c0c1ff",
+                        "tertiary-fixed": "#ffdcc5",
+                        "on-background": "#dae2fd",
+                        "surface-tint": "#c0c1ff",
+                        "secondary-fixed": "#d4e4fa",
+                        "outline": "#908fa0",
+                        "on-tertiary-fixed-variant": "#703700",
+                        "on-tertiary-fixed": "#301400",
+                        "on-secondary-container": "#a7b6cc",
+                        "surface-container-high": "#222a3d",
+                        "on-tertiary-container": "#452000",
+                        "on-primary-fixed": "#07006c",
+                        "primary-fixed": "#e1e0ff",
+                        "inverse-on-surface": "#283044",
+                        "secondary-container": "#39485a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "40px",
+                        "lg": "24px",
+                        "xl": "32px",
+                        "unit": "4px",
+                        "sm": "8px",
+                        "gutter": "24px",
+                        "xs": "4px",
+                        "md": "16px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #0b1326;
+            color: #dae2fd;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-start overflow-x-hidden">
+<!-- Subtle Background Shader -->
+<div class="fixed inset-0 z-0 pointer-events-none opacity-40">
+
+</div>
+<!-- Main Content Canvas -->
+<main class="relative z-10 w-full max-w-[480px] px-md py-xl flex flex-col gap-lg">
+<!-- Header Section -->
+<header class="flex flex-col gap-xs pt-lg">
+<div class="flex items-center gap-sm mb-xs">
+<div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container" style="font-variation-settings: 'FILL' 1;">hub</span>
+</div>
+<span class="text-primary font-headline-md text-headline-md font-bold tracking-tight">Nexus CRM</span>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface leading-tight">
+                Welcome to <br/>Nexus CRM
+            </h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-[90%]">
+                Your workspace is ready. Finalize your credentials to start managing your enterprise data.
+            </p>
+</header>
+<!-- Invited By Card (Bento Style) -->
+<section class="glass-panel p-md rounded-xl flex items-center gap-md relative overflow-hidden">
+<div class="absolute inset-0 shimmer pointer-events-none opacity-20"></div>
+<div class="relative w-14 h-14 shrink-0">
+<img class="w-full h-full rounded-full object-cover border-2 border-primary/20" data-alt="A professional headshot of Sarah Jenkins, a mid-30s executive with a friendly yet authoritative expression. She has warm lighting on her face, set against a blurred high-tech office background with soft blue and indigo hues. The photography style is sharp, corporate, and clean, aligning with a premium enterprise dark mode aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDGI5vRqOwFIY878CuvJOBXTq1eR-AIYLhKBgAvorgE9R9KptGZFDSZ0rM0qvp_kZPxwPqBIoI9MP3hYgFck97bwZuxb6AsM5q67EqufN6f6a-aSl10GWyppYtOANEeHOsNaeC0G_9dxafoAkbyjBaNiyvx7Nr24ETscI9jLo7SazcAhTlxDLcYlmNz3WuLmzCRK-bvZdd3MNTrR1D6U7anjxcDAAvHe_r9TSgURvch3-jU0W9s2TFhUXy3GXhQFEMO3WMW0PUazRM"/>
+<div class="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-surface rounded-full"></div>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-primary uppercase tracking-wider">Invited By</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Sarah Jenkins</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Senior Operations Lead</span>
+</div>
+<div class="ml-auto">
+<span class="material-symbols-outlined text-outline">verified</span>
+</div>
+</section>
+<!-- Setup Form Section -->
+<section class="flex flex-col gap-md">
+<div class="flex items-center justify-between px-xs">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Set up your profile</h2>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Step 1 of 2</span>
+</div>
+<form class="flex flex-col gap-md">
+<!-- Full Name Input -->
+<div class="flex flex-col gap-xs">
+<label class="font-label-md text-label-md text-on-surface ml-1">Full Name</label>
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-md flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-on-surface-variant group-focus-within:text-primary transition-colors">person</span>
+</div>
+<input class="w-full bg-surface-container border border-outline-variant rounded-lg py-3 pl-11 pr-md text-on-surface placeholder:text-on-surface-variant/50 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none" placeholder="Enter your full name" type="text"/>
+</div>
+</div>
+<!-- Professional Email (Read Only/Prefilled) -->
+<div class="flex flex-col gap-xs opacity-80">
+<label class="font-label-md text-label-md text-on-surface ml-1">Professional Email</label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-md flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-on-surface-variant">mail</span>
+</div>
+<input class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg py-3 pl-11 pr-md text-on-surface-variant cursor-not-allowed outline-none" readonly="" type="email" value="alex.staff@corporate.com"/>
+</div>
+</div>
+<!-- Password Input -->
+<div class="flex flex-col gap-xs">
+<label class="font-label-md text-label-md text-on-surface ml-1">Create Password</label>
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-md flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-on-surface-variant group-focus-within:text-primary transition-colors">lock</span>
+</div>
+<input class="w-full bg-surface-container border border-outline-variant rounded-lg py-3 pl-11 pr-11 text-on-surface placeholder:text-on-surface-variant/50 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none" placeholder="Min. 12 characters" type="password"/>
+<button class="absolute inset-y-0 right-0 pr-md flex items-center text-on-surface-variant hover:text-on-surface" type="button">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</div>
+</div>
+<!-- Department Choice (Chips) -->
+<div class="flex flex-col gap-sm mt-xs">
+<label class="font-label-md text-label-md text-on-surface ml-1">Primary Department</label>
+<div class="flex flex-wrap gap-sm">
+<button class="dept-chip bg-surface-container-highest text-primary border border-primary px-md py-xs rounded-full font-label-md text-label-md transition-all active:scale-95" onclick="selectChip(this)" type="button">Sales</button>
+<button class="dept-chip bg-surface-container border border-outline-variant text-on-surface-variant px-md py-xs rounded-full font-label-md text-label-md transition-all hover:bg-surface-container-high active:scale-95" onclick="selectChip(this)" type="button">Support</button>
+<button class="dept-chip bg-surface-container border border-outline-variant text-on-surface-variant px-md py-xs rounded-full font-label-md text-label-md transition-all hover:bg-surface-container-high active:scale-95" onclick="selectChip(this)" type="button">Marketing</button>
+</div>
+</div>
+</form>
+</section>
+<!-- CTA Section -->
+<footer class="mt-lg flex flex-col gap-md">
+<button class="w-full bg-primary-container text-on-primary-container font-headline-sm text-headline-sm py-4 rounded-xl font-bold shadow-lg shadow-primary-container/10 active:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-sm">
+                Join Workspace
+                <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+<p class="text-center font-body-sm text-body-sm text-on-surface-variant">
+                By joining, you agree to Nexus CRM <a class="text-primary underline" href="#">Terms of Service</a> and <a class="text-primary underline" href="#">Privacy Policy</a>.
+            </p>
+</footer>
+<!-- Bottom Spacer -->
+<div class="h-10"></div>
+</main>
+<script>
+        function selectChip(element) {
+            const chips = document.querySelectorAll('.dept-chip');
+            chips.forEach(chip => {
+                chip.classList.remove('bg-primary-container', 'text-on-primary-container', 'border-primary');
+                chip.classList.add('bg-surface-container', 'text-on-surface-variant', 'border-outline-variant');
+            });
+            element.classList.remove('bg-surface-container', 'text-on-surface-variant', 'border-outline-variant');
+            element.classList.add('bg-primary-container', 'text-on-primary-container', 'border-primary');
+        }
+
+        // Micro-interaction for form inputs
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.classList.add('scale-[1.01]');
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.classList.remove('scale-[1.01]');
+            });
+        });
+    </script>
+</body></html>

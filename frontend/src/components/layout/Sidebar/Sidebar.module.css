@@ -1,0 +1,123 @@
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 64px; /* below header */
+  height: calc(100vh - 64px);
+  z-index: 40;
+  display: none; /* hidden on mobile by default */
+  flex-direction: column;
+  padding: var(--spacing-md) 0;
+  background-color: var(--color-surface);
+  border-right: 1px solid var(--color-outline-variant);
+  width: var(--spacing-sidebar-width);
+  transition: width 0.3s ease-in-out;
+  flex-shrink: 0;
+}
+
+/* Show sidebar on md screens and up */
+@media (min-width: 768px) {
+  .sidebar {
+    display: flex;
+  }
+}
+
+.orgSection {
+  padding: 0 var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.orgIcon {
+  width: 40px;
+  height: 40px;
+  background-color: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+  border-radius: var(--radius-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.orgInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.orgName {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-headline-md);
+  font-weight: var(--font-weight-headline-md);
+  line-height: var(--font-line-height-headline-md);
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.orgTier {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-label-sm);
+  font-weight: var(--font-weight-label-sm);
+  line-height: var(--font-line-height-label-sm);
+  color: var(--color-on-surface-variant);
+  margin: 0;
+}
+
+.actionSection {
+  padding: 0 var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.navSection {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 var(--spacing-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--color-on-surface-variant);
+}
+
+.navItem:hover {
+  background-color: var(--color-surface-container-low);
+}
+
+.navItemActive {
+  background-color: var(--color-surface-container-highest);
+  color: var(--color-primary);
+  border-left-color: var(--color-primary);
+}
+
+.navIcon {
+  font-size: 20px;
+}
+
+.navLabel {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-label-md);
+  font-weight: var(--font-weight-label-md);
+}
+
+.bottomSection {
+  padding: 8px var(--spacing-sm) 0 var(--spacing-sm);
+  margin-top: auto;
+  border-top: 1px solid var(--color-outline-variant);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.logoutItem {
+  color: var(--color-error);
+}

@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Nexus CRM - Custom Fields &amp; Categories</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#494bd6",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "on-secondary": "#233143",
+                        "on-tertiary": "#4f2500",
+                        "tertiary-fixed": "#ffdcc5",
+                        "primary-fixed": "#e1e0ff",
+                        "on-primary": "#1000a9",
+                        "surface-bright": "#31394d",
+                        "on-tertiary-fixed": "#301400",
+                        "secondary": "#b9c8de",
+                        "on-error": "#690005",
+                        "error-container": "#93000a",
+                        "on-primary-fixed": "#07006c",
+                        "secondary-fixed-dim": "#b9c8de",
+                        "secondary-fixed": "#d4e4fa",
+                        "surface-container-highest": "#2d3449",
+                        "on-surface-variant": "#c7c4d7",
+                        "on-background": "#dae2fd",
+                        "on-tertiary-container": "#452000",
+                        "inverse-on-surface": "#283044",
+                        "tertiary-fixed-dim": "#ffb783",
+                        "surface-container": "#171f33",
+                        "on-error-container": "#ffdad6",
+                        "inverse-surface": "#dae2fd",
+                        "outline-variant": "#464554",
+                        "on-secondary-fixed-variant": "#39485a",
+                        "on-secondary-fixed": "#0d1c2d",
+                        "on-primary-container": "#0d0096",
+                        "tertiary-container": "#d97721",
+                        "tertiary": "#ffb783",
+                        "surface-container-high": "#222a3d",
+                        "primary": "#c0c1ff",
+                        "on-tertiary-fixed-variant": "#703700",
+                        "error": "#ffb4ab",
+                        "surface-dim": "#0b1326",
+                        "outline": "#908fa0",
+                        "surface-container-lowest": "#060e20",
+                        "primary-container": "#8083ff",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "background": "#0b1326",
+                        "surface-container-low": "#131b2e",
+                        "on-secondary-container": "#a7b6cc",
+                        "surface": "#0b1326",
+                        "on-surface": "#dae2fd",
+                        "surface-tint": "#c0c1ff",
+                        "secondary-container": "#39485a",
+                        "surface-variant": "#2d3449"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "margin-desktop": "40px",
+                        "unit": "4px",
+                        "xs": "4px",
+                        "md": "16px",
+                        "gutter": "24px",
+                        "xl": "32px",
+                        "margin-mobile": "16px",
+                        "sm": "8px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-fill {
+            font-variation-settings: 'FILL' 1;
+        }
+        
+        /* Swipe-to-action simulation styles */
+        .swipe-item-container {
+            position: relative;
+            overflow: hidden;
+        }
+        .swipe-actions {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            display: flex;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+        .swipe-item-content {
+            transition: transform 0.3s ease;
+            position: relative;
+            z-index: 10;
+        }
+        /* Reveal class applied via JS */
+        .swipe-item-container.revealed .swipe-item-content {
+            transform: translateX(-120px);
+        }
+        .swipe-item-container.revealed .swipe-actions {
+            transform: translateX(0);
+        }
+        
+        /* Modal transition */
+        .modal-enter { opacity: 0; transform: translateY(100%); }
+        .modal-enter-active { opacity: 1; transform: translateY(0); transition: opacity 300ms, transform 300ms cubic-bezier(0.4, 0, 0.2, 1); }
+        .modal-leave { opacity: 1; transform: translateY(0); }
+        .modal-leave-active { opacity: 0; transform: translateY(100%); transition: opacity 200ms, transform 200ms cubic-bezier(0.4, 0, 0.2, 1); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex flex-col md:hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top App Bar (Contextual/Sub-page) -->
+<header class="bg-surface-container flex items-center w-full px-md h-16 border-b border-outline-variant sticky top-0 z-40">
+<button class="mr-sm p-sm rounded-full text-primary hover:bg-secondary-container/20 transition-colors cursor-pointer active:opacity-80" onclick="alert('Navigate back to Settings main')">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="flex-1">
+<h1 class="font-headline-sm text-headline-sm text-on-surface">Data Fields</h1>
+</div>
+<button class="p-sm rounded-full text-primary hover:bg-secondary-container/20 transition-colors cursor-pointer active:opacity-80" id="main-add-btn">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 p-margin-mobile overflow-y-auto space-y-xl pb-24">
+<!-- Section: Custom Fields -->
+<section>
+<div class="flex items-center justify-between mb-sm px-sm">
+<h2 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Custom Fields</h2>
+<span class="font-label-sm text-label-sm text-primary">3 Active</span>
+</div>
+<div class="bg-surface-container rounded-lg border border-outline-variant overflow-hidden shadow-sm flex flex-col divide-y divide-outline-variant">
+<!-- Field Item 1 -->
+<div class="swipe-item-container bg-surface-container w-full h-16">
+<div class="swipe-actions w-[120px] h-full flex">
+<button class="flex-1 bg-surface-container-highest text-on-surface flex items-center justify-center border-l border-outline-variant cursor-pointer active:bg-secondary-container" onclick="openEditModal('Industry Vertical')">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+<button class="flex-1 bg-error-container text-on-error-container flex items-center justify-center cursor-pointer active:opacity-80" onclick="triggerDeleteWarning('Industry Vertical')">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+<div class="swipe-item-content h-full w-full bg-surface-container px-md flex items-center justify-between cursor-pointer active:bg-surface-container-high" onclick="toggleSwipe(this.parentElement)">
+<div class="flex items-center space-x-md">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined text-sm" data-icon="format_list_bulleted">format_list_bulleted</span>
+</div>
+<div>
+<h3 class="font-body-md text-body-md text-on-surface font-medium">Industry Vertical</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Dropdown • Required</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-sm" data-icon="drag_indicator">drag_indicator</span>
+</div>
+</div>
+<!-- Field Item 2 -->
+<div class="swipe-item-container bg-surface-container w-full h-16">
+<div class="swipe-actions w-[120px] h-full flex">
+<button class="flex-1 bg-surface-container-highest text-on-surface flex items-center justify-center border-l border-outline-variant cursor-pointer active:bg-secondary-container">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+<button class="flex-1 bg-error-container text-on-error-container flex items-center justify-center cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+<div class="swipe-item-content h-full w-full bg-surface-container px-md flex items-center justify-between cursor-pointer active:bg-surface-container-high" onclick="toggleSwipe(this.parentElement)">
+<div class="flex items-center space-x-md">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined text-sm" data-icon="calendar_month">calendar_month</span>
+</div>
+<div>
+<h3 class="font-body-md text-body-md text-on-surface font-medium">Renewal Date</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Date • Optional</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-sm" data-icon="drag_indicator">drag_indicator</span>
+</div>
+</div>
+<!-- Field Item 3 -->
+<div class="swipe-item-container bg-surface-container w-full h-16">
+<div class="swipe-actions w-[120px] h-full flex">
+<button class="flex-1 bg-surface-container-highest text-on-surface flex items-center justify-center border-l border-outline-variant cursor-pointer active:bg-secondary-container">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+<button class="flex-1 bg-error-container text-on-error-container flex items-center justify-center cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+<div class="swipe-item-content h-full w-full bg-surface-container px-md flex items-center justify-between cursor-pointer active:bg-surface-container-high" onclick="toggleSwipe(this.parentElement)">
+<div class="flex items-center space-x-md">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined text-sm" data-icon="attach_money">attach_money</span>
+</div>
+<div>
+<h3 class="font-body-md text-body-md text-on-surface font-medium">LTV Estimate</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Currency • Calculated</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-sm" data-icon="drag_indicator">drag_indicator</span>
+</div>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-xs px-sm text-center">Swipe left on a row to edit or delete.</p>
+</section>
+<!-- Section: Outcome Categories -->
+<section>
+<div class="flex items-center justify-between mb-sm px-sm">
+<h2 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Outcome Categories</h2>
+<span class="font-label-sm text-label-sm text-primary">4 Active</span>
+</div>
+<div class="bg-surface-container rounded-lg border border-outline-variant overflow-hidden shadow-sm grid grid-cols-1 divide-y divide-outline-variant">
+<!-- Category 1 -->
+<div class="px-md py-sm bg-surface-container flex items-center justify-between active:bg-surface-container-high transition-colors">
+<div class="flex items-center space-x-sm">
+<div class="w-3 h-3 rounded-full bg-[#10b981]"></div>
+<h3 class="font-body-md text-body-md text-on-surface">Closed Won</h3>
+</div>
+<button class="p-xs text-on-surface-variant active:text-on-surface">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<!-- Category 2 -->
+<div class="px-md py-sm bg-surface-container flex items-center justify-between active:bg-surface-container-high transition-colors">
+<div class="flex items-center space-x-sm">
+<div class="w-3 h-3 rounded-full bg-[#ef4444]"></div>
+<h3 class="font-body-md text-body-md text-on-surface">Closed Lost</h3>
+</div>
+<button class="p-xs text-on-surface-variant active:text-on-surface">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<!-- Category 3 -->
+<div class="px-md py-sm bg-surface-container flex items-center justify-between active:bg-surface-container-high transition-colors">
+<div class="flex items-center space-x-sm">
+<div class="w-3 h-3 rounded-full bg-[#f59e0b]"></div>
+<h3 class="font-body-md text-body-md text-on-surface">Nurture</h3>
+</div>
+<button class="p-xs text-on-surface-variant active:text-on-surface">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<!-- Category 4 -->
+<div class="px-md py-sm bg-surface-container flex items-center justify-between active:bg-surface-container-high transition-colors">
+<div class="flex items-center space-x-sm">
+<div class="w-3 h-3 rounded-full bg-[#3b82f6]"></div>
+<h3 class="font-body-md text-body-md text-on-surface">In Progress</h3>
+</div>
+<button class="p-xs text-on-surface-variant active:text-on-surface">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+<button class="w-full mt-md py-sm border border-outline-variant text-primary font-label-md text-label-md rounded-lg flex items-center justify-center space-x-xs active:bg-surface-container-high transition-colors" onclick="openAddCategoryModal()">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+<span>Add Category</span>
+</button>
+</section>
+</main>
+<!-- Full Screen Modal: Add/Edit Field -->
+<div class="fixed inset-0 z-50 bg-background hidden flex-col modal-enter" id="field-modal">
+<header class="bg-surface-container flex items-center w-full px-md h-16 border-b border-outline-variant">
+<button class="mr-sm p-sm rounded-full text-on-surface hover:bg-secondary-container/20 transition-colors cursor-pointer" onclick="closeModal('field-modal')">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+<div class="flex-1">
+<h1 class="font-headline-sm text-headline-sm text-on-surface" id="field-modal-title">Add Custom Field</h1>
+</div>
+<button class="px-md py-xs rounded-full bg-primary text-on-primary font-label-md text-label-md cursor-pointer active:opacity-80" onclick="closeModal('field-modal')">
+                Save
+            </button>
+</header>
+<div class="flex-1 overflow-y-auto p-margin-mobile space-y-md">
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant block">Field Label</label>
+<input class="w-full bg-surface-container border border-outline-variant rounded-lg px-md py-sm text-body-md font-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="e.g., Target Demographic" type="text"/>
+</div>
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant block">Field Type</label>
+<div class="relative">
+<select class="w-full bg-surface-container border border-outline-variant rounded-lg px-md py-sm text-body-md font-body-md text-on-surface appearance-none focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+<option>Text (Single Line)</option>
+<option>Text (Multi-Line)</option>
+<option>Dropdown</option>
+<option>Number</option>
+<option>Date</option>
+<option>Currency</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-md text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container p-sm rounded-lg border border-outline-variant flex items-center justify-between">
+<div>
+<h4 class="font-body-md text-body-md text-on-surface">Required Field</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Make this mandatory for new records</p>
+</div>
+<!-- Toggle Switch -->
+<div class="w-12 h-6 bg-surface-container-highest rounded-full relative cursor-pointer active:scale-95 transition-transform" onclick="this.classList.toggle('bg-primary'); this.children[0].classList.toggle('translate-x-6'); this.children[0].classList.toggle('bg-on-primary');">
+<div class="w-5 h-5 bg-outline rounded-full absolute top-[2px] left-[2px] transition-transform duration-200 shadow-sm"></div>
+</div>
+</div>
+<div class="bg-surface-container p-sm rounded-lg border border-outline-variant flex items-center justify-between">
+<div>
+<h4 class="font-body-md text-body-md text-on-surface">Show in List Views</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Display as a column by default</p>
+</div>
+<!-- Toggle Switch (On) -->
+<div class="w-12 h-6 bg-primary rounded-full relative cursor-pointer active:scale-95 transition-transform" onclick="this.classList.toggle('bg-primary'); this.classList.toggle('bg-surface-container-highest'); this.children[0].classList.toggle('translate-x-6'); this.children[0].classList.toggle('bg-on-primary'); this.children[0].classList.toggle('bg-outline');">
+<div class="w-5 h-5 bg-on-primary rounded-full absolute top-[2px] left-[2px] translate-x-6 transition-transform duration-200 shadow-sm"></div>
+</div>
+</div>
+<div class="pt-xl text-center">
+<button class="text-error font-label-md text-label-md py-sm px-lg hidden" id="modal-delete-btn" onclick="triggerDeleteWarning('current field')">Delete Field</button>
+</div>
+</div>
+</div>
+<!-- Warning / Deletion Bottom Sheet Modal -->
+<div class="fixed inset-0 z-[60] hidden" id="delete-warning-modal">
+<div class="absolute inset-0 bg-surface-dim/80 backdrop-blur-sm" onclick="closeWarningModal()"></div>
+<div class="absolute bottom-0 left-0 w-full bg-surface-container rounded-t-xl border-t border-outline-variant p-margin-mobile shadow-[0_-10px_40px_rgba(0,0,0,0.5)] transform translate-y-full transition-transform duration-300 ease-out" id="delete-warning-sheet">
+<div class="w-12 h-1 bg-outline-variant rounded-full mx-auto mb-md"></div>
+<div class="flex items-start space-x-md mb-lg">
+<div class="w-10 h-10 rounded-full bg-error-container/20 flex items-center justify-center flex-shrink-0 text-error">
+<span class="material-symbols-outlined icon-fill" data-icon="warning">warning</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-error mb-xs">Delete Field?</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                        Deleting <span class="font-bold text-on-surface" id="delete-field-name">Field Name</span> will remove it from all records. This action cannot be undone and may result in permanent data loss.
+                    </p>
+</div>
+</div>
+<div class="space-y-sm">
+<button class="w-full bg-error text-on-error py-md rounded-lg font-label-md text-label-md active:opacity-80 transition-opacity" onclick="confirmDelete()">
+                    Yes, Delete Field
+                </button>
+<button class="w-full bg-transparent border border-outline-variant text-on-surface py-md rounded-lg font-label-md text-label-md active:bg-surface-container-high transition-colors" onclick="closeWarningModal()">
+                    Cancel
+                </button>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation Shell (Suppressed contextually per rules, but included here hidden to satisfy structural potential if user navigated back to root, though technically suppressed per JSON instructions for Settings/Sub-pages. Excluded entirely from active render per "Automatic Suppression" rule for Task-Focused sub-pages with "Back" action.) -->
+<script>
+        // Swipe to reveal logic
+        let currentlyRevealed = null;
+
+        function toggleSwipe(element) {
+            if (currentlyRevealed && currentlyRevealed !== element) {
+                currentlyRevealed.classList.remove('revealed');
+            }
+            element.classList.toggle('revealed');
+            if (element.classList.contains('revealed')) {
+                currentlyRevealed = element;
+            } else {
+                currentlyRevealed = null;
+            }
+        }
+
+        // Close swipe actions when clicking outside
+        document.addEventListener('click', function(event) {
+            if (currentlyRevealed && !currentlyRevealed.contains(event.target)) {
+                currentlyRevealed.classList.remove('revealed');
+                currentlyRevealed = null;
+            }
+        });
+
+        // Modal Logic
+        const addBtn = document.getElementById('main-add-btn');
+        const fieldModal = document.getElementById('field-modal');
+        const modalTitle = document.getElementById('field-modal-title');
+        const modalDeleteBtn = document.getElementById('modal-delete-btn');
+
+        addBtn.addEventListener('click', () => {
+            modalTitle.textContent = 'Add Custom Field';
+            modalDeleteBtn.classList.add('hidden');
+            openModal('field-modal');
+        });
+
+        function openEditModal(fieldName) {
+            modalTitle.textContent = `Edit Field`;
+            // In a real app, populate fields here based on fieldName
+            modalDeleteBtn.classList.remove('hidden');
+            if (currentlyRevealed) {
+                currentlyRevealed.classList.remove('revealed');
+                currentlyRevealed = null;
+            }
+            openModal('field-modal');
+        }
+
+        function openAddCategoryModal() {
+            modalTitle.textContent = 'Add Category';
+            modalDeleteBtn.classList.add('hidden');
+            openModal('field-modal'); // Reusing field modal layout for simplicity in this demo, normally would be a distinct form
+        }
+
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.remove('hidden');
+            // Force reflow for transition
+            void modal.offsetWidth;
+            modal.classList.remove('modal-enter');
+            modal.classList.add('modal-enter-active');
+            
+            setTimeout(() => {
+                modal.classList.remove('modal-enter-active');
+            }, 300);
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.add('modal-leave-active');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('modal-leave-active');
+                modal.classList.add('modal-enter'); // reset state
+            }, 200);
+        }
+
+        // Warning Modal Logic
+        const warningModal = document.getElementById('delete-warning-modal');
+        const warningSheet = document.getElementById('delete-warning-sheet');
+        const deleteFieldNameSpan = document.getElementById('delete-field-name');
+
+        function triggerDeleteWarning(fieldName) {
+            deleteFieldNameSpan.textContent = fieldName;
+            warningModal.classList.remove('hidden');
+            
+            // Short delay to allow display:block to apply before transforming
+            requestAnimationFrame(() => {
+                warningSheet.classList.remove('translate-y-full');
+            });
+
+            // Close swipe if open
+            if (currentlyRevealed) {
+                currentlyRevealed.classList.remove('revealed');
+                currentlyRevealed = null;
+            }
+        }
+
+        function closeWarningModal() {
+            warningSheet.classList.add('translate-y-full');
+            setTimeout(() => {
+                warningModal.classList.add('hidden');
+            }, 300);
+        }
+
+        function confirmDelete() {
+            alert('Delete action triggered. In a real app, this would process the deletion.');
+            closeWarningModal();
+            closeModal('field-modal'); // Close edit modal if open
+        }
+
+    </script>
+</body></html>

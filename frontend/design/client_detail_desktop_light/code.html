@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Nexus CRM - Client Detail</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#f8f9ff",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#0f0069",
+                        "on-surface": "#0b1c30",
+                        "tertiary": "#7e3000",
+                        "secondary": "#006591",
+                        "inverse-surface": "#213145",
+                        "primary-container": "#4f46e5",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed-dim": "#ffb695",
+                        "primary": "#3525cd",
+                        "error-container": "#ffdad6",
+                        "surface-tint": "#4d44e3",
+                        "secondary-fixed": "#c9e6ff",
+                        "outline": "#777587",
+                        "on-secondary-fixed-variant": "#004c6e",
+                        "on-primary": "#ffffff",
+                        "surface-variant": "#d3e4fe",
+                        "secondary-container": "#39b8fd",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-tertiary-container": "#ffd2be",
+                        "outline-variant": "#c7c4d8",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "background": "#f8f9ff",
+                        "surface-container-high": "#dce9ff",
+                        "inverse-primary": "#c3c0ff",
+                        "tertiary-fixed": "#ffdbcc",
+                        "tertiary-container": "#a44100",
+                        "surface-bright": "#f8f9ff",
+                        "on-surface-variant": "#464555",
+                        "on-primary-container": "#dad7ff",
+                        "surface-container-low": "#eff4ff",
+                        "secondary-fixed-dim": "#89ceff",
+                        "surface-container": "#e5eeff",
+                        "on-background": "#0b1c30",
+                        "on-secondary-fixed": "#001e2f",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-error": "#ffffff",
+                        "primary-fixed": "#e2dfff",
+                        "on-secondary-container": "#004666",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed": "#351000",
+                        "surface-dim": "#cbdbf5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "md": "16px",
+                        "lg": "24px",
+                        "base": "4px",
+                        "sm": "8px",
+                        "xl": "32px",
+                        "sidebar-collapsed": "64px",
+                        "xs": "4px",
+                        "2xl": "48px",
+                        "max-content-width": "1280px",
+                        "sidebar-width": "240px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "display": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["18px", { "lineHeight": "26px", "fontWeight": "600" }],
+                        "label-sm": ["11px", { "lineHeight": "14px", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .timeline-line::before {
+            content: '';
+            position: absolute;
+            top: 24px;
+            bottom: -24px;
+            left: 20px;
+            width: 2px;
+            background-color: #E2E8F0;
+            z-index: 0;
+        }
+        .timeline-item:last-child .timeline-line::before {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex text-body-md">
+<!-- TopNavBar (Mobile Only) -->
+<header class="md:hidden bg-surface dark:bg-surface border-b border-outline-variant dark:border-outline-variant w-full h-16 flex justify-between items-center px-md fixed top-0 z-50">
+<div class="flex items-center gap-sm">
+<button class="p-sm text-on-surface-variant">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<span class="font-headline-sm text-headline-sm font-bold text-primary dark:text-primary">Nexus CRM</span>
+</div>
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+<img class="w-8 h-8 rounded-full object-cover" data-alt="A professional headshot of a female CRM user with dark hair tied back, wearing a navy blazer, smiling subtly against a soft grey corporate office background, well-lit studio lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtXr7FKxp9yqM1dmM142M57PsoCHVBxoMHbeRF2EFkTLXYyjkizPPjkicgKAjyYmd92-yutIYxYSt6rrdnVJ7nW4gOHMqZuPFZvNIMjiv5ztJaXkqUH-dTjHeVvbD-U5i99_s4qfOSo4M7fDqiwJMkPfn_gWnFr9_mqOhGhh6zRQBDYGYy3mH5LADiOrf2iRow_yErNuJdT9OHjBbQmpRKAv0kFKparNZbDWz3wVDlpGiYE6JyqJ1JDR9UPgQdH4xZePxVq88KQ8cz"/>
+</div>
+</header>
+<!-- SideNavBar (Desktop) -->
+<nav class="hidden md:flex flex-col h-full w-64 fixed left-0 top-0 bg-surface-container dark:bg-surface-container border-r border-outline-variant dark:border-outline-variant p-md gap-sm z-40">
+<div class="flex flex-col mb-lg">
+<div class="flex items-center gap-sm mb-xs">
+<span class="material-symbols-outlined text-primary text-[24px]">hexagon</span>
+<span class="font-headline-sm text-headline-sm font-black text-primary dark:text-primary">Nexus CRM</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant pl-8">Enterprise Edition</span>
+</div>
+<button class="bg-primary-container text-on-primary w-full py-sm rounded-lg font-label-md text-label-md mb-md flex items-center justify-center gap-sm hover:bg-primary transition-colors duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add</span>
+            New Record
+        </button>
+<div class="flex-1 flex flex-col gap-xs">
+<a class="flex items-center gap-md px-sm py-sm rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface dark:hover:text-on-surface hover:bg-surface-container-highest dark:hover:bg-surface-container-highest transition-all duration-200 ease-in-out font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-md px-sm py-sm rounded-lg bg-secondary-container dark:bg-secondary-container text-on-secondary-container dark:text-on-secondary-container transition-all duration-200 ease-in-out font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">group</span>
+                Clients
+            </a>
+<a class="flex items-center gap-md px-sm py-sm rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface dark:hover:text-on-surface hover:bg-surface-container-highest dark:hover:bg-surface-container-highest transition-all duration-200 ease-in-out font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">event</span>
+                Appointments
+            </a>
+<a class="flex items-center gap-md px-sm py-sm rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface dark:hover:text-on-surface hover:bg-surface-container-highest dark:hover:bg-surface-container-highest transition-all duration-200 ease-in-out font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">monetization_on</span>
+                Deals
+            </a>
+<a class="flex items-center gap-md px-sm py-sm rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface dark:hover:text-on-surface hover:bg-surface-container-highest dark:hover:bg-surface-container-highest transition-all duration-200 ease-in-out font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">analytics</span>
+                Analytics
+            </a>
+</div>
+<div class="flex flex-col gap-xs mt-auto pt-md border-t border-outline-variant">
+<a class="flex items-center gap-md px-sm py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-all duration-200 ease-in-out font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">help</span>
+                Support
+            </a>
+<a class="flex items-center gap-md px-sm py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-all duration-200 ease-in-out font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">logout</span>
+                Logout
+            </a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-sidebar-width pt-16 md:pt-0 p-md md:p-lg lg:p-lg flex flex-col min-h-screen bg-background">
+<!-- Breadcrumbs & Header -->
+<div class="mb-lg flex flex-col gap-sm">
+<div class="flex items-center gap-xs font-label-sm text-label-sm text-on-surface-variant">
+<a class="hover:text-primary transition-colors" href="#">Clients</a>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-on-surface">Acme Corporation</span>
+</div>
+<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-md">
+<div class="flex items-start gap-md">
+<div class="w-16 h-16 rounded-xl bg-surface-container-high border border-outline-variant flex items-center justify-center text-headline-lg font-headline-lg text-primary overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A clean, minimalist logo of a fictional company named Acme Corporation, featuring abstract geometric shapes in blue and grey on a white background, highly polished corporate identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCY9t-yKRsisre0XMAjgzNpYYxKrEroDHih2o6_W1-XH26w48Y1a1xDb0pOZChRF3Xk3t7ZMUkm9_MsW6cZ59EZKzPeHiINPKag44bQyiDpk0-wjpL1Jcm4Wmu6L33joFG0ygsl_na0ahvUNBfwhoIJ1ZxkJJKhdubYsjcNEFc9SDb4678TZNtjwdpXsn8f9yCLQssgQJ1M_2halvdbt2dk2AVwFawBl1EzywE7fsdaE9JEtf-Jr_FUr6z7Jvp7INlzfd0dhJYOmiUM"/>
+</div>
+<div>
+<div class="flex items-center gap-sm">
+<h1 class="font-display text-display text-on-surface">Acme Corporation</h1>
+<span class="px-sm py-xs rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm border border-primary-fixed-dim">Active</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-xs">Enterprise Software Solutions • San Francisco, CA</p>
+</div>
+</div>
+<div class="flex items-center gap-sm">
+<button class="h-9 px-md rounded-lg border border-outline-variant bg-surface hover:bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center gap-sm transition-colors">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+                        Edit
+                    </button>
+<button class="h-9 px-md rounded-lg bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md flex items-center gap-sm transition-colors shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1)]">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">mail</span>
+                        Message
+                    </button>
+<button class="w-9 h-9 rounded-lg border border-outline-variant bg-surface hover:bg-surface-container-low text-on-surface flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+<!-- 2-Column Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-lg flex-1 items-start">
+<!-- Left Column: Details & Custom Fields (Bento Style) -->
+<div class="lg:col-span-4 flex flex-col gap-md">
+<!-- Key Contact Card -->
+<div class="bg-surface rounded-xl border border-outline-variant p-md">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-md">Key Contact</h3>
+<div class="flex items-center gap-md">
+<img class="w-12 h-12 rounded-full object-cover" data-alt="A professional headshot of a male executive in his 40s, wearing a light blue dress shirt, smiling warmly, corporate office background with slight bokeh, natural lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmbyx_pdMuPehmJQhQwasjE99a8cOGf1_Kh8uIJryEfoMzXWAB4z3-shMEpJWtXaIFQcgKD6rqrgR-BkVDRSnzlmoXTRbJ5VcZET6GrcgeD-bVipu9wDvSnKQ3XPAMI-HEX20_S2UfiaGdPbL1l4Q4oo-s-bkaocFKlAyaqpfkqyNerobWKdS3ecTuYCiJhxUtrz5F5itJOQCDctJwaY30UkMIKAIGK2pBbfdEJe1h6axNGI1L6DHkh3AJCc_1dh2mcQRL067Cu28M"/>
+<div>
+<div class="font-label-md text-label-md text-on-surface font-bold">Sarah Jenkins</div>
+<div class="font-body-md text-body-md text-on-surface-variant text-[13px]">VP of Operations</div>
+</div>
+</div>
+<div class="mt-md flex flex-col gap-sm">
+<a class="flex items-center gap-sm text-on-surface-variant hover:text-primary transition-colors text-[13px]" href="mailto:sarah@acmecorp.com">
+<span class="material-symbols-outlined text-[16px]">mail</span>
+                            sarah@acmecorp.com
+                        </a>
+<a class="flex items-center gap-sm text-on-surface-variant hover:text-primary transition-colors text-[13px]" href="tel:+15550198">
+<span class="material-symbols-outlined text-[16px]">call</span>
+                            +1 (555) 019-8273
+                        </a>
+</div>
+</div>
+<!-- Custom Fields Panel -->
+<div class="bg-surface rounded-xl border border-outline-variant p-md">
+<div class="flex items-center justify-between mb-md">
+<h3 class="font-headline-md text-headline-md text-on-surface">Custom Fields</h3>
+<button class="text-primary hover:text-on-primary-fixed transition-colors">
+<span class="material-symbols-outlined text-[18px]">settings</span>
+</button>
+</div>
+<div class="flex flex-col gap-sm">
+<div class="flex justify-between items-center py-xs border-b border-surface-container-high last:border-0">
+<span class="font-body-md text-body-md text-on-surface-variant">Industry</span>
+<span class="font-label-md text-label-md text-on-surface text-right">SaaS</span>
+</div>
+<div class="flex justify-between items-center py-xs border-b border-surface-container-high last:border-0">
+<span class="font-body-md text-body-md text-on-surface-variant">Annual Revenue</span>
+<span class="font-label-md text-label-md text-on-surface text-right">$5M - $10M</span>
+</div>
+<div class="flex justify-between items-center py-xs border-b border-surface-container-high last:border-0">
+<span class="font-body-md text-body-md text-on-surface-variant">Lead Source</span>
+<span class="font-label-md text-label-md text-on-surface text-right">Inbound Marketing</span>
+</div>
+<div class="flex justify-between items-center py-xs border-b border-surface-container-high last:border-0">
+<span class="font-body-md text-body-md text-on-surface-variant">Account Tier</span>
+<span class="font-label-md text-label-md text-on-surface text-right px-2 py-1 bg-tertiary-fixed-dim text-on-tertiary-fixed-variant rounded-md">Tier 1</span>
+</div>
+<div class="flex justify-between items-center py-xs border-b border-surface-container-high last:border-0">
+<span class="font-body-md text-body-md text-on-surface-variant">Renewal Date</span>
+<span class="font-label-md text-label-md text-on-surface text-right">Oct 15, 2026</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Interaction Timeline -->
+<div class="lg:col-span-8 bg-surface rounded-xl border border-outline-variant p-md lg:p-lg h-full">
+<div class="flex items-center justify-between mb-lg">
+<h2 class="font-headline-md text-headline-md text-on-surface">Interaction Timeline</h2>
+<div class="flex gap-xs">
+<button class="w-8 h-8 rounded-lg bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high flex items-center justify-center transition-colors" title="Filter">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high flex items-center justify-center transition-colors" title="Search">
+<span class="material-symbols-outlined text-[18px]">search</span>
+</button>
+</div>
+</div>
+<!-- Log New Activity Action Area -->
+<div class="flex gap-sm mb-xl p-sm bg-surface-container-low rounded-lg border border-outline-variant/50">
+<button class="flex-1 py-xs flex flex-col items-center gap-xs rounded-md hover:bg-surface transition-colors text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined text-[20px]">call</span>
+<span class="font-label-sm text-label-sm">Log Call</span>
+</button>
+<button class="flex-1 py-xs flex flex-col items-center gap-xs rounded-md hover:bg-surface transition-colors text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined text-[20px]">mail</span>
+<span class="font-label-sm text-label-sm">Email</span>
+</button>
+<button class="flex-1 py-xs flex flex-col items-center gap-xs rounded-md hover:bg-surface transition-colors text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined text-[20px]">event</span>
+<span class="font-label-sm text-label-sm">Meeting</span>
+</button>
+<button class="flex-1 py-xs flex flex-col items-center gap-xs rounded-md hover:bg-surface transition-colors text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined text-[20px]">note_add</span>
+<span class="font-label-sm text-label-sm">Note</span>
+</button>
+</div>
+<!-- Timeline List -->
+<div class="relative pl-sm">
+<!-- Timeline Item 1: Meeting -->
+<div class="timeline-item timeline-line relative mb-lg">
+<div class="absolute left-0 top-0 w-10 h-10 rounded-full bg-secondary-fixed-dim text-on-secondary-fixed flex items-center justify-center z-10 border-4 border-surface">
+<span class="material-symbols-outlined text-[18px]">groups</span>
+</div>
+<div class="ml-14 bg-surface rounded-lg border border-outline-variant p-md shadow-[0px_2px_4px_-2px_rgba(0,0,0,0.05)] hover:border-primary-fixed-dim transition-colors">
+<div class="flex justify-between items-start mb-sm">
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">Q3 Strategy Review</h4>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Meeting • Today, 10:00 AM</span>
+</div>
+<span class="px-2 py-1 rounded-md bg-surface-container-high text-primary font-label-sm text-label-sm border border-outline-variant/30">Completed</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-sm">Discussed upcoming Q3 roadmap and feature requests. Client is satisfied with current progress but wants to expedite the reporting module integration.</p>
+</div>
+</div>
+<!-- Timeline Item 2: Email -->
+<div class="timeline-item timeline-line relative mb-lg">
+<div class="absolute left-0 top-0 w-10 h-10 rounded-full bg-surface-container-high text-primary flex items-center justify-center z-10 border-4 border-surface">
+<span class="material-symbols-outlined text-[18px]">mail</span>
+</div>
+<div class="ml-14 bg-surface rounded-lg border border-outline-variant p-md shadow-[0px_2px_4px_-2px_rgba(0,0,0,0.05)] hover:border-primary-fixed-dim transition-colors">
+<div class="flex justify-between items-start mb-sm">
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">Follow-up: Contract Renewal</h4>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Email (Outbound) • Yesterday, 2:30 PM</span>
+</div>
+<span class="px-2 py-1 rounded-md bg-secondary-fixed text-on-secondary-fixed-variant font-label-sm text-label-sm border border-outline-variant/30">Sent</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-sm">Sent the updated contract terms for review. Awaiting signature by Friday.</p>
+</div>
+</div>
+<!-- Timeline Item 3: Call -->
+<div class="timeline-item timeline-line relative mb-lg">
+<div class="absolute left-0 top-0 w-10 h-10 rounded-full bg-surface-container-highest text-on-surface flex items-center justify-center z-10 border-4 border-surface">
+<span class="material-symbols-outlined text-[18px]">call</span>
+</div>
+<div class="ml-14 bg-surface rounded-lg border border-outline-variant p-md shadow-[0px_2px_4px_-2px_rgba(0,0,0,0.05)] hover:border-primary-fixed-dim transition-colors">
+<div class="flex justify-between items-start mb-sm">
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">Quick sync on integration</h4>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Call (Inbound) • Oct 10, 11:15 AM</span>
+</div>
+<span class="px-2 py-1 rounded-md bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm border border-outline-variant/30">Left Voicemail</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-sm">Sarah called to ask a quick question about API rate limits. Left a voicemail as I was in another meeting. Will return call later today.</p>
+</div>
+</div>
+<!-- Timeline Item 4: Note -->
+<div class="timeline-item relative">
+<div class="absolute left-0 top-0 w-10 h-10 rounded-full bg-tertiary-fixed-dim text-on-tertiary-fixed-variant flex items-center justify-center z-10 border-4 border-surface">
+<span class="material-symbols-outlined text-[18px]">description</span>
+</div>
+<div class="ml-14 bg-surface-container-lowest rounded-lg border border-dashed border-outline-variant p-md">
+<div class="flex justify-between items-start mb-sm">
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">Account Handover</h4>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Internal Note • Oct 1, 9:00 AM</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-sm">Account officially transitioned from sales to customer success. Initial onboarding packet sent.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

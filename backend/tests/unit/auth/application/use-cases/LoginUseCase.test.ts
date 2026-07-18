@@ -25,7 +25,8 @@ describe('LoginUseCase', () => {
       create: jest.fn(),
       findById: jest.fn(),
       findBySlug: jest.fn(),
-    };
+      findAll: jest.fn(),
+    } as any;
     passwordHasher = {
       hash: jest.fn(),
       compare: jest.fn(),

@@ -11,7 +11,6 @@ export const authSchemas = {
   login: z.object({
     email: z.string().email(),
     password: z.string().min(1),
-    tenantSlug: z.string().nullable().optional(),
   }),
   inviteStaff: z.object({
     email: z.string().email(),
@@ -23,7 +22,6 @@ export const authSchemas = {
   }),
   requestPasswordReset: z.object({
     email: z.string().email(),
-    tenantSlug: z.string().optional(),
   }),
   resetPassword: z.object({
     token: z.string().min(1),

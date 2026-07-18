@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Nexus CRM - Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface": "#0b1326",
+                      "primary-container": "#8083ff",
+                      "on-secondary-fixed-variant": "#39485a",
+                      "on-primary": "#1000a9",
+                      "on-primary-fixed-variant": "#2f2ebe",
+                      "tertiary": "#ffb783",
+                      "surface-container-highest": "#2d3449",
+                      "tertiary-fixed-dim": "#ffb783",
+                      "on-primary-container": "#0d0096",
+                      "inverse-primary": "#494bd6",
+                      "tertiary-container": "#d97721",
+                      "inverse-surface": "#dae2fd",
+                      "secondary": "#b9c8de",
+                      "on-tertiary": "#4f2500",
+                      "surface-container-lowest": "#060e20",
+                      "on-error-container": "#ffdad6",
+                      "surface-dim": "#0b1326",
+                      "on-secondary-fixed": "#0d1c2d",
+                      "primary-fixed-dim": "#c0c1ff",
+                      "on-surface": "#dae2fd",
+                      "error": "#ffb4ab",
+                      "background": "#0b1326",
+                      "surface-variant": "#2d3449",
+                      "surface-container-low": "#131b2e",
+                      "surface-bright": "#31394d",
+                      "outline-variant": "#464554",
+                      "on-error": "#690005",
+                      "on-secondary": "#233143",
+                      "secondary-fixed-dim": "#b9c8de",
+                      "error-container": "#93000a",
+                      "on-surface-variant": "#c7c4d7",
+                      "surface-container": "#171f33",
+                      "primary": "#c0c1ff",
+                      "tertiary-fixed": "#ffdcc5",
+                      "on-background": "#dae2fd",
+                      "surface-tint": "#c0c1ff",
+                      "secondary-fixed": "#d4e4fa",
+                      "outline": "#908fa0",
+                      "on-tertiary-fixed-variant": "#703700",
+                      "on-tertiary-fixed": "#301400",
+                      "on-secondary-container": "#a7b6cc",
+                      "surface-container-high": "#222a3d",
+                      "on-tertiary-container": "#452000",
+                      "on-primary-fixed": "#07006c",
+                      "primary-fixed": "#e1e0ff",
+                      "inverse-on-surface": "#283044",
+                      "secondary-container": "#39485a"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-desktop": "40px",
+                      "lg": "24px",
+                      "xl": "32px",
+                      "unit": "4px",
+                      "sm": "8px",
+                      "gutter": "24px",
+                      "xs": "4px",
+                      "md": "16px",
+                      "margin-mobile": "16px"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "label-sm": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "body-md": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "label-md": ["Inter"],
+                      "headline-sm": ["Inter"]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-sm": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "400"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                      "headline-sm": ["20px", {"lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        body {
+            background-color: #0b1326;
+            color: #dae2fd;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(70, 69, 84, 0.3);
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+        /* Mobile adjustment for standard top bar since it's "small" type in JSON */
+        .mobile-shell-padding {
+            padding-top: 64px;
+            padding-bottom: 80px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background min-h-screen overflow-x-hidden">
+<!-- TopNavBar: Execution of Shared Component JSON -->
+<header class="w-full h-16 fixed top-0 left-0 z-50 flex justify-between items-center px-margin-mobile bg-surface dark:bg-surface border-b border-outline-variant dark:border-outline-variant transition-colors duration-200">
+<div class="flex items-center gap-md">
+<button class="p-sm rounded-full hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors text-on-surface">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<span class="font-headline-sm text-headline-sm font-bold text-primary dark:text-primary">Nexus CRM</span>
+</div>
+<div class="flex items-center gap-sm">
+<button class="p-sm rounded-full hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors text-on-surface">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline">
+<img class="w-full h-full object-cover" data-alt="A professional studio portrait of a corporate staff member with a friendly smile, set against a dark, moody blue background that matches the enterprise software aesthetic. The lighting is soft and cinematic, highlighting the professional attire and modern, systematic vibe of the Nexus CRM brand." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6Xxn-4V0_LKeqjuwe5s-4gohnu6uJX3AKpEvRz33VDDFOFftedmPpISv5MwmTp7tEBoGUAI90wRaTvv-svBi7rCIfBLju79rnKfOCVH9lSGK9_tvu-tr_oOWM8WUmGYHoVfRXmz1f2q8omAOCMTpGJMe11wVrgR42dH1XCEcAshbqKhYjkZbA8OVhKF_SYyMurLvf4yTykMe_6ivLTUDu7A-JiAkZ7hukhCFHYtfX62URmgQzkP-adjX3J5L9sRfblp2YJ9PyDNw8"/>
+</div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="mobile-shell-padding min-h-screen flex flex-col items-center justify-center px-margin-mobile">
+<!-- Dashboard Empty State -->
+<div class="w-full max-w-md text-center space-y-lg animate-in fade-in slide-in-from-bottom-4 duration-700">
+<!-- Decorative Visual for Empty State -->
+<div class="relative w-48 h-48 mx-auto mb-xl">
+<div class="absolute inset-0 bg-primary-container/10 rounded-full blur-3xl"></div>
+<div class="relative glass-card w-full h-full rounded-3xl flex items-center justify-center overflow-hidden border-outline-variant">
+
+<span class="material-symbols-outlined text-[64px] text-primary" style="font-variation-settings: 'wght' 300;">query_stats</span>
+</div>
+<!-- Floaties -->
+<div class="absolute -top-4 -right-4 p-md glass-card rounded-xl shadow-2xl animate-bounce" style="animation-duration: 4s;">
+<span class="material-symbols-outlined text-tertiary">trending_up</span>
+</div>
+<div class="absolute -bottom-2 -left-6 p-sm glass-card rounded-xl shadow-2xl animate-pulse">
+<span class="material-symbols-outlined text-secondary">group</span>
+</div>
+</div>
+<!-- Content -->
+<div class="space-y-sm">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Dashboard</h1>
+<p class="font-body-md text-body-md text-on-surface-variant px-md">No recent activity. Your client interactions and data insights will appear here once you start recording data.</p>
+</div>
+<div class="pt-lg flex flex-col gap-md">
+<button class="w-full py-md px-xl bg-primary text-on-primary font-label-md text-label-md rounded-xl font-bold flex items-center justify-center gap-sm transition-transform active:scale-95 shadow-lg shadow-primary/20">
+                    Get Started
+                    <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+<button class="w-full py-md px-xl border border-outline-variant text-on-surface font-label-md text-label-md rounded-xl font-medium hover:bg-surface-container-high transition-colors">
+                    Import Existing Data
+                </button>
+</div>
+</div>
+<!-- Hint Section: Asymmetric layout element -->
+<div class="mt-xl w-full grid grid-cols-2 gap-md opacity-60">
+<div class="p-md glass-card rounded-2xl space-y-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">lightbulb</span>
+<p class="font-label-sm text-label-sm">Did you know? You can sync with Outlook.</p>
+</div>
+<div class="p-md glass-card rounded-2xl space-y-xs mt-lg">
+<span class="material-symbols-outlined text-secondary text-[20px]">help_center</span>
+<p class="font-label-sm text-label-sm">Need help? Explore our tutorials.</p>
+</div>
+</div>
+</main>
+<!-- BottomNavBar: Implementation based on Request & Shared Component styles -->
+<nav class="fixed bottom-0 left-0 w-full h-20 bg-surface-container dark:bg-surface-container flex justify-around items-center px-sm z-50">
+<!-- Dashboard (Active) -->
+<button class="flex flex-col items-center justify-center gap-1 min-w-[72px] h-full transition-all duration-200">
+<div class="bg-secondary-container dark:bg-secondary-container text-on-secondary-container dark:text-on-secondary-container px-5 py-1 rounded-full flex items-center justify-center mb-1">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+</div>
+<span class="font-label-sm text-label-sm font-bold text-primary">Dashboard</span>
+</button>
+<!-- Clients -->
+<button class="flex flex-col items-center justify-center gap-1 min-w-[72px] h-full transition-all duration-200 text-on-surface-variant hover:text-on-surface">
+<span class="material-symbols-outlined mb-1">group</span>
+<span class="font-label-sm text-label-sm">Clients</span>
+</button>
+<!-- Events -->
+<button class="flex flex-col items-center justify-center gap-1 min-w-[72px] h-full transition-all duration-200 text-on-surface-variant hover:text-on-surface">
+<span class="material-symbols-outlined mb-1">event</span>
+<span class="font-label-sm text-label-sm">Events</span>
+</button>
+<!-- Settings -->
+<button class="flex flex-col items-center justify-center gap-1 min-w-[72px] h-full transition-all duration-200 text-on-surface-variant hover:text-on-surface">
+<span class="material-symbols-outlined mb-1">settings</span>
+<span class="font-label-sm text-label-sm">Settings</span>
+</button>
+</nav>
+<!-- Floating Action Button (FAB) for Contextual Action: "New Record" -->
+<button class="fixed bottom-24 right-6 w-14 h-14 rounded-2xl bg-tertiary-container text-on-tertiary-container shadow-2xl flex items-center justify-center active:scale-90 transition-transform z-40">
+<span class="material-symbols-outlined text-[28px]">add</span>
+</button>
+<script>
+        // Simple Micro-interaction for feedback
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('touchstart', function() {
+                this.classList.add('opacity-70');
+            });
+            button.addEventListener('touchend', function() {
+                this.classList.remove('opacity-70');
+            });
+        });
+
+        // Interactive "Empty State" hover effect for desktop testing
+        const card = document.querySelector('.glass-card');
+        if(card) {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        }
+    </script>
+</body></html>

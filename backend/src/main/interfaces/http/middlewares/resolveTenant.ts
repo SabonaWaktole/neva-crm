@@ -7,6 +7,7 @@ declare global {
     interface Request {
       tenant?: {
         id: string;
+        urlSlug: string;
       };
     }
   }
@@ -31,7 +32,7 @@ export const resolveTenant = (tenantRepository: ITenantRepository) => {
       }
     }
 
-    req.tenant = { id: tenant.id };
+    req.tenant = { id: tenant.id, urlSlug: tenant.urlSlug };
     next();
   };
 };

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Login - Nexus CRM</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#494bd6",
+                        "surface-container-lowest": "#060e20",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "on-tertiary": "#4f2500",
+                        "surface-dim": "#0b1326",
+                        "primary-fixed": "#e1e0ff",
+                        "outline": "#908fa0",
+                        "on-secondary-fixed": "#0d1c2d",
+                        "on-error": "#690005",
+                        "tertiary-fixed": "#ffdcc5",
+                        "surface-variant": "#2d3449",
+                        "tertiary-fixed-dim": "#ffb783",
+                        "surface-container": "#171f33",
+                        "secondary-fixed": "#d4e4fa",
+                        "surface-container-high": "#222a3d",
+                        "on-secondary-fixed-variant": "#39485a",
+                        "surface": "#0b1326",
+                        "secondary-fixed-dim": "#b9c8de",
+                        "error": "#ffb4ab",
+                        "on-secondary": "#233143",
+                        "surface-container-low": "#131b2e",
+                        "secondary": "#b9c8de",
+                        "on-tertiary-fixed": "#301400",
+                        "inverse-surface": "#dae2fd",
+                        "on-secondary-container": "#a7b6cc",
+                        "on-primary-container": "#0d0096",
+                        "on-error-container": "#ffdad6",
+                        "background": "#0b1326",
+                        "surface-container-highest": "#2d3449",
+                        "primary-container": "#8083ff",
+                        "error-container": "#93000a",
+                        "tertiary-container": "#d97721",
+                        "secondary-container": "#39485a",
+                        "on-background": "#dae2fd",
+                        "on-surface": "#dae2fd",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "primary": "#c0c1ff",
+                        "outline-variant": "#464554",
+                        "on-primary-fixed": "#07006c",
+                        "inverse-on-surface": "#283044",
+                        "surface-bright": "#31394d",
+                        "on-tertiary-fixed-variant": "#703700",
+                        "on-primary": "#1000a9",
+                        "on-tertiary-container": "#452000",
+                        "tertiary": "#ffb783",
+                        "surface-tint": "#c0c1ff",
+                        "on-surface-variant": "#c7c4d7"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "40px",
+                        "gutter": "24px",
+                        "xs": "4px",
+                        "margin-mobile": "16px",
+                        "sm": "8px",
+                        "xl": "32px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #0b1326; /* Strict fallback */
+        }
+        
+        /* Subtle animated background grid */
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            mask-image: radial-gradient(circle at center, black, transparent 80%);
+            -webkit-mask-image: radial-gradient(circle at center, black, transparent 80%);
+        }
+
+        /* Glassmorphism subtle glow */
+        .glow-effect::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            right: -1px;
+            bottom: -1px;
+            background: linear-gradient(45deg, rgba(192, 193, 255, 0.1), transparent 60%);
+            border-radius: inherit;
+            z-index: -1;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex items-center justify-center relative overflow-hidden font-body-md antialiased">
+<!-- Decorative Background Elements -->
+<div class="absolute inset-0 bg-grid pointer-events-none z-0"></div>
+<div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-container rounded-full blur-[120px] opacity-10 pointer-events-none z-0"></div>
+<div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-tertiary-container rounded-full blur-[120px] opacity-5 pointer-events-none z-0"></div>
+<!-- Main Authentication Container -->
+<main class="relative z-10 w-full max-w-[440px] px-margin-mobile md:px-0">
+<!-- Header / Logo -->
+<div class="flex flex-col items-center mb-xl">
+<div class="w-12 h-12 bg-surface-container-high rounded-xl border border-surface-container-highest flex items-center justify-center mb-md relative glow-effect shadow-lg shadow-black/20">
+<span class="material-symbols-outlined text-[28px] text-primary" style="font-variation-settings: 'FILL' 1;">
+                    hub
+                </span>
+</div>
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-on-surface mb-xs">Nexus CRM</h1>
+<p class="font-body-md text-on-surface-variant">Sign in to your workspace</p>
+</div>
+<!-- Login Card -->
+<div class="bg-surface-container border border-surface-container-highest rounded-xl p-lg md:p-xl relative glow-effect shadow-2xl shadow-black/40">
+<form action="#" class="flex flex-col gap-lg" method="POST">
+<!-- Organization ID Input -->
+<div class="flex flex-col gap-xs">
+<label class="font-label-md text-on-surface-variant" for="org-id">Organization ID</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors text-[20px]">
+                            domain
+                        </span>
+<input class="w-full bg-surface border border-outline-variant rounded-lg py-sm pl-10 pr-sm font-body-md text-on-surface placeholder:text-outline focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all shadow-inner" id="org-id" name="org-id" placeholder="acme-corp" required="" type="text"/>
+</div>
+</div>
+<!-- Email Input -->
+<div class="flex flex-col gap-xs">
+<label class="font-label-md text-on-surface-variant" for="email">Email Address</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors text-[20px]">
+                            mail
+                        </span>
+<input class="w-full bg-surface border border-outline-variant rounded-lg py-sm pl-10 pr-sm font-body-md text-on-surface placeholder:text-outline focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all shadow-inner" id="email" name="email" placeholder="name@company.com" required="" type="email"/>
+</div>
+</div>
+<!-- Password Input -->
+<div class="flex flex-col gap-xs">
+<div class="flex justify-between items-center">
+<label class="font-label-md text-on-surface-variant" for="password">Password</label>
+<a class="font-label-sm text-primary hover:text-primary-fixed transition-colors" href="#">Forgot password?</a>
+</div>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors text-[20px]">
+                            lock
+                        </span>
+<input class="w-full bg-surface border border-outline-variant rounded-lg py-sm pl-10 pr-10 font-body-md text-on-surface placeholder:text-outline focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all shadow-inner" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface transition-colors focus:outline-none" type="button">
+<span class="material-symbols-outlined text-[20px]">visibility_off</span>
+</button>
+</div>
+</div>
+<!-- Primary Action -->
+<button class="w-full bg-inverse-primary hover:bg-primary-container text-white font-label-md py-sm px-lg rounded-lg transition-all duration-200 mt-sm flex justify-center items-center shadow-[0_0_15px_rgba(73,75,214,0.3)] hover:shadow-[0_0_20px_rgba(73,75,214,0.5)]" type="submit">
+                    Sign In
+                </button>
+</form>
+<!-- Divider -->
+<div class="relative flex py-lg items-center">
+<div class="flex-grow border-t border-outline-variant"></div>
+<span class="flex-shrink-0 mx-4 font-label-sm text-on-surface-variant uppercase tracking-widest">Or</span>
+<div class="flex-grow border-t border-outline-variant"></div>
+</div>
+<!-- Secondary Action -->
+<button class="w-full bg-transparent border border-outline-variant hover:bg-surface-container-high text-on-surface font-label-md py-sm px-lg rounded-lg transition-all duration-200 flex justify-center items-center gap-sm" type="button">
+<span class="material-symbols-outlined text-[20px]">key</span>
+                Sign in with SSO
+            </button>
+</div>
+<!-- Footer Links -->
+<div class="mt-lg text-center flex justify-center gap-md">
+<a class="font-label-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Privacy Policy</a>
+<span class="text-outline-variant">•</span>
+<a class="font-label-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Terms of Service</a>
+</div>
+</main>
+<script>
+        // Simple password toggle logic
+        document.querySelector('button[type="button"]').addEventListener('click', function(e) {
+            e.preventDefault();
+            const input = document.getElementById('password');
+            const icon = this.querySelector('span');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = 'visibility';
+            } else {
+                input.type = 'password';
+                icon.textContent = 'visibility_off';
+            }
+        });
+    </script>
+</body></html>

@@ -1,0 +1,34 @@
+.checkboxContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+}
+
+.checkboxInput {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.checkboxText {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-md);
+  color: var(--color-on-surface);
+}
+
+.helperTextError {
+  margin-top: 0;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-label-sm);
+  line-height: var(--font-line-height-label-sm);
+  color: var(--color-error);
+}

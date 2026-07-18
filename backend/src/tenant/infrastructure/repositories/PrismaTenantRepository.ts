@@ -32,4 +32,21 @@ export class PrismaTenantRepository implements ITenantRepository {
     });
     return tenant;
   }
+
+  async findAll(skip: number, take: number): Promise<{ items: Tenant[]; total: number }> {
+    const [records, total] = await Promise.all([
+      prisma.tenant.findMany({ skip, take, orderBy: { createdAt: 'desc' } }),
+      prisma.tenant.count()
+    ]);
+    
+    return {
+      items: records.map(r => Tenant.create({
+        id: r.id,
+        name: r.name,
+        urlSlug: r.urlSlug,
+        createdAt: r.createdAt
+      })),
+      total
+    };
+  }
 }

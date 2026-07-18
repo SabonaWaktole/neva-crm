@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>New Appointment | Nexus CRM</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-highest": "#2d3449",
+                    "surface-container-high": "#222a3d",
+                    "secondary-fixed-dim": "#b9c8de",
+                    "surface-tint": "#c0c1ff",
+                    "secondary": "#b9c8de",
+                    "primary-container": "#8083ff",
+                    "surface-container-low": "#131b2e",
+                    "on-background": "#dae2fd",
+                    "surface-dim": "#0b1326",
+                    "surface-bright": "#31394d",
+                    "primary": "#c0c1ff",
+                    "on-primary-fixed": "#07006c",
+                    "tertiary-fixed": "#ffdcc5",
+                    "on-tertiary-container": "#452000",
+                    "on-secondary": "#233143",
+                    "inverse-surface": "#dae2fd",
+                    "on-tertiary-fixed": "#301400",
+                    "tertiary": "#ffb783",
+                    "on-secondary-container": "#a7b6cc",
+                    "error": "#ffb4ab",
+                    "surface-container-lowest": "#060e20",
+                    "surface-variant": "#2d3449",
+                    "on-tertiary-fixed-variant": "#703700",
+                    "outline-variant": "#464554",
+                    "on-primary": "#1000a9",
+                    "secondary-container": "#39485a",
+                    "on-primary-container": "#0d0096",
+                    "surface": "#0b1326",
+                    "primary-fixed": "#e1e0ff",
+                    "secondary-fixed": "#d4e4fa",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary-fixed-variant": "#39485a",
+                    "error-container": "#93000a",
+                    "primary-fixed-dim": "#c0c1ff",
+                    "background": "#0b1326",
+                    "surface-container": "#171f33",
+                    "on-tertiary": "#4f2500",
+                    "on-error": "#690005",
+                    "on-secondary-fixed": "#0d1c2d",
+                    "on-primary-fixed-variant": "#2f2ebe",
+                    "on-surface-variant": "#c7c4d7",
+                    "tertiary-fixed-dim": "#ffb783",
+                    "tertiary-container": "#d97721",
+                    "outline": "#908fa0",
+                    "on-surface": "#dae2fd",
+                    "inverse-primary": "#494bd6",
+                    "inverse-on-surface": "#283044"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xs": "4px",
+                    "lg": "24px",
+                    "gutter": "24px",
+                    "unit": "4px",
+                    "margin-desktop": "40px",
+                    "md": "16px",
+                    "xl": "32px",
+                    "sm": "8px",
+                    "margin-mobile": "16px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Inter"],
+                    "label-md": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-sm": ["Inter"],
+                    "body-md": ["Inter"],
+                    "label-sm": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "400"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #0b1326; color: #dae2fd; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid #334155; }
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.8); }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-surface-dim overflow-hidden">
+<!-- TopNavBar -->
+<header class="bg-surface-container-low flex justify-between items-center w-full px-margin-desktop sticky top-0 z-50 border-b border-outline-variant h-16">
+<div class="flex items-center gap-xl">
+<span class="font-headline-md text-headline-md font-bold text-primary">Nexus CRM</span>
+<nav class="hidden md:flex gap-lg items-center">
+<a class="text-on-surface-variant hover:text-primary transition-colors font-headline-sm text-headline-sm" href="#">Dashboard</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-headline-sm text-headline-sm" href="#">Clients</a>
+<a class="text-primary border-b-2 border-primary pb-1 font-headline-sm text-headline-sm" href="#">Appointments</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-headline-sm text-headline-sm" href="#">Tasks</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-headline-sm text-headline-sm" href="#">Reports</a>
+</nav>
+</div>
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined text-on-surface-variant cursor-pointer active:opacity-80">notifications</button>
+<button class="material-symbols-outlined text-on-surface-variant cursor-pointer active:opacity-80">settings</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a corporate user with a clean, well-lit background. The style is modern and sophisticated, following a dark mode enterprise aesthetic with subtle indigo tones in the background shadows. The lighting is soft and directional, highlighting the subject's professional demeanor." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPJDM0-adV4J-zd7XsmEdCQHSNGtEP6K8LhWPO9HnO-66HafIApllRMjrBhXHCELL0NiUpWaiWLgGvJ2nMtmE4xntK8wcD-wD-fZQCaanXcSfU8fyHm7UWS0iBj5HYKkXUoPOfebtdRjoQKNS1cuYxtdZXAJF08XfATstgoKtmdTD0GmUTx8crj6z9VkwlsDRo6sCofEOJkGYhWJyIBRcWmR2Oq3yGAxQEIpgPblVEy2vT0bUsMbgyFpP1zl3QuMhxb25fcaGzx36N"/>
+</div>
+</div>
+</header>
+<div class="flex h-[calc(100vh-64px)] overflow-hidden">
+<!-- SideNavBar -->
+<aside class="fixed md:static left-0 top-16 h-full flex flex-col p-md z-40 bg-surface-dim border-r border-outline-variant w-64 transition-transform">
+<div class="flex flex-col gap-xs flex-grow">
+<div class="px-md py-sm mb-md">
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">Nexus CRM</span>
+<p class="text-label-sm text-on-surface-variant">Appointments</p>
+</div>
+<a class="flex items-center gap-md p-md text-on-surface-variant hover:bg-surface-container-high transition-all rounded-lg cursor-pointer" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="font-label-md text-label-md">Calendar</span>
+</a>
+<a class="flex items-center gap-md p-md bg-secondary-container text-on-secondary-container transition-all rounded-lg cursor-pointer" href="#">
+<span class="material-symbols-outlined">add_circle</span>
+<span class="font-label-md text-label-md">Schedule</span>
+</a>
+<a class="flex items-center gap-md p-md text-on-surface-variant hover:bg-surface-container-high transition-all rounded-lg cursor-pointer" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-label-md text-label-md">Staff</span>
+</a>
+<a class="flex items-center gap-md p-md text-on-surface-variant hover:bg-surface-container-high transition-all rounded-lg cursor-pointer" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-md text-label-md">Analytics</span>
+</a>
+<a class="flex items-center gap-md p-md text-on-surface-variant hover:bg-surface-container-high transition-all rounded-lg cursor-pointer" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</div>
+<div class="border-t border-outline-variant mt-auto pt-md flex flex-col gap-xs">
+<a class="flex items-center gap-md p-md text-on-surface-variant hover:bg-surface-container-high transition-all rounded-lg cursor-pointer" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label-md text-label-md">Help</span>
+</a>
+<a class="flex items-center gap-md p-md text-on-surface-variant hover:bg-surface-container-high transition-all rounded-lg cursor-pointer" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-md text-label-md">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-grow overflow-y-auto p-margin-desktop custom-scrollbar bg-surface relative">
+<div class="max-w-4xl mx-auto">
+<!-- Header -->
+<div class="mb-xl">
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Schedule New Appointment</h1>
+<p class="text-body-md text-on-surface-variant mt-sm">Create and assign a new client booking in the Nexus ecosystem.</p>
+</div>
+<!-- Form Section (Bento Style Layout) -->
+<form class="grid grid-cols-12 gap-lg">
+<!-- Client Selection Card -->
+<div class="col-span-12 lg:col-span-7 p-xl rounded-xl glass-panel flex flex-col gap-lg">
+<div class="flex items-center gap-sm text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person_search</span>
+<h2 class="font-headline-sm text-headline-sm">Client Information</h2>
+</div>
+<div class="relative group">
+<label class="block font-label-md text-label-md text-on-surface-variant mb-xs">Search Client</label>
+<div class="relative">
+<span class="absolute left-md top-1/2 -translate-y-1/2 material-symbols-outlined text-outline">search</span>
+<input class="w-full pl-xl pr-md py-md bg-surface-container-low border border-outline-variant rounded-lg text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Start typing client name..." type="text"/>
+</div>
+<div class="hidden group-focus-within:block absolute w-full top-full mt-xs bg-surface-container-high border border-outline-variant rounded-lg shadow-xl z-10">
+<div class="p-sm hover:bg-surface-container-highest cursor-pointer flex items-center gap-md">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold">JD</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Johnathan Doe</p>
+<p class="text-label-sm text-on-surface-variant">john.doe@enterprise.com</p>
+</div>
+</div>
+<div class="p-sm hover:bg-surface-container-highest cursor-pointer flex items-center gap-md border-t border-outline-variant">
+<div class="w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold">SA</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Sarah Abrams</p>
+<p class="text-label-sm text-on-surface-variant">s.abrams@techcorp.io</p>
+</div>
+</div>
+</div>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-xs">Appointment Type</label>
+<select class="w-full p-md bg-surface-container-low border border-outline-variant rounded-lg text-on-surface focus:outline-none focus:border-primary transition-all appearance-none">
+<option>Initial Consultation</option>
+<option>Quarterly Review</option>
+<option>Technical Integration Support</option>
+<option>Strategic Planning Session</option>
+</select>
+</div>
+</div>
+<!-- Date & Staff Selection Card -->
+<div class="col-span-12 lg:col-span-5 p-xl rounded-xl glass-panel flex flex-col gap-lg">
+<div class="flex items-center gap-sm text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">calendar_month</span>
+<h2 class="font-headline-sm text-headline-sm">Schedule &amp; Staff</h2>
+</div>
+<div class="grid grid-cols-2 gap-md">
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-xs">Date</label>
+<input class="w-full p-md bg-surface-container-low border border-outline-variant rounded-lg text-on-surface focus:outline-none focus:border-primary transition-all" type="date"/>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-xs">Time</label>
+<input class="w-full p-md bg-surface-container-low border border-outline-variant rounded-lg text-on-surface focus:outline-none focus:border-primary transition-all" type="time"/>
+</div>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-xs">Assigned Staff</label>
+<select class="w-full p-md bg-surface-container-low border border-outline-variant rounded-lg text-on-surface focus:outline-none focus:border-primary transition-all">
+<option>Marcus Thorne (Lead Architect)</option>
+<option>Elena Vance (Senior Consultant)</option>
+<option>Riley Matthews (Account Manager)</option>
+</select>
+<p class="text-label-sm text-on-surface-variant mt-xs px-sm flex items-center gap-xs">
+<span class="material-symbols-outlined text-[14px]">info</span>
+                                Staff availability is verified automatically.
+                            </p>
+</div>
+</div>
+<!-- Notes Card -->
+<div class="col-span-12 p-xl rounded-xl glass-panel flex flex-col gap-lg">
+<div class="flex items-center gap-sm text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">description</span>
+<h2 class="font-headline-sm text-headline-sm">Purpose &amp; Internal Notes</h2>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-xs">Detailed Notes</label>
+<textarea class="w-full p-md bg-surface-container-low border border-outline-variant rounded-lg text-on-surface focus:outline-none focus:border-primary transition-all resize-none custom-scrollbar" placeholder="Describe the objectives of this meeting..." rows="4"></textarea>
+</div>
+<div class="flex items-center gap-lg">
+<label class="flex items-center gap-md cursor-pointer group">
+<div class="w-5 h-5 border-2 border-outline rounded flex items-center justify-center group-hover:border-primary transition-all">
+<input class="hidden peer" type="checkbox"/>
+<span class="material-symbols-outlined text-primary scale-0 peer-checked:scale-100 transition-transform text-[16px]">check</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface">Send calendar invite to client</span>
+</label>
+<label class="flex items-center gap-md cursor-pointer group">
+<div class="w-5 h-5 border-2 border-outline rounded flex items-center justify-center group-hover:border-primary transition-all">
+<input checked="" class="hidden peer" type="checkbox"/>
+<span class="material-symbols-outlined text-primary scale-0 peer-checked:scale-100 transition-transform text-[16px]">check</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface">Notify staff via dashboard</span>
+</label>
+</div>
+</div>
+<!-- Action Bar -->
+<div class="col-span-12 flex justify-end items-center gap-md mt-md">
+<button class="px-xl py-md border border-outline-variant text-on-surface hover:bg-surface-container-high transition-all rounded-lg font-label-md text-label-md" type="button">
+                            Cancel
+                        </button>
+<button class="px-xl py-md bg-primary text-on-primary-container hover:opacity-90 transition-all rounded-lg font-label-md text-label-md font-bold shadow-lg shadow-primary/20" type="submit">
+                            Confirm Appointment
+                        </button>
+</div>
+</form>
+<!-- Informational Sidebar for Large Screens -->
+<div class="hidden xl:block absolute right-margin-desktop top-[140px] w-64 space-y-lg">
+<div class="p-lg rounded-xl bg-surface-container-high border border-outline-variant">
+<h4 class="font-label-md text-label-md text-primary mb-sm">Recent Context</h4>
+<div class="space-y-md">
+<div class="flex gap-md">
+<div class="w-1 h-8 bg-tertiary-container rounded"></div>
+<div>
+<p class="text-label-sm text-on-surface">Last Contact</p>
+<p class="text-xs text-on-surface-variant">2 days ago via Email</p>
+</div>
+</div>
+<div class="flex gap-md">
+<div class="w-1 h-8 bg-primary-container rounded"></div>
+<div>
+<p class="text-label-sm text-on-surface">Active Project</p>
+<p class="text-xs text-on-surface-variant">Nexus Upgrade 2.0</p>
+</div>
+</div>
+</div>
+</div>
+<div class="relative h-48 rounded-xl overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover opacity-50 grayscale hover:grayscale-0 transition-all duration-500" data-alt="A sophisticated data visualization dashboard showing appointment trends and resource allocation. The aesthetic is clean and high-tech, featuring a palette of deep slate, vibrant indigo, and soft amber accents. The lighting mimics a sleek control room with glowing UI elements and a subtle depth of field effect." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlaWbzF8mv9PHCsUyJDYIX5Q_eMfKldYo711eZoaLJL_IYnvEYhtNyWXHANTfxVgaDOlmMPtd1Y9EZ_1SnztCx6remKZZkWWaFtztu7M5aOURAQnVlJnTfKca7CfVDN2UB2kbE_jH4FEWurfP14t9kuhcHL1FC6jDMCH1aZRBzy59Yuu5A_2zgoczP_rxzM8hiN3EqyqixGQ-jL5Duoz2Zawp3uR5-9EQ9YVxM7V1mf-TEC1Rd8fgWwCPvdssbqDL_SspP8MJmAFqK"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-dim to-transparent p-md flex flex-col justify-end">
+<p class="text-label-sm font-bold text-on-surface">Staff Efficiency</p>
+<p class="text-[10px] text-on-surface-variant">Optimizing 85% of slots</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Micro-interaction Scripts -->
+<script>
+        document.querySelectorAll('button, a').forEach(el => {
+            el.addEventListener('mousedown', () => {
+                el.style.transform = 'scale(0.97)';
+            });
+            el.addEventListener('mouseup', () => {
+                el.style.transform = 'scale(1)';
+            });
+            el.addEventListener('mouseleave', () => {
+                el.style.transform = 'scale(1)';
+            });
+        });
+
+        // Simple Checkbox Logic for Custom Component
+        document.querySelectorAll('.cursor-pointer.group').forEach(label => {
+            const checkbox = label.querySelector('input');
+            const icon = label.querySelector('.material-symbols-outlined');
+            
+            label.addEventListener('click', (e) => {
+                e.preventDefault();
+                checkbox.checked = !checkbox.checked;
+                if (checkbox.checked) {
+                    icon.classList.remove('scale-0');
+                    icon.classList.add('scale-100');
+                } else {
+                    icon.classList.remove('scale-100');
+                    icon.classList.add('scale-0');
+                }
+            });
+        });
+    </script>
+</body></html>

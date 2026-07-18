@@ -1,0 +1,302 @@
+.container {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-background);
+  font-family: var(--font-family-base);
+  color: var(--color-on-surface);
+  padding: var(--spacing-md);
+}
+
+.mainWrapper {
+  width: 100%;
+  max-width: 800px;
+  padding: var(--spacing-2xl) var(--spacing-lg);
+}
+
+.header {
+  margin-bottom: var(--spacing-xl);
+  text-align: center;
+}
+
+.title {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-display);
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.subtitle {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-lg);
+  color: var(--color-on-surface-variant);
+  margin-top: var(--spacing-sm);
+  margin-bottom: 0;
+}
+
+.cardContainer {
+  position: relative;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+.stepperHeader {
+  padding: var(--spacing-2xl) var(--spacing-2xl) var(--spacing-lg);
+  border-bottom: 1px solid var(--color-outline-variant);
+  background-color: var(--color-surface-container-lowest);
+  position: relative;
+  z-index: 10;
+  border-top-left-radius: var(--radius-xl);
+  border-top-right-radius: var(--radius-xl);
+}
+
+.contentArea {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.stepContent {
+  position: absolute;
+  inset: 0;
+  padding: var(--spacing-2xl);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.5s ease-in-out;
+}
+
+.stepContentHiddenRight {
+  transform: translateX(100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.stepContentHiddenLeft {
+  transform: translateX(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.stepContentActive {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.stepTitle {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-headline-lg);
+  font-weight: var(--font-weight-headline-lg);
+  color: var(--color-on-surface);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.stepSubtitle {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-md);
+  color: var(--color-on-surface-variant);
+  margin: 0 0 var(--spacing-xl) 0;
+}
+
+.formContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.formContentMaxW {
+  max-width: 28rem; /* max-w-md */
+}
+
+/* Specific to step 1 */
+.urlPreviewBox {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: var(--color-surface-container-low);
+  border-radius: var(--radius-default);
+  border: 1px solid var(--color-outline-variant);
+  max-width: 28rem;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.urlText {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-md);
+  color: var(--color-on-surface-variant);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.urlSlug {
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+/* Specific to step 2 */
+.uploadBox {
+  width: 100%;
+  height: 12rem;
+  border: 2px dashed var(--color-outline-variant);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.uploadBox:hover {
+  background-color: var(--color-surface-container-low);
+  border-color: var(--color-primary);
+}
+
+.uploadIconBox {
+  width: 4rem;
+  height: 4rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface-container-high);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--spacing-md);
+  transition: all 0.2s;
+}
+
+.uploadBox:hover .uploadIconBox {
+  background-color: var(--color-primary-container);
+}
+
+.uploadIcon {
+  font-size: 32px;
+  color: var(--color-outline);
+  transition: all 0.2s;
+}
+
+.uploadBox:hover .uploadIcon {
+  color: var(--color-primary);
+}
+
+.uploadTitle {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-headline-md);
+  font-weight: var(--font-weight-headline-md);
+  color: var(--color-on-surface);
+  transition: all 0.2s;
+}
+
+.uploadBox:hover .uploadTitle {
+  color: var(--color-primary);
+}
+
+.uploadSubtitle {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-md);
+  color: var(--color-on-surface-variant);
+  margin-top: var(--spacing-xs);
+}
+
+.uploadHelp {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-label-sm);
+  color: var(--color-outline);
+  margin-top: var(--spacing-sm);
+}
+
+/* Specific to step 3 */
+.gapLg {
+  gap: var(--spacing-lg);
+}
+
+.gapXs {
+  gap: var(--spacing-xs);
+}
+
+.label {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-label-md);
+  font-weight: var(--font-weight-label-md);
+  color: var(--color-on-surface);
+}
+
+.selectWrapper {
+  position: relative;
+}
+
+.select {
+  appearance: none;
+  height: 36px;
+  width: 100%;
+  padding: 0 var(--spacing-md);
+  border-radius: var(--radius-default);
+  border: 1px solid var(--color-outline-variant);
+  background-color: var(--color-surface-container-lowest);
+  color: var(--color-on-surface);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-md);
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.selectIcon {
+  position: absolute;
+  right: var(--spacing-md);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-outline);
+  pointer-events: none;
+  font-size: 20px;
+}
+
+.footer {
+  padding: var(--spacing-lg);
+  background-color: var(--color-surface-container-low);
+  border-top: 1px solid var(--color-outline-variant);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 10;
+  border-bottom-left-radius: var(--radius-xl);
+  border-bottom-right-radius: var(--radius-xl);
+}
+
+.btnBack {
+  height: 36px;
+  padding: 0 var(--spacing-md);
+  border-radius: var(--radius-default);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-label-md);
+  font-weight: var(--font-weight-label-md);
+  color: var(--color-on-surface);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  transition: all 0.2s;
+}
+
+.btnBack:hover {
+  background-color: var(--color-surface-container-highest);
+}
+
+.btnBackHidden {
+  opacity: 0;
+  pointer-events: none;
+}

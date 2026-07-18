@@ -1,0 +1,110 @@
+.wrapper {
+  height: 100%;
+}
+
+.placeholder {
+  opacity: 0.6;
+}
+
+.card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--spacing-lg);
+  background-color: var(--color-surface-container-lowest);
+  box-shadow: var(--elevation-1);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-md);
+}
+
+.title {
+  font-family: var(--font-family-label-md);
+  font-size: var(--font-size-label-md);
+  font-weight: var(--font-weight-label-md);
+  letter-spacing: var(--font-letter-spacing-label-md);
+  color: var(--color-on-surface-variant);
+  text-transform: uppercase;
+  margin: 0;
+  padding-right: var(--spacing-md);
+}
+
+.iconWrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.value {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-display);
+  font-weight: var(--font-weight-display);
+  letter-spacing: var(--font-letter-spacing-display);
+  color: var(--color-on-surface);
+  line-height: 1.1;
+}
+
+.trendContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.trendBadge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm, 4px);
+  font-size: var(--font-size-label-sm);
+  font-weight: var(--font-weight-label-sm);
+}
+
+.trendUp {
+  background-color: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+}
+
+.trendDown {
+  background-color: var(--color-error-container);
+  color: var(--color-error);
+}
+
+.trendNeutral {
+  background-color: var(--color-surface-variant);
+  color: var(--color-on-surface-variant);
+}
+
+.progressContainer {
+  width: 100%;
+  background-color: var(--color-surface-container);
+  height: 4px;
+  border-radius: var(--radius-full);
+  margin-top: var(--spacing-md);
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  border-radius: var(--radius-full);
+}
+
+.trendLabel {
+  font-size: var(--font-size-label-sm);
+  color: var(--color-on-surface-variant);
+}

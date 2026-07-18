@@ -1,0 +1,217 @@
+.tableContainer {
+  background-color: var(--color-surface-container-lowest);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--elevation-1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--color-outline-variant);
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.headerIcon {
+  color: var(--color-primary);
+}
+
+.headerLeft h2 {
+  font-family: var(--font-family-headline-sm);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-on-surface);
+  margin: 0;
+}
+
+.headerDate {
+  font-size: 13px;
+  color: var(--color-on-surface-variant);
+  margin-left: var(--spacing-xs);
+}
+
+/* Desktop Table View */
+.tableWrapper {
+  display: none;
+  overflow-x: auto;
+}
+
+@media (min-width: 1024px) {
+  .tableWrapper {
+    display: block;
+  }
+  
+  .mobileList {
+    display: none;
+  }
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table th {
+  padding: var(--spacing-md) var(--spacing-lg);
+  background-color: var(--color-surface-container-low);
+  font-family: var(--font-family-label-md);
+  font-size: var(--font-size-label-md);
+  font-weight: var(--font-weight-label-md);
+  color: var(--color-on-surface-variant);
+  border-bottom: 1px solid var(--color-outline-variant);
+}
+
+.table td {
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--color-outline-variant);
+  vertical-align: middle;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:hover td {
+  background-color: var(--color-surface-container-low);
+}
+
+.timeCell {
+  font-family: var(--font-family-label-md);
+  font-weight: 600;
+  color: var(--color-on-surface);
+  white-space: nowrap;
+}
+
+.clientName {
+  font-weight: 600;
+  color: var(--color-on-surface);
+  margin-bottom: 4px;
+}
+
+.appointmentDetail {
+  font-size: 13px;
+  color: var(--color-on-surface-variant);
+}
+
+.statusCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-outline);
+}
+
+.dotScheduled { background-color: var(--color-primary); }
+.dotConfirmed { background-color: #10b981; }
+.dotCompleted { background-color: #10b981; }
+.dotCancelled { background-color: var(--color-error); }
+
+.statusText {
+  font-size: 13px;
+  color: var(--color-on-surface-variant);
+  text-transform: capitalize;
+}
+
+.actionsColumn {
+  width: 48px;
+}
+
+.actionsCell {
+  text-align: right;
+}
+
+.actionButton {
+  background: none;
+  border: none;
+  color: var(--color-outline);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionButton:hover {
+  color: var(--color-on-surface);
+  background-color: var(--color-surface-container-high);
+}
+
+.emptyState {
+  text-align: center;
+  color: var(--color-on-surface-variant);
+  padding: var(--spacing-xl) !important;
+}
+
+/* Mobile Stacked View */
+.mobileList {
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-md);
+  gap: var(--spacing-md);
+}
+
+.mobileCard {
+  background-color: var(--color-surface-container-low);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.mobileHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--color-outline-variant);
+  padding-bottom: var(--spacing-sm);
+}
+
+.mobileBody {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mobileFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--spacing-sm);
+}
+
+.mobileActions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.iconAction {
+  background-color: var(--color-surface-container-highest);
+  color: var(--color-on-surface);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}

@@ -1,0 +1,264 @@
+<!DOCTYPE html><html class="h-full" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Sales Rep Mobile App Shell</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#ffb695",
+                        "surface-container-high": "#dce9ff",
+                        "tertiary-container": "#a44100",
+                        "secondary": "#006591",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "surface-tint": "#4d44e3",
+                        "on-secondary-container": "#004666",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#f8f9ff",
+                        "on-error": "#ffffff",
+                        "primary": "#3525cd",
+                        "on-tertiary-fixed": "#351000",
+                        "surface-container": "#e5eeff",
+                        "tertiary-fixed": "#ffdbcc",
+                        "surface-dim": "#cbdbf5",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed": "#0f0069",
+                        "primary-container": "#4f46e5",
+                        "tertiary": "#7e3000",
+                        "on-secondary-fixed-variant": "#004c6e",
+                        "secondary-fixed": "#c9e6ff",
+                        "surface-variant": "#d3e4fe",
+                        "on-error-container": "#93000a",
+                        "outline": "#777587",
+                        "primary-fixed": "#e2dfff",
+                        "on-surface-variant": "#464555",
+                        "on-primary-container": "#dad7ff",
+                        "inverse-primary": "#c3c0ff",
+                        "on-tertiary": "#ffffff",
+                        "outline-variant": "#c7c4d8",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-container": "#ffd2be",
+                        "background": "#f8f9ff",
+                        "on-surface": "#0b1c30",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "on-secondary-fixed": "#001e2f",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "secondary-container": "#39b8fd",
+                        "on-background": "#0b1c30",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-container-low": "#eff4ff",
+                        "inverse-surface": "#213145",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#d3e4fe",
+                        "surface": "#f8f9ff",
+                        "secondary-fixed-dim": "#89ceff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "2xl": "48px",
+                        "xl": "32px",
+                        "lg": "24px",
+                        "max-content-width": "1280px",
+                        "sidebar-width": "240px",
+                        "md": "16px",
+                        "base": "4px",
+                        "xs": "4px",
+                        "sm": "8px",
+                        "sidebar-collapsed": "64px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "display": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["18px", { "lineHeight": "26px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "display": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-sm": ["11px", { "lineHeight": "14px", "fontWeight": "600" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .drawer-open {
+            transform: translateX(0);
+        }
+        .drawer-closed {
+            transform: translateX(-100%);
+        }
+        .overlay-open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .overlay-closed {
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="h-full bg-background text-on-background antialiased flex flex-col font-body-md">
+<!-- Top App Bar -->
+<header class="bg-surface text-primary font-headline-md text-headline-md fixed top-0 w-full z-50 flex justify-between items-center px-lg h-16 border-b border-outline-variant flat no shadows md:hidden">
+<div class="flex items-center gap-sm">
+<button class="p-2 -ml-2 rounded-full hover:bg-surface-container-low transition-colors cursor-pointer active:opacity-80" id="menu-btn">
+<span class="material-symbols-outlined text-primary">menu</span>
+</button>
+<span class="text-headline-md font-headline-md font-bold text-primary">Nexus CRM</span>
+</div>
+<div class="flex items-center gap-sm">
+<button class="p-2 rounded-full hover:bg-surface-container-low transition-colors cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined text-primary">notifications</span>
+</button>
+<button class="p-2 rounded-full hover:bg-surface-container-low transition-colors cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined text-primary">help</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold ml-2 overflow-hidden border border-outline-variant cursor-pointer active:opacity-80">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="A professional headshot of a corporate sales representative, modern lighting, clear background, high quality, suitable for a B2B application avatar." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPQqN5iSvcmyAkOR22cVjAEk8E-6dQ59YCygEkIIb_3D1V25iq6BHYitkNhxRnqEbPsGA_gpPrQQzMsD0LqvlP09hqpPdS2czILl057Uxrv-01qwNXdspXazgzsjaqu_Ebfm3k1Qrb9xkwQauq_8CvgsQTY-zMV2xUbdHod3HS3nRQl4OL3C52WeVOsMt-VeDBG9r_4BI3Thc5Q3c4XQR8J99MtwNq5xkyuFp4l9SrmEwO-SOvqTw6U7HfCJRajcPZ79EJtx-8AJ3d">
+</div>
+</div>
+</header>
+<!-- Drawer Overlay -->
+<div class="fixed inset-0 bg-on-surface/20 z-50 transition-opacity duration-300 overlay-closed md:hidden" id="drawer-overlay"></div>
+<!-- Side Navigation (Drawer on Mobile, Hidden on Web for this specific shell) -->
+<nav class="fixed left-0 top-0 h-full w-sidebar-width bg-surface z-50 flex flex-col py-md border-r border-outline-variant transition-transform duration-300 ease-in-out drawer-closed md:hidden" id="drawer-menu">
+<div class="px-md mb-md flex items-center justify-between">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center border border-outline-variant overflow-hidden">
+<img alt="Organization Logo" class="w-full h-full object-cover" data-alt="A sleek, modern corporate logo icon suitable for an enterprise CRM platform, minimalist geometric design, professional color palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrd282lvVMW2kLP0-oJry9WKJhtkEsxEmpbNxqjJDbtx0oGK1TLPHnqj2tWvpbPwD-RPIXwx434i1y_JnJhNbYjR1FobnUJVkrnghEh2mfxB8bDwKLw7UeIUBgwiNsU0AG0Ht9qZPUDVkJ-MiLmH1wpp15qNEUXyepy5-474Y6UU_k464g88N9ZQqllr3vIH61f0018lo5QJbnQh4OH1iCElaBFz7syXYNBDyTeDdX7_km7zjak6h8CnyE8yyYBeb1w8fBP1_G0tdL">
+</div>
+<div>
+<h2 class="font-headline-md text-headline-md text-primary font-bold">Corporate Modern</h2>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Enterprise Tier</p>
+</div>
+</div>
+<button class="p-1 rounded-full hover:bg-surface-container-low transition-colors cursor-pointer active:opacity-80" id="close-btn">
+<span class="material-symbols-outlined text-on-surface-variant">close</span>
+</button>
+</div>
+<div class="px-md mb-lg">
+<button class="w-full py-2 px-4 bg-primary text-on-primary rounded-lg font-label-md text-label-md flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors shadow-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add</span>
+                New Entry
+            </button>
+</div>
+<ul class="flex-1 overflow-y-auto px-sm space-y-1">
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-r-full bg-surface-container-highest text-primary border-l-2 border-primary font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+                    Dashboard
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-r-full text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">group</span>
+                    Clients
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-r-full text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">event</span>
+                    Appointments
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-r-full text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">description</span>
+                    Quotations
+                </a>
+</li>
+</ul>
+<div class="mt-auto px-sm pt-4 border-t border-outline-variant space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-r-full text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">contact_support</span>
+                Support
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-r-full text-on-surface-variant hover:bg-surface-container-low transition-all font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">logout</span>
+                Log Out
+            </a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 mt-16 p-md flex flex-col md:hidden">
+<!-- Content Header -->
+<div class="mb-lg">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface font-bold">Dashboard</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Overview of your daily tasks and active clients.</p>
+</div>
+<!-- Empty State -->
+<div class="flex-1 flex flex-col items-center justify-center text-center p-xl bg-surface-container-low rounded-xl border border-outline-variant/50">
+<div class="w-24 h-24 mb-lg rounded-full bg-surface-container flex items-center justify-center text-primary/50">
+<span class="material-symbols-outlined text-display" style="font-size: 48px;">inbox</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2 font-semibold">No recent activity</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-lg max-w-[250px]">Your dashboard is currently empty. Start by adding a new client or scheduling an appointment.</p>
+<button class="py-2 px-6 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary/90 transition-colors shadow-sm">
+                Get Started
+            </button>
+</div>
+</main>
+<!-- Desktop Notice -->
+<div class="hidden md:flex h-full items-center justify-center bg-surface-container-lowest text-on-surface">
+<div class="text-center p-xl">
+<span class="material-symbols-outlined text-display text-primary mb-4" style="font-size: 64px;">smartphone</span>
+<h2 class="font-headline-lg text-headline-lg font-bold mb-2">Mobile View Only</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Please resize your window to view the mobile app shell.</p>
+</div>
+</div>
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuBtn = document.getElementById('menu-btn');
+            const closeBtn = document.getElementById('close-btn');
+            const drawerMenu = document.getElementById('drawer-menu');
+            const drawerOverlay = document.getElementById('drawer-overlay');
+
+            function openDrawer() {
+                drawerMenu.classList.remove('drawer-closed');
+                drawerMenu.classList.add('drawer-open');
+                drawerOverlay.classList.remove('overlay-closed');
+                drawerOverlay.classList.add('overlay-open');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeDrawer() {
+                drawerMenu.classList.remove('drawer-open');
+                drawerMenu.classList.add('drawer-closed');
+                drawerOverlay.classList.remove('overlay-open');
+                drawerOverlay.classList.add('overlay-closed');
+                document.body.style.overflow = '';
+            }
+
+            menuBtn.addEventListener('click', openDrawer);
+            closeBtn.addEventListener('click', closeDrawer);
+            drawerOverlay.addEventListener('click', closeDrawer);
+        });
+    </script>
+</body></html>
