@@ -14,6 +14,7 @@ export interface KPICardProps {
   trendDirection?: 'up' | 'down' | 'neutral';
   isPlaceholder?: boolean;
   placeholderText?: string;
+  progress?: number;
 }
 
 export const KPICard: React.FC<KPICardProps> = ({
@@ -72,6 +73,14 @@ export const KPICard: React.FC<KPICardProps> = ({
             </div>
           )}
         </div>
+        {progress !== undefined && (
+          <div className={styles.progressContainer}>
+            <div 
+              className={styles.progressBar} 
+              style={{ width: `${Math.min(Math.max(progress, 0), 100)}%`, backgroundColor: iconColor || 'var(--color-primary)' }}
+            />
+          </div>
+        )}
       </Card>
     </div>
   );

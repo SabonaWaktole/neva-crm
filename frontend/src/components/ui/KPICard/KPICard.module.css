@@ -82,12 +82,26 @@
 
 .trendDown {
   background-color: var(--color-error-container);
-  color: var(--color-on-error-container);
+  color: var(--color-error);
 }
 
 .trendNeutral {
   background-color: var(--color-surface-variant);
   color: var(--color-on-surface-variant);
+}
+
+.progressContainer {
+  width: 100%;
+  background-color: var(--color-surface-container);
+  height: 4px;
+  border-radius: var(--radius-full);
+  margin-top: var(--spacing-md);
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  border-radius: var(--radius-full);
 }
 
 .trendLabel {
