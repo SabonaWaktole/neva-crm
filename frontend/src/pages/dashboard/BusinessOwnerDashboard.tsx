@@ -10,55 +10,72 @@ import {
   CalendarPlus,
   History,
   MessageSquarePlus,
-  Zap
+  Zap,
+  PhoneCall,
+  Video,
+  FileText,
+  Mail,
+  CalendarX
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button/Button';
 import { KPICard } from '../../components/ui/KPICard';
 import { UpcomingAppointmentsWidget } from '../../components/widgets/UpcomingAppointmentsWidget';
 import { TimelineItem } from '../../components/ui/TimelineItem';
 
-// Mock data matching GetTenantActivityFeedUseCase schema
+// Mock data matching TimelineMerger schema
 const mockActivities = [
   {
     id: '1',
     timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
     type: 'CLIENT_CREATED',
-    description: 'Added Sarah Jenkins to the workspace',
+    description: 'Client Added',
     actor: 'Alex Carter',
-    details: { clientId: 'client-1' }
+    details: { name: 'Sarah Jenkins', status: 'ACTIVE' }
   },
   {
     id: '2',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-    type: 'INTERACTION_LOGGED',
-    description: 'Added a note to Global Logistics Deal',
+    type: 'INTERACTION_ADDED',
+    description: 'Interaction (NOTE)',
     actor: 'Alex Carter',
-    details: { clientId: 'client-2', interactionType: 'NOTE' }
+    details: { channel: 'NOTE', content: 'Added a note to Global Logistics Deal' }
   },
   {
     id: '3',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
     type: 'APPOINTMENT_SCHEDULED',
-    description: 'Scheduled "Demo" with Acme Corp',
+    description: 'Appointment (SCHEDULED)',
     actor: 'Alex Carter',
-    details: { appointmentId: 'app-1', clientId: 'client-3' }
+    statusLabel: 'SCHEDULED',
+    details: { notes: 'Demo with Acme Corp', status: 'SCHEDULED' }
+  },
+  {
+    id: '4',
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 26).toISOString(),
+    type: 'APPOINTMENT_COMPLETED',
+    description: 'Appointment (COMPLETED)',
+    actor: 'Alex Carter',
+    statusLabel: 'COMPLETED',
+    details: { notes: 'Onboarding call', status: 'COMPLETED' }
   }
 ];
 
-const getActivityConfig = (type: string) => {
+const getActivityConfig = (type: string, details?: any) => {
   switch (type) {
     case 'CLIENT_CREATED':
       return { icon: <UserPlus size={20} />, color: 'var(--color-primary)', bg: 'var(--color-primary-fixed)' };
-    case 'CLIENT_UPDATED':
-      return { icon: <Users size={20} />, color: 'var(--color-secondary)', bg: 'var(--color-secondary-fixed)' };
     case 'APPOINTMENT_SCHEDULED':
       return { icon: <CalendarPlus size={20} />, color: 'var(--color-secondary)', bg: 'var(--color-secondary-fixed)' };
+    case 'APPOINTMENT_CONFIRMED':
     case 'APPOINTMENT_COMPLETED':
       return { icon: <CalendarCheck size={20} />, color: 'var(--color-primary)', bg: 'var(--color-primary-fixed)' };
-    case 'INTERACTION_LOGGED':
-      return { icon: <MessageSquarePlus size={20} />, color: 'var(--color-outline)', bg: 'var(--color-surface-variant)' };
-    case 'SYSTEM_EVENT':
-      return { icon: <Zap size={20} />, color: 'var(--color-error)', bg: 'var(--color-error-container)' };
+    case 'APPOINTMENT_CANCELLED':
+      return { icon: <CalendarX size={20} />, color: 'var(--color-error)', bg: 'var(--color-error-container)' };
+    case 'INTERACTION_ADDED':
+      if (details?.channel === 'CALL') return { icon: <PhoneCall size={20} />, color: 'var(--color-outline)', bg: 'var(--color-surface-variant)' };
+      if (details?.channel === 'EMAIL') return { icon: <Mail size={20} />, color: 'var(--color-outline)', bg: 'var(--color-surface-variant)' };
+      if (details?.channel === 'MEETING') return { icon: <Video size={20} />, color: 'var(--color-outline)', bg: 'var(--color-surface-variant)' };
+      return { icon: <FileText size={20} />, color: 'var(--color-outline)', bg: 'var(--color-surface-variant)' };
     default:
       return { icon: <History size={20} />, color: 'var(--color-outline)', bg: 'var(--color-surface-variant)' };
   }
@@ -171,7 +188,7 @@ export const BusinessOwnerDashboard = () => {
             
             <div className={styles.feedList}>
               {mockActivities.map((activity, index) => {
-                const config = getActivityConfig(activity.type);
+                const config = getActivityConfig(activity.type, activity.details);
                 return (
                   <TimelineItem 
                     key={activity.id}
