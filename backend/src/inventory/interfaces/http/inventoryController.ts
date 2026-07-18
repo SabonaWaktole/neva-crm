@@ -115,7 +115,7 @@ export class InventoryController {
         authorUserId: req.user!.userId,
         authorRole: req.user!.role as any,
         warehouseId: parsed.warehouseId,
-        quantityChange: parsed.quantityDelta,
+        quantityChange: parsed.quantityChange,
         reason: parsed.reason || 'Manual adjustment',
       });
       res.json(result);

@@ -22,7 +22,7 @@ export const updateProductSchema = z.object({
 
 export const adjustStockSchema = z.object({
   warehouseId: z.string(),
-  quantityDelta: z.number(), // Can be negative or positive
+  quantityChange: z.number(), // Can be negative or positive
   reason: z.string().optional(),
 });
 

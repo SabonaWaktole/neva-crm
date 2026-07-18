@@ -251,4 +251,106 @@ describe('Inventory Module Integration Tests', () => {
       expect(res.body.error).toContain('not found'); // T1's API can't see T2's warehouse when looking up the stock level
     });
   });
+
+  describe('4. Missing Scope Coverage', () => {
+    let testWh1Id: string;
+    let testWh2Id: string;
+
+    beforeAll(async () => {
+      const w1 = await request(app).post('/api/t1-inv/inventory/warehouses').set('Authorization', `Bearer ${tokenTenant1Owner}`).send({ name: 'Scope Hub 1' });
+      testWh1Id = w1.body.id;
+      const w2 = await request(app).post('/api/t1-inv/inventory/warehouses').set('Authorization', `Bearer ${tokenTenant1Owner}`).send({ name: 'Scope Hub 2' });
+      testWh2Id = w2.body.id;
+    });
+
+    it('Product creation: supports 0 locations vs multiple locations', async () => {
+      // 0 locations
+      const pZero = await request(app).post('/api/t1-inv/inventory/products')
+        .set('Authorization', `Bearer ${tokenTenant1Owner}`)
+        .send({
+          name: 'Zero Loc Product',
+          description: 'No initial stock',
+          price: 10,
+          initialStock: []
+        });
+      expect(pZero.status).toBe(201);
+      expect(pZero.body.stockLevels).toHaveLength(0);
+
+      // Multiple locations
+      const pMulti = await request(app).post('/api/t1-inv/inventory/products')
+        .set('Authorization', `Bearer ${tokenTenant1Owner}`)
+        .send({
+          name: 'Multi Loc Product',
+          description: 'Has stock in 2 places',
+          price: 20,
+          initialStock: [
+            { warehouseId: testWh1Id, quantity: 50 },
+            { warehouseId: testWh2Id, quantity: 100 }
+          ]
+        });
+      expect(pMulti.status).toBe(201);
+      expect(pMulti.body.stockLevels).toHaveLength(2);
+      expect(pMulti.body.stockLevels.find((s: any) => s.warehouseId === testWh1Id).quantity).toBe(50);
+      expect(pMulti.body.stockLevels.find((s: any) => s.warehouseId === testWh2Id).quantity).toBe(100);
+    });
+
+    it('Adjust stock endpoint explicitly modifies stock and logs movement', async () => {
+      const p = await request(app).post('/api/t1-inv/inventory/products')
+        .set('Authorization', `Bearer ${tokenTenant1Owner}`)
+        .send({ name: 'Adjustable', description: 'Desc', price: 10, initialStock: [{ warehouseId: testWh1Id, quantity: 50 }]});
+      
+      const res = await request(app).post(`/api/t1-inv/inventory/products/${p.body.product.id}/adjust`)
+        .set('Authorization', `Bearer ${tokenTenant1Staff}`) // Staff can adjust
+        .send({ warehouseId: testWh1Id, quantityChange: -20, reason: 'Shrinkage' });
+      
+      expect(res.status).toBe(200);
+      expect(res.body.stockLevel.quantity).toBe(30);
+
+      const dbMovement = await prisma.stockMovement.findFirst({
+        where: { tenantId: t1Id, productId: p.body.product.id, type: 'ADJUSTMENT' }
+      });
+      expect(dbMovement?.quantity).toBe(-20);
+    });
+
+    it('Product search with the 3 threshold boundaries (LOW_STOCK, IN_STOCK, OUT_OF_STOCK)', async () => {
+      const p1 = await request(app).post('/api/t1-inv/inventory/products').set('Authorization', `Bearer ${tokenTenant1Owner}`).send({ name: 'Search Out', description: 'D', price: 10, initialStock: [] });
+      const p2 = await request(app).post('/api/t1-inv/inventory/products').set('Authorization', `Bearer ${tokenTenant1Owner}`).send({ name: 'Search Low', description: 'D', lowStockThreshold: 10, price: 10, initialStock: [{ warehouseId: testWh1Id, quantity: 5 }] });
+      const p3 = await request(app).post('/api/t1-inv/inventory/products').set('Authorization', `Bearer ${tokenTenant1Owner}`).send({ name: 'Search In', description: 'D', lowStockThreshold: 10, price: 10, initialStock: [{ warehouseId: testWh1Id, quantity: 50 }] });
+      
+      const outRes = await request(app).get('/api/t1-inv/inventory/products?availability=OUT_OF_STOCK').set('Authorization', `Bearer ${tokenTenant1Staff}`);
+      expect(outRes.body.some((p: any) => p.product.id === p1.body.product.id)).toBe(true);
+      expect(outRes.body.some((p: any) => p.product.id === p2.body.product.id)).toBe(false);
+
+      const lowRes = await request(app).get('/api/t1-inv/inventory/products?availability=LOW_STOCK').set('Authorization', `Bearer ${tokenTenant1Staff}`);
+      expect(lowRes.body.some((p: any) => p.product.id === p2.body.product.id)).toBe(true);
+      expect(lowRes.body.some((p: any) => p.product.id === p3.body.product.id)).toBe(false);
+
+      const inRes = await request(app).get('/api/t1-inv/inventory/products?availability=IN_STOCK').set('Authorization', `Bearer ${tokenTenant1Staff}`);
+      expect(inRes.body.some((p: any) => p.product.id === p3.body.product.id)).toBe(true);
+      expect(inRes.body.some((p: any) => p.product.id === p1.body.product.id)).toBe(false);
+    });
+
+    it('Role-gating proving 403 at the API level', async () => {
+      // 1. Business-Owner-ONLY endpoint: Create Warehouse (Staff is rejected)
+      const createWhRes = await request(app).post('/api/t1-inv/inventory/warehouses')
+        .set('Authorization', `Bearer ${tokenTenant1Staff}`) // Staff attempting to create warehouse
+        .send({ name: 'Staff Warehouse' });
+      expect(createWhRes.status).toBe(403);
+      expect(createWhRes.body.error).toContain('Unauthorized');
+
+      // 2. Business-Owner-or-Staff endpoint: Adjust Stock (Super Admin is rejected)
+      // First create a product as owner so we have something to adjust
+      const p = await request(app).post('/api/t1-inv/inventory/products')
+        .set('Authorization', `Bearer ${tokenTenant1Owner}`)
+        .send({ name: 'RoleTest Prod', description: 'D', price: 10, initialStock: [{ warehouseId: testWh1Id, quantity: 50 }] });
+      
+      const tokenSuperAdmin = tokenService.sign({ userId: 'u_super', role: UserRole.SUPER_ADMIN as any, tenantId: t1Id, tenantSlug: 't1-inv' });
+      
+      const adjustRes = await request(app).post(`/api/t1-inv/inventory/products/${p.body.product.id}/adjust`)
+        .set('Authorization', `Bearer ${tokenSuperAdmin}`) // SUPER_ADMIN attempting to adjust tenant stock
+        .send({ warehouseId: testWh1Id, quantityChange: 10 });
+      expect(adjustRes.status).toBe(403);
+      expect(adjustRes.body.error).toContain('Unauthorized');
+    });
+  });
 });
