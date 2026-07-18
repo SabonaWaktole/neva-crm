@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './StaffScheduleTable.module.css';
-import { CalendarViewDay, MoreVertical, Phone, MapPin, Check } from 'lucide-react';
+import { CalendarDays, MoreVertical, Phone, MapPin, Check } from 'lucide-react';
 import { Badge } from '../../ui/Badge/Badge';
 import { Button } from '../../ui/Button/Button';
 import type { Appointment } from '../../../types/appointment';
@@ -15,7 +15,7 @@ export const StaffScheduleTable: React.FC<StaffScheduleTableProps> = ({ appointm
     <div className={styles.tableContainer}>
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          <CalendarViewDay size={20} className={styles.headerIcon} />
+          <CalendarDays size={20} className={styles.headerIcon} />
           <h2>My Schedule</h2>
           <span className={styles.headerDate}>Today</span>
         </div>

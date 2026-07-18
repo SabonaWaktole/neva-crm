@@ -28,6 +28,7 @@ export const KPICard: React.FC<KPICardProps> = ({
   trendDirection = 'neutral',
   isPlaceholder = false,
   placeholderText = 'Coming soon',
+  progress,
 }) => {
   return (
     <div className={`${styles.wrapper} ${isPlaceholder ? styles.placeholder : ''}`}>

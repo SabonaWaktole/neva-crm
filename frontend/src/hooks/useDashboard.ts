@@ -1,12 +1,11 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { dashboardService, DashboardMetrics, ActivityFeedItem, Tenant } from '../services/dashboardService';
-import { useAuthStore } from '../store/useAuthStore';
+import { dashboardService } from '../services/dashboardService';
+import type { DashboardMetrics, ActivityFeedItem, Tenant } from '../services/dashboardService';
 
 export const useDashboardMetrics = () => {
   const { tenantSlug } = useParams();
-  const authTenantId = useAuthStore((state) => state.user?.tenantId);
-  const activeTenant = tenantSlug || authTenantId;
+  const activeTenant = tenantSlug as string;
 
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -35,8 +34,7 @@ export const useDashboardMetrics = () => {
 
 export const useActivityFeed = (limit: number = 10) => {
   const { tenantSlug } = useParams();
-  const authTenantId = useAuthStore((state) => state.user?.tenantId);
-  const activeTenant = tenantSlug || authTenantId;
+  const activeTenant = tenantSlug as string;
 
   const [activities, setActivities] = useState<ActivityFeedItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);

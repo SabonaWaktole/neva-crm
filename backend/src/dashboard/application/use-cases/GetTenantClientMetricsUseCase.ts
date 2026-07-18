@@ -5,6 +5,7 @@ export interface TenantClientMetrics {
   totalClients: number;
   activeClients: number;
   newClientsThisMonth: number;
+  totalClientsLastWeek: number;
 }
 
 export class GetTenantClientMetricsUseCase {
@@ -30,10 +31,15 @@ export class GetTenantClientMetricsUseCase {
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const newClientsThisMonth = allClients.filter((c: Client) => c.createdAt >= firstDayOfMonth).length;
 
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(now.getDate() - 7);
+    const totalClientsLastWeek = allClients.filter((c: Client) => c.createdAt < oneWeekAgo).length;
+
     return {
       totalClients,
       activeClients,
       newClientsThisMonth,
+      totalClientsLastWeek,
     };
   }
 }

@@ -37,8 +37,8 @@ export const dashboardService = {
 
   getTenantActivityFeed: async (tenantSlug: string, limit?: number): Promise<ActivityFeedItem[]> => {
     const params = limit ? { limit } : {};
-    const response = await apiClient.get<ActivityFeedItem[]>(`/${tenantSlug}/dashboard/feed`, { params });
-    return response.data;
+    const response = await apiClient.get<{ timeline: ActivityFeedItem[] }>(`/${tenantSlug}/dashboard/feed`, { params });
+    return response.data.timeline;
   },
 
   getTenants: async (skip?: number, take?: number): Promise<PaginatedTenants> => {

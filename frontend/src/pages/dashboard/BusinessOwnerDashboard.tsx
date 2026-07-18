@@ -21,7 +21,8 @@ import { Button } from '../../components/ui/Button/Button';
 import { KPICard } from '../../components/ui/KPICard';
 import { UpcomingAppointmentsWidget } from '../../components/widgets/UpcomingAppointmentsWidget';
 import { TimelineItem } from '../../components/ui/TimelineItem';
-// Replaced mockActivities with real data
+import { getActivityConfig } from '../../utils/activityMapper';
+import { useDashboardMetrics, useActivityFeed } from '../../hooks/useDashboard';
 
 export const BusinessOwnerDashboard = () => {
   const { metrics, isLoading: isLoadingMetrics } = useDashboardMetrics();

@@ -5,7 +5,6 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { useLogout } from '../../hooks/useLogout';
 import { useNavigation } from '../../hooks/useNavigation';
 import { StaffDashboard } from '../dashboard/StaffDashboard';
-import { ClientsShell } from './ClientsShell';
 
 export const StaffShell = () => {
   const navigate = useNavigate();
@@ -38,11 +37,7 @@ export const StaffShell = () => {
         />
       }
     >
-      <Routes>
-        <Route path="/" element={<Navigate to="dashboard" replace />} />
-        <Route path="/dashboard" element={<StaffDashboard />} />
-        <Route path="/clients/*" element={<ClientsShell />} />
-      </Routes>
+      <StaffDashboard />
     </AppLayout>
   );
 };

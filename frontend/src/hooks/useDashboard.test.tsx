@@ -1,22 +1,29 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { describe, it, expect, beforeEach } from 'vitest';
+import React from 'react';
+import { renderHook, waitFor } from '@testing-library/react';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { useDashboardMetrics, useActivityFeed, useTenants } from './useDashboard';
 import { server } from '../setupTests';
 import { http, HttpResponse } from 'msw';
-import { useAuthStore } from '../store/useAuthStore';
+
+// Helper to wrap hooks in a router that provides :tenantSlug param
+const createRouterWrapper = (slug: string) => {
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
+    <MemoryRouter initialEntries={[`/${slug}`]}>
+      <Routes>
+        <Route path="/:tenantSlug" element={<>{children}</>} />
+      </Routes>
+    </MemoryRouter>
+  );
+  return Wrapper;
+};
 
 describe('useDashboard Hooks', () => {
-  beforeEach(() => {
-    useAuthStore.setState({ 
-      user: { userId: 'bo-1', role: 'BUSINESS_OWNER', tenantId: 'tenant-1', tenantSlug: 'tenant-1' }, 
-      isAuthenticated: true 
-    });
-  });
-
+  // ─── useDashboardMetrics ───────────────────────────────────────────
   describe('useDashboardMetrics', () => {
-    it('fetches metrics successfully', async () => {
+    it('fetches metrics successfully using tenantSlug from route params', async () => {
       server.use(
-        http.get('http://localhost:3000/api/tenant-1/dashboard/metrics', () => {
+        http.get('http://localhost:3000/api/acme-corp/dashboard/metrics', () => {
           return HttpResponse.json({
             totalClients: 156,
             totalClientsLastWeek: 140
@@ -24,7 +31,9 @@ describe('useDashboard Hooks', () => {
         })
       );
 
-      const { result } = renderHook(() => useDashboardMetrics());
+      const { result } = renderHook(() => useDashboardMetrics(), {
+        wrapper: createRouterWrapper('acme-corp'),
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -37,12 +46,14 @@ describe('useDashboard Hooks', () => {
 
     it('handles fetch failure', async () => {
       server.use(
-        http.get('http://localhost:3000/api/tenant-1/dashboard/metrics', () => {
+        http.get('http://localhost:3000/api/acme-corp/dashboard/metrics', () => {
           return HttpResponse.json({ error: 'Failed to fetch metrics' }, { status: 500 });
         })
       );
 
-      const { result } = renderHook(() => useDashboardMetrics());
+      const { result } = renderHook(() => useDashboardMetrics(), {
+        wrapper: createRouterWrapper('acme-corp'),
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -50,12 +61,41 @@ describe('useDashboard Hooks', () => {
 
       expect(result.current.error).toBe('Failed to fetch metrics');
     });
+
+    it('does not re-fetch when parent re-renders with the same tenantSlug', async () => {
+      let fetchCount = 0;
+      server.use(
+        http.get('http://localhost:3000/api/acme-corp/dashboard/metrics', () => {
+          fetchCount++;
+          return HttpResponse.json({ totalClients: 10, totalClientsLastWeek: 8 });
+        })
+      );
+
+      const { result, rerender } = renderHook(() => useDashboardMetrics(), {
+        wrapper: createRouterWrapper('acme-corp'),
+      });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(fetchCount).toBe(1);
+
+      // Parent re-renders — tenantSlug hasn't changed, so fetchMetrics
+      // (memoized via useCallback([activeTenant])) should be stable.
+      rerender();
+      rerender();
+      rerender();
+
+      expect(fetchCount).toBe(1);
+    });
   });
 
+  // ─── useActivityFeed ───────────────────────────────────────────────
   describe('useActivityFeed', () => {
     it('fetches activity feed with correct limit', async () => {
       server.use(
-        http.get('http://localhost:3000/api/tenant-1/dashboard/feed', ({ request }) => {
+        http.get('http://localhost:3000/api/acme-corp/dashboard/feed', ({ request }) => {
           const url = new URL(request.url);
           const limit = url.searchParams.get('limit');
           if (limit === '5') {
@@ -73,7 +113,9 @@ describe('useDashboard Hooks', () => {
         })
       );
 
-      const { result } = renderHook(() => useActivityFeed(5));
+      const { result } = renderHook(() => useActivityFeed(5), {
+        wrapper: createRouterWrapper('acme-corp'),
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -83,23 +125,48 @@ describe('useDashboard Hooks', () => {
       expect(result.current.activities[0].id).toBe('evt-1');
       expect(result.current.error).toBeNull();
     });
+
+    it('does not re-fetch when parent re-renders with the same limit and tenantSlug', async () => {
+      let fetchCount = 0;
+      server.use(
+        http.get('http://localhost:3000/api/acme-corp/dashboard/feed', () => {
+          fetchCount++;
+          return HttpResponse.json([]);
+        })
+      );
+
+      const { result, rerender } = renderHook(
+        ({ limit }) => useActivityFeed(limit),
+        {
+          initialProps: { limit: 5 },
+          wrapper: createRouterWrapper('acme-corp'),
+        }
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(fetchCount).toBe(1);
+
+      // Parent re-renders with same primitive limit — should NOT re-fetch
+      rerender({ limit: 5 });
+      rerender({ limit: 5 });
+      rerender({ limit: 5 });
+
+      expect(fetchCount).toBe(1);
+    });
   });
 
+  // ─── useTenants ────────────────────────────────────────────────────
   describe('useTenants', () => {
-    beforeEach(() => {
-      useAuthStore.setState({ 
-        user: { userId: 'su-1', role: 'SUPER_ADMIN', tenantId: 'system', tenantSlug: 'system' }, 
-        isAuthenticated: true 
-      });
-    });
-
     it('fetches paginated tenants successfully', async () => {
       server.use(
         http.get('http://localhost:3000/api/tenants', ({ request }) => {
           const url = new URL(request.url);
           const skip = url.searchParams.get('skip');
           const take = url.searchParams.get('take');
-          
+
           if (skip === '0' && take === '50') {
             return HttpResponse.json({
               items: [
@@ -124,7 +191,7 @@ describe('useDashboard Hooks', () => {
       expect(result.current.error).toBeNull();
     });
 
-    it('prevents infinite loops when dependency array runs multiple renders', async () => {
+    it('does not re-fetch when parent re-renders with same skip/take primitives', async () => {
       let fetchCount = 0;
       server.use(
         http.get('http://localhost:3000/api/tenants', () => {
