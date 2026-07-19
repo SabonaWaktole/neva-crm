@@ -11,6 +11,8 @@ import { DeleteWarehouseUseCase } from '../../application/use-cases/DeleteWareho
 import { CreateCategoryUseCase } from '../../application/use-cases/CreateCategoryUseCase';
 import { UpdateCategoryUseCase } from '../../application/use-cases/UpdateCategoryUseCase';
 import { DeleteCategoryUseCase } from '../../application/use-cases/DeleteCategoryUseCase';
+import { GetWarehousesUseCase } from '../../application/use-cases/GetWarehousesUseCase';
+import { GetCategoriesUseCase } from '../../application/use-cases/GetCategoriesUseCase';
 import { AvailabilityStatus } from '../../domain/repositories';
 import { NegativeStockError } from '../../domain/errors';
 import { WarehouseInUseError, CategoryInUseError } from '../../domain/inUseErrors';
@@ -30,9 +32,11 @@ export class InventoryController {
     private createWarehouseUseCase: CreateWarehouseUseCase,
     private updateWarehouseUseCase: UpdateWarehouseUseCase,
     private deleteWarehouseUseCase: DeleteWarehouseUseCase,
+    private getWarehousesUseCase: GetWarehousesUseCase,
     private createCategoryUseCase: CreateCategoryUseCase,
     private updateCategoryUseCase: UpdateCategoryUseCase,
-    private deleteCategoryUseCase: DeleteCategoryUseCase
+    private deleteCategoryUseCase: DeleteCategoryUseCase,
+    private getCategoriesUseCase: GetCategoriesUseCase
   ) {}
 
   // ======================
@@ -151,6 +155,19 @@ export class InventoryController {
   // ======================
   // WAREHOUSES
   // ======================
+  getWarehouses = async (req: Request, res: Response) => {
+    try {
+      const results = await this.getWarehousesUseCase.execute({
+        tenantId: req.user!.tenantId!,
+        authorRole: req.user!.role as any,
+      });
+      res.json(results);
+    } catch (error: any) {
+      if (error.message.includes('Unauthorized')) return res.status(403).json({ error: error.message });
+      res.status(500).json({ error: error.message });
+    }
+  };
+
   createWarehouse = async (req: Request, res: Response) => {
     try {
       const parsed = createWarehouseSchema.parse(req.body);
@@ -204,6 +221,19 @@ export class InventoryController {
   // ======================
   // CATEGORIES
   // ======================
+  getCategories = async (req: Request, res: Response) => {
+    try {
+      const results = await this.getCategoriesUseCase.execute({
+        tenantId: req.user!.tenantId!,
+        authorRole: req.user!.role as any,
+      });
+      res.json(results);
+    } catch (error: any) {
+      if (error.message.includes('Unauthorized')) return res.status(403).json({ error: error.message });
+      res.status(500).json({ error: error.message });
+    }
+  };
+
   createCategory = async (req: Request, res: Response) => {
     try {
       const parsed = createCategorySchema.parse(req.body);

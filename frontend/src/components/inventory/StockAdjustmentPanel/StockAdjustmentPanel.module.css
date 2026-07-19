@@ -1,0 +1,270 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+  padding-bottom: var(--spacing-xl);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--color-on-surface-variant);
+  margin-bottom: var(--spacing-md);
+}
+
+.sectionTitle {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-label-sm);
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  margin: 0;
+}
+
+.distributionGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+.distCard {
+  padding: var(--spacing-md);
+  background-color: var(--color-surface-container-low);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-lg);
+}
+
+.distName {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-label-sm);
+  color: var(--color-on-surface-variant);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.distQuantity {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-headline-sm);
+  font-weight: bold;
+  color: var(--color-primary); /* Primary for first, but hard to dynamic style without props, using primary for now */
+  margin: 0;
+}
+
+.distCard:nth-child(2) .distQuantity {
+  color: var(--color-secondary);
+}
+
+.distUnits {
+  font-size: var(--font-size-caption-xs);
+  color: var(--color-on-surface-variant);
+  font-weight: normal;
+}
+
+.tabsWrapper {
+  display: flex;
+  background-color: var(--color-surface-container-lowest);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-unit);
+}
+
+.tabButton {
+  flex: 1;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  background: none;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-label-md);
+  color: var(--color-on-surface-variant);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tabButton:hover {
+  color: var(--color-on-surface);
+}
+
+.tabActive {
+  background-color: var(--color-surface-container-highest);
+  color: var(--color-primary);
+  border-color: var(--color-outline-variant);
+  box-shadow: var(--elevation-1);
+}
+
+.formSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.splitRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+.fieldLabel {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-label-md);
+  color: var(--color-on-surface);
+  margin-bottom: var(--spacing-sm);
+  display: block;
+}
+
+.typeSelectorWrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.typeToggle {
+  display: flex;
+  background-color: var(--color-surface-container-low);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-unit);
+  height: 44px; /* match input height */
+}
+
+.typeBtn {
+  flex: 1;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-label-md);
+  font-weight: bold;
+  cursor: pointer;
+  background: none;
+  color: var(--color-on-surface-variant);
+  transition: all 0.2s;
+}
+
+.typeSubtractActive {
+  background-color: var(--color-error-container);
+  color: var(--color-on-error-container);
+}
+
+.typeAddActive {
+  background-color: color-mix(in srgb, var(--color-primary) 20%, transparent);
+  color: var(--color-primary);
+}
+
+.quantityWrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.reasonSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.reasonGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.reasonBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-sm);
+  background-color: var(--color-surface-container-low);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-lg);
+  color: var(--color-on-surface-variant);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-label-sm);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+}
+
+.reasonBtn:hover {
+  border-color: var(--color-primary);
+}
+
+.reasonBtnActive {
+  border-color: var(--color-primary);
+  background-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  color: var(--color-primary);
+}
+
+.arrowDivider {
+  display: flex;
+  justify-content: center;
+  margin: -var(--spacing-lg) 0;
+  position: relative;
+  z-index: 10;
+}
+
+.arrowIconWrap {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid var(--color-surface-container);
+  box-shadow: var(--elevation-2);
+}
+
+.transferQuantityWrap {
+  position: relative;
+}
+
+.maxLabel {
+  position: absolute;
+  right: var(--spacing-md);
+  top: 38px; /* Approx middle of input assuming label is above */
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-label-sm);
+  font-weight: bold;
+  color: var(--color-on-surface-variant);
+  text-transform: uppercase;
+}
+
+.infoBanner {
+  display: flex;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: color-mix(in srgb, var(--color-tertiary-container) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-tertiary) 20%, transparent);
+  border-radius: var(--radius-lg);
+  align-items: flex-start;
+}
+
+.infoIcon {
+  color: var(--color-tertiary);
+  flex-shrink: 0;
+}
+
+.infoBanner p {
+  margin: 0;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-tertiary);
+  line-height: 1.4;
+}
+
+.footer {
+  display: flex;
+  gap: var(--spacing-md);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--color-outline-variant);
+  margin-top: auto;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}

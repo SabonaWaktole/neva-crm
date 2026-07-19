@@ -17,15 +17,18 @@ import { DropdownMenu } from '../../components/ui/DropdownMenu/DropdownMenu';
 import styles from './ClientListContent.module.css';
 
 import { useClients } from '../../hooks/useClients';
+import { useDebounce } from '../../hooks/useDebounce';
+
 export const ClientListContent: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { tenantSlug } = useParams();
   const navigate = useNavigate();
   const { clients, total, isLoading, fetchClients } = useClients();
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   useEffect(() => {
-    fetchClients({ name: searchTerm });
-  }, [fetchClients, searchTerm]);
+    fetchClients({ name: debouncedSearchTerm });
+  }, [fetchClients, debouncedSearchTerm]);
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {

@@ -310,6 +310,7 @@ describe('Inventory Module Integration Tests', () => {
         where: { tenantId: t1Id, productId: p.body.product.id, type: 'ADJUSTMENT' }
       });
       expect(dbMovement?.quantity).toBe(-20);
+      expect(dbMovement?.warehouseId).toBe(testWh1Id); // Proves the bug is fixed!
     });
 
     it('Product search with the 3 threshold boundaries (LOW_STOCK, IN_STOCK, OUT_OF_STOCK)', async () => {

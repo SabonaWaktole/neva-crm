@@ -1,7 +1,7 @@
 import React from 'react';
 import type { ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { User, Building2, Sliders, UsersRound, Puzzle } from 'lucide-react';
+import { User, Building2, Sliders, UsersRound, Puzzle, PackageOpen, FolderTree } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import styles from './SettingsLayout.module.css';
 
@@ -22,6 +22,8 @@ const navItems: NavItem[] = [
   { id: 'client-management', label: 'Client Management', icon: Sliders },
   { id: 'team', label: 'Team', icon: UsersRound },
   { id: 'integrations', label: 'Integrations', icon: Puzzle },
+  { id: 'warehouses', label: 'Warehouses', icon: PackageOpen },
+  { id: 'categories', label: 'Categories', icon: FolderTree },
 ];
 
 export const SettingsLayout: React.FC<SettingsLayoutProps> = ({
