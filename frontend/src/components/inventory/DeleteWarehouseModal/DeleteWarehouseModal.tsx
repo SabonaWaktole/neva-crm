@@ -1,7 +1,6 @@
 import React from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { Modal } from '../../ui/Modal';
-import { Button } from '../../ui/Button';
 import styles from './DeleteWarehouseModal.module.css';
 
 export interface DeleteWarehouseModalProps {

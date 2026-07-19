@@ -1,18 +1,24 @@
 import React, { useState } from 'react';
 import { Plus, Warehouse, Package, Truck } from 'lucide-react';
 import { KPICard } from '../../../components/ui/KPICard';
-import { WarehouseTable, WarehouseRowData } from '../../../components/inventory/WarehouseTable/WarehouseTable';
-import { WarehouseFormModal, WarehouseFormData } from '../../../components/inventory/WarehouseFormModal/WarehouseFormModal';
+import { WarehouseTable } from '../../../components/inventory/WarehouseTable/WarehouseTable';
+import type { WarehouseRowData } from '../../../components/inventory/WarehouseTable/WarehouseTable';
+import { WarehouseFormModal } from '../../../components/inventory/WarehouseFormModal/WarehouseFormModal';
+import type { WarehouseFormData } from '../../../components/inventory/WarehouseFormModal/WarehouseFormModal';
 import { DeleteWarehouseModal } from '../../../components/inventory/DeleteWarehouseModal/DeleteWarehouseModal';
 import styles from './WarehouseList.module.css';
 
 import { useWarehouses, useCreateWarehouse, useUpdateWarehouse, useDeleteWarehouse } from '../../../hooks/useInventory';
 
 export const WarehouseList: React.FC = () => {
-  const { data: warehouses = [] } = useWarehouses();
-  const createMutation = useCreateWarehouse();
-  const updateMutation = useUpdateWarehouse();
-  const deleteMutation = useDeleteWarehouse();
+  const { warehouses, fetchWarehouses } = useWarehouses();
+  const { createWarehouse } = useCreateWarehouse();
+  const { updateWarehouse } = useUpdateWarehouse();
+  const { deleteWarehouse } = useDeleteWarehouse();
+
+  React.useEffect(() => {
+    fetchWarehouses();
+  }, [fetchWarehouses]);
 
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingWarehouse, setEditingWarehouse] = useState<WarehouseRowData | null>(null);
@@ -32,10 +38,11 @@ export const WarehouseList: React.FC = () => {
 
   const handleSaveForm = async (data: WarehouseFormData) => {
     if (editingWarehouse) {
-      await updateMutation.mutateAsync({ warehouseId: editingWarehouse.id, data });
+      await updateWarehouse(editingWarehouse.id, data);
     } else {
-      await createMutation.mutateAsync(data);
+      await createWarehouse(data);
     }
+    await fetchWarehouses();
     setIsFormModalOpen(false);
   };
 
@@ -46,10 +53,18 @@ export const WarehouseList: React.FC = () => {
 
   const handleConfirmDelete = async () => {
     if (deletingWarehouse) {
-      await deleteMutation.mutateAsync(deletingWarehouse.id);
+      await deleteWarehouse(deletingWarehouse.id);
+      await fetchWarehouses();
       setIsDeleteModalOpen(false);
     }
   };
+
+  // Map backend Warehouse[] (address: string | null | undefined) to WarehouseRowData[] (address: string | null)
+  const warehouseRows: WarehouseRowData[] = warehouses.map(w => ({
+    id: w.id,
+    name: w.name,
+    address: w.address ?? null,
+  }));
 
   return (
     <div className={styles.pageContainer}>
@@ -70,13 +85,15 @@ export const WarehouseList: React.FC = () => {
           title="Total Active"
           value="12"
           icon={<Warehouse />}
-          trend={{ direction: 'up', value: '0%' }}
+          trendValue="0%"
+          trendDirection="up"
         />
         <KPICard
           title="Capacity Used"
           value="84%"
           icon={<Package />}
-          trend={{ direction: 'up', value: '2%' }}
+          trendValue="2%"
+          trendDirection="up"
         />
         <KPICard
           title="Hub Traffic"
@@ -86,7 +103,7 @@ export const WarehouseList: React.FC = () => {
       </div>
 
       <WarehouseTable 
-        warehouses={warehouses}
+        warehouses={warehouseRows}
         onEdit={handleOpenEdit}
         onDelete={handleOpenDelete}
       />
@@ -95,7 +112,7 @@ export const WarehouseList: React.FC = () => {
         isOpen={isFormModalOpen}
         onClose={() => setIsFormModalOpen(false)}
         onSave={handleSaveForm}
-        initialData={editingWarehouse}
+        initialData={editingWarehouse ? { name: editingWarehouse.name, address: editingWarehouse.address ?? '' } : null}
       />
 
       {deletingWarehouse && (

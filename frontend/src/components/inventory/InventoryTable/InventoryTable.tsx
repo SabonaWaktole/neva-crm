@@ -3,7 +3,8 @@ import styles from './InventoryTable.module.css';
 import { Badge } from '../../ui/Badge';
 import { MoreHorizontal, Edit, Trash2 } from 'lucide-react';
 import { DropdownMenu } from '../../ui/DropdownMenu';
-import { MultiLocationStockIndicator, StockBreakdown } from '../../ui/MultiLocationStockIndicator/MultiLocationStockIndicator';
+import { MultiLocationStockIndicator } from '../../ui/MultiLocationStockIndicator/MultiLocationStockIndicator';
+import type { StockBreakdown } from '../../ui/MultiLocationStockIndicator/MultiLocationStockIndicator';
 
 export interface Product {
   id: string;

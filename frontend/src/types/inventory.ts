@@ -23,6 +23,7 @@ export interface Product {
   description: string;
   sku: string;
   price: number;
+  lowStockThreshold?: number;
   status: string;
   totalUnits: number;
   categoryId?: string | null;

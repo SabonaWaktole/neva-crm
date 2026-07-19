@@ -1,6 +1,7 @@
 import { AdjustStockUseCase } from './AdjustStockUseCase';
-import { IStockLevelRepository, IStockMovementRepository } from '../../domain/repositories';
+import { IStockLevelRepository, IStockMovementRepository, IWarehouseRepository } from '../../domain/repositories';
 import { StockLevel } from '../../domain/StockLevel';
+import { Warehouse } from '../../domain/Warehouse';
 import { NegativeStockError } from '../../domain/errors';
 import { StockMovementType } from '../../domain/StockMovement';
 import { UserRole } from '../../../auth/domain/enums/UserRole';
@@ -9,6 +10,7 @@ describe('AdjustStockUseCase', () => {
   let useCase: AdjustStockUseCase;
   let stockLevelRepo: jest.Mocked<IStockLevelRepository>;
   let stockMovementRepo: jest.Mocked<IStockMovementRepository>;
+  let warehouseRepo: jest.Mocked<IWarehouseRepository>;
 
   beforeEach(() => {
     stockLevelRepo = {
@@ -21,7 +23,13 @@ describe('AdjustStockUseCase', () => {
     stockMovementRepo = {
       save: jest.fn(),
     };
-    useCase = new AdjustStockUseCase(stockLevelRepo, stockMovementRepo);
+    warehouseRepo = {
+      findById: jest.fn(),
+      findAllByTenantId: jest.fn(),
+      save: jest.fn(),
+      delete: jest.fn(),
+    };
+    useCase = new AdjustStockUseCase(stockLevelRepo, stockMovementRepo, warehouseRepo);
   });
 
   it('should adjust stock upward and create an ADJUSTMENT movement', async () => {
@@ -95,10 +103,10 @@ describe('AdjustStockUseCase', () => {
     expect(stockMovementRepo.save).not.toHaveBeenCalled();
   });
 
-  it('should reject if stock level does not exist', async () => {
+  it('should lazily create stock level when none exists', async () => {
     stockLevelRepo.findByProductAndWarehouse.mockResolvedValue(null);
-
-    await expect(useCase.execute({
+    warehouseRepo.findById.mockResolvedValue(Warehouse.create({ id: 'w1', tenantId: 'tenant1', name: 'Test WH' }));
+    const result = await useCase.execute({
       tenantId: 'tenant1',
       productId: 'p1',
       warehouseId: 'w1',
@@ -106,7 +114,11 @@ describe('AdjustStockUseCase', () => {
       reason: 'Test',
       authorUserId: 'u1',
       authorRole: UserRole.STAFF
-    })).rejects.toThrow('Stock level not found for product p1 at warehouse w1');
+    });
+
+    expect(result.stockLevel.quantity).toBe(5);
+    expect(stockLevelRepo.save).toHaveBeenCalled();
+    expect(stockMovementRepo.save).toHaveBeenCalled();
   });
 
   it('should reject unauthorized roles', async () => {

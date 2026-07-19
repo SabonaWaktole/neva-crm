@@ -1,4 +1,5 @@
-import React, { useState, DragEvent } from 'react';
+import React, { useState } from 'react';
+import type { DragEvent } from 'react';
 import { ImagePlus } from 'lucide-react';
 import styles from './ImageUploadZone.module.css';
 

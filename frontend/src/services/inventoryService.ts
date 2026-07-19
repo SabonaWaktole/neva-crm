@@ -26,7 +26,7 @@ export const inventoryService = {
     return product;
   },
 
-  createProduct: async (tenantSlug: string, data: Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'tenantId'> & { initialStock?: { warehouseId: string; quantity: number }[] }): Promise<Product> => {
+  createProduct: async (tenantSlug: string, data: Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'tenantId' | 'status' | 'totalUnits' | 'sku'> & { sku?: string; status?: string; initialStock?: { warehouseId: string; quantity: number }[] }): Promise<Product> => {
     const response = await apiClient.post(`/${tenantSlug}/inventory/products`, data);
     return response.data;
   },

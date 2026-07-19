@@ -13,7 +13,11 @@ interface CategoryRowData {
 import { useCategories } from '../../../hooks/useInventory';
 
 export const CategoryList: React.FC = () => {
-  const { data: realCategories = [], isLoading } = useCategories();
+  const { categories: realCategories, fetchCategories } = useCategories();
+
+  React.useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
   // MOCK DATA - item counts and icons are decorative
   const categories: CategoryRowData[] = realCategories.map((c, i) => ({

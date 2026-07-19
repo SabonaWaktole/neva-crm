@@ -1,10 +1,7 @@
 import React from 'react';
 import { 
-  Users, 
   CalendarCheck, 
-  Plus,
   UserPlus,
-  CalendarPlus,
   History,
   PhoneCall,
   Video,

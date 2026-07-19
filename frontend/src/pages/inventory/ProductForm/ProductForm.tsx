@@ -13,9 +13,14 @@ import { useCategories, useWarehouses, useCreateProduct } from '../../../hooks/u
 
 export const ProductForm: React.FC = () => {
   const navigate = useNavigate();
-  const { data: categories = [] } = useCategories();
-  const { data: warehouses = [] } = useWarehouses();
-  const createMutation = useCreateProduct();
+  const { categories, fetchCategories } = useCategories();
+  const { warehouses, fetchWarehouses } = useWarehouses();
+  const { createProduct, isPending } = useCreateProduct();
+
+  React.useEffect(() => {
+    fetchCategories();
+    fetchWarehouses();
+  }, [fetchCategories, fetchWarehouses]);
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -51,7 +56,7 @@ export const ProductForm: React.FC = () => {
       .map(r => ({ warehouseId: r.warehouseId, quantity: Number(r.quantity) }));
 
     try {
-      await createMutation.mutateAsync({
+      await createProduct({
         name,
         description,
         categoryId: categoryId || undefined,
@@ -168,8 +173,8 @@ export const ProductForm: React.FC = () => {
         <div className={styles.footerRight}>
           <Button variant="ghost" type="button" onClick={() => navigate(-1)}>Discard Draft</Button>
           <Button variant="outline" type="button" onClick={() => navigate(-1)}>Save & Close</Button>
-          <Button variant="primary" type="button" onClick={handleCommit} disabled={createMutation.isPending}>
-            {createMutation.isPending ? 'Committing...' : 'Commit Product'}
+          <Button variant="primary" type="button" onClick={handleCommit} disabled={isPending}>
+            {isPending ? 'Committing...' : 'Commit Product'}
           </Button>
         </div>
       </footer>

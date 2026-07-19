@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { render, screen } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { ClientDetailContent } from './ClientDetailContent';
@@ -37,19 +37,24 @@ describe('ClientDetailContent Timeline', () => {
     vi.mocked(clientsHooks.useClientSettings).mockReturnValue({
       customFields: [],
       outcomeCategories: [],
-      fetchSettings: vi.fn()
+      isLoading: false,
+      error: null,
+      fetchSettings: vi.fn() as any
     });
     
     vi.mocked(clientsHooks.useAddInteraction).mockReturnValue({
       addInteraction: vi.fn(),
-      isLoading: false
+      isLoading: false,
+      error: null
     });
     
     vi.mocked(apptHooks.useClientAppointments).mockReturnValue({
       appointments: [],
+      total: 0,
       isLoading: false,
+      error: null,
       updateAppointmentLocally: vi.fn(),
-      fetchClientAppointments: vi.fn()
+      fetchClientAppointments: vi.fn() as any
     });
   });
 

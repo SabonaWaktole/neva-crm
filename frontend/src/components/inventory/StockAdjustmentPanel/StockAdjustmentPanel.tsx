@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { Inventory, South, Info } from '@mui/icons-material'; // Replacing missing lucide icons with standard ones where needed, actually let's stick to Lucide.
-// Wait, the design used material symbols. I'll use Lucide icons.
-import { Package, ArrowDown, Info as InfoIcon, X, Check, ArrowRightLeft } from 'lucide-react';
+import { Package, ArrowDown, Info as InfoIcon, ArrowRightLeft } from 'lucide-react';
 import { SlideOver } from '../../ui/SlideOver';
 import { SelectInput } from '../../ui/SelectInput';
 import { TextInput } from '../../ui/TextInput';
@@ -31,11 +29,16 @@ export const StockAdjustmentPanel: React.FC<StockAdjustmentPanelProps> = ({
   const [adjustType, setAdjustType] = useState<AdjustType>('subtract');
   const [reason, setReason] = useState<ReasonType | null>(null);
 
-  const { data: stockLevels = [], isLoading } = useProductStock(productId);
-  const { data: warehouses = [] } = useWarehouses();
+  const { stockLevels, fetchStock } = useProductStock(productId);
+  const { warehouses, fetchWarehouses } = useWarehouses();
   
-  const adjustMutation = useAdjustStock();
-  const transferMutation = useTransferStock();
+  const { adjustStock, isPending: isAdjustPending } = useAdjustStock();
+  const { transferStock, isPending: isTransferPending } = useTransferStock();
+
+  React.useEffect(() => {
+    fetchStock();
+    fetchWarehouses();
+  }, [fetchStock, fetchWarehouses]);
 
   const [adjustWarehouseId, setAdjustWarehouseId] = useState('');
   const [adjustQuantity, setAdjustQuantity] = useState('');
@@ -58,29 +61,25 @@ export const StockAdjustmentPanel: React.FC<StockAdjustmentPanelProps> = ({
       if (isNaN(numQty) || numQty <= 0) return;
       const finalQuantity = adjustType === 'subtract' ? -numQty : numQty;
       
-      await adjustMutation.mutateAsync({
-        productId,
-        data: {
-          warehouseId: adjustWarehouseId,
-          quantity: finalQuantity,
-          reason: [reason, notes].filter(Boolean).join(' - ')
-        }
+      await adjustStock(productId, {
+        warehouseId: adjustWarehouseId,
+        quantity: finalQuantity,
+        reason: [reason, notes].filter(Boolean).join(' - ')
       });
     } else {
       if (!transferOriginId || !transferDestinationId || !transferQuantity) return;
       const numQty = parseInt(transferQuantity);
       if (isNaN(numQty) || numQty <= 0) return;
       
-      await transferMutation.mutateAsync({
-        productId,
-        data: {
-          fromWarehouseId: transferOriginId,
-          toWarehouseId: transferDestinationId,
-          quantity: numQty,
-          reason: notes
-        }
+      await transferStock(productId, {
+        fromWarehouseId: transferOriginId,
+        toWarehouseId: transferDestinationId,
+        quantity: numQty,
+        reason: notes
       });
     }
+    
+    await fetchStock();
     
     // Reset forms
     setAdjustQuantity('');
@@ -91,39 +90,42 @@ export const StockAdjustmentPanel: React.FC<StockAdjustmentPanelProps> = ({
   };
 
   return (
-    <SlideOver isOpen={isOpen} onClose={onClose} title="New Adjustment" subtitle={`Update stock levels for ${productName}`}>
+    <SlideOver isOpen={isOpen} onClose={onClose} title={`New Adjustment — ${productName}`}>
       <div className={styles.container}>
         
         {/* Current Stock Summary - MOCK */}
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
-            <Package size={16} />
-            <h4 className={styles.sectionTitle}>CURRENT DISTRIBUTION</h4>
+            <Package size={20} />
+            <span>Current Stock Levels</span>
           </div>
-          <div className={styles.distributionGrid}>
-            {isLoading ? <div>Loading stock...</div> : stockLevels.map((loc) => (
-              <div key={loc.id} className={styles.distCard}>
-                <p className={styles.distName}>{loc.warehouse?.name || 'Unknown'}</p>
-                <p className={styles.distQuantity}>
-                  {loc.quantity} <span className={styles.distUnits}>units</span>
-                </p>
+          <div className={styles.stockGrid}>
+            {stockLevels.map(sl => (
+              <div key={sl.warehouseId} className={styles.stockCard}>
+                <span className={styles.stockCardLabel}>{sl.warehouse?.name || 'Unknown'}</span>
+                <span className={styles.stockCardValue}>{sl.quantity} units</span>
               </div>
             ))}
+            {stockLevels.length === 0 && (
+              <p className={styles.emptyText}>No stock levels found.</p>
+            )}
           </div>
         </section>
 
-        {/* Tabs Switcher */}
-        <div className={styles.tabsWrapper}>
-          <button 
+        {/* Tabs */}
+        <div className={styles.tabBar}>
+          <button
             className={`${styles.tabButton} ${activeTab === 'adjust' ? styles.tabActive : ''}`}
             onClick={() => setActiveTab('adjust')}
           >
-            Adjust Quantity
+            <Package size={16} />
+            Adjust Stock
           </button>
-          <button 
+          <button
             className={`${styles.tabButton} ${activeTab === 'transfer' ? styles.tabActive : ''}`}
             onClick={() => setActiveTab('transfer')}
           >
+            <ArrowRightLeft size={16} />
             Transfer Stock
           </button>
         </div>
@@ -133,66 +135,65 @@ export const StockAdjustmentPanel: React.FC<StockAdjustmentPanelProps> = ({
           <div className={styles.formSection}>
             <SelectInput 
               label="Select Location"
-              options={stockLevels.map(l => ({ value: l.warehouseId, label: `${l.warehouse?.name || 'Unknown'} (${l.quantity} units)` }))}
               value={adjustWarehouseId}
               onChange={(e) => setAdjustWarehouseId(e.target.value)}
-            />
+            >
+              <option value="">Select a warehouse...</option>
+              {stockLevels.map(l => (
+                <option key={l.warehouseId} value={l.warehouseId}>
+                  {l.warehouse?.name || 'Unknown'} ({l.quantity} units)
+                </option>
+              ))}
+            </SelectInput>
 
             <div className={styles.splitRow}>
               <div className={styles.typeSelectorWrapper}>
                 <label className={styles.fieldLabel}>Type</label>
                 <div className={styles.typeToggle}>
-                  <button 
-                    className={`${styles.typeBtn} ${adjustType === 'subtract' ? styles.typeSubtractActive : ''}`}
+                  <button
+                    className={`${styles.typeBtn} ${adjustType === 'subtract' ? styles.typeBtnActive : ''}`}
                     onClick={() => setAdjustType('subtract')}
                   >
-                    -
+                    Subtract
                   </button>
-                  <button 
-                    className={`${styles.typeBtn} ${adjustType === 'add' ? styles.typeAddActive : ''}`}
+                  <button
+                    className={`${styles.typeBtn} ${adjustType === 'add' ? styles.typeBtnActive : ''}`}
                     onClick={() => setAdjustType('add')}
                   >
-                    +
+                    Add
                   </button>
                 </div>
               </div>
-              <div className={styles.quantityWrapper}>
-                <TextInput 
-                  label="Quantity"
-                  type="number"
-                  placeholder="0"
-                  value={adjustQuantity}
-                  onChange={(e) => setAdjustQuantity(e.target.value)}
-                />
-              </div>
+              <TextInput
+                label="Quantity"
+                type="number"
+                value={adjustQuantity}
+                onChange={(e) => setAdjustQuantity(e.target.value)}
+                placeholder="0"
+              />
             </div>
 
-            <div className={styles.reasonSection}>
-              <label className={styles.fieldLabel}>Adjustment Reason</label>
-              <div className={styles.reasonGrid}>
-                {[
-                  { id: 'damaged', label: 'Damaged', icon: <X size={14} /> },
-                  { id: 'audit', label: 'Audit', icon: <Package size={14} /> },
-                  { id: 'return', label: 'Return', icon: <ArrowRightLeft size={14} /> },
-                  { id: 'other', label: 'Other', icon: <InfoIcon size={14} /> },
-                ].map((r) => (
-                  <button 
-                    key={r.id}
-                    className={`${styles.reasonBtn} ${reason === r.id ? styles.reasonBtnActive : ''}`}
-                    onClick={() => setReason(r.id as ReasonType)}
+            <div className={styles.reasonGrid}>
+              <label className={styles.fieldLabel}>Reason</label>
+              <div className={styles.reasonOptions}>
+                {(['damaged', 'audit', 'return', 'other'] as ReasonType[]).map(r => (
+                  <button
+                    key={r}
+                    className={`${styles.reasonChip} ${reason === r ? styles.reasonChipActive : ''}`}
+                    onClick={() => setReason(r)}
                   >
-                    {r.icon} {r.label}
+                    {r.charAt(0).toUpperCase() + r.slice(1)}
                   </button>
                 ))}
               </div>
-              <TextareaInput 
-                label=""
-                placeholder="Additional notes..."
-                rows={3}
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-              />
             </div>
+
+            <TextareaInput
+              label="Notes (Optional)"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Any additional details..."
+            />
           </div>
         )}
 
@@ -201,10 +202,16 @@ export const StockAdjustmentPanel: React.FC<StockAdjustmentPanelProps> = ({
           <div className={styles.formSection}>
             <SelectInput 
               label="Origin Location"
-              options={stockLevels.map(l => ({ value: l.warehouseId, label: `${l.warehouse?.name || 'Unknown'} (${l.quantity} units)` }))}
               value={transferOriginId}
               onChange={(e) => setTransferOriginId(e.target.value)}
-            />
+            >
+              <option value="">Select origin...</option>
+              {stockLevels.map(l => (
+                <option key={l.warehouseId} value={l.warehouseId}>
+                  {l.warehouse?.name || 'Unknown'} ({l.quantity} units)
+                </option>
+              ))}
+            </SelectInput>
 
             <div className={styles.arrowDivider}>
               <div className={styles.arrowIconWrap}>
@@ -214,10 +221,16 @@ export const StockAdjustmentPanel: React.FC<StockAdjustmentPanelProps> = ({
 
             <SelectInput 
               label="Destination Location"
-              options={warehouses.map(l => ({ value: l.id, label: `${l.name}` }))}
               value={transferDestinationId}
               onChange={(e) => setTransferDestinationId(e.target.value)}
-            />
+            >
+              <option value="">Select destination...</option>
+              {warehouses.map(l => (
+                <option key={l.id} value={l.id}>
+                  {l.name}
+                </option>
+              ))}
+            </SelectInput>
 
             <div className={styles.transferQuantityWrap}>
               <TextInput 
@@ -239,9 +252,9 @@ export const StockAdjustmentPanel: React.FC<StockAdjustmentPanelProps> = ({
       </div>
 
       <div className={styles.footer}>
-        <Button variant="outline" fullWidth onClick={onClose} disabled={adjustMutation.isPending || transferMutation.isPending}>Cancel</Button>
-        <Button variant="primary" fullWidth onClick={handleConfirm} disabled={adjustMutation.isPending || transferMutation.isPending}>
-          {adjustMutation.isPending || transferMutation.isPending ? 'Updating...' : 'Confirm Update'}
+        <Button variant="outline" fullWidth onClick={onClose} disabled={isAdjustPending || isTransferPending}>Cancel</Button>
+        <Button variant="primary" fullWidth onClick={handleConfirm} disabled={isAdjustPending || isTransferPending}>
+          {isAdjustPending || isTransferPending ? 'Updating...' : 'Confirm Update'}
         </Button>
       </div>
     </SlideOver>

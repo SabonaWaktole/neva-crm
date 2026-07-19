@@ -8,7 +8,7 @@ import { SuperAdminDashboard } from '../dashboard/SuperAdminDashboard';
 
 export const SuperAdminShell = () => {
   const navigate = useNavigate();
-  const { tenantSlug } = useParams();
+  useParams();
   const { user } = useAuthStore();
   const { logout } = useLogout();
   const location = useLocation();

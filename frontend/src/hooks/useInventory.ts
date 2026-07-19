@@ -1,199 +1,345 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useCallback } from 'react';
 import { inventoryService } from '../services/inventoryService';
-import { useAuthStore } from '../store/authStore';
+import { useParams } from 'react-router-dom';
+import type { Product, StockLevel, Category, Warehouse } from '../types/inventory';
 import { useDebounce } from './useDebounce';
-import { Product, StockLevel, StockMovement, Category, Warehouse } from '../types/inventory';
 
 // ========================
 // PRODUCTS
 // ========================
 
-export function useProducts(filters?: { query?: string; categoryId?: string; inStockOnly?: boolean }) {
-  const { tenantSlug } = useAuthStore();
+export const useProducts = (filters?: { query?: string; categoryId?: string; inStockOnly?: boolean }) => {
+  const { tenantSlug } = useParams();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const debouncedQuery = useDebounce(filters?.query, 300);
 
-  return useQuery({
-    queryKey: ['products', tenantSlug, debouncedQuery, filters?.categoryId, filters?.inStockOnly],
-    queryFn: () => inventoryService.searchProducts(tenantSlug!, debouncedQuery, filters?.categoryId, filters?.inStockOnly),
-    enabled: !!tenantSlug,
-  });
-}
+  const fetchProducts = useCallback(async () => {
+    if (!tenantSlug) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await inventoryService.searchProducts(tenantSlug, debouncedQuery, filters?.categoryId, filters?.inStockOnly);
+      setProducts(data);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to fetch products');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [tenantSlug, debouncedQuery, filters?.categoryId, filters?.inStockOnly]);
 
-export function useProduct(productId?: string) {
-  const { tenantSlug } = useAuthStore();
-  return useQuery({
-    queryKey: ['products', tenantSlug, productId],
-    queryFn: () => inventoryService.getProduct(tenantSlug!, productId!),
-    enabled: !!tenantSlug && !!productId,
-  });
-}
+  return { products, isLoading, error, fetchProducts };
+};
 
-export function useProductStock(productId?: string) {
-  const { tenantSlug } = useAuthStore();
-  return useQuery({
-    queryKey: ['product_stock', tenantSlug, productId],
-    queryFn: () => inventoryService.getStockBreakdown(tenantSlug!, productId!),
-    enabled: !!tenantSlug && !!productId,
-  });
-}
+export const useProductStock = (productId?: string) => {
+  const { tenantSlug } = useParams();
+  const [stockLevels, setStockLevels] = useState<StockLevel[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-export function useCreateProduct() {
-  const { tenantSlug } = useAuthStore();
-  const queryClient = useQueryClient();
+  const fetchStock = useCallback(async () => {
+    if (!tenantSlug || !productId) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await inventoryService.getStockBreakdown(tenantSlug, productId);
+      setStockLevels(data);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to fetch stock levels');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [tenantSlug, productId]);
 
-  return useMutation({
-    mutationFn: (data: Parameters<typeof inventoryService.createProduct>[1]) =>
-      inventoryService.createProduct(tenantSlug!, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products', tenantSlug] });
-    },
-  });
-}
+  return { stockLevels, isLoading, error, fetchStock };
+};
 
-export function useUpdateProduct() {
-  const { tenantSlug } = useAuthStore();
-  const queryClient = useQueryClient();
+export const useCreateProduct = () => {
+  const { tenantSlug } = useParams();
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  return useMutation({
-    mutationFn: ({ productId, data }: { productId: string; data: Parameters<typeof inventoryService.updateProduct>[2] }) =>
-      inventoryService.updateProduct(tenantSlug!, productId, data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['products', tenantSlug] });
-      queryClient.invalidateQueries({ queryKey: ['products', tenantSlug, variables.productId] });
-    },
-  });
-}
+  const createProduct = async (data: Parameters<typeof inventoryService.createProduct>[1]) => {
+    if (!tenantSlug) throw new Error('Missing tenant context');
+    setIsPending(true);
+    setError(null);
+    try {
+      return await inventoryService.createProduct(tenantSlug, data);
+    } catch (err: any) {
+      const msg = err.response?.data?.error || 'Failed to create product';
+      setError(msg);
+      throw err;
+    } finally {
+      setIsPending(false);
+    }
+  };
+
+  return { createProduct, isPending, error };
+};
+
+export const useUpdateProduct = () => {
+  const { tenantSlug } = useParams();
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const updateProduct = async (productId: string, data: Parameters<typeof inventoryService.updateProduct>[2]) => {
+    if (!tenantSlug) throw new Error('Missing tenant context');
+    setIsPending(true);
+    setError(null);
+    try {
+      return await inventoryService.updateProduct(tenantSlug, productId, data);
+    } catch (err: any) {
+      const msg = err.response?.data?.error || 'Failed to update product';
+      setError(msg);
+      throw err;
+    } finally {
+      setIsPending(false);
+    }
+  };
+
+  return { updateProduct, isPending, error };
+};
 
 // ========================
 // STOCK OPERATIONS
 // ========================
 
-export function useAdjustStock() {
-  const { tenantSlug } = useAuthStore();
-  const queryClient = useQueryClient();
+export const useAdjustStock = () => {
+  const { tenantSlug } = useParams();
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  return useMutation({
-    mutationFn: ({ productId, data }: { productId: string; data: Parameters<typeof inventoryService.adjustStock>[2] }) =>
-      inventoryService.adjustStock(tenantSlug!, productId, data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['product_stock', tenantSlug, variables.productId] });
-      queryClient.invalidateQueries({ queryKey: ['products', tenantSlug] });
-    },
-  });
-}
+  const adjustStock = async (productId: string, data: Parameters<typeof inventoryService.adjustStock>[2]) => {
+    if (!tenantSlug) throw new Error('Missing tenant context');
+    setIsPending(true);
+    setError(null);
+    try {
+      return await inventoryService.adjustStock(tenantSlug, productId, data);
+    } catch (err: any) {
+      const msg = err.response?.data?.error || 'Failed to adjust stock';
+      setError(msg);
+      throw err;
+    } finally {
+      setIsPending(false);
+    }
+  };
 
-export function useTransferStock() {
-  const { tenantSlug } = useAuthStore();
-  const queryClient = useQueryClient();
+  return { adjustStock, isPending, error };
+};
 
-  return useMutation({
-    mutationFn: ({ productId, data }: { productId: string; data: Parameters<typeof inventoryService.transferStock>[2] }) =>
-      inventoryService.transferStock(tenantSlug!, productId, data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['product_stock', tenantSlug, variables.productId] });
-      queryClient.invalidateQueries({ queryKey: ['products', tenantSlug] });
-    },
-  });
-}
+export const useTransferStock = () => {
+  const { tenantSlug } = useParams();
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const transferStock = async (productId: string, data: Parameters<typeof inventoryService.transferStock>[2]) => {
+    if (!tenantSlug) throw new Error('Missing tenant context');
+    setIsPending(true);
+    setError(null);
+    try {
+      return await inventoryService.transferStock(tenantSlug, productId, data);
+    } catch (err: any) {
+      const msg = err.response?.data?.error || 'Failed to transfer stock';
+      setError(msg);
+      throw err;
+    } finally {
+      setIsPending(false);
+    }
+  };
+
+  return { transferStock, isPending, error };
+};
 
 // ========================
 // WAREHOUSES
 // ========================
 
-export function useWarehouses() {
-  const { tenantSlug } = useAuthStore();
-  return useQuery({
-    queryKey: ['warehouses', tenantSlug],
-    queryFn: () => inventoryService.getWarehouses(tenantSlug!),
-    enabled: !!tenantSlug,
-  });
-}
+export const useWarehouses = () => {
+  const { tenantSlug } = useParams();
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-export function useCreateWarehouse() {
-  const { tenantSlug } = useAuthStore();
-  const queryClient = useQueryClient();
+  const fetchWarehouses = useCallback(async () => {
+    if (!tenantSlug) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await inventoryService.getWarehouses(tenantSlug);
+      setWarehouses(data);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to fetch warehouses');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [tenantSlug]);
 
-  return useMutation({
-    mutationFn: (data: { name: string; address?: string }) =>
-      inventoryService.createWarehouse(tenantSlug!, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['warehouses', tenantSlug] });
-    },
-  });
-}
+  return { warehouses, isLoading, error, fetchWarehouses };
+};
 
-export function useUpdateWarehouse() {
-  const { tenantSlug } = useAuthStore();
-  const queryClient = useQueryClient();
+export const useCreateWarehouse = () => {
+  const { tenantSlug } = useParams();
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  return useMutation({
-    mutationFn: ({ warehouseId, data }: { warehouseId: string; data: { name?: string; address?: string } }) =>
-      inventoryService.updateWarehouse(tenantSlug!, warehouseId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['warehouses', tenantSlug] });
-    },
-  });
-}
+  const createWarehouse = async (data: { name: string; address?: string }) => {
+    if (!tenantSlug) throw new Error('Missing tenant context');
+    setIsPending(true);
+    setError(null);
+    try {
+      return await inventoryService.createWarehouse(tenantSlug, data);
+    } catch (err: any) {
+      const msg = err.response?.data?.error || 'Failed to create warehouse';
+      setError(msg);
+      throw err;
+    } finally {
+      setIsPending(false);
+    }
+  };
 
-export function useDeleteWarehouse() {
-  const { tenantSlug } = useAuthStore();
-  const queryClient = useQueryClient();
+  return { createWarehouse, isPending, error };
+};
 
-  return useMutation({
-    mutationFn: (warehouseId: string) => inventoryService.deleteWarehouse(tenantSlug!, warehouseId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['warehouses', tenantSlug] });
-    },
-  });
-}
+export const useUpdateWarehouse = () => {
+  const { tenantSlug } = useParams();
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const updateWarehouse = async (warehouseId: string, data: { name?: string; address?: string }) => {
+    if (!tenantSlug) throw new Error('Missing tenant context');
+    setIsPending(true);
+    setError(null);
+    try {
+      return await inventoryService.updateWarehouse(tenantSlug, warehouseId, data);
+    } catch (err: any) {
+      const msg = err.response?.data?.error || 'Failed to update warehouse';
+      setError(msg);
+      throw err;
+    } finally {
+      setIsPending(false);
+    }
+  };
+
+  return { updateWarehouse, isPending, error };
+};
+
+export const useDeleteWarehouse = () => {
+  const { tenantSlug } = useParams();
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const deleteWarehouse = async (warehouseId: string) => {
+    if (!tenantSlug) throw new Error('Missing tenant context');
+    setIsPending(true);
+    setError(null);
+    try {
+      return await inventoryService.deleteWarehouse(tenantSlug, warehouseId);
+    } catch (err: any) {
+      const msg = err.response?.data?.error || 'Failed to delete warehouse';
+      setError(msg);
+      throw err;
+    } finally {
+      setIsPending(false);
+    }
+  };
+
+  return { deleteWarehouse, isPending, error };
+};
 
 // ========================
 // CATEGORIES
 // ========================
 
-export function useCategories() {
-  const { tenantSlug } = useAuthStore();
-  return useQuery({
-    queryKey: ['categories', tenantSlug],
-    queryFn: () => inventoryService.getCategories(tenantSlug!),
-    enabled: !!tenantSlug,
-  });
-}
+export const useCategories = () => {
+  const { tenantSlug } = useParams();
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-export function useCreateCategory() {
-  const { tenantSlug } = useAuthStore();
-  const queryClient = useQueryClient();
+  const fetchCategories = useCallback(async () => {
+    if (!tenantSlug) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await inventoryService.getCategories(tenantSlug);
+      setCategories(data);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to fetch categories');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [tenantSlug]);
 
-  return useMutation({
-    mutationFn: (data: { name: string }) =>
-      inventoryService.createCategory(tenantSlug!, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories', tenantSlug] });
-    },
-  });
-}
+  return { categories, isLoading, error, fetchCategories };
+};
 
-export function useUpdateCategory() {
-  const { tenantSlug } = useAuthStore();
-  const queryClient = useQueryClient();
+export const useCreateCategory = () => {
+  const { tenantSlug } = useParams();
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  return useMutation({
-    mutationFn: ({ categoryId, data }: { categoryId: string; data: { name: string } }) =>
-      inventoryService.updateCategory(tenantSlug!, categoryId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories', tenantSlug] });
-    },
-  });
-}
+  const createCategory = async (data: { name: string }) => {
+    if (!tenantSlug) throw new Error('Missing tenant context');
+    setIsPending(true);
+    setError(null);
+    try {
+      return await inventoryService.createCategory(tenantSlug, data);
+    } catch (err: any) {
+      const msg = err.response?.data?.error || 'Failed to create category';
+      setError(msg);
+      throw err;
+    } finally {
+      setIsPending(false);
+    }
+  };
 
-export function useDeleteCategory() {
-  const { tenantSlug } = useAuthStore();
-  const queryClient = useQueryClient();
+  return { createCategory, isPending, error };
+};
 
-  return useMutation({
-    mutationFn: (categoryId: string) => inventoryService.deleteCategory(tenantSlug!, categoryId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories', tenantSlug] });
-    },
-  });
-}
+export const useUpdateCategory = () => {
+  const { tenantSlug } = useParams();
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const updateCategory = async (categoryId: string, data: { name: string }) => {
+    if (!tenantSlug) throw new Error('Missing tenant context');
+    setIsPending(true);
+    setError(null);
+    try {
+      return await inventoryService.updateCategory(tenantSlug, categoryId, data);
+    } catch (err: any) {
+      const msg = err.response?.data?.error || 'Failed to update category';
+      setError(msg);
+      throw err;
+    } finally {
+      setIsPending(false);
+    }
+  };
+
+  return { updateCategory, isPending, error };
+};
+
+export const useDeleteCategory = () => {
+  const { tenantSlug } = useParams();
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const deleteCategory = async (categoryId: string) => {
+    if (!tenantSlug) throw new Error('Missing tenant context');
+    setIsPending(true);
+    setError(null);
+    try {
+      return await inventoryService.deleteCategory(tenantSlug, categoryId);
+    } catch (err: any) {
+      const msg = err.response?.data?.error || 'Failed to delete category';
+      setError(msg);
+      throw err;
+    } finally {
+      setIsPending(false);
+    }
+  };
+
+  return { deleteCategory, isPending, error };
+};

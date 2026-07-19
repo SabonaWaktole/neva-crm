@@ -12,15 +12,24 @@ import { PlusSquare, Search, Download, TrendingUp, AlertCircle, DollarSign, Data
 export const InventoryList: React.FC = () => {
   const [searchQuery, setSearchQuery] = React.useState('');
   const [categoryId, setCategoryId] = React.useState('');
-  const [statusFilter, setStatusFilter] = React.useState(''); // Not mapped to backend yet, frontend filter or ignore
+  // statusFilter: Not mapped to backend yet, deferred to future iteration
 
-  const { data: products = [], isLoading } = useProducts({ 
+  const { products, isLoading, fetchProducts } = useProducts({ 
     query: searchQuery, 
     categoryId: categoryId || undefined 
   });
   
-  const { data: categories = [] } = useCategories();
-  const { data: warehouses = [] } = useWarehouses();
+  const { categories, fetchCategories } = useCategories();
+  const { warehouses, fetchWarehouses } = useWarehouses();
+
+  React.useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  React.useEffect(() => {
+    fetchCategories();
+    fetchWarehouses();
+  }, [fetchCategories, fetchWarehouses]);
 
   const [isAdjustPanelOpen, setIsAdjustPanelOpen] = React.useState(false);
   const [productToAdjust, setProductToAdjust] = React.useState<any | null>(null);
