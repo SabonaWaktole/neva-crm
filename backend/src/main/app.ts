@@ -158,8 +158,8 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const inventoryController = new InventoryController(
     new CreateProductUseCase(productRepo, warehouseRepo, stockTxManager),
     new UpdateProductUseCase(productRepo),
-    new AdjustStockUseCase(stockLevelRepo, stockMovementRepo, warehouseRepo),
-    new TransferStockUseCase(stockLevelRepo, stockTxManager, warehouseRepo),
+    new AdjustStockUseCase(stockLevelRepo, stockMovementRepo),
+    new TransferStockUseCase(stockLevelRepo, stockTxManager),
     new SearchProductsUseCase(productRepo),
     new GetProductStockBreakdownUseCase(productRepo, stockLevelRepo),
     new CreateWarehouseUseCase(warehouseRepo),

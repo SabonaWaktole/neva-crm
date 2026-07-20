@@ -250,6 +250,25 @@ describe('Inventory Module Integration Tests', () => {
       expect(res.status).toBe(404);
       expect(res.body.error).toContain('not found'); // T1's API can't see T2's warehouse when looking up the stock level
     });
+
+    it('cross-tenant isolation on adjust: cannot adjust stock in a different tenant\'s warehouse', async () => {
+      // T2 warehouse
+      const t2Wh = await request(app).post('/api/t2-inv/inventory/warehouses')
+        .set('Authorization', `Bearer ${tokenTenant2Owner}`)
+        .send({ name: 'T2 Hub For Adjust' });
+      const t2WarehouseId = t2Wh.body.id;
+
+      const res = await request(app).post(`/api/t1-inv/inventory/products/${productId}/adjust`)
+        .set('Authorization', `Bearer ${tokenTenant1Staff}`) // Attempting as T1
+        .send({
+          warehouseId: t2WarehouseId, // Sneaking in T2's warehouse
+          quantityChange: 50,
+          reason: 'Exploit'
+        });
+
+      expect(res.status).toBe(404);
+      expect(res.body.error).toContain('not found');
+    });
   });
 
   describe('4. Missing Scope Coverage', () => {

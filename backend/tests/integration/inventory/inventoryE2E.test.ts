@@ -108,7 +108,10 @@ describe('Inventory End-to-End User Flow', () => {
         description: 'Latest model',
         price: 999,
         categoryId,
-        initialStock: [{ warehouseId: warehouse1Id, quantity: 100 }]
+        initialStock: [
+          { warehouseId: warehouse1Id, quantity: 100 },
+          { warehouseId: warehouse2Id, quantity: 0 }
+        ]
       });
 
     expect(res.status).toBe(201);

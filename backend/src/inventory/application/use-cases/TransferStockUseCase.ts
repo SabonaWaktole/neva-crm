@@ -1,4 +1,4 @@
-import { IStockLevelRepository, IStockMovementRepository, IStockTransactionManager, IWarehouseRepository } from '../../domain/repositories';
+import { IStockLevelRepository, IStockMovementRepository, IStockTransactionManager } from '../../domain/repositories';
 import { StockMovement, StockMovementType } from '../../domain/StockMovement';
 import { StockLevel } from '../../domain/StockLevel';
 import { UserRole } from '../../../auth/domain/enums/UserRole';
@@ -18,8 +18,7 @@ export interface TransferStockDTO {
 export class TransferStockUseCase {
   constructor(
     private stockLevelRepo: IStockLevelRepository,
-    private transactionManager: IStockTransactionManager,
-    private warehouseRepo: IWarehouseRepository
+    private transactionManager: IStockTransactionManager
   ) {}
 
   async execute(dto: TransferStockDTO): Promise<{ sourceStock: StockLevel; destStock: StockLevel; movement: StockMovement }> {
@@ -39,24 +38,11 @@ export class TransferStockUseCase {
       throw new Error(`Stock level not found for product ${dto.productId} at source warehouse ${dto.fromWarehouseId}`);
     }
 
-    let destStock = await this.stockLevelRepo.findByProductAndWarehouse(
+    const destStock = await this.stockLevelRepo.findByProductAndWarehouse(
       dto.tenantId, dto.productId, dto.toWarehouseId
     );
     if (!destStock) {
-      // Validate destination warehouse belongs to this tenant before lazy creation
-      const destWarehouse = await this.warehouseRepo.findById(dto.tenantId, dto.toWarehouseId);
-      if (!destWarehouse) {
-        throw new Error(`Destination warehouse ${dto.toWarehouseId} not found in tenant ${dto.tenantId}`);
-      }
-      destStock = StockLevel.create({
-        id: randomUUID(),
-        tenantId: dto.tenantId,
-        productTenantId: dto.tenantId,
-        warehouseTenantId: dto.tenantId,
-        productId: dto.productId,
-        warehouseId: dto.toWarehouseId,
-        quantity: 0
-      });
+      throw new Error(`Stock level not found for product ${dto.productId} at destination warehouse ${dto.toWarehouseId}`);
     }
 
     // Domain-level validation: throws NegativeStockError if insufficient

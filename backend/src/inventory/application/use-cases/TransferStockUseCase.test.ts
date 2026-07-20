@@ -1,17 +1,15 @@
 import { TransferStockUseCase } from './TransferStockUseCase';
-import { IStockLevelRepository, IStockMovementRepository, IStockTransactionManager, IWarehouseRepository } from '../../domain/repositories';
+import { IStockLevelRepository, IStockMovementRepository, IStockTransactionManager } from '../../domain/repositories';
 import { StockLevel } from '../../domain/StockLevel';
 import { NegativeStockError } from '../../domain/errors';
 import { StockMovementType } from '../../domain/StockMovement';
 import { UserRole } from '../../../auth/domain/enums/UserRole';
-import { Warehouse } from '../../domain/Warehouse';
 
 describe('TransferStockUseCase', () => {
   let useCase: TransferStockUseCase;
   let stockLevelRepo: jest.Mocked<IStockLevelRepository>;
   let stockMovementRepo: jest.Mocked<IStockMovementRepository>;
   let transactionManager: jest.Mocked<IStockTransactionManager>;
-  let warehouseRepo: jest.Mocked<IWarehouseRepository>;
   let transactionStockLevelRepo: jest.Mocked<IStockLevelRepository>;
   let transactionStockMovementRepo: jest.Mocked<IStockMovementRepository>;
 
@@ -44,14 +42,7 @@ describe('TransferStockUseCase', () => {
       }),
     };
 
-    warehouseRepo = {
-      findById: jest.fn(),
-      findAllByTenantId: jest.fn(),
-      save: jest.fn(),
-      delete: jest.fn(),
-    };
-
-    useCase = new TransferStockUseCase(stockLevelRepo, transactionManager, warehouseRepo);
+    useCase = new TransferStockUseCase(stockLevelRepo, transactionManager);
   });
 
   function makeStockLevel(id: string, warehouseId: string, quantity: number): StockLevel {
@@ -151,14 +142,13 @@ describe('TransferStockUseCase', () => {
     })).rejects.toThrow('Stock level not found for product p1 at source warehouse w1');
   });
 
-  it('should lazily create destination stock level when none exists', async () => {
+  it('should reject if destination stock level does not exist', async () => {
     const source = makeStockLevel('sl1', 'w1', 50);
     stockLevelRepo.findByProductAndWarehouse
       .mockResolvedValueOnce(source)
       .mockResolvedValueOnce(null);
-    warehouseRepo.findById.mockResolvedValue(Warehouse.create({ id: 'w2', tenantId: 'tenant1', name: 'Test WH' }));
 
-    const result = await useCase.execute({
+    await expect(useCase.execute({
       tenantId: 'tenant1',
       productId: 'p1',
       fromWarehouseId: 'w1',
@@ -166,11 +156,7 @@ describe('TransferStockUseCase', () => {
       quantity: 10,
       authorUserId: 'u1',
       authorRole: UserRole.STAFF
-    });
-
-    expect(result.sourceStock.quantity).toBe(40);
-    expect(result.destStock.quantity).toBe(10);
-    expect(result.destStock.warehouseId).toBe('w2');
+    })).rejects.toThrow('Stock level not found for product p1 at destination warehouse w2');
   });
 
   it('should reject unauthorized roles', async () => {
