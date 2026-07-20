@@ -19,6 +19,11 @@ describe('PrismaAppointmentRepository Integration', () => {
   beforeAll(async () => {
     repo = new PrismaAppointmentRepository(prisma);
 
+    await prisma.stockMovement.deleteMany({});
+    await prisma.stockLevel.deleteMany({});
+    await prisma.product.deleteMany({});
+    await prisma.warehouse.deleteMany({});
+    await prisma.category.deleteMany({});
     await prisma.interaction.deleteMany({});
     await prisma.appointment.deleteMany({});
     await prisma.client.deleteMany({});
@@ -85,6 +90,11 @@ describe('PrismaAppointmentRepository Integration', () => {
   });
 
   afterAll(async () => {
+    await prisma.stockMovement.deleteMany({});
+    await prisma.stockLevel.deleteMany({});
+    await prisma.product.deleteMany({});
+    await prisma.warehouse.deleteMany({});
+    await prisma.category.deleteMany({});
     await prisma.interaction.deleteMany({});
     await prisma.appointment.deleteMany({});
     await prisma.client.deleteMany({});

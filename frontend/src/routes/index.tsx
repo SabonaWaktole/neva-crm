@@ -13,6 +13,10 @@ import { ClientDetailPage } from '../pages/clients/ClientDetailPage';
 import { ClientFormPage } from '../pages/clients/ClientFormPage';
 import { AppointmentsPage } from '../pages/appointments/AppointmentsPage';
 import { ClientSettingsPage } from '../pages/settings/ClientSettingsPage';
+import { InventoryList } from '../pages/inventory/InventoryList';
+import { ProductForm } from '../pages/inventory/ProductForm/ProductForm';
+import { WarehouseList } from '../pages/inventory/WarehouseList/WarehouseList';
+import { CategoryList } from '../pages/inventory/CategoryList/CategoryList';
 import { ProtectedRoute } from './ProtectedRoute';
 import { RoleGuard } from './RoleGuard';
 import { TenantGuard } from './TenantGuard';
@@ -130,6 +134,38 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <ClientSettingsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'inventory',
+        element: (
+          <ProtectedRoute>
+            <InventoryList />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'inventory/new',
+        element: (
+          <ProtectedRoute>
+            <ProductForm />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'inventory/warehouses',
+        element: (
+          <ProtectedRoute>
+            <WarehouseList />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'inventory/categories',
+        element: (
+          <ProtectedRoute>
+            <CategoryList />
           </ProtectedRoute>
         ),
       },

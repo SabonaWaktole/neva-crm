@@ -1,4 +1,3 @@
-import { Network, UserPlus } from 'lucide-react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { AppLayout } from '../../components/layout/AppLayout/AppLayout';
 import { Sidebar } from '../../components/layout/Sidebar/Sidebar';

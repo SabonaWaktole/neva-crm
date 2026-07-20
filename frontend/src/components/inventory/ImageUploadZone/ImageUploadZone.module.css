@@ -1,0 +1,58 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  border: 2px dashed var(--color-outline-variant);
+  background-color: var(--color-surface-container-low);
+  border-radius: var(--radius-xl);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.dropzone:hover {
+  border-color: var(--color-primary);
+}
+
+.dropzoneDragging {
+  border-color: var(--color-primary);
+  background-color: var(--color-surface-variant);
+}
+
+.icon {
+  color: var(--color-outline);
+  transition: color 0.2s ease-in-out;
+}
+
+.dropzone:hover .icon,
+.dropzoneDragging .icon {
+  color: var(--color-primary);
+}
+
+.label {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-label-sm);
+  font-weight: var(--font-weight-label-sm, 500);
+  line-height: var(--font-line-height-label-sm, 1.4);
+  letter-spacing: var(--font-letter-spacing-label-sm, 0.5px);
+  color: var(--color-on-surface);
+}
+
+.hint {
+  text-align: center;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-label-sm);
+  font-style: italic;
+  color: var(--color-outline-variant);
+  margin: 0;
+}

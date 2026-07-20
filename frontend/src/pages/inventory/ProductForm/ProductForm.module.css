@@ -1,0 +1,201 @@
+.pageContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  /* assuming this is the full page component */
+  background-color: var(--color-background);
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: 64px;
+  padding: 0 var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  background-color: var(--color-background);
+  border-bottom: 1px solid var(--color-outline-variant);
+}
+
+.breadcrumb {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-md);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.breadcrumbMuted {
+  color: var(--color-on-surface-variant);
+}
+
+.breadcrumbSeparator {
+  color: var(--color-outline);
+}
+
+.breadcrumbActive {
+  color: var(--color-on-surface);
+}
+
+.scrollArea {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.contentWrapper {
+  max-width: 1024px; /* max-w-5xl usually around 1024px */
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+}
+
+.gridContainer {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--spacing-lg);
+}
+
+.leftCol {
+  grid-column: span 8;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.rightCol {
+  grid-column: span 4;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.bottomRow {
+  grid-column: span 12;
+}
+
+.card {
+  background-color: var(--color-surface-container);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.cardTitle {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-headline-md);
+  font-weight: var(--font-weight-headline-md);
+  line-height: var(--font-line-height-headline-md);
+  color: var(--color-on-surface);
+  margin: 0;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.twoColGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+.metadataList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.metadataItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-sm);
+}
+
+.metadataLabel {
+  color: var(--color-on-surface-variant);
+}
+
+.metadataValue {
+  color: var(--color-on-surface);
+  font-weight: 500;
+}
+
+.statusEnabled {
+  background-color: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+  padding: 2px var(--spacing-sm);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-label-sm);
+  font-weight: bold;
+}
+
+.footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  height: 80px;
+  background-color: color-mix(in srgb, var(--color-surface-container) 80%, transparent);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacing-lg);
+  border-top: 1px solid var(--color-outline-variant);
+}
+
+.footerLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--color-on-surface-variant);
+}
+
+.infoIcon {
+  color: var(--color-primary);
+}
+
+.infoText {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-sm);
+}
+
+.footerRight {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+/* Add responsive adjustments */
+@media (max-width: 768px) {
+  .leftCol, .rightCol {
+    grid-column: span 12;
+  }
+  
+  .twoColGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .footer {
+    flex-direction: column;
+    height: auto;
+    padding: var(--spacing-md) var(--spacing-lg);
+    gap: var(--spacing-md);
+    justify-content: center;
+  }
+  
+  .footerRight {
+    width: 100%;
+    justify-content: stretch;
+  }
+  
+  .footerRight > * {
+    flex: 1;
+  }
+}

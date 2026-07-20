@@ -142,6 +142,8 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const { CreateCategoryUseCase } = require('../inventory/application/use-cases/CreateCategoryUseCase');
   const { UpdateCategoryUseCase } = require('../inventory/application/use-cases/UpdateCategoryUseCase');
   const { DeleteCategoryUseCase } = require('../inventory/application/use-cases/DeleteCategoryUseCase');
+  const { GetWarehousesUseCase } = require('../inventory/application/use-cases/GetWarehousesUseCase');
+  const { GetCategoriesUseCase } = require('../inventory/application/use-cases/GetCategoriesUseCase');
   
   const { InventoryController } = require('../inventory/interfaces/http/inventoryController');
   const { createInventoryRouter } = require('../inventory/interfaces/http/inventoryRoutes');
@@ -163,9 +165,11 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
     new CreateWarehouseUseCase(warehouseRepo),
     new UpdateWarehouseUseCase(warehouseRepo),
     new DeleteWarehouseUseCase(warehouseRepo, stockLevelRepo),
+    new GetWarehousesUseCase(warehouseRepo),
     new CreateCategoryUseCase(categoryRepo),
     new UpdateCategoryUseCase(categoryRepo),
-    new DeleteCategoryUseCase(categoryRepo, productRepo)
+    new DeleteCategoryUseCase(categoryRepo, productRepo),
+    new GetCategoriesUseCase(categoryRepo)
   );
 
   const inventoryRoutes = createInventoryRouter(inventoryController, tokenService, tenantRepository);

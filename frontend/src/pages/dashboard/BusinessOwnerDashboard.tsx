@@ -1,4 +1,3 @@
-import React from 'react';
 import styles from './BusinessOwnerDashboard.module.css';
 import { 
   Users, 
@@ -6,16 +5,7 @@ import {
   Clock, 
   Package, 
   Plus,
-  UserPlus,
-  CalendarPlus,
-  History,
-  MessageSquarePlus,
-  Zap,
-  PhoneCall,
-  Video,
-  FileText,
-  Mail,
-  CalendarX
+  History
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button/Button';
 import { KPICard } from '../../components/ui/KPICard';
@@ -45,11 +35,11 @@ export const BusinessOwnerDashboard = () => {
           <p className={styles.subtitle}>Here's a summary of your workspace for today.</p>
         </div>
         <div className={styles.headerActions}>
-          <Button variant="outline" leftIcon={<CalendarCheck size={18} />}>
-            Today, Oct 24
+          <Button variant="outline" icon={<CalendarCheck size={18} />}>
+            View Schedule
           </Button>
-          <Button variant="primary" leftIcon={<Plus size={18} />}>
-            Add Record
+          <Button variant="primary" icon={<Plus size={18} />}>
+            New Appointment
           </Button>
         </div>
       </header>
@@ -143,12 +133,12 @@ export const BusinessOwnerDashboard = () => {
                   return (
                     <TimelineItem 
                       key={activity.id}
-                      title={config.label}
+                      title={activity.type.replace(/_/g, ' ')}
                       subtitle={new Date(activity.timestamp).toLocaleString()}
                       content={`${activity.actor.name}: ${activity.description}`}
                       icon={config.icon}
                       iconTextColor={config.color}
-                      iconBgColor={config.bgColor}
+                      iconBgColor={config.bg}
                       isLast={index === activities.length - 1}
                     />
                   );

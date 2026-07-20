@@ -1,6 +1,6 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { useDashboardMetrics, useActivityFeed, useTenants } from './useDashboard';
 import { server } from '../setupTests';
@@ -99,17 +99,19 @@ describe('useDashboard Hooks', () => {
           const url = new URL(request.url);
           const limit = url.searchParams.get('limit');
           if (limit === '5') {
-            return HttpResponse.json([
-              {
-                id: 'evt-1',
-                type: 'CLIENT_CREATED',
-                description: 'Client Added',
-                timestamp: '2023-10-24T10:00:00.000Z',
-                actor: { id: 'u1', name: 'Alex Carter' }
-              }
-            ]);
+            return HttpResponse.json({
+              timeline: [
+                {
+                  id: 'evt-1',
+                  type: 'CLIENT_CREATED',
+                  description: 'Client Added',
+                  timestamp: '2023-10-24T10:00:00.000Z',
+                  actor: { id: 'u1', name: 'Alex Carter' }
+                }
+              ]
+            });
           }
-          return HttpResponse.json([]);
+          return HttpResponse.json({ timeline: [] });
         })
       );
 
@@ -131,7 +133,7 @@ describe('useDashboard Hooks', () => {
       server.use(
         http.get('http://localhost:3000/api/acme-corp/dashboard/feed', () => {
           fetchCount++;
-          return HttpResponse.json([]);
+          return HttpResponse.json({ timeline: [] });
         })
       );
 

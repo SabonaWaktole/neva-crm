@@ -97,7 +97,6 @@ describe('AdjustStockUseCase', () => {
 
   it('should reject if stock level does not exist', async () => {
     stockLevelRepo.findByProductAndWarehouse.mockResolvedValue(null);
-
     await expect(useCase.execute({
       tenantId: 'tenant1',
       productId: 'p1',
@@ -107,6 +106,9 @@ describe('AdjustStockUseCase', () => {
       authorUserId: 'u1',
       authorRole: UserRole.STAFF
     })).rejects.toThrow('Stock level not found for product p1 at warehouse w1');
+
+    expect(stockLevelRepo.save).not.toHaveBeenCalled();
+    expect(stockMovementRepo.save).not.toHaveBeenCalled();
   });
 
   it('should reject unauthorized roles', async () => {

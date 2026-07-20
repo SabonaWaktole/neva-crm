@@ -46,11 +46,11 @@ export const StaffScheduleTable: React.FC<StaffScheduleTableProps> = ({ appointm
                   </td>
                   <td>
                     <div className={styles.clientName}>{apt.clientId}</div>
-                    <div className={styles.appointmentDetail}>{apt.notes || apt.type}</div>
+                    <div className={styles.appointmentDetail}>{apt.notes || "Standard"}</div>
                   </td>
                   <td>
                     {/* Mocking the Type Badge mapping since we don't have location types in the enum yet */}
-                    <Badge variant="primary">{apt.type}</Badge>
+                    <Badge variant="primary">Standard</Badge>
                   </td>
                   <td>
                     <div className={styles.statusCell}>
@@ -93,10 +93,10 @@ export const StaffScheduleTable: React.FC<StaffScheduleTableProps> = ({ appointm
               </div>
               <div className={styles.mobileBody}>
                 <div className={styles.clientName}>{apt.clientId}</div>
-                <div className={styles.appointmentDetail}>{apt.notes || apt.type}</div>
+                <div className={styles.appointmentDetail}>{apt.notes || "Standard"}</div>
               </div>
               <div className={styles.mobileFooter}>
-                <Badge variant="primary">{apt.type}</Badge>
+                <Badge variant="primary">Standard</Badge>
                 <div className={styles.mobileActions}>
                   <button className={styles.iconAction}><Phone size={16} /></button>
                   <button className={styles.iconAction}><MapPin size={16} /></button>

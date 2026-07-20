@@ -13,6 +13,11 @@ describe('PrismaTenantRepository Integration', () => {
     repo = new PrismaTenantRepository();
 
     // Clear all existing data to ensure total is exactly 15
+    await prisma.stockMovement.deleteMany({});
+    await prisma.stockLevel.deleteMany({});
+    await prisma.product.deleteMany({});
+    await prisma.warehouse.deleteMany({});
+    await prisma.category.deleteMany({});
     await prisma.interaction.deleteMany({});
     await prisma.appointment.deleteMany({});
     await prisma.client.deleteMany({});
@@ -41,6 +46,11 @@ describe('PrismaTenantRepository Integration', () => {
   });
 
   afterAll(async () => {
+    await prisma.stockMovement.deleteMany({});
+    await prisma.stockLevel.deleteMany({});
+    await prisma.product.deleteMany({});
+    await prisma.warehouse.deleteMany({});
+    await prisma.category.deleteMany({});
     await prisma.interaction.deleteMany({});
     await prisma.appointment.deleteMany({});
     await prisma.client.deleteMany({});

@@ -11,6 +11,7 @@ export class PrismaStockMovementRepository implements IStockMovementRepository {
         id: movement.id,
         tenantId: movement.tenantId,
         productId: movement.productId,
+        warehouseId: movement.warehouseId,
         fromWarehouseId: movement.fromWarehouseId,
         toWarehouseId: movement.toWarehouseId,
         quantity: movement.quantity,

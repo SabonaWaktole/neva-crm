@@ -1,0 +1,40 @@
+.row {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--spacing-md);
+  align-items: flex-end;
+}
+
+.col6 {
+  grid-column: span 6;
+}
+
+.col4 {
+  grid-column: span 4;
+}
+
+.col2 {
+  grid-column: span 2;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: 36px; /* Match input height */
+}
+
+.deleteButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background-color: transparent;
+  color: var(--color-error);
+  border-radius: var(--radius-default);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.deleteButton:hover {
+  background-color: var(--color-error-container);
+}

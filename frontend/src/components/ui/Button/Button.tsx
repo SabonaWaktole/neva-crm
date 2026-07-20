@@ -5,7 +5,7 @@ import styles from './Button.module.css';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
-  variant?: 'primary' | 'outline';
+  variant?: 'primary' | 'outline' | 'ghost';
   fullWidth?: boolean;
   icon?: ReactNode;
   iconPosition?: 'left' | 'right';

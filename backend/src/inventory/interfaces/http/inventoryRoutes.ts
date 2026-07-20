@@ -25,11 +25,13 @@ export const createInventoryRouter = (
   router.post('/products/:id/transfer', controller.transferStock);
 
   // Warehouses
+  router.get('/warehouses', controller.getWarehouses);
   router.post('/warehouses', controller.createWarehouse);
   router.put('/warehouses/:id', controller.updateWarehouse);
   router.delete('/warehouses/:id', controller.deleteWarehouse);
 
   // Categories
+  router.get('/categories', controller.getCategories);
   router.post('/categories', controller.createCategory);
   router.put('/categories/:id', controller.updateCategory);
   router.delete('/categories/:id', controller.deleteCategory);

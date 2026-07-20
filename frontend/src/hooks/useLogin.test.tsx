@@ -13,7 +13,7 @@ describe('useLogin hook', () => {
 
   it('handles successful login', async () => {
     server.use(
-      http.post('http://localhost:3000/api/auth/login', () => {
+      http.post('http://localhost:3000/api/tenant-1/auth/login', () => {
         return HttpResponse.json({ message: 'Login successful' });
       }),
       http.get('http://localhost:3000/api/auth/me', () => {
@@ -39,7 +39,7 @@ describe('useLogin hook', () => {
 
   it('handles login failure', async () => {
     server.use(
-      http.post('http://localhost:3000/api/auth/login', () => {
+      http.post('http://localhost:3000/api/tenant-1/auth/login', () => {
         return HttpResponse.json({ error: 'Invalid credentials' }, { status: 401 });
       })
     );

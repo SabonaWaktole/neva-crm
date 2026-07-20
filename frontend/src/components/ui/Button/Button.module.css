@@ -63,3 +63,14 @@
 .icon {
   font-size: 18px;
 }
+
+/* Ghost Variant */
+.ghost {
+  background-color: transparent;
+  color: var(--color-on-surface-variant);
+}
+
+.ghost:hover {
+  background-color: var(--color-surface-container);
+  color: var(--color-on-surface);
+}

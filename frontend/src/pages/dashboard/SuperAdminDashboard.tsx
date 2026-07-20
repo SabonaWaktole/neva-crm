@@ -1,4 +1,4 @@
-import React from 'react';
+
 import styles from './SuperAdminDashboard.module.css';
 import { 
   Users, 
@@ -72,8 +72,8 @@ export const SuperAdminDashboard = () => {
           <h1 className={styles.title}>Platform Overview</h1>
           <p className={styles.subtitle}>Real-time health and tenant distribution metrics.</p>
         </div>
-        <Button leftIcon={<Plus size={20} />}>
-          Provision New Tenant
+        <Button icon={<Plus size={20} />}>
+          New Tenant
         </Button>
       </header>
 

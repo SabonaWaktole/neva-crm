@@ -1,7 +1,6 @@
 import React from 'react';
 import styles from './TenantManagementTable.module.css';
 import { MoreVertical } from 'lucide-react';
-import { Badge } from '../../ui/Badge/Badge';
 
 export interface Tenant {
   id: string;

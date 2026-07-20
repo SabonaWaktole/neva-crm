@@ -1,14 +1,10 @@
-import React from 'react';
 import styles from './StaffDashboard.module.css';
 import { 
   Users, 
   CalendarCheck, 
   AlertTriangle,
   History,
-  PhoneCall,
-  Video,
   FileText,
-  Mail,
   UserPlus,
   CalendarPlus,
   TrendingUp,
@@ -76,10 +72,10 @@ export const StaffDashboard = () => {
           <p className={styles.subtitle}>Here's a summary of your individual pipeline for today.</p>
         </div>
         <div className={styles.headerActions}>
-          <Button variant="outline" leftIcon={<CalendarCheck size={18} />}>
+          <Button variant="outline" icon={<CalendarCheck size={18} />}>
             Today, Oct 24
           </Button>
-          <Button variant="outline" leftIcon={<Download size={18} />}>
+          <Button variant="outline" icon={<Download size={18} />}>
             Export Report
           </Button>
         </div>
@@ -131,7 +127,7 @@ export const StaffDashboard = () => {
                 <CalendarCheck size={20} color="var(--color-primary)" />
                 <h2>My Schedule</h2>
               </div>
-              <Button variant="ghost" size="small">View Calendar</Button>
+              <Button variant="ghost">View Calendar</Button>
             </div>
             {isLoadingAppointments ? (
               <p style={{ padding: '1rem', color: 'var(--color-on-surface-variant)' }}>Loading appointments...</p>
@@ -203,12 +199,12 @@ export const StaffDashboard = () => {
                   return (
                     <TimelineItem 
                       key={activity.id}
-                      title={config.label}
+                      title={activity.type.replace(/_/g, ' ')}
                       subtitle={new Date(activity.timestamp).toLocaleString()}
                       content={`${activity.actor.name}: ${activity.description}`}
                       icon={config.icon}
                       iconTextColor={config.color}
-                      iconBgColor={config.bgColor}
+                      iconBgColor={config.bg}
                       isLast={index === activities.length - 1}
                     />
                   );

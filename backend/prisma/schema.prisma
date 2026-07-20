@@ -190,10 +190,11 @@ model Warehouse {
   name     String
   address  String?
 
-  tenant        Tenant          @relation(fields: [tenantId], references: [id])
-  stockLevels   StockLevel[]
-  movementsFrom StockMovement[] @relation("FromWarehouse")
-  movementsTo   StockMovement[] @relation("ToWarehouse")
+  tenant             Tenant          @relation(fields: [tenantId], references: [id])
+  stockLevels        StockLevel[]
+  movements          StockMovement[] @relation("AdjustmentWarehouse")
+  movementsFrom      StockMovement[] @relation("FromWarehouse")
+  movementsTo        StockMovement[] @relation("ToWarehouse")
 
   @@unique([tenantId, name])
 }
@@ -238,8 +239,9 @@ model StockMovement {
   id              String   @id
   tenantId        String
   productId       String
-  fromWarehouseId String?
-  toWarehouseId   String?
+  warehouseId     String?  // Used for ADJUSTMENT
+  fromWarehouseId String?  // Used for TRANSFER
+  toWarehouseId   String?  // Used for TRANSFER
   quantity        Int
   type            String // 'ADJUSTMENT', 'TRANSFER'
   reason          String?
@@ -248,11 +250,13 @@ model StockMovement {
 
   tenant        Tenant     @relation(fields: [tenantId], references: [id])
   product       Product    @relation(fields: [productId], references: [id])
+  warehouse     Warehouse? @relation("AdjustmentWarehouse", fields: [warehouseId], references: [id])
   fromWarehouse Warehouse? @relation("FromWarehouse", fields: [fromWarehouseId], references: [id])
   toWarehouse   Warehouse? @relation("ToWarehouse", fields: [toWarehouseId], references: [id])
   authorUser    User       @relation(fields: [createdBy], references: [id])
 
   @@index([tenantId, productId])
+  @@index([tenantId, warehouseId])
   @@index([tenantId, fromWarehouseId])
   @@index([tenantId, toWarehouseId])
   @@index([tenantId, createdAt])
