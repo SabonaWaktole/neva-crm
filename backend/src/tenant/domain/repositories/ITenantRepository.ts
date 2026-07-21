@@ -5,4 +5,5 @@ export interface ITenantRepository {
   findBySlug(slug: string): Promise<Tenant | null>;
   create(tenant: Tenant): Promise<Tenant>;
   findAll(skip: number, take: number): Promise<{ items: Tenant[]; total: number }>;
+  updateSettings(id: string, settings: { requiresQuotationApproval: boolean }): Promise<void>;
 }

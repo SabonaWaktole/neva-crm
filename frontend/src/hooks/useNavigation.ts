@@ -6,7 +6,7 @@ const ownerNavItems: NavItem[] = [
   { id: 'clients', label: 'Clients', icon: 'group' },
   { id: 'appointments', label: 'Appointments', icon: 'event' },
   { id: 'inventory', label: 'Products & Stock', icon: 'inventory_2' },
-  { id: 'quotes', label: 'Quotations', icon: 'description' },
+  { id: 'quotations', label: 'Quotations', icon: 'description' },
   { id: 'reports', label: 'Reports', icon: 'bar_chart' },
   { id: 'settings', label: 'Settings', icon: 'settings' },
 ];
@@ -15,7 +15,7 @@ const staffNavItems: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
   { id: 'clients', label: 'Clients', icon: 'group' },
   { id: 'appointments', label: 'Appointments', icon: 'event' },
-  { id: 'quotes', label: 'Quotations', icon: 'description' },
+  { id: 'quotations', label: 'Quotations', icon: 'description' },
   { id: 'tasks', label: 'My Tasks', icon: 'task_alt' },
 ];
 

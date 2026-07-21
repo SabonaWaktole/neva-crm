@@ -14,6 +14,7 @@ describe('GetTenantsUseCase', () => {
       findBySlug: jest.fn(),
       create: jest.fn(),
       findAll: jest.fn(),
+      updateSettings: jest.fn(),
     };
     useCase = new GetTenantsUseCase(mockTenantRepo);
   });

@@ -175,5 +175,58 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const inventoryRoutes = createInventoryRouter(inventoryController, tokenService, tenantRepository);
   app.use('/api/:tenantSlug/inventory', inventoryRoutes);
 
+  // Quotations Routes
+  const { PrismaQuotationRepository } = require('../quotations/infrastructure/repositories/PrismaQuotationRepository');
+  const { PrismaQuotationLineItemRepository } = require('../quotations/infrastructure/repositories/PrismaQuotationLineItemRepository');
+  const { PrismaQuotationStatusHistoryRepository } = require('../quotations/infrastructure/repositories/PrismaQuotationStatusHistoryRepository');
+  
+  const { CreateQuotationUseCase } = require('../quotations/application/use-cases/CreateQuotationUseCase');
+  const { UpdateQuotationUseCase } = require('../quotations/application/use-cases/UpdateQuotationUseCase');
+  const { SubmitQuotationUseCase } = require('../quotations/application/use-cases/SubmitQuotationUseCase');
+  const { ApproveQuotationUseCase } = require('../quotations/application/use-cases/ApproveQuotationUseCase');
+  const { ReturnQuotationToDraftUseCase } = require('../quotations/application/use-cases/ReturnQuotationToDraftUseCase');
+  const { MarkQuotationAcceptedUseCase } = require('../quotations/application/use-cases/MarkQuotationAcceptedUseCase');
+  const { MarkQuotationRejectedUseCase } = require('../quotations/application/use-cases/MarkQuotationRejectedUseCase');
+  const { ExpireQuotationUseCase } = require('../quotations/application/use-cases/ExpireQuotationUseCase');
+  const { SearchQuotationsUseCase } = require('../quotations/application/use-cases/SearchQuotationsUseCase');
+  const { GetQuotationDetailUseCase } = require('../quotations/application/use-cases/GetQuotationDetailUseCase');
+  const { GetPendingApprovalsUseCase } = require('../quotations/application/use-cases/GetPendingApprovalsUseCase');
+  
+  const { QuotationsController } = require('../quotations/interfaces/http/QuotationsController');
+  const { createQuotationRouter } = require('../quotations/interfaces/http/quotationRoutes');
+  const { SettingsService } = require('../settings/SettingsService');
+
+  const quotationRepo = new PrismaQuotationRepository(prisma);
+  const quotationLineItemRepo = new PrismaQuotationLineItemRepository(prisma);
+  const quotationHistoryRepo = new PrismaQuotationStatusHistoryRepository(prisma);
+  
+  const settingsService = new SettingsService(tenantRepository);
+
+  const quotationsController = new QuotationsController(
+    new CreateQuotationUseCase(quotationRepo, quotationLineItemRepo, quotationHistoryRepo, prismaClientRepository, productRepo, warehouseRepo),
+    new UpdateQuotationUseCase(quotationRepo, quotationLineItemRepo, productRepo, warehouseRepo),
+    new SubmitQuotationUseCase(quotationRepo, quotationHistoryRepo),
+    new ApproveQuotationUseCase(quotationRepo, quotationHistoryRepo),
+    new ReturnQuotationToDraftUseCase(quotationRepo, quotationHistoryRepo),
+    new MarkQuotationAcceptedUseCase(quotationRepo, quotationLineItemRepo, quotationHistoryRepo, stockLevelRepo, stockTxManager),
+    new MarkQuotationRejectedUseCase(quotationRepo, quotationHistoryRepo),
+    new ExpireQuotationUseCase(quotationRepo, quotationHistoryRepo),
+    new SearchQuotationsUseCase(quotationRepo),
+    new GetQuotationDetailUseCase(quotationRepo, quotationLineItemRepo, quotationHistoryRepo),
+    new GetPendingApprovalsUseCase(quotationRepo),
+    settingsService
+  );
+
+  const quotationRoutes = createQuotationRouter(quotationsController, tokenService, tenantRepository);
+  app.use('/api/:tenantSlug/quotations', quotationRoutes);
+
+  // Settings Routes
+  const { SettingsController } = require('../settings/interfaces/http/SettingsController');
+  const { createSettingsRouter } = require('../settings/interfaces/http/settingsRoutes');
+  
+  const settingsController = new SettingsController(tenantRepository);
+  const settingsRoutes = createSettingsRouter(settingsController, tokenService, tenantRepository);
+  app.use('/api/:tenantSlug/settings', settingsRoutes);
+
   return app;
 };

@@ -8,10 +8,11 @@ generator client {
 }
 
 model Tenant {
-  id        String   @id
-  name      String
-  urlSlug   String   @unique
-  createdAt DateTime @default(now())
+  id                        String   @id
+  name                      String
+  urlSlug                   String   @unique
+  requiresQuotationApproval Boolean  @default(true)
+  createdAt                 DateTime @default(now())
 
   users                  User[]
   invitations            Invitation[]
@@ -27,6 +28,9 @@ model Tenant {
   products       Product[]
   stockLevels    StockLevel[]
   stockMovements StockMovement[]
+
+  // Quotations
+  quotations Quotation[]
 }
 
 model User {
@@ -37,13 +41,15 @@ model User {
   tenantId       String?
   createdAt      DateTime @default(now())
 
-  tenant               Tenant?              @relation(fields: [tenantId], references: [id])
+  tenant               Tenant?                  @relation(fields: [tenantId], references: [id])
   passwordResetTokens  PasswordResetToken[]
-  assignedClients      Client[]             @relation("AssignedClients")
-  updatedClients       Client[]             @relation("LastUpdatedClients")
+  assignedClients      Client[]                 @relation("AssignedClients")
+  updatedClients       Client[]                 @relation("LastUpdatedClients")
   interactions         Interaction[]
-  assignedAppointments Appointment[]        @relation("AssignedAppointments")
+  assignedAppointments Appointment[]            @relation("AssignedAppointments")
   inventoryMovements   StockMovement[]
+  quotations           Quotation[]
+  statusChanges        QuotationStatusHistory[]
 }
 
 model Invitation {
@@ -86,6 +92,7 @@ model Client {
   lastUpdatedByUser User          @relation("LastUpdatedClients", fields: [lastUpdatedByUserId], references: [id])
   interactions      Interaction[]
   appointments      Appointment[]
+  quotations        Quotation[]
 
   @@index([tenantId, status])
   @@index([tenantId, assignedUserId])
@@ -190,11 +197,12 @@ model Warehouse {
   name     String
   address  String?
 
-  tenant             Tenant          @relation(fields: [tenantId], references: [id])
+  tenant             Tenant              @relation(fields: [tenantId], references: [id])
   stockLevels        StockLevel[]
-  movements          StockMovement[] @relation("AdjustmentWarehouse")
-  movementsFrom      StockMovement[] @relation("FromWarehouse")
-  movementsTo        StockMovement[] @relation("ToWarehouse")
+  movements          StockMovement[]     @relation("AdjustmentWarehouse")
+  movementsFrom      StockMovement[]     @relation("FromWarehouse")
+  movementsTo        StockMovement[]     @relation("ToWarehouse")
+  quotationLineItems QuotationLineItem[]
 
   @@unique([tenantId, name])
 }
@@ -210,10 +218,11 @@ model Product {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  tenant      Tenant          @relation(fields: [tenantId], references: [id])
-  category    Category?       @relation(fields: [categoryId], references: [id])
-  stockLevels StockLevel[]
-  movements   StockMovement[]
+  tenant             Tenant              @relation(fields: [tenantId], references: [id])
+  category           Category?           @relation(fields: [categoryId], references: [id])
+  stockLevels        StockLevel[]
+  movements          StockMovement[]
+  quotationLineItems QuotationLineItem[]
 
   @@index([tenantId, categoryId])
   @@index([tenantId, name])
@@ -239,9 +248,9 @@ model StockMovement {
   id              String   @id
   tenantId        String
   productId       String
-  warehouseId     String?  // Used for ADJUSTMENT
-  fromWarehouseId String?  // Used for TRANSFER
-  toWarehouseId   String?  // Used for TRANSFER
+  warehouseId     String? // Used for ADJUSTMENT
+  fromWarehouseId String? // Used for TRANSFER
+  toWarehouseId   String? // Used for TRANSFER
   quantity        Int
   type            String // 'ADJUSTMENT', 'TRANSFER'
   reason          String?
@@ -260,4 +269,62 @@ model StockMovement {
   @@index([tenantId, fromWarehouseId])
   @@index([tenantId, toWarehouseId])
   @@index([tenantId, createdAt])
+}
+
+// ==========================================
+// QUOTATIONS MODULE
+// ==========================================
+
+model Quotation {
+  id              String    @id @default(uuid())
+  tenantId        String
+  clientId        String
+  createdByUserId String
+  status          String
+  sentAt          DateTime?
+  respondedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  tenant    Tenant @relation(fields: [tenantId], references: [id])
+  client    Client @relation(fields: [clientId], references: [id])
+  createdBy User   @relation(fields: [createdByUserId], references: [id])
+
+  lineItems     QuotationLineItem[]
+  statusHistory QuotationStatusHistory[]
+
+  @@index([tenantId, clientId])
+  @@index([tenantId, status])
+}
+
+model QuotationLineItem {
+  id          String @id @default(uuid())
+  tenantId    String
+  quotationId String
+  productId   String
+  warehouseId String
+  quantity    Int
+  unitPrice   Float
+
+  quotation Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  product   Product   @relation(fields: [productId], references: [id])
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+
+  @@index([tenantId, quotationId])
+}
+
+model QuotationStatusHistory {
+  id              String   @id @default(uuid())
+  tenantId        String
+  quotationId     String
+  fromStatus      String
+  toStatus        String
+  changedByUserId String
+  note            String?
+  createdAt       DateTime @default(now())
+
+  quotation Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  changedBy User      @relation(fields: [changedByUserId], references: [id])
+
+  @@index([tenantId, quotationId])
 }
