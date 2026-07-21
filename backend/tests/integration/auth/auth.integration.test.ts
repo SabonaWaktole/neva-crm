@@ -74,6 +74,19 @@ class InMemoryTenantRepository implements ITenantRepository {
   async findAll(skip: number, take: number): Promise<{ items: Tenant[]; total: number }> {
     return { items: this.tenants.slice(skip, skip + take), total: this.tenants.length };
   }
+  async updateSettings(id: string, settings: { requiresQuotationApproval: boolean }): Promise<void> {
+    const tenant = this.tenants.find(t => t.id === id);
+    if (tenant) {
+      const idx = this.tenants.indexOf(tenant);
+      this.tenants[idx] = Tenant.create({
+        id: tenant.id,
+        name: tenant.name,
+        urlSlug: tenant.urlSlug,
+        requiresQuotationApproval: settings.requiresQuotationApproval,
+        createdAt: tenant.createdAt,
+      });
+    }
+  }
 
   getAll(): Tenant[] { return [...this.tenants]; }
   clear(): void { this.tenants = []; }

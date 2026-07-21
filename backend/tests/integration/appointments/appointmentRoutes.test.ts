@@ -37,12 +37,13 @@ const t2OwnerToken = stubTokenService.sign({ userId: 'u2-owner', role: UserRole.
 const stubTenantRepo: ITenantRepository = {
   findById: async () => null,
   findBySlug: async (slug: string) => {
-    if (slug === 't1') return { id: 't1', name: 'Tenant 1', urlSlug: 't1', createdAt: new Date() };
-    if (slug === 't2') return { id: 't2', name: 'Tenant 2', urlSlug: 't2', createdAt: new Date() };
+    if (slug === 't1') return { id: 't1', name: 'Tenant 1', urlSlug: 't1', createdAt: new Date(), requiresQuotationApproval: true };
+    if (slug === 't2') return { id: 't2', name: 'Tenant 2', urlSlug: 't2', createdAt: new Date(), requiresQuotationApproval: true };
     return null;
   },
   create: async (t: any) => t,
   findAll: async () => ({ items: [], total: 0 }),
+  updateSettings: async () => {},
 };
 
 const app = express();

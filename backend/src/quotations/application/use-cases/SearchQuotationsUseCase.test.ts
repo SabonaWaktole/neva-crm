@@ -1,0 +1,92 @@
+import { SearchQuotationsUseCase } from './SearchQuotationsUseCase';
+import { IQuotationRepository } from '../../domain/IQuotationRepository';
+import { Quotation, QuotationStatus } from '../../domain/Quotation';
+import { QuotationLineItem } from '../../domain/QuotationLineItem';
+import { UserRole } from '../../../auth/domain/enums/UserRole';
+
+describe('SearchQuotationsUseCase', () => {
+  let useCase: SearchQuotationsUseCase;
+  let quotationRepo: jest.Mocked<IQuotationRepository>;
+
+  beforeEach(() => {
+    quotationRepo = { findById: jest.fn(), findPendingApprovals: jest.fn(), search: jest.fn(), save: jest.fn() };
+    useCase = new SearchQuotationsUseCase(quotationRepo);
+  });
+
+  function makeQuotation(status: QuotationStatus, createdByUserId: string, clientId: string): Quotation {
+    return Quotation.create({
+      id: 'q1', tenantId: 'tenant-1', clientId, createdByUserId, lineItems: [], status
+    });
+  }
+
+  it('should search with all parameters for Business Owner', async () => {
+    quotationRepo.search.mockResolvedValue({ data: [], total: 0 });
+
+    const result = await useCase.execute({
+      tenantId: 'tenant-1',
+      actingUserId: 'owner-1',
+      actingUserRole: UserRole.BUSINESS_OWNER,
+      params: {
+        query: 'search term',
+        status: QuotationStatus.Sent,
+        clientId: 'c1',
+        page: 2,
+        limit: 15
+      }
+    });
+
+    expect(quotationRepo.search).toHaveBeenCalledWith({
+      tenantId: 'tenant-1',
+      query: 'search term',
+      status: QuotationStatus.Sent,
+      clientId: 'c1',
+      createdByUserId: undefined, // Owner sees all
+      page: 2,
+      limit: 15
+    } as any);
+    expect(result.data).toEqual([]);
+    expect(result.total).toBe(0);
+  });
+
+  it('should restrict Staff to their own quotations', async () => {
+    quotationRepo.search.mockResolvedValue({ data: [], total: 0 });
+
+    await useCase.execute({
+      tenantId: 'tenant-1',
+      actingUserId: 'staff-1',
+      actingUserRole: UserRole.STAFF,
+      params: {}
+    });
+
+    expect(quotationRepo.search).toHaveBeenCalledWith({
+      tenantId: 'tenant-1',
+      query: undefined,
+      status: undefined,
+      clientId: undefined,
+      createdByUserId: 'staff-1', // Staff restricted
+      page: 1, // default
+      limit: 10 // default
+    } as any);
+  });
+
+  it('should provide default pagination', async () => {
+    quotationRepo.search.mockResolvedValue({ data: [], total: 0 });
+
+    await useCase.execute({
+      tenantId: 'tenant-1',
+      actingUserId: 'owner-1',
+      actingUserRole: UserRole.BUSINESS_OWNER,
+      params: {}
+    });
+
+    expect(quotationRepo.search).toHaveBeenCalledWith({
+      tenantId: 'tenant-1',
+      query: undefined,
+      status: undefined,
+      clientId: undefined,
+      createdByUserId: undefined,
+      page: 1,
+      limit: 10
+    } as any);
+  });
+});

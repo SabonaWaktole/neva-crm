@@ -18,9 +18,12 @@ export const LoginPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login(email, password, tenantSlug || null);
-      // Navigate to the dashboard after successful login
-      navigate(`/${tenantSlug || ''}`);
+      const actualTenantSlug = await login(email, password, null);
+      if (actualTenantSlug) {
+        navigate(`/${actualTenantSlug}/dashboard`);
+      } else {
+        navigate('/admin/dashboard');
+      }
     } catch (err) {
       // Error is handled by the hook
     }

@@ -12,9 +12,12 @@ import { KPICard } from '../../components/ui/KPICard';
 import { UpcomingAppointmentsWidget } from '../../components/widgets/UpcomingAppointmentsWidget';
 import { TimelineItem } from '../../components/ui/TimelineItem';
 import { getActivityConfig } from '../../utils/activityMapper';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useDashboardMetrics, useActivityFeed } from '../../hooks/useDashboard';
 
 export const BusinessOwnerDashboard = () => {
+  const { tenantSlug } = useParams();
+  const navigate = useNavigate();
   const { metrics, isLoading: isLoadingMetrics } = useDashboardMetrics();
   const { activities, isLoading: isLoadingFeed } = useActivityFeed(5);
 
@@ -35,10 +38,10 @@ export const BusinessOwnerDashboard = () => {
           <p className={styles.subtitle}>Here's a summary of your workspace for today.</p>
         </div>
         <div className={styles.headerActions}>
-          <Button variant="outline" icon={<CalendarCheck size={18} />}>
+          <Button variant="outline" icon={<CalendarCheck size={18} />} onClick={() => navigate(`/${tenantSlug}/appointments`)}>
             View Schedule
           </Button>
-          <Button variant="primary" icon={<Plus size={18} />}>
+          <Button variant="primary" icon={<Plus size={18} />} onClick={() => navigate(`/${tenantSlug}/appointments/new`)}>
             New Appointment
           </Button>
         </div>
@@ -147,7 +150,7 @@ export const BusinessOwnerDashboard = () => {
             </div>
             
             <div className={styles.feedFooter}>
-              <Button variant="ghost" fullWidth>View All Activity</Button>
+              <Button variant="ghost" fullWidth onClick={() => navigate(`/${tenantSlug}/clients`)}>View All Activity</Button>
             </div>
           </div>
         </div>

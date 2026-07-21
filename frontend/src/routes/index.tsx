@@ -12,11 +12,16 @@ import { ClientListPage } from '../pages/clients/ClientListPage';
 import { ClientDetailPage } from '../pages/clients/ClientDetailPage';
 import { ClientFormPage } from '../pages/clients/ClientFormPage';
 import { AppointmentsPage } from '../pages/appointments/AppointmentsPage';
+import { CreateAppointmentPage } from '../pages/appointments/CreateAppointmentPage';
 import { ClientSettingsPage } from '../pages/settings/ClientSettingsPage';
 import { InventoryList } from '../pages/inventory/InventoryList';
 import { ProductForm } from '../pages/inventory/ProductForm/ProductForm';
 import { WarehouseList } from '../pages/inventory/WarehouseList/WarehouseList';
 import { CategoryList } from '../pages/inventory/CategoryList/CategoryList';
+import { QuotationList } from '../pages/quotations/QuotationList';
+import { QuotationDetail } from '../pages/quotations/QuotationDetail';
+import { CreateQuotation } from '../pages/quotations/CreateQuotation';
+import { EditQuotation } from '../pages/quotations/EditQuotation';
 import { ProtectedRoute } from './ProtectedRoute';
 import { RoleGuard } from './RoleGuard';
 import { TenantGuard } from './TenantGuard';
@@ -50,7 +55,7 @@ export const router = createBrowserRouter([
     element: <StaffInvitationPage />,
   },
   {
-    path: '/:tenantSlug/login',
+    path: '/login',
     element: <LoginPage />,
   },
   {
@@ -130,6 +135,14 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: 'appointments/new',
+        element: (
+          <ProtectedRoute>
+            <CreateAppointmentPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: 'settings/client-management',
         element: (
           <ProtectedRoute>
@@ -166,6 +179,38 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <CategoryList />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'quotations',
+        element: (
+          <ProtectedRoute>
+            <QuotationList />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'quotations/new',
+        element: (
+          <ProtectedRoute>
+            <CreateQuotation />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'quotations/:id',
+        element: (
+          <ProtectedRoute>
+            <QuotationDetail />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'quotations/:id/edit',
+        element: (
+          <ProtectedRoute>
+            <EditQuotation />
           </ProtectedRoute>
         ),
       },

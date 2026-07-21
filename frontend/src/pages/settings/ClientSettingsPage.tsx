@@ -11,7 +11,7 @@ const mockNavItems: NavItem[] = [
   { id: 'clients', label: 'Clients', icon: 'group' },
   { id: 'appointments', label: 'Appointments', icon: 'event' },
   { id: 'inventory', label: 'Products & Stock', icon: 'inventory_2' },
-  { id: 'quotes', label: 'Quotations', icon: 'description' },
+  { id: 'quotations', label: 'Quotations', icon: 'description' },
   { id: 'reports', label: 'Reports', icon: 'bar_chart' },
   { id: 'settings', label: 'Settings', icon: 'settings', isActive: true },
 ];
@@ -24,7 +24,7 @@ export const ClientSettingsPage: React.FC = () => {
 
   const handleLogout = async () => {
     await logout();
-    navigate(`/${tenantSlug || ''}/login`);
+    navigate('/login');
   };
 
   const userName = user?.userId ? `User ${user.userId.substring(0, 8)}` : 'Business Owner';

@@ -9,13 +9,15 @@ import { Card } from '../../components/ui/Card/Card';
 import { SettingsLayout } from '../../components/layout/SettingsLayout/SettingsLayout';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useLogout } from '../../hooks/useLogout';
+import { useTenantSettings } from '../../hooks/useTenantSettings';
+import { useEffect, useState } from 'react';
 
 const mockNavItems: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
   { id: 'clients', label: 'Clients', icon: 'group' },
   { id: 'appointments', label: 'Appointments', icon: 'event' },
   { id: 'inventory', label: 'Products & Stock', icon: 'inventory_2' },
-  { id: 'quotes', label: 'Quotations', icon: 'description' },
+  { id: 'quotations', label: 'Quotations', icon: 'description' },
   { id: 'reports', label: 'Reports', icon: 'bar_chart' },
   { id: 'settings', label: 'Settings', icon: 'settings', isActive: true },
 ];
@@ -25,10 +27,28 @@ export const AccountSettingsPage = () => {
   const { tenantSlug } = useParams();
   const { user } = useAuthStore();
   const { logout } = useLogout();
+  const { fetchSettings, updateSettings, loading } = useTenantSettings();
+  
+  const [requiresQuotationApproval, setRequiresQuotationApproval] = useState(true);
+
+  useEffect(() => {
+    fetchSettings().then((settings) => {
+      setRequiresQuotationApproval(settings.requiresQuotationApproval);
+    }).catch(console.error);
+  }, [fetchSettings]);
 
   const handleLogout = async () => {
     await logout();
-    navigate(`/${tenantSlug || ''}/login`);
+    navigate('/login');
+  };
+
+  const handleSave = async () => {
+    try {
+      await updateSettings({ requiresQuotationApproval });
+      alert('Settings saved successfully');
+    } catch (err) {
+      alert('Failed to save settings');
+    }
   };
 
   const userName = user?.userId ? `User ${user.userId.substring(0, 8)}` : 'Settings User';
@@ -165,6 +185,27 @@ export const AccountSettingsPage = () => {
                     </select>
                   </div>
                 </Card>
+
+                <Card padding="lg">
+                  <div style={{ borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: 'var(--spacing-md)', marginBottom: 'var(--spacing-md)' }}>
+                    <h2 style={{ fontFamily: 'var(--font-family-headline-md)', fontSize: 'var(--font-size-headline-md)', margin: 0, color: 'var(--color-on-surface)' }}>Quotations</h2>
+                    <p style={{ fontFamily: 'var(--font-family-body-md)', fontSize: '13px', margin: 'var(--spacing-xs) 0 0 0', color: 'var(--color-on-surface-variant)' }}>Manage quotation workflow settings.</p>
+                  </div>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)', cursor: 'pointer' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={requiresQuotationApproval}
+                        onChange={(e) => setRequiresQuotationApproval(e.target.checked)}
+                        disabled={loading || roleName !== 'Business Owner'}
+                        style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary)' }}
+                      />
+                      <span style={{ fontFamily: 'var(--font-family-label-md)', fontSize: 'var(--font-size-label-md)', color: 'var(--color-on-surface)' }}>Require Approval for Quotations</span>
+                    </label>
+                    <p style={{ fontSize: '12px', color: 'var(--color-outline)', margin: 'var(--spacing-xs) 0 0 26px' }}>If enabled, Staff quotations must be approved by a Business Owner before sending.</p>
+                  </div>
+                </Card>
               </div>
             </div>
           </div>
@@ -172,7 +213,7 @@ export const AccountSettingsPage = () => {
           {/* Page Action Footer */}
           <div style={{ marginTop: 'var(--spacing-xl)', paddingTop: 'var(--spacing-lg)', borderTop: '1px solid var(--color-outline-variant)', display: 'flex', justifyContent: 'flex-end', gap: 'var(--spacing-md)' }}>
             <Button variant="outline">Discard Changes</Button>
-            <Button variant="primary">Save Changes</Button>
+            <Button variant="primary" onClick={handleSave} isLoading={loading}>Save Changes</Button>
           </div>
 
         </div>

@@ -30,12 +30,13 @@ const validToken = stubTokenService.sign({ userId: 'u1', role: UserRole.BUSINESS
 const stubTenantRepo: ITenantRepository = {
   findById: async () => null,
   findBySlug: async (slug: string) => {
-    if (slug === 't1') return { id: 't1', name: 'Tenant 1', urlSlug: 't1', createdAt: new Date() };
-    if (slug === 't2') return { id: 't2', name: 'Tenant 2', urlSlug: 't2', createdAt: new Date() };
+    if (slug === 't1') return { id: 't1', name: 'Tenant 1', urlSlug: 't1', createdAt: new Date(), requiresQuotationApproval: true };
+    if (slug === 't2') return { id: 't2', name: 'Tenant 2', urlSlug: 't2', createdAt: new Date(), requiresQuotationApproval: true };
     return null;
   },
   create: async (t: any) => t,
   findAll: async () => ({ items: [], total: 0 }),
+  updateSettings: async () => {},
 };
 
 // We removed the authenticate mock so we can test the real JWT extraction and validation.

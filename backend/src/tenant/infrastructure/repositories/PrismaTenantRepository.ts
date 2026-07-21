@@ -17,6 +17,7 @@ export class PrismaTenantRepository implements ITenantRepository {
       id: data.id,
       name: data.name,
       urlSlug: data.urlSlug,
+      requiresQuotationApproval: data.requiresQuotationApproval,
       createdAt: data.createdAt
     });
   }
@@ -27,6 +28,7 @@ export class PrismaTenantRepository implements ITenantRepository {
         id: tenant.id,
         name: tenant.name,
         urlSlug: tenant.urlSlug,
+        requiresQuotationApproval: tenant.requiresQuotationApproval,
         createdAt: tenant.createdAt,
       },
     });
@@ -44,9 +46,19 @@ export class PrismaTenantRepository implements ITenantRepository {
         id: r.id,
         name: r.name,
         urlSlug: r.urlSlug,
+        requiresQuotationApproval: r.requiresQuotationApproval,
         createdAt: r.createdAt
       })),
       total
     };
+  }
+
+  async updateSettings(id: string, settings: { requiresQuotationApproval: boolean }): Promise<void> {
+    await prisma.tenant.update({
+      where: { id },
+      data: {
+        requiresQuotationApproval: settings.requiresQuotationApproval
+      }
+    });
   }
 }

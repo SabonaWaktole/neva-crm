@@ -16,6 +16,12 @@ export class PrismaUserRepository implements IUserRepository {
     return User.create({ ...data, role: data.role as UserRole });
   }
 
+  async findAnyByEmail(email: string): Promise<User | null> {
+    const data = await prisma.user.findFirst({ where: { email } });
+    if (!data) return null;
+    return User.create({ ...data, role: data.role as UserRole });
+  }
+
   async findSuperAdminByEmail(email: string): Promise<User | null> {
     const data = await prisma.user.findFirst({ where: { email, role: 'SUPER_ADMIN' } });
     if (!data) return null;
@@ -41,5 +47,10 @@ export class PrismaUserRepository implements IUserRepository {
       where: { id: userId },
       data: { hashedPassword },
     });
+  }
+
+  async findByTenantId(tenantId: string): Promise<User[]> {
+    const data = await prisma.user.findMany({ where: { tenantId } });
+    return data.map(u => User.create({ ...u, role: u.role as UserRole }));
   }
 }

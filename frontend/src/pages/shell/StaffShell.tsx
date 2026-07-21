@@ -17,7 +17,7 @@ export const StaffShell = () => {
 
   const handleLogout = async () => {
     await logout();
-    navigate(`/${tenantSlug || ''}/login`);
+    navigate('/login');
   };
 
   const userName = user?.userId ? `Staff ${user.userId.substring(0, 8)}` : 'Staff Member';

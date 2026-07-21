@@ -12,7 +12,11 @@ import styles from './UpcomingAppointmentsWidget.module.css';
 
 
 
+import { useNavigate, useParams } from 'react-router-dom';
+
 export const UpcomingAppointmentsWidget: React.FC = () => {
+  const { tenantSlug } = useParams();
+  const navigate = useNavigate();
   const { appointments, isLoading, error } = useUpcomingAppointments(5);
 
   const getStatusToken = (status: string) => {
@@ -40,7 +44,7 @@ export const UpcomingAppointmentsWidget: React.FC = () => {
           </div>
           <h2 className={styles.title}>Upcoming Appointments</h2>
         </div>
-        <Button variant="outline" className={styles.viewAllButton}>
+        <Button variant="outline" className={styles.viewAllButton} onClick={() => navigate(`/${tenantSlug}/appointments`)}>
           View Calendar
         </Button>
       </div>
