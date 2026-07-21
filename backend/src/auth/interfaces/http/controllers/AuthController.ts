@@ -8,7 +8,7 @@ import { ResetPasswordUseCase } from '@auth/application/use-cases/ResetPasswordU
 import { GetTenantStaffUseCase } from '@auth/application/use-cases/GetTenantStaffUseCase';
 import { GetPendingInvitationsUseCase } from '@auth/application/use-cases/GetPendingInvitationsUseCase';
 import { ITenantRepository } from '@tenant/domain/repositories/ITenantRepository';
-
+import { UserRole } from '@auth/domain/enums/UserRole';
 export class AuthController {
   constructor(
     private registerUseCase: RegisterBusinessOwnerUseCase,
@@ -97,8 +97,8 @@ export class AuthController {
 
   acceptInvitation = async (req: Request, res: Response) => {
     try {
-      await this.acceptInvitationUseCase.execute(req.body);
-      res.status(200).json({ message: 'Invitation accepted successfully' });
+      const result = await this.acceptInvitationUseCase.execute(req.body);
+      res.status(200).json({ message: 'Invitation accepted successfully', tenantSlug: result.tenantSlug });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
@@ -138,7 +138,7 @@ export class AuthController {
     try {
       const result = await this.getPendingInvitationsUseCase.execute({
         tenantId: req.tenant!.id,
-        requestingUserRole: req.user!.role,
+        requestingUserRole: req.user!.role as UserRole,
       });
       res.json(result);
     } catch (error: any) {

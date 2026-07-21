@@ -6,11 +6,14 @@ import { User } from '../../domain/entities/User';
 import { Password } from '../../domain/value-objects/Password';
 import { v4 as uuidv4 } from 'uuid';
 
+import { ITenantRepository } from '../../../tenant/domain/repositories/ITenantRepository';
+
 export class AcceptInvitationUseCase {
   constructor(
     private invitationRepository: IInvitationRepository,
     private userRepository: IUserRepository,
-    private passwordHasher: IPasswordHasher
+    private passwordHasher: IPasswordHasher,
+    private tenantRepository: ITenantRepository
   ) {}
 
   async execute(input: any) {
@@ -35,6 +38,8 @@ export class AcceptInvitationUseCase {
     await this.userRepository.create(user);
     await this.invitationRepository.markAccepted(invitation.id, new Date());
 
-    return user;
+    const tenant = await this.tenantRepository.findById(invitation.tenantId);
+
+    return { user, tenantSlug: tenant?.urlSlug };
   }
 }

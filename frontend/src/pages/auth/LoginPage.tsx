@@ -18,7 +18,7 @@ export const LoginPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const actualTenantSlug = await login(email, password, null);
+      const actualTenantSlug = await login(email, password, tenantSlug || null);
       if (actualTenantSlug) {
         navigate(`/${actualTenantSlug}/dashboard`);
       } else {

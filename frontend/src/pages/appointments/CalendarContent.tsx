@@ -6,7 +6,6 @@ import {
   ChevronRight, 
   Plus, 
   Calendar as CalendarIcon, 
-  Search, 
   Bell, 
   MoreVertical, 
   User,
@@ -15,7 +14,6 @@ import {
 import { Button } from '../../components/ui/Button/Button';
 import { Badge } from '../../components/ui/Badge/Badge';
 import { Avatar } from '../../components/ui/Avatar/Avatar';
-import { TextInput } from '../../components/ui/TextInput/TextInput';
 import styles from './CalendarContent.module.css';
 
 import { useAppointmentsByDateRange } from '../../hooks/useAppointments';
