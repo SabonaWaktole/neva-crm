@@ -16,7 +16,9 @@ describe('AuthController', () => {
       {} as any, // resetPasswordUseCase
       {} as any, // tenantRepository
       getTenantStaffUseCaseMock,
-      {} as any // getPendingInvitationsUseCase
+      {} as any, // getPendingInvitationsUseCase
+      {} as any, // updateUserProfileUseCase
+      {} as any  // getUserProfileUseCase
     );
   });
 

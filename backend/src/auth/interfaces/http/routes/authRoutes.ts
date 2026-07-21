@@ -19,10 +19,13 @@ export const createGlobalAuthRoutes = (
   router.post('/register', validateRequest(authSchemas.register), authController.register);
   router.post('/login', validateRequest(authSchemas.login), authController.loginGlobal);
   router.post('/logout', authController.logout);
-  router.get('/me', authMw, authController.getMe);
   
   router.post('/invitations/accept', validateRequest(authSchemas.acceptInvitation), authController.acceptInvitation);
   router.post('/password-reset/reset', validateRequest(authSchemas.resetPassword), authController.resetPassword);
+
+  // Profile endpoints
+  router.get('/me', authMw, authController.getMe);
+  router.put('/me', authMw, validateRequest(authSchemas.updateProfile), authController.updateMe);
 
   return router;
 };

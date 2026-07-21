@@ -15,6 +15,7 @@ import { AppointmentsPage } from '../pages/appointments/AppointmentsPage';
 import { CreateAppointmentPage } from '../pages/appointments/CreateAppointmentPage';
 import { ClientSettingsPage } from '../pages/settings/ClientSettingsPage';
 import { TeamSettingsPage } from '../pages/settings/team/TeamSettingsPage';
+import { ProfilePage } from '../pages/settings/profile/ProfilePage';
 import { AcceptInvitationPage } from '../pages/auth/AcceptInvitationPage';
 import { InventoryList } from '../pages/inventory/InventoryList';
 import { ProductForm } from '../pages/inventory/ProductForm/ProductForm';
@@ -107,6 +108,14 @@ export const router = createBrowserRouter([
             <RoleGuard allowedRoles={['BUSINESS_OWNER', 'SUPER_ADMIN']}>
               <TeamSettingsPage />
             </RoleGuard>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'settings/profile',
+        element: (
+          <ProtectedRoute>
+            <ProfilePage />
           </ProtectedRoute>
         ),
       },

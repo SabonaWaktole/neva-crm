@@ -34,6 +34,9 @@ export class PrismaUserRepository implements IUserRepository {
         id: user.id,
         email: user.email,
         hashedPassword: user.hashedPassword,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: user.phone,
         role: user.role,
         tenantId: user.tenantId,
         createdAt: user.createdAt,
@@ -46,6 +49,13 @@ export class PrismaUserRepository implements IUserRepository {
     await prisma.user.update({
       where: { id: userId },
       data: { hashedPassword },
+    });
+  }
+
+  async updateProfile(userId: string, data: { firstName?: string | null; lastName?: string | null; phone?: string | null; email?: string }): Promise<void> {
+    await prisma.user.update({
+      where: { id: userId },
+      data,
     });
   }
 

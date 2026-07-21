@@ -49,7 +49,7 @@ export const SettingsLayout: React.FC<SettingsLayoutProps> = ({
             return (
               <Link
                 key={item.id}
-                to={`/${tenantSlug}/settings${item.id === 'profile' ? '' : `/${item.id}`}`}
+                to={`/${tenantSlug}/settings${item.id === 'company' ? '' : `/${item.id}`}`}
                 className={itemClasses}
               >
                 <Icon className={styles.navIcon} size={20} />

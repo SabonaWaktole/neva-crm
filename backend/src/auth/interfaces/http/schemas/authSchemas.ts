@@ -27,4 +27,10 @@ export const authSchemas = {
     token: z.string().min(1),
     newPassword: z.string().min(8).regex(/[A-Z]/).regex(/[a-z]/).regex(/[0-9]/),
   }),
+  updateProfile: z.object({
+    firstName: z.string().min(1).optional().nullable(),
+    lastName: z.string().min(1).optional().nullable(),
+    phone: z.string().optional().nullable(),
+    email: z.string().email().optional(),
+  }),
 };

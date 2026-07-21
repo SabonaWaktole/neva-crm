@@ -7,6 +7,8 @@ import { RequestPasswordResetUseCase } from '@auth/application/use-cases/Request
 import { ResetPasswordUseCase } from '@auth/application/use-cases/ResetPasswordUseCase';
 import { GetTenantStaffUseCase } from '@auth/application/use-cases/GetTenantStaffUseCase';
 import { GetPendingInvitationsUseCase } from '@auth/application/use-cases/GetPendingInvitationsUseCase';
+import { UpdateUserProfileUseCase } from '@auth/application/use-cases/UpdateUserProfileUseCase';
+import { GetUserProfileUseCase } from '@auth/application/use-cases/GetUserProfileUseCase';
 import { ITenantRepository } from '@tenant/domain/repositories/ITenantRepository';
 import { UserRole } from '@auth/domain/enums/UserRole';
 export class AuthController {
@@ -19,7 +21,9 @@ export class AuthController {
     private resetPasswordUseCase: ResetPasswordUseCase,
     private tenantRepository: ITenantRepository,
     private getTenantStaffUseCase: GetTenantStaffUseCase,
-    private getPendingInvitationsUseCase: GetPendingInvitationsUseCase
+    private getPendingInvitationsUseCase: GetPendingInvitationsUseCase,
+    private updateUserProfileUseCase: UpdateUserProfileUseCase,
+    private getUserProfileUseCase: GetUserProfileUseCase
   ) {}
 
   register = async (req: Request, res: Response) => {
@@ -74,8 +78,25 @@ export class AuthController {
     if (!req.user) {
       return res.status(401).json({ error: 'Not authenticated' });
     }
-    // We can just return the decoded token data which has userId, role, tenantId
-    res.status(200).json({ user: req.user });
+    try {
+      const user = await this.getUserProfileUseCase.execute(req.user.userId);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      res.status(200).json({
+        user: {
+          userId: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          phone: user.phone,
+          role: user.role,
+          tenantId: user.tenantId,
+        }
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
   };
 
   inviteStaff = async (req: Request, res: Response) => {
@@ -143,6 +164,26 @@ export class AuthController {
       res.json(result);
     } catch (error: any) {
       next(error);
+    }
+  };
+  updateMe = async (req: Request, res: Response, next: any) => {
+    try {
+      await this.updateUserProfileUseCase.execute({
+        userId: req.user!.userId,
+        requestingUserId: req.user!.userId,
+        requestingUserRole: req.user!.role as UserRole,
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        phone: req.body.phone,
+        email: req.body.email,
+      });
+      res.status(200).json({ message: 'Profile updated successfully' });
+    } catch (error: any) {
+      if (error.name === 'UnauthorizedError') {
+        res.status(403).json({ error: error.message });
+      } else {
+        res.status(400).json({ error: error.message });
+      }
     }
   };
 }

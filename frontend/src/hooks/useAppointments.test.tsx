@@ -9,7 +9,7 @@ import { AppointmentStatus } from '../types/appointment';
 describe('useAppointmentsQueries', () => {
   beforeEach(() => {
     useAuthStore.setState({ 
-      user: { userId: 'staff-1', role: 'STAFF', tenantId: 'tenant-1', tenantSlug: 'tenant-1' }, 
+      user: { userId: 'staff-1', role: 'STAFF', tenantId: 'tenant-1', tenantSlug: 'tenant-1', email: 'test@example.com' }, 
       isAuthenticated: true 
     });
   });

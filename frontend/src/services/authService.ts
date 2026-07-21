@@ -12,6 +12,11 @@ export const authService = {
     return response.data.user;
   },
 
+  updateProfile: async (data: { firstName?: string | null; lastName?: string | null; phone?: string | null; email?: string }) => {
+    const response = await apiClient.put('/auth/me', data);
+    return response.data;
+  },
+
   logout: async () => {
     await apiClient.post('/auth/logout');
   },
