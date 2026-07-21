@@ -6,6 +6,7 @@ import { AcceptInvitationUseCase } from '@auth/application/use-cases/AcceptInvit
 import { RequestPasswordResetUseCase } from '@auth/application/use-cases/RequestPasswordResetUseCase';
 import { ResetPasswordUseCase } from '@auth/application/use-cases/ResetPasswordUseCase';
 import { GetTenantStaffUseCase } from '@auth/application/use-cases/GetTenantStaffUseCase';
+import { GetPendingInvitationsUseCase } from '@auth/application/use-cases/GetPendingInvitationsUseCase';
 import { ITenantRepository } from '@tenant/domain/repositories/ITenantRepository';
 
 export class AuthController {
@@ -17,7 +18,8 @@ export class AuthController {
     private requestPasswordResetUseCase: RequestPasswordResetUseCase,
     private resetPasswordUseCase: ResetPasswordUseCase,
     private tenantRepository: ITenantRepository,
-    private getTenantStaffUseCase: GetTenantStaffUseCase
+    private getTenantStaffUseCase: GetTenantStaffUseCase,
+    private getPendingInvitationsUseCase: GetPendingInvitationsUseCase
   ) {}
 
   register = async (req: Request, res: Response) => {
@@ -126,6 +128,18 @@ export class AuthController {
   getTenantStaff = async (req: Request, res: Response, next: Function) => {
     try {
       const result = await this.getTenantStaffUseCase.execute({ tenantId: req.tenant!.id });
+      res.json(result);
+    } catch (error: any) {
+      next(error);
+    }
+  };
+
+  getPendingInvitations = async (req: Request, res: Response, next: Function) => {
+    try {
+      const result = await this.getPendingInvitationsUseCase.execute({
+        tenantId: req.tenant!.id,
+        requestingUserRole: req.user!.role,
+      });
       res.json(result);
     } catch (error: any) {
       next(error);

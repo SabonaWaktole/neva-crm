@@ -43,13 +43,26 @@ const CalendarDesktopView = ({
   const { tenantSlug } = useParams();
   const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('month');
 
   const handlePrevMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+    if (viewMode === 'month') {
+      setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+    } else if (viewMode === 'week') {
+      setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - 7));
+    } else {
+      setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - 1));
+    }
   };
 
   const handleNextMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+    if (viewMode === 'month') {
+      setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+    } else if (viewMode === 'week') {
+      setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 7));
+    } else {
+      setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1));
+    }
   };
 
   const handleToday = () => {
@@ -64,10 +77,24 @@ const CalendarDesktopView = ({
   
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
+  const dateObj = currentDate.getDate();
   const firstDayOfMonth = new Date(year, month, 1);
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const startingDayOfWeek = firstDayOfMonth.getDay() === 0 ? 6 : firstDayOfMonth.getDay() - 1;
   const previousMonthDays = new Date(year, month, 0).getDate();
+  
+  // Week calculation
+  const currentDayOfWeek = currentDate.getDay() === 0 ? 6 : currentDate.getDay() - 1;
+  const startOfWeek = new Date(year, month, dateObj - currentDayOfWeek);
+
+  // Formatting header string based on view
+  let viewTitleString = monthYearString;
+  if (viewMode === 'day') {
+    viewTitleString = currentDate.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  } else if (viewMode === 'week') {
+    const endOfWeek = new Date(startOfWeek.getFullYear(), startOfWeek.getMonth(), startOfWeek.getDate() + 6);
+    viewTitleString = `${startOfWeek.toLocaleDateString([], { month: 'short', day: 'numeric' })} - ${endOfWeek.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}`;
+  }
 
   return (
     <div className={styles.desktopView}>
@@ -77,7 +104,7 @@ const CalendarDesktopView = ({
         <section className={styles.calendarCanvas}>
           <div className={styles.calendarToolbar}>
             <div className={styles.monthSelector}>
-              <h2>{monthYearString}</h2>
+              <h2>{viewTitleString}</h2>
               <div className={styles.monthControls}>
                 <button onClick={handlePrevMonth}><ChevronLeft size={16} /></button>
                 <span onClick={handleToday} style={{ cursor: 'pointer' }}>Today</span>
@@ -86,9 +113,9 @@ const CalendarDesktopView = ({
             </div>
             <div className={styles.calendarActions}>
               <div className={styles.segmentedControl}>
-                <button>Day</button>
-                <button>Week</button>
-                <button className={styles.activeSegment}>Month</button>
+                <button className={viewMode === 'day' ? styles.activeSegment : ''} onClick={() => setViewMode('day')}>Day</button>
+                <button className={viewMode === 'week' ? styles.activeSegment : ''} onClick={() => setViewMode('week')}>Week</button>
+                <button className={viewMode === 'month' ? styles.activeSegment : ''} onClick={() => setViewMode('month')}>Month</button>
               </div>
               <Button variant="primary" icon={<Plus size={18} />} onClick={() => navigate(`/${tenantSlug}/appointments/new`)}>
                 New Appointment
@@ -97,26 +124,39 @@ const CalendarDesktopView = ({
           </div>
 
           <div className={styles.gridContainer}>
-            <div className={styles.gridHeader}>
-              <div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div><div>SUN</div>
+            <div className={styles.gridHeader} style={viewMode === 'day' ? { gridTemplateColumns: '1fr' } : {}}>
+              {viewMode === 'day' ? (
+                <div>{currentDate.toLocaleDateString([], { weekday: 'short' }).toUpperCase()}</div>
+              ) : (
+                <><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div><div>SUN</div></>
+              )}
             </div>
-            <div className={styles.gridCells}>
-              {Array.from({ length: startingDayOfWeek }).map((_, i) => (
+            <div className={styles.gridCells} style={viewMode === 'day' ? { gridTemplateColumns: '1fr' } : {}}>
+              {viewMode === 'month' && Array.from({ length: startingDayOfWeek }).map((_, i) => (
                 <div key={`empty-${i}`} className={styles.emptyCell}>
                   {previousMonthDays - startingDayOfWeek + i + 1}
                 </div>
               ))}
               
-              {Array.from({ length: daysInMonth }).map((_, i) => {
-                const dayNumber = i + 1;
+              {Array.from({ length: viewMode === 'month' ? daysInMonth : viewMode === 'week' ? 7 : 1 }).map((_, i) => {
+                let cellDate: Date;
+                if (viewMode === 'month') {
+                  cellDate = new Date(year, month, i + 1);
+                } else if (viewMode === 'week') {
+                  cellDate = new Date(startOfWeek.getFullYear(), startOfWeek.getMonth(), startOfWeek.getDate() + i);
+                } else {
+                  cellDate = currentDate;
+                }
+                
+                const dayNumber = cellDate.getDate();
                 const dayAppointments = appointments.filter(app => {
                   const date = new Date(app.scheduledAt);
-                  return date.getDate() === dayNumber && date.getMonth() === month && date.getFullYear() === year;
+                  return date.getDate() === dayNumber && date.getMonth() === cellDate.getMonth() && date.getFullYear() === cellDate.getFullYear();
                 });
                 
                 return (
-                  <div key={dayNumber} className={styles.cell}>
-                    <span className={styles.dayNumber}>{dayNumber}</span>
+                  <div key={cellDate.toISOString()} className={styles.cell}>
+                    <span className={styles.dayNumber}>{viewMode !== 'month' ? cellDate.toLocaleDateString([], { month: 'short', day: 'numeric' }) : dayNumber}</span>
                     <div className={styles.eventList}>
                       {dayAppointments.map(app => {
                         const token = getStatusToken(app.status);
