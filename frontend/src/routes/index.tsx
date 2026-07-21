@@ -12,6 +12,7 @@ import { ClientListPage } from '../pages/clients/ClientListPage';
 import { ClientDetailPage } from '../pages/clients/ClientDetailPage';
 import { ClientFormPage } from '../pages/clients/ClientFormPage';
 import { AppointmentsPage } from '../pages/appointments/AppointmentsPage';
+import { CreateAppointmentPage } from '../pages/appointments/CreateAppointmentPage';
 import { ClientSettingsPage } from '../pages/settings/ClientSettingsPage';
 import { InventoryList } from '../pages/inventory/InventoryList';
 import { ProductForm } from '../pages/inventory/ProductForm/ProductForm';
@@ -54,7 +55,7 @@ export const router = createBrowserRouter([
     element: <StaffInvitationPage />,
   },
   {
-    path: '/:tenantSlug/login',
+    path: '/login',
     element: <LoginPage />,
   },
   {
@@ -130,6 +131,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <AppointmentsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'appointments/new',
+        element: (
+          <ProtectedRoute>
+            <CreateAppointmentPage />
           </ProtectedRoute>
         ),
       },

@@ -71,7 +71,7 @@ export const OnboardingPage = () => {
               <p className={styles.stepSubtitle}>Your workspace is ready at <strong>nexus.crm/{tenantSlug}</strong></p>
               <Button
                 variant="primary"
-                onClick={() => navigate(`/${tenantSlug}/login`)}
+                onClick={() => navigate('/login')}
               >
                 Go to Login
               </Button>

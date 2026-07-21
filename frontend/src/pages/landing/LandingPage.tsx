@@ -32,12 +32,12 @@ export const LandingPage: React.FC = () => {
             Nexus CRM
           </span>
         </div>
-        <div style={{ display: 'flex', gap: '16px' }}>
-          <Button variant="outline" onClick={() => navigate('/demo/login')}>
-            Sign In Demo
+        <div style={{ display: 'flex', gap: 'var(--spacing-md)' }}>
+          <Button variant="outline" onClick={() => navigate('/login')}>
+            Sign In
           </Button>
           <Button variant="primary" onClick={() => navigate('/register-business')}>
-            Start Free Trial
+            Get Started
           </Button>
         </div>
       </nav>

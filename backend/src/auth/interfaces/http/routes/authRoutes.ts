@@ -48,5 +48,13 @@ export const createTenantAuthRoutes = (
     authController.inviteStaff
   );
 
+  router.get(
+    '/staff',
+    authMw,
+    resolveTenantMw,
+    authorize([UserRole.BUSINESS_OWNER, UserRole.STAFF]),
+    authController.getTenantStaff
+  );
+
   return router;
 };

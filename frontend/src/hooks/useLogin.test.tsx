@@ -11,35 +11,32 @@ describe('useLogin hook', () => {
     useAuthStore.setState({ user: null, isAuthenticated: false });
   });
 
-  it('handles successful login', async () => {
+  it('should handle successful login', async () => {
     server.use(
-      http.post('http://localhost:3000/api/tenant-1/auth/login', () => {
-        return HttpResponse.json({ message: 'Login successful' });
+      http.post('http://localhost:3000/api/auth/login', () => {
+        return HttpResponse.json({ token: 'mock-token', tenantSlug: 'tenant-1' });
       }),
       http.get('http://localhost:3000/api/auth/me', () => {
-        return HttpResponse.json({
-          user: { userId: '1', role: UserRole.STAFF, tenantId: 'tenant-1' }
-        });
+        return HttpResponse.json({ user: { id: 'user-1', email: 'test@example.com', role: 'STAFF' } });
       })
     );
 
     const { result } = renderHook(() => useLogin());
 
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.error).toBeNull();
-
     await act(async () => {
-      await result.current.login('test@example.com', 'password', 'tenant-1');
+      const tenantSlug = await result.current.login('test@example.com', 'password', null);
+      expect(tenantSlug).toBe('tenant-1');
     });
 
     expect(result.current.isLoading).toBe(false);
-    expect(useAuthStore.getState().isAuthenticated).toBe(true);
-    expect(useAuthStore.getState().user?.role).toBe(UserRole.STAFF);
+    expect(result.current.error).toBeNull();
+    const store = useAuthStore.getState();
+    expect(store.user?.id).toBe('user-1');
   });
 
-  it('handles login failure', async () => {
+  it('should handle login error', async () => {
     server.use(
-      http.post('http://localhost:3000/api/tenant-1/auth/login', () => {
+      http.post('http://localhost:3000/api/auth/login', () => {
         return HttpResponse.json({ error: 'Invalid credentials' }, { status: 401 });
       })
     );
@@ -48,7 +45,7 @@ describe('useLogin hook', () => {
 
     await act(async () => {
       try {
-        await result.current.login('wrong@example.com', 'wrong', 'tenant-1');
+        await result.current.login('wrong@example.com', 'wrong', null);
       } catch (e) {
         // Handle expected error
       }

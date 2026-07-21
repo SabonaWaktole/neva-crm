@@ -5,6 +5,7 @@ import { InviteStaffUseCase } from '@auth/application/use-cases/InviteStaffUseCa
 import { AcceptInvitationUseCase } from '@auth/application/use-cases/AcceptInvitationUseCase';
 import { RequestPasswordResetUseCase } from '@auth/application/use-cases/RequestPasswordResetUseCase';
 import { ResetPasswordUseCase } from '@auth/application/use-cases/ResetPasswordUseCase';
+import { GetTenantStaffUseCase } from '@auth/application/use-cases/GetTenantStaffUseCase';
 import { ITenantRepository } from '@tenant/domain/repositories/ITenantRepository';
 
 export class AuthController {
@@ -15,7 +16,8 @@ export class AuthController {
     private acceptInvitationUseCase: AcceptInvitationUseCase,
     private requestPasswordResetUseCase: RequestPasswordResetUseCase,
     private resetPasswordUseCase: ResetPasswordUseCase,
-    private tenantRepository: ITenantRepository
+    private tenantRepository: ITenantRepository,
+    private getTenantStaffUseCase: GetTenantStaffUseCase
   ) {}
 
   register = async (req: Request, res: Response) => {
@@ -55,7 +57,7 @@ export class AuthController {
         sameSite: 'strict',
         maxAge: 24 * 60 * 60 * 1000 // 1 day
       });
-      res.status(200).json({ message: 'Login successful', token: result.token });
+      res.status(200).json({ message: 'Login successful', token: result.token, tenantSlug: result.tenantSlug });
     } catch (error: any) {
       res.status(401).json({ error: error.message });
     }
@@ -118,6 +120,15 @@ export class AuthController {
       res.status(200).json({ message: 'Password reset successfully' });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
+    }
+  };
+
+  getTenantStaff = async (req: Request, res: Response, next: Function) => {
+    try {
+      const result = await this.getTenantStaffUseCase.execute({ tenantId: req.tenant!.id });
+      res.json(result);
+    } catch (error: any) {
+      next(error);
     }
   };
 }

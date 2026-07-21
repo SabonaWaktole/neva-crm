@@ -39,7 +39,7 @@ export const AccountSettingsPage = () => {
 
   const handleLogout = async () => {
     await logout();
-    navigate(`/${tenantSlug || ''}/login`);
+    navigate('/login');
   };
 
   const handleSave = async () => {

@@ -15,11 +15,15 @@ export class LoginUseCase {
 
   async execute(input: any) {
     let user;
+    let actualTenantSlug = input.tenantSlug;
 
     if (input.tenantSlug === null) {
-      user = await this.userRepository.findSuperAdminByEmail(input.email);
-      if (user && user.role !== UserRole.SUPER_ADMIN) {
-        throw new InvalidCredentialsError();
+      user = await this.userRepository.findAnyByEmail(input.email);
+      if (user && user.role !== UserRole.SUPER_ADMIN && user.tenantId) {
+        const tenant = await this.tenantRepository.findById(user.tenantId);
+        if (tenant) {
+          actualTenantSlug = tenant.urlSlug;
+        }
       }
     } else {
       const tenant = await this.tenantRepository.findBySlug(input.tenantSlug);
@@ -44,9 +48,9 @@ export class LoginUseCase {
       userId: user.id,
       role: user.role,
       tenantId: user.tenantId,
-      tenantSlug: input.tenantSlug,
+      tenantSlug: actualTenantSlug,
     });
 
-    return { token };
+    return { token, tenantSlug: actualTenantSlug };
   }
 }

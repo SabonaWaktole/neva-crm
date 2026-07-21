@@ -10,7 +10,7 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to={tenantSlug ? `/${tenantSlug}/login` : '/login'} replace />;
+    return <Navigate to="/login" replace />;
   }
 
   return <>{children}</>;

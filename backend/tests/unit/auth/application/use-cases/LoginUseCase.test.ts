@@ -18,6 +18,7 @@ describe('LoginUseCase', () => {
       create: jest.fn(),
       findById: jest.fn(),
       findByEmail: jest.fn(),
+      findAnyByEmail: jest.fn(),
       findSuperAdminByEmail: jest.fn(),
       updatePassword: jest.fn(),
     };
@@ -61,7 +62,7 @@ describe('LoginUseCase', () => {
   });
 
   it('should login a super admin successfully', async () => {
-    userRepository.findSuperAdminByEmail.mockResolvedValue({ id: 'sa-1', role: UserRole.SUPER_ADMIN, tenantId: null, hashedPassword: 'hashed' } as any);
+    userRepository.findAnyByEmail.mockResolvedValue({ id: 'sa-1', role: UserRole.SUPER_ADMIN, tenantId: null, hashedPassword: 'hashed' } as any);
     passwordHasher.compare.mockResolvedValue(true);
     tokenService.sign.mockReturnValue('sa-jwt-token');
 
@@ -72,7 +73,25 @@ describe('LoginUseCase', () => {
     });
 
     expect(result.token).toBe('sa-jwt-token');
-    expect(tokenService.sign).toHaveBeenCalledWith(expect.objectContaining({ userId: 'sa-1', role: UserRole.SUPER_ADMIN, tenantId: null }));
+    expect(result.tenantSlug).toBe(null);
+    expect(tokenService.sign).toHaveBeenCalledWith(expect.objectContaining({ userId: 'sa-1', role: UserRole.SUPER_ADMIN, tenantId: null, tenantSlug: null }));
+  });
+
+  it('should login a regular user globally and fetch tenantSlug', async () => {
+    userRepository.findAnyByEmail.mockResolvedValue({ id: 'user-1', role: UserRole.STAFF, tenantId: 'tenant-1', hashedPassword: 'hashed' } as any);
+    tenantRepository.findById.mockResolvedValue({ id: 'tenant-1', urlSlug: 'acme' } as any);
+    passwordHasher.compare.mockResolvedValue(true);
+    tokenService.sign.mockReturnValue('user-jwt-token');
+
+    const result = await useCase.execute({
+      email: 'staff@acme.com',
+      password: 'Password123',
+      tenantSlug: null,
+    });
+
+    expect(result.token).toBe('user-jwt-token');
+    expect(result.tenantSlug).toBe('acme');
+    expect(tokenService.sign).toHaveBeenCalledWith(expect.objectContaining({ userId: 'user-1', role: UserRole.STAFF, tenantId: 'tenant-1', tenantSlug: 'acme' }));
   });
 
   it('should throw InvalidCredentialsError on invalid password', async () => {

@@ -1,4 +1,5 @@
 import { Request, Response, Router } from 'express';
+import { ZodError } from 'zod';
 import { CreateQuotationUseCase } from '../../application/use-cases/CreateQuotationUseCase';
 import { UpdateQuotationUseCase } from '../../application/use-cases/UpdateQuotationUseCase';
 import { SubmitQuotationUseCase } from '../../application/use-cases/SubmitQuotationUseCase';
@@ -10,8 +11,14 @@ import { ExpireQuotationUseCase } from '../../application/use-cases/ExpireQuotat
 import { SearchQuotationsUseCase } from '../../application/use-cases/SearchQuotationsUseCase';
 import { GetQuotationDetailUseCase } from '../../application/use-cases/GetQuotationDetailUseCase';
 import { GetPendingApprovalsUseCase } from '../../application/use-cases/GetPendingApprovalsUseCase';
-import { QuotationStatus } from '../../domain/Quotation';
 import { SettingsService } from '../../../settings/SettingsService';
+import {
+  createQuotationSchema,
+  updateQuotationSchema,
+  searchQuotationsSchema,
+  markAcceptedSchema,
+  markRejectedSchema,
+} from './schemas/quotationSchemas';
 
 export class QuotationsController {
   public router = Router();
@@ -49,17 +56,18 @@ export class QuotationsController {
 
   private async createQuotation(req: Request, res: Response) {
     try {
+      const validatedData = createQuotationSchema.parse(req.body);
       const tenantId = req.user!.tenantId!;
-      const { clientId, lineItems } = req.body;
       const result = await this.createQuotationUseCase.execute({
         tenantId,
-        clientId,
+        clientId: validatedData.clientId,
         createdByUserId: req.user!.userId,
         authorRole: req.user!.role,
-        lineItems
+        lineItems: validatedData.lineItems
       });
       res.status(201).json(result.quotation);
     } catch (error: any) {
+      if (error instanceof ZodError) return res.status(400).json({ error: error.errors });
       if (error.message.includes('Unauthorized')) return res.status(403).json({ error: error.message });
       res.status(400).json({ error: error.message });
     }
@@ -67,18 +75,19 @@ export class QuotationsController {
 
   private async updateQuotation(req: Request, res: Response) {
     try {
+      const validatedData = updateQuotationSchema.parse(req.body);
       const tenantId = req.user!.tenantId!;
       const id = req.params.id as string;
-      const { lineItems } = req.body;
       const result = await this.updateQuotationUseCase.execute({
         tenantId,
         quotationId: id,
         actingUserId: req.user!.userId,
         actingUserRole: req.user!.role,
-        lineItems
+        lineItems: validatedData.lineItems
       });
       res.json(result.quotation);
     } catch (error: any) {
+      if (error instanceof ZodError) return res.status(400).json({ error: error.errors });
       if (error.message.includes('not found')) return res.status(404).json({ error: error.message });
       if (error.message.includes('Unauthorized')) return res.status(403).json({ error: error.message });
       res.status(400).json({ error: error.message });
@@ -147,6 +156,7 @@ export class QuotationsController {
 
   private async markAccepted(req: Request, res: Response) {
     try {
+      markAcceptedSchema.parse(req.body);
       const tenantId = req.user!.tenantId!;
       const id = req.params.id as string;
       const result = await this.markQuotationAcceptedUseCase.execute({
@@ -157,6 +167,7 @@ export class QuotationsController {
       });
       res.json(result.quotation);
     } catch (error: any) {
+      if (error instanceof ZodError) return res.status(400).json({ error: error.errors });
       if (error.message.includes('not found')) return res.status(404).json({ error: error.message });
       if (error.message.includes('Unauthorized')) return res.status(403).json({ error: error.message });
       res.status(400).json({ error: error.message });
@@ -165,6 +176,7 @@ export class QuotationsController {
 
   private async markRejected(req: Request, res: Response) {
     try {
+      markRejectedSchema.parse(req.body);
       const tenantId = req.user!.tenantId!;
       const id = req.params.id as string;
       const result = await this.markQuotationRejectedUseCase.execute({
@@ -175,6 +187,7 @@ export class QuotationsController {
       });
       res.json(result.quotation);
     } catch (error: any) {
+      if (error instanceof ZodError) return res.status(400).json({ error: error.errors });
       if (error.message.includes('not found')) return res.status(404).json({ error: error.message });
       if (error.message.includes('Unauthorized')) return res.status(403).json({ error: error.message });
       res.status(400).json({ error: error.message });
@@ -201,23 +214,24 @@ export class QuotationsController {
 
   private async searchQuotations(req: Request, res: Response) {
     try {
+      const validatedQuery = searchQuotationsSchema.parse(req.query);
       const tenantId = req.user!.tenantId!;
-      const { query, status, clientId, page, limit } = req.query;
 
       const result = await this.searchQuotationsUseCase.execute({
         tenantId,
         actingUserId: req.user!.userId,
         actingUserRole: req.user!.role,
         params: {
-          query: query as string,
-          status: status as QuotationStatus,
-          clientId: clientId as string,
-          page: page ? parseInt(page as string, 10) : undefined,
-          limit: limit ? parseInt(limit as string, 10) : undefined
+          query: validatedQuery.query,
+          status: validatedQuery.status,
+          clientId: validatedQuery.clientId,
+          page: validatedQuery.page,
+          limit: validatedQuery.limit
         }
       });
       res.json(result);
     } catch (error: any) {
+      if (error instanceof ZodError) return res.status(400).json({ error: error.errors });
       res.status(400).json({ error: error.message });
     }
   }

@@ -11,11 +11,23 @@ export const useLogin = () => {
     setIsLoading(true);
     setError(null);
     try {
-      await authService.login(email, password, tenantSlug);
+      const result = await authService.login(email, password, tenantSlug);
       const user = await authService.getMe();
       setUser(user);
+      return result.tenantSlug;
     } catch (err: any) {
-      setError(err.response?.data?.error || 'An unexpected error occurred');
+      let errorMessage = 'An unexpected error occurred';
+      const data = err.response?.data;
+      if (data) {
+        if (data.error) {
+          errorMessage = data.error;
+        } else if (data.issues && Array.isArray(data.issues)) {
+          errorMessage = data.issues.map((i: any) => `${i.path.join('.')}: ${i.message}`).join(', ');
+        } else if (data.message) {
+          errorMessage = data.message;
+        }
+      }
+      setError(errorMessage);
       throw err;
     } finally {
       setIsLoading(false);

@@ -9,6 +9,7 @@ import { InviteStaffUseCase } from '@auth/application/use-cases/InviteStaffUseCa
 import { AcceptInvitationUseCase } from '@auth/application/use-cases/AcceptInvitationUseCase';
 import { RequestPasswordResetUseCase } from '@auth/application/use-cases/RequestPasswordResetUseCase';
 import { ResetPasswordUseCase } from '@auth/application/use-cases/ResetPasswordUseCase';
+import { GetTenantStaffUseCase } from '@auth/application/use-cases/GetTenantStaffUseCase';
 import { PrismaUserRepository } from '@auth/infrastructure/repositories/PrismaUserRepository';
 import { PrismaTenantRepository } from '@tenant/infrastructure/repositories/PrismaTenantRepository';
 import { PrismaInvitationRepository } from '@auth/infrastructure/repositories/PrismaInvitationRepository';
@@ -62,6 +63,7 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const acceptInvitationUseCase = new AcceptInvitationUseCase(invitationRepository, userRepository, passwordHasher);
   const requestPasswordResetUseCase = new RequestPasswordResetUseCase(userRepository, prtRepository, emailSender);
   const resetPasswordUseCase = new ResetPasswordUseCase(prtRepository, userRepository, passwordHasher);
+  const getTenantStaffUseCase = new GetTenantStaffUseCase(userRepository);
 
   // Controller
   const authController = new AuthController(
@@ -71,7 +73,8 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
     acceptInvitationUseCase,
     requestPasswordResetUseCase,
     resetPasswordUseCase,
-    tenantRepository
+    tenantRepository,
+    getTenantStaffUseCase
   );
 
   // Auth Routes

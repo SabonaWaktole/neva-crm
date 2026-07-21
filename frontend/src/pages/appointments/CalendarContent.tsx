@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { AppointmentDetailPanel } from '../../components/panels/AppointmentDetailPanel/AppointmentDetailPanel';
 import { 
   ChevronLeft, 
@@ -39,54 +40,48 @@ const CalendarDesktopView = ({
   appointments: Appointment[],
   onAppointmentClick: (app: Appointment) => void 
 }) => {
-  const today = new Date(); // In a real app, this would be reactive state
+  const { tenantSlug } = useParams();
+  const navigate = useNavigate();
+  const [currentDate, setCurrentDate] = useState(new Date());
 
-  // Derive today's queue from the month's appointments
-  const queueAppointments = (appointments || []).filter(app => isSameDayLocal(app.scheduledAt, today));
+  const handlePrevMonth = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+  };
+
+  const handleToday = () => {
+    setCurrentDate(new Date());
+  };
+
+  // Derive today's queue from the month's appointments (real logic: today relative to user's real today)
+  const realToday = new Date();
+  const queueAppointments = (appointments || []).filter(app => isSameDayLocal(app.scheduledAt, realToday));
   
+  const monthYearString = currentDate.toLocaleDateString([], { month: 'long', year: 'numeric' });
+  
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  const firstDayOfMonth = new Date(year, month, 1);
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const startingDayOfWeek = firstDayOfMonth.getDay() === 0 ? 6 : firstDayOfMonth.getDay() - 1;
+  const previousMonthDays = new Date(year, month, 0).getDate();
+
   return (
     <div className={styles.desktopView}>
-      {/* TopNavBar Anchor */}
-      <header className={styles.header}>
-        <div className={styles.headerLeft}>
-          <div className={styles.searchWrapper}>
-            <TextInput 
-              placeholder="Search appointments..." 
-              iconLeft={<Search size={18} />}
-            />
-          </div>
-          <nav className={styles.navLinks}>
-            <a href="#">Dashboard</a>
-            <a href="#">Clients</a>
-            <a href="#" className={styles.activeLink}>Appointments</a>
-            <a href="#">Tasks</a>
-            <a href="#">Reports</a>
-          </nav>
-        </div>
-        <div className={styles.headerRight}>
-          <button className={styles.iconButton}>
-            <Bell size={20} />
-            <span className={styles.badgeIndicator}></span>
-          </button>
-          <div className={styles.divider}></div>
-          <div className={styles.userProfile}>
-            <Avatar fallback="AR" size="sm" />
-            <span className={styles.userName}>Alex Rivera</span>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content Split */}
+      {/* Main Content Split (Header removed) */}
       <div className={styles.splitContent}>
         {/* Left: Calendar Canvas */}
         <section className={styles.calendarCanvas}>
           <div className={styles.calendarToolbar}>
             <div className={styles.monthSelector}>
-              <h2>October 2026</h2>
+              <h2>{monthYearString}</h2>
               <div className={styles.monthControls}>
-                <button><ChevronLeft size={16} /></button>
-                <span>Today</span>
-                <button><ChevronRight size={16} /></button>
+                <button onClick={handlePrevMonth}><ChevronLeft size={16} /></button>
+                <span onClick={handleToday} style={{ cursor: 'pointer' }}>Today</span>
+                <button onClick={handleNextMonth}><ChevronRight size={16} /></button>
               </div>
             </div>
             <div className={styles.calendarActions}>
@@ -95,7 +90,7 @@ const CalendarDesktopView = ({
                 <button>Week</button>
                 <button className={styles.activeSegment}>Month</button>
               </div>
-              <Button variant="primary" icon={<Plus size={18} />}>
+              <Button variant="primary" icon={<Plus size={18} />} onClick={() => navigate(`/${tenantSlug}/appointments/new`)}>
                 New Appointment
               </Button>
             </div>
@@ -106,13 +101,17 @@ const CalendarDesktopView = ({
               <div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div><div>SUN</div>
             </div>
             <div className={styles.gridCells}>
-              <div className={styles.emptyCell}>30</div>
-              {Array.from({ length: 31 }).map((_, i) => {
+              {Array.from({ length: startingDayOfWeek }).map((_, i) => (
+                <div key={`empty-${i}`} className={styles.emptyCell}>
+                  {previousMonthDays - startingDayOfWeek + i + 1}
+                </div>
+              ))}
+              
+              {Array.from({ length: daysInMonth }).map((_, i) => {
                 const dayNumber = i + 1;
-                // Naive mapping for visual placeholder — real app would map exact dates
                 const dayAppointments = appointments.filter(app => {
                   const date = new Date(app.scheduledAt);
-                  return date.getDate() === dayNumber && date.getMonth() === today.getMonth();
+                  return date.getDate() === dayNumber && date.getMonth() === month && date.getFullYear() === year;
                 });
                 
                 return (
@@ -123,7 +122,6 @@ const CalendarDesktopView = ({
                         const token = getStatusToken(app.status);
                         const time = new Date(app.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                         const title = app.clientName || 'Appointment';
-                        // Capitalize token to match CSS class like eventPrimary
                         const capToken = token.charAt(0).toUpperCase() + token.slice(1);
                         return (
                           <div key={app.id} className={`${styles.eventChip} ${styles[`event${capToken}`]}`}>
@@ -143,7 +141,7 @@ const CalendarDesktopView = ({
         <aside className={styles.queueSidebar}>
           <div className={styles.queueHeader}>
             <h3>Queue</h3>
-            <p>3 upcoming for today</p>
+            <p>{queueAppointments.length} upcoming for today</p>
           </div>
           <div className={styles.queueContent}>
             <div className={styles.statusLegend}>
