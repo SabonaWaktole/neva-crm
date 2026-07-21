@@ -10,6 +10,7 @@ import { AcceptInvitationUseCase } from '@auth/application/use-cases/AcceptInvit
 import { RequestPasswordResetUseCase } from '@auth/application/use-cases/RequestPasswordResetUseCase';
 import { ResetPasswordUseCase } from '@auth/application/use-cases/ResetPasswordUseCase';
 import { GetTenantStaffUseCase } from '@auth/application/use-cases/GetTenantStaffUseCase';
+import { GetPendingInvitationsUseCase } from '@auth/application/use-cases/GetPendingInvitationsUseCase';
 import { PrismaUserRepository } from '@auth/infrastructure/repositories/PrismaUserRepository';
 import { PrismaTenantRepository } from '@tenant/infrastructure/repositories/PrismaTenantRepository';
 import { PrismaInvitationRepository } from '@auth/infrastructure/repositories/PrismaInvitationRepository';
@@ -17,6 +18,7 @@ import { PrismaPasswordResetTokenRepository } from '@auth/infrastructure/reposit
 import { BcryptPasswordHasher } from '@auth/infrastructure/BcryptPasswordHasher';
 import { JwtTokenService } from '@auth/infrastructure/JwtTokenService';
 import { ConsoleEmailSender } from '@auth/infrastructure/ConsoleEmailSender';
+import { NodemailerEmailSender } from '@auth/infrastructure/NodemailerEmailSender';
 import { PrismaUnitOfWork } from '@shared/infrastructure/prisma/PrismaUnitOfWork';
 import { IUserRepository } from '@auth/domain/repositories/IUserRepository';
 import { ITenantRepository } from '@tenant/domain/repositories/ITenantRepository';
@@ -53,17 +55,18 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const prtRepository = overrides?.prtRepository ?? new PrismaPasswordResetTokenRepository();
   const passwordHasher = overrides?.passwordHasher ?? new BcryptPasswordHasher();
   const tokenService = overrides?.tokenService ?? new JwtTokenService();
-  const emailSender = overrides?.emailSender ?? new ConsoleEmailSender();
+  const emailSender = overrides?.emailSender ?? new NodemailerEmailSender();
   const unitOfWork = overrides?.unitOfWork ?? new PrismaUnitOfWork();
 
   // Use Cases
   const registerUseCase = new RegisterBusinessOwnerUseCase(userRepository, tenantRepository, passwordHasher, unitOfWork);
   const loginUseCase = new LoginUseCase(userRepository, tenantRepository, passwordHasher, tokenService);
   const inviteStaffUseCase = new InviteStaffUseCase(invitationRepository, emailSender);
-  const acceptInvitationUseCase = new AcceptInvitationUseCase(invitationRepository, userRepository, passwordHasher);
+  const acceptInvitationUseCase = new AcceptInvitationUseCase(invitationRepository, userRepository, passwordHasher, tenantRepository);
   const requestPasswordResetUseCase = new RequestPasswordResetUseCase(userRepository, prtRepository, emailSender);
   const resetPasswordUseCase = new ResetPasswordUseCase(prtRepository, userRepository, passwordHasher);
   const getTenantStaffUseCase = new GetTenantStaffUseCase(userRepository);
+  const getPendingInvitationsUseCase = new GetPendingInvitationsUseCase(invitationRepository);
 
   // Controller
   const authController = new AuthController(
@@ -74,7 +77,8 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
     requestPasswordResetUseCase,
     resetPasswordUseCase,
     tenantRepository,
-    getTenantStaffUseCase
+    getTenantStaffUseCase,
+    getPendingInvitationsUseCase
   );
 
   // Auth Routes

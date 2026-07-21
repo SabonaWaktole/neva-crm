@@ -25,6 +25,13 @@ export class PrismaInvitationRepository implements IInvitationRepository {
     return Invitation.create({ ...data, role: data.role as UserRole });
   }
 
+  async findByTenantId(tenantId: string): Promise<Invitation[]> {
+    const data = await prisma.invitation.findMany({ 
+      where: { tenantId }
+    });
+    return data.map(d => Invitation.create({ ...d, role: d.role as UserRole }));
+  }
+
   async markAccepted(id: string, acceptedAt: Date): Promise<void> {
     await prisma.invitation.update({
       where: { id },

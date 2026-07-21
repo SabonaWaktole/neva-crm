@@ -14,6 +14,8 @@ import { ClientFormPage } from '../pages/clients/ClientFormPage';
 import { AppointmentsPage } from '../pages/appointments/AppointmentsPage';
 import { CreateAppointmentPage } from '../pages/appointments/CreateAppointmentPage';
 import { ClientSettingsPage } from '../pages/settings/ClientSettingsPage';
+import { TeamSettingsPage } from '../pages/settings/team/TeamSettingsPage';
+import { AcceptInvitationPage } from '../pages/auth/AcceptInvitationPage';
 import { InventoryList } from '../pages/inventory/InventoryList';
 import { ProductForm } from '../pages/inventory/ProductForm/ProductForm';
 import { WarehouseList } from '../pages/inventory/WarehouseList/WarehouseList';
@@ -55,6 +57,10 @@ export const router = createBrowserRouter([
     element: <StaffInvitationPage />,
   },
   {
+    path: '/invitations/accept',
+    element: <AcceptInvitationPage />,
+  },
+  {
     path: '/login',
     element: <LoginPage />,
   },
@@ -91,6 +97,16 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <AccountSettingsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'settings/team',
+        element: (
+          <ProtectedRoute>
+            <RoleGuard allowedRoles={['BUSINESS_OWNER', 'SUPER_ADMIN']}>
+              <TeamSettingsPage />
+            </RoleGuard>
           </ProtectedRoute>
         ),
       },

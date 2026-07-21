@@ -6,8 +6,9 @@ import { AcceptInvitationUseCase } from '@auth/application/use-cases/AcceptInvit
 import { RequestPasswordResetUseCase } from '@auth/application/use-cases/RequestPasswordResetUseCase';
 import { ResetPasswordUseCase } from '@auth/application/use-cases/ResetPasswordUseCase';
 import { GetTenantStaffUseCase } from '@auth/application/use-cases/GetTenantStaffUseCase';
+import { GetPendingInvitationsUseCase } from '@auth/application/use-cases/GetPendingInvitationsUseCase';
 import { ITenantRepository } from '@tenant/domain/repositories/ITenantRepository';
-
+import { UserRole } from '@auth/domain/enums/UserRole';
 export class AuthController {
   constructor(
     private registerUseCase: RegisterBusinessOwnerUseCase,
@@ -17,7 +18,8 @@ export class AuthController {
     private requestPasswordResetUseCase: RequestPasswordResetUseCase,
     private resetPasswordUseCase: ResetPasswordUseCase,
     private tenantRepository: ITenantRepository,
-    private getTenantStaffUseCase: GetTenantStaffUseCase
+    private getTenantStaffUseCase: GetTenantStaffUseCase,
+    private getPendingInvitationsUseCase: GetPendingInvitationsUseCase
   ) {}
 
   register = async (req: Request, res: Response) => {
@@ -95,8 +97,8 @@ export class AuthController {
 
   acceptInvitation = async (req: Request, res: Response) => {
     try {
-      await this.acceptInvitationUseCase.execute(req.body);
-      res.status(200).json({ message: 'Invitation accepted successfully' });
+      const result = await this.acceptInvitationUseCase.execute(req.body);
+      res.status(200).json({ message: 'Invitation accepted successfully', tenantSlug: result.tenantSlug });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
@@ -126,6 +128,18 @@ export class AuthController {
   getTenantStaff = async (req: Request, res: Response, next: Function) => {
     try {
       const result = await this.getTenantStaffUseCase.execute({ tenantId: req.tenant!.id });
+      res.json(result);
+    } catch (error: any) {
+      next(error);
+    }
+  };
+
+  getPendingInvitations = async (req: Request, res: Response, next: Function) => {
+    try {
+      const result = await this.getPendingInvitationsUseCase.execute({
+        tenantId: req.tenant!.id,
+        requestingUserRole: req.user!.role as UserRole,
+      });
       res.json(result);
     } catch (error: any) {
       next(error);

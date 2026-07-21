@@ -49,6 +49,14 @@ export const createTenantAuthRoutes = (
   );
 
   router.get(
+    '/invitations',
+    authMw,
+    resolveTenantMw,
+    authorize([UserRole.BUSINESS_OWNER, UserRole.SUPER_ADMIN]),
+    authController.getPendingInvitations
+  );
+
+  router.get(
     '/staff',
     authMw,
     resolveTenantMw,

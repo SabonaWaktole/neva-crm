@@ -4,7 +4,6 @@ import { useLogin } from './useLogin';
 import { server } from '../setupTests';
 import { http, HttpResponse } from 'msw';
 import { useAuthStore } from '../store/useAuthStore';
-import { UserRole } from '../../../backend/src/auth/domain/enums/UserRole';
 
 describe('useLogin hook', () => {
   beforeEach(() => {
@@ -17,7 +16,7 @@ describe('useLogin hook', () => {
         return HttpResponse.json({ token: 'mock-token', tenantSlug: 'tenant-1' });
       }),
       http.get('http://localhost:3000/api/auth/me', () => {
-        return HttpResponse.json({ user: { id: 'user-1', email: 'test@example.com', role: 'STAFF' } });
+        return HttpResponse.json({ user: { userId: 'user-1', email: 'test@example.com', role: 'STAFF' } });
       })
     );
 
@@ -31,7 +30,7 @@ describe('useLogin hook', () => {
     expect(result.current.isLoading).toBe(false);
     expect(result.current.error).toBeNull();
     const store = useAuthStore.getState();
-    expect(store.user?.id).toBe('user-1');
+    expect(store.user?.userId).toBe('user-1');
   });
 
   it('should handle login error', async () => {
