@@ -18,7 +18,7 @@ test.describe('Authentication & Onboarding Flow', () => {
 
     // 1. Go to Onboarding page
     await page.goto('/register-business');
-    await expect(page).toHaveTitle(/Nexus CRM/);
+    await expect(page).toHaveTitle(/Neva CRM/);
 
     // Step 1: Organization
     await page.getByPlaceholder('e.g. Acme Corp').fill(companyName);
@@ -44,7 +44,7 @@ test.describe('Authentication & Onboarding Flow', () => {
 
     // 3. Dashboard (Business Owner Shell)
     await expect(page).toHaveURL(new RegExp(`/${slug}`));
-    await expect(page.getByRole('heading', { name: 'Welcome to Nexus CRM' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Welcome to Neva CRM' })).toBeVisible();
     await expect(page.getByText('Add your first client')).toBeVisible();
 
     // 4. Test Logout

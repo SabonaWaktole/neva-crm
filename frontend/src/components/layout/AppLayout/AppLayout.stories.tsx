@@ -38,7 +38,7 @@ export const ShellWithSidebar: Story = {
     ),
     children: (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center' }}>
-        <h1 style={{ fontFamily: 'Inter, sans-serif', fontSize: '36px', fontWeight: 700, margin: '0 0 16px 0' }}>Welcome to Nexus CRM</h1>
+        <h1 style={{ fontFamily: 'Inter, sans-serif', fontSize: '36px', fontWeight: 700, margin: '0 0 16px 0' }}>Welcome to Neva CRM</h1>
         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '16px', color: '#464555', maxWidth: '600px' }}>
           Your workspace is ready. Let's get things set up so you can start managing your clients and growing your business efficiently.
         </p>

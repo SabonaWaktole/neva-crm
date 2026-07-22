@@ -62,13 +62,13 @@ export const OnboardingPage = () => {
       <div className={styles.container}>
         <main className={styles.mainWrapper}>
           <div className={styles.header}>
-            <h1 className={styles.title}>Nexus CRM</h1>
+            <h1 className={styles.title}>Neva CRM</h1>
           </div>
           <Card padding="none" className={styles.cardContainer}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--spacing-lg)', padding: 'var(--spacing-2xl)' }}>
               <CheckCircle2 size={64} color="var(--color-success)" />
               <h2 className={styles.stepTitle}>Workspace Created!</h2>
-              <p className={styles.stepSubtitle}>Your workspace is ready at <strong>nexus.crm/{tenantSlug}</strong></p>
+              <p className={styles.stepSubtitle}>Your workspace is ready at <strong>neva.crm/{tenantSlug}</strong></p>
               <Button
                 variant="primary"
                 onClick={() => navigate('/login')}
@@ -86,7 +86,7 @@ export const OnboardingPage = () => {
     <div className={styles.container}>
       <main className={styles.mainWrapper}>
         <div className={styles.header}>
-          <h1 className={styles.title}>Nexus CRM</h1>
+          <h1 className={styles.title}>Neva CRM</h1>
           <p className={styles.subtitle}>Let's set up your workspace.</p>
         </div>
 
@@ -135,7 +135,7 @@ export const OnboardingPage = () => {
                 <div className={styles.urlPreviewBox}>
                   <LinkIcon size={20} color="var(--color-outline)" />
                   <div className={styles.urlText}>
-                    <span>nexus.crm/</span><span className={styles.urlSlug}>{displaySlug}</span>
+                    <span>neva.crm/</span><span className={styles.urlSlug}>{displaySlug}</span>
                   </div>
                 </div>
               </div>

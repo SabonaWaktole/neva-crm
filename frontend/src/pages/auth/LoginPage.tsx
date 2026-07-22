@@ -32,7 +32,7 @@ export const LoginPage = () => {
   return (
     <AuthLayout
       title="Welcome back"
-      subtitle="Sign in to your Nexus CRM account"
+      subtitle="Sign in to your Neva CRM account"
       logoIcon={<Network size={32} color="var(--color-primary)" />}
     >
       <form style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }} onSubmit={handleSubmit}>

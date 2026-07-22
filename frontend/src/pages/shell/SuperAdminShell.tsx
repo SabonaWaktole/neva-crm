@@ -30,7 +30,7 @@ export const SuperAdminShell = () => {
       onSettingsClick={() => navigate('/settings')}
       sidebar={
         <Sidebar 
-          orgName="Nexus CRM Platform" 
+          orgName="Neva CRM Platform" 
           orgTier="Global Administration" 
           navItems={navItemsWithActiveState} 
           onNavItemClick={(id) => navigate(`/${id}`)}
