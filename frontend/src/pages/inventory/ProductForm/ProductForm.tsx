@@ -32,10 +32,7 @@ const ProductFormContent: React.FC = () => {
   const [description, setDescription] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [price, setPrice] = useState('');
-  const [allocationRows, setAllocationRows] = useState<{ id: string; warehouseId: string; quantity: number }[]>([
-    { id: '1', warehouseId: 'wh-1', quantity: 50 },
-    { id: '2', warehouseId: 'wh-2', quantity: 0 },
-  ]);
+  const [allocationRows, setAllocationRows] = useState<{ id: string; warehouseId: string; quantity: number }[]>([]);
 
 
 

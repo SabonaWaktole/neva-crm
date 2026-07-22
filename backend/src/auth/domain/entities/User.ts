@@ -9,6 +9,7 @@ interface UserProps {
   phone?: string | null;
   role: UserRole;
   tenantId: string | null;
+  warehouseId?: string | null;
   createdAt: Date;
 }
 
@@ -21,6 +22,7 @@ export class User {
   public readonly phone: string | null;
   public readonly role: UserRole;
   public readonly tenantId: string | null;
+  public warehouseId: string | null;
   public readonly createdAt: Date;
 
   private constructor(props: UserProps) {
@@ -32,6 +34,7 @@ export class User {
     this.phone = props.phone || null;
     this.role = props.role;
     this.tenantId = props.tenantId;
+    this.warehouseId = props.warehouseId || null;
     this.createdAt = props.createdAt;
   }
 

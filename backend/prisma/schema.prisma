@@ -45,6 +45,8 @@ model User {
   createdAt      DateTime @default(now())
 
   tenant               Tenant?                  @relation(fields: [tenantId], references: [id])
+  warehouseId          String?
+  warehouse            Warehouse?               @relation("UserWarehouse", fields: [warehouseId], references: [id])
   passwordResetTokens  PasswordResetToken[]
   assignedClients      Client[]                 @relation("AssignedClients")
   updatedClients       Client[]                 @relation("LastUpdatedClients")
@@ -63,8 +65,10 @@ model Invitation {
   token      String    @unique
   expiresAt  DateTime
   acceptedAt DateTime?
+  warehouseId String?
 
-  tenant Tenant @relation(fields: [tenantId], references: [id])
+  tenant    Tenant     @relation(fields: [tenantId], references: [id])
+  warehouse Warehouse? @relation("InvitationWarehouse", fields: [warehouseId], references: [id])
 }
 
 model PasswordResetToken {
@@ -203,6 +207,8 @@ model Warehouse {
   updatedAt DateTime @updatedAt
 
   tenant             Tenant              @relation(fields: [tenantId], references: [id])
+  managers           User[]              @relation("UserWarehouse")
+  invitations        Invitation[]        @relation("InvitationWarehouse")
   stockLevels        StockLevel[]
   movements          StockMovement[]     @relation("AdjustmentWarehouse")
   movementsFrom      StockMovement[]     @relation("FromWarehouse")

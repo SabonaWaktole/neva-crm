@@ -12,6 +12,8 @@ import { useWarehouses, useCreateWarehouse, useUpdateWarehouse, useDeleteWarehou
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { AppLayout } from '../../../components/layout/AppLayout/AppLayout';
 import { Sidebar } from '../../../components/layout/Sidebar/Sidebar';
+import { SettingsLayout } from '../../../components/layout/SettingsLayout/SettingsLayout';
+import { ChevronRight } from 'lucide-react';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { useLogout } from '../../../hooks/useLogout';
 import { useNavigation } from '../../../hooks/useNavigation';
@@ -94,7 +96,7 @@ const WarehouseListContent: React.FC = () => {
       <div className={styles.kpiGrid}>
         <KPICard
           title="Total Active"
-          value="12"
+          value={warehouses.length.toString()}
           icon={<Warehouse />}
           trendValue="0%"
           trendDirection="up"
@@ -171,7 +173,23 @@ export const WarehouseList: React.FC = () => {
         />
       }
     >
-      <WarehouseListContent />
+      <SettingsLayout activeNavId="warehouses">
+        <div style={{ maxWidth: '1024px', margin: '0 auto', width: '100%' }}>
+          
+          <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+            <nav aria-label="Breadcrumb" style={{ display: 'flex', alignItems: 'center', color: 'var(--color-on-surface-variant)', fontSize: 'var(--font-size-label-sm)', marginBottom: 'var(--spacing-xs)' }}>
+              <ol style={{ display: 'flex', alignItems: 'center', listStyle: 'none', padding: 0, margin: 0, gap: '8px' }}>
+                <li><a href="#settings" onClick={(e) => { e.preventDefault(); navigate(`/${tenantSlug}/settings`); }} style={{ color: 'inherit', textDecoration: 'none' }}>Settings</a></li>
+                <li><ChevronRight size={14} /></li>
+                <li aria-current="page" style={{ color: 'var(--color-on-surface)', fontWeight: 600 }}>Warehouses</li>
+              </ol>
+            </nav>
+          </div>
+
+          <WarehouseListContent />
+
+        </div>
+      </SettingsLayout>
     </AppLayout>
   );
 };

@@ -9,4 +9,5 @@ export interface IUserRepository {
   updatePassword(userId: string, hashedPassword: string): Promise<void>;
   findByTenantId(tenantId: string): Promise<User[]>;
   updateProfile(userId: string, data: { firstName?: string | null; lastName?: string | null; phone?: string | null; email?: string }): Promise<void>;
+  updateRoleAndWarehouse(userId: string, role: string, warehouseId: string | null): Promise<void>;
 }

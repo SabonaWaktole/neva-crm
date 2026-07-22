@@ -17,6 +17,9 @@ import { useLogout } from '../../../hooks/useLogout';
 import { useNavigation } from '../../../hooks/useNavigation';
 
 const InventoryListContent: React.FC = () => {
+  const navigate = useNavigate();
+  const { tenantSlug } = useParams();
+  
   const [searchQuery, setSearchQuery] = React.useState('');
   const [categoryId, setCategoryId] = React.useState('');
   // statusFilter: Not mapped to backend yet, deferred to future iteration
@@ -54,7 +57,7 @@ const InventoryListContent: React.FC = () => {
           <h1 className={styles.title}>Inventory Management</h1>
           <p className={styles.subtitle}>Manage your products, stock levels, and warehouse allocations.</p>
         </div>
-        <Button variant="primary" icon={<PlusSquare size={20} />}>
+        <Button variant="primary" icon={<PlusSquare size={20} />} onClick={() => navigate(`/${tenantSlug}/inventory/new`)}>
           Add Product
         </Button>
       </div>
@@ -142,16 +145,22 @@ const InventoryListContent: React.FC = () => {
         {isLoading ? (
           <div>Loading products...</div>
         ) : (
-          <InventoryTable 
-            products={products.map((p: any) => ({
-              ...p,
-              // Map backend Category object to string for the table
-              category: p.category ? p.category.name : 'Uncategorized',
-              totalUnits: p.totalUnits ?? 0,
-              stockBreakdown: p.stockBreakdown ?? []
-            }))} 
-            onAdjustStock={handleAdjustStock} 
-          />
+            <InventoryTable 
+              products={products.map((p: any) => {
+                const prod = p.product || p; // Handle nested { product, totalStock } from backend
+                return {
+                  id: prod.id,
+                  name: prod.name,
+                  sku: prod.sku || '', // SKU might not exist on backend yet
+                  price: prod.price || 0,
+                  status: p.availability || p.status || 'OUT_OF_STOCK',
+                  category: prod.category?.name || p.category?.name || 'Uncategorized',
+                  totalUnits: p.totalStock ?? p.totalUnits ?? 0,
+                  stockBreakdown: p.stockBreakdown ?? []
+                };
+              })} 
+              onAdjustStock={handleAdjustStock} 
+            />
         )}
       </div>
 
