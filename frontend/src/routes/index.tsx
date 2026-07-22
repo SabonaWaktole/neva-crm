@@ -8,6 +8,7 @@ import { BusinessOwnerShell } from '../pages/shell/BusinessOwnerShell';
 import { StaffShell } from '../pages/shell/StaffShell';
 import { SuperAdminShell } from '../pages/shell/SuperAdminShell';
 import { AccountSettingsPage } from '../pages/settings/AccountSettingsPage';
+import { ReportsPage } from '../pages/ReportsPage';
 import { ClientListPage } from '../pages/clients/ClientListPage';
 import { ClientDetailPage } from '../pages/clients/ClientDetailPage';
 import { ClientFormPage } from '../pages/clients/ClientFormPage';
@@ -127,6 +128,16 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <ProfilePage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'reports',
+        element: (
+          <ProtectedRoute>
+            <RoleGuard allowedRoles={['BUSINESS_OWNER', 'SUPER_ADMIN']}>
+              <ReportsPage />
+            </RoleGuard>
           </ProtectedRoute>
         ),
       },
