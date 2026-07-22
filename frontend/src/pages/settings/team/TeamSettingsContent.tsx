@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Card } from '../../../components/ui/Card/Card';
 import { Button } from '../../../components/ui/Button/Button';
-import { useTeam } from '../../../hooks/useTeam';
+import { useTeam, StaffMember } from '../../../hooks/useTeam';
 import { InviteMemberModal } from './InviteMemberModal';
-import { Mail, Shield, Clock } from 'lucide-react';
+import { EditMemberModal } from './EditMemberModal';
+import { Mail, Shield, Clock, Edit2 } from 'lucide-react';
 import { useAuthStore } from '../../../store/useAuthStore';
 
 export const TeamSettingsContent: React.FC = () => {
-  const { staff, pendingInvitations, loadingStaff, loadingInvitations, fetchStaff, fetchPendingInvitations, inviteStaff } = useTeam();
+  const { staff, pendingInvitations, loadingStaff, loadingInvitations, fetchStaff, fetchPendingInvitations, inviteStaff, updateStaffRole } = useTeam();
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [editingMember, setEditingMember] = useState<StaffMember | null>(null);
   const { user } = useAuthStore();
   const isOwner = user?.role === 'BUSINESS_OWNER' || user?.role === 'SUPER_ADMIN';
 
@@ -17,8 +19,8 @@ export const TeamSettingsContent: React.FC = () => {
     fetchPendingInvitations();
   }, [fetchStaff, fetchPendingInvitations]);
 
-  const handleInvite = async (email: string) => {
-    await inviteStaff(email, 'STAFF');
+  const handleInvite = async (email: string, role: string, warehouseId?: string) => {
+    await inviteStaff(email, role, warehouseId);
   };
 
   return (
@@ -56,9 +58,16 @@ export const TeamSettingsContent: React.FC = () => {
                     <div style={{ fontSize: '14px', color: 'var(--color-on-surface-variant)' }}>{member.email}</div>
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--color-surface-container-highest)', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 500 }}>
-                  <Shield size={14} />
-                  {member.role === 'STAFF' ? 'Sales Rep' : member.role}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--color-surface-container-highest)', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 500 }}>
+                    <Shield size={14} />
+                    {member.role === 'STAFF' ? 'Sales Rep' : member.role}
+                  </div>
+                  {isOwner && (
+                    <Button variant="outline" size="sm" onClick={() => setEditingMember(member)} style={{ padding: '4px 8px' }}>
+                      <Edit2 size={14} />
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}
@@ -104,6 +113,12 @@ export const TeamSettingsContent: React.FC = () => {
         isOpen={isInviteModalOpen}
         onClose={() => setIsInviteModalOpen(false)}
         onInvite={handleInvite}
+      />
+      
+      <EditMemberModal
+        member={editingMember}
+        onClose={() => setEditingMember(null)}
+        onUpdate={updateStaffRole}
       />
     </div>
   );

@@ -18,7 +18,8 @@ describe('AuthController', () => {
       getTenantStaffUseCaseMock,
       {} as any, // getPendingInvitationsUseCase
       {} as any, // updateUserProfileUseCase
-      {} as any  // getUserProfileUseCase
+      {} as any, // getUserProfileUseCase
+      {} as any  // updateUserRoleUseCase
     );
   });
 

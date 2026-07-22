@@ -20,6 +20,7 @@ export interface CreateProductDTO {
   lowStockThreshold?: number;
   initialStock: InitialStock[];
   authorRole: UserRole;
+  authorWarehouseId?: string | null;
 }
 
 export class CreateProductUseCase {
@@ -30,15 +31,23 @@ export class CreateProductUseCase {
   ) {}
 
   async execute(dto: CreateProductDTO): Promise<{ product: Product; stockLevels: StockLevel[] }> {
-    if (dto.authorRole !== UserRole.BUSINESS_OWNER && dto.authorRole !== UserRole.STAFF) {
+    if (dto.authorRole !== UserRole.BUSINESS_OWNER && dto.authorRole !== UserRole.STAFF && dto.authorRole !== UserRole.SUPER_ADMIN) {
       throw new Error('Unauthorized: Only Business Owners and Staff can create products.');
     }
 
-    // 1. Verify warehouses belong to the same tenant
+    if (dto.authorRole === UserRole.STAFF && !dto.authorWarehouseId) {
+      throw new Error('Unauthorized: You must be assigned to a warehouse to create products.');
+    }
+
+    // 1. Verify warehouses belong to the same tenant and staff permissions
     const stockLevels: StockLevel[] = [];
     const productId = randomUUID();
 
     for (const stock of dto.initialStock) {
+      if (dto.authorRole === UserRole.STAFF && dto.authorWarehouseId !== stock.warehouseId) {
+        throw new Error('Unauthorized: You can only add initial stock to your assigned warehouse.');
+      }
+
       const warehouse = await this.warehouseRepo.findById(dto.tenantId, stock.warehouseId);
       if (!warehouse) {
         throw new Error(`Warehouse ${stock.warehouseId} not found`);

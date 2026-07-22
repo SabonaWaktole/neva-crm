@@ -13,6 +13,7 @@ import { GetTenantStaffUseCase } from '@auth/application/use-cases/GetTenantStaf
 import { GetPendingInvitationsUseCase } from '@auth/application/use-cases/GetPendingInvitationsUseCase';
 import { UpdateUserProfileUseCase } from '@auth/application/use-cases/UpdateUserProfileUseCase';
 import { GetUserProfileUseCase } from '@auth/application/use-cases/GetUserProfileUseCase';
+import { UpdateUserRoleUseCase } from '@auth/application/use-cases/UpdateUserRoleUseCase';
 import { PrismaUserRepository } from '@auth/infrastructure/repositories/PrismaUserRepository';
 import { PrismaTenantRepository } from '@tenant/infrastructure/repositories/PrismaTenantRepository';
 import { PrismaInvitationRepository } from '@auth/infrastructure/repositories/PrismaInvitationRepository';
@@ -71,6 +72,7 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const getPendingInvitationsUseCase = new GetPendingInvitationsUseCase(invitationRepository);
   const updateUserProfileUseCase = new UpdateUserProfileUseCase(userRepository);
   const getUserProfileUseCase = new GetUserProfileUseCase(userRepository);
+  const updateUserRoleUseCase = new UpdateUserRoleUseCase(userRepository);
 
   // Controller
   const authController = new AuthController(
@@ -84,7 +86,8 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
     getTenantStaffUseCase,
     getPendingInvitationsUseCase,
     updateUserProfileUseCase,
-    getUserProfileUseCase
+    getUserProfileUseCase,
+    updateUserRoleUseCase
   );
 
   // Auth Routes

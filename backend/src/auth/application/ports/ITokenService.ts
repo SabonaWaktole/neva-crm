@@ -5,6 +5,7 @@ export interface TokenPayload {
   role: UserRole;
   tenantId: string | null;
   tenantSlug: string | null;
+  warehouseId: string | null;
 }
 
 export interface ITokenService {

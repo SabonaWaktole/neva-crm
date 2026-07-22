@@ -54,7 +54,8 @@ describe('Inventory End-to-End User Flow', () => {
       userId: ownerId,
       role: 'BUSINESS_OWNER' as any,
       tenantId,
-      tenantSlug: 'e2e-tenant'
+      tenantSlug: 'e2e-tenant',
+      warehouseId: null
     });
   });
 

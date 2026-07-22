@@ -68,7 +68,8 @@ describe('TransferStockUseCase', () => {
       quantity: 20,
       reason: 'Rebalancing',
       authorUserId: 'u1',
-      authorRole: UserRole.STAFF
+      authorRole: UserRole.STAFF,
+      authorWarehouseId: 'w1'
     });
 
     expect(result.sourceStock.quantity).toBe(30);  // 50 - 20
@@ -101,7 +102,8 @@ describe('TransferStockUseCase', () => {
       toWarehouseId: 'w2',
       quantity: 20, // More than source has
       authorUserId: 'u1',
-      authorRole: UserRole.STAFF
+      authorRole: UserRole.STAFF,
+      authorWarehouseId: 'w1'
     })).rejects.toThrow(NegativeStockError);
 
     // BOTH quantities must remain completely unchanged
@@ -138,7 +140,8 @@ describe('TransferStockUseCase', () => {
       toWarehouseId: 'w2',
       quantity: 10,
       authorUserId: 'u1',
-      authorRole: UserRole.STAFF
+      authorRole: UserRole.STAFF,
+      authorWarehouseId: 'w1'
     })).rejects.toThrow('Stock level not found for product p1 at source warehouse w1');
   });
 
@@ -155,7 +158,8 @@ describe('TransferStockUseCase', () => {
       toWarehouseId: 'w2',
       quantity: 10,
       authorUserId: 'u1',
-      authorRole: UserRole.STAFF
+      authorRole: UserRole.STAFF,
+      authorWarehouseId: 'w1'
     })).rejects.toThrow('Stock level not found for product p1 at destination warehouse w2');
   });
 
@@ -179,7 +183,8 @@ describe('TransferStockUseCase', () => {
       toWarehouseId: 'w2',
       quantity: 0,
       authorUserId: 'u1',
-      authorRole: UserRole.STAFF
+      authorRole: UserRole.STAFF,
+      authorWarehouseId: 'w1'
     })).rejects.toThrow('Transfer quantity must be positive.');
 
     await expect(useCase.execute({
@@ -189,7 +194,8 @@ describe('TransferStockUseCase', () => {
       toWarehouseId: 'w2',
       quantity: -5,
       authorUserId: 'u1',
-      authorRole: UserRole.STAFF
+      authorRole: UserRole.STAFF,
+      authorWarehouseId: 'w1'
     })).rejects.toThrow('Transfer quantity must be positive.');
   });
 });

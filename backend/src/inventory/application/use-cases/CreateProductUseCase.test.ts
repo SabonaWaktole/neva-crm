@@ -73,7 +73,8 @@ describe('CreateProductUseCase', () => {
       categoryId: null,
       price: 100,
       initialStock: [{ warehouseId: 'w1', quantity: 50 }],
-      authorRole: UserRole.STAFF
+      authorRole: UserRole.STAFF,
+      authorWarehouseId: 'w1'
     });
 
     expect(result.product.name).toBe('Test Product');

@@ -16,6 +16,7 @@ describe('GetTenantStaffUseCase', () => {
       updatePassword: jest.fn(),
       updateProfile: jest.fn(),
       findByTenantId: jest.fn(),
+      updateRoleAndWarehouse: jest.fn(),
     };
     useCase = new GetTenantStaffUseCase(userRepositoryMock);
   });

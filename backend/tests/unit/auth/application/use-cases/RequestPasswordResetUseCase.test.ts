@@ -19,6 +19,7 @@ describe('RequestPasswordResetUseCase', () => {
       findSuperAdminByEmail: jest.fn(),
       updatePassword: jest.fn(),
       updateProfile: jest.fn(),
+      updateRoleAndWarehouse: jest.fn(),
     };
     prtRepository = {
       create: jest.fn(),

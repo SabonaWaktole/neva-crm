@@ -15,6 +15,11 @@ export const authSchemas = {
   inviteStaff: z.object({
     email: z.string().email(),
     role: z.enum(['STAFF', 'BUSINESS_OWNER']),
+    warehouseId: z.string().optional().nullable(),
+  }),
+  updateStaffRole: z.object({
+    role: z.enum(['STAFF', 'BUSINESS_OWNER']),
+    warehouseId: z.string().optional().nullable(),
   }),
   acceptInvitation: z.object({
     token: z.string().min(1),

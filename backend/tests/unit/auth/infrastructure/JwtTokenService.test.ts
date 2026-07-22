@@ -17,7 +17,7 @@ describe('JwtTokenService', () => {
   });
 
   it('signs and verifies a valid payload', () => {
-    const payload = { userId: '123', role: UserRole.STAFF, tenantId: 't1', tenantSlug: 't1' };
+    const payload = { userId: '123', role: UserRole.STAFF, tenantId: 't1', tenantSlug: 't1' , warehouseId: null };
     const token = tokenService.sign(payload);
     
     expect(typeof token).toBe('string');
@@ -30,7 +30,7 @@ describe('JwtTokenService', () => {
   });
 
   it('throws an error when verifying an invalid or tampered token', () => {
-    const payload = { userId: '123', role: UserRole.STAFF, tenantId: 't1', tenantSlug: 't1' };
+    const payload = { userId: '123', role: UserRole.STAFF, tenantId: 't1', tenantSlug: 't1' , warehouseId: null };
     const token = tokenService.sign(payload);
     
     // Tamper with the token
@@ -40,7 +40,7 @@ describe('JwtTokenService', () => {
   });
 
   it('throws an error when verifying a token signed with a different secret', () => {
-    const payload = { userId: '123', role: UserRole.STAFF, tenantId: 't1', tenantSlug: 't1' };
+    const payload = { userId: '123', role: UserRole.STAFF, tenantId: 't1', tenantSlug: 't1' , warehouseId: null };
     const token = tokenService.sign(payload);
     
     // Change the secret

@@ -49,6 +49,7 @@ export class LoginUseCase {
       role: user.role,
       tenantId: user.tenantId,
       tenantSlug: actualTenantSlug,
+      warehouseId: user.warehouseId,
     });
 
     return { token, tenantSlug: actualTenantSlug };

@@ -23,6 +23,7 @@ describe('RegisterBusinessOwnerUseCase', () => {
       findSuperAdminByEmail: jest.fn(),
       updatePassword: jest.fn(),
       updateProfile: jest.fn(),
+      updateRoleAndWarehouse: jest.fn(),
     };
     tenantRepository = {
       create: jest.fn(),

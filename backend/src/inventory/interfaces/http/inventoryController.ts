@@ -51,6 +51,7 @@ export class InventoryController {
         warehouseId: req.query.warehouseId as string | undefined,
         availability: req.query.availability as AvailabilityStatus | undefined,
         authorRole: req.user!.role as any,
+        authorWarehouseId: req.user!.warehouseId,
       });
       res.json(results);
     } catch (error: any) {
@@ -65,6 +66,7 @@ export class InventoryController {
       const result = await this.createProductUseCase.execute({
         tenantId: req.user!.tenantId!,
         authorRole: req.user!.role as any,
+        authorWarehouseId: req.user!.warehouseId,
         ...parsed,
         categoryId: parsed.categoryId ?? null,
       });
@@ -83,6 +85,7 @@ export class InventoryController {
         tenantId: req.user!.tenantId!,
         id: req.params.id as string,
         authorRole: req.user!.role as any,
+        authorWarehouseId: req.user!.warehouseId,
         ...parsed,
         categoryId: parsed.categoryId !== undefined ? (parsed.categoryId ?? null) : undefined,
       });
@@ -118,6 +121,7 @@ export class InventoryController {
         productId: req.params.id as string,
         authorUserId: req.user!.userId,
         authorRole: req.user!.role as any,
+        authorWarehouseId: req.user!.warehouseId,
         warehouseId: parsed.warehouseId,
         quantityChange: parsed.quantityChange,
         reason: parsed.reason || 'Manual adjustment',
@@ -140,6 +144,7 @@ export class InventoryController {
         productId: req.params.id as string,
         authorUserId: req.user!.userId,
         authorRole: req.user!.role as any,
+        authorWarehouseId: req.user!.warehouseId,
         ...parsed,
       });
       res.json(result);
@@ -160,6 +165,7 @@ export class InventoryController {
       const results = await this.getWarehousesUseCase.execute({
         tenantId: req.user!.tenantId!,
         authorRole: req.user!.role as any,
+        authorWarehouseId: req.user!.warehouseId,
       });
       res.json(results);
     } catch (error: any) {

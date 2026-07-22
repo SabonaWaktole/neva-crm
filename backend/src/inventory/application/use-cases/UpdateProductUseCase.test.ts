@@ -47,7 +47,7 @@ describe('UpdateProductUseCase', () => {
       tenantId: 'tenant1',
       id: 'p1',
       name: 'New Name',
-      authorRole: UserRole.STAFF,
+      authorRole: UserRole.STAFF, authorWarehouseId: 'w1',
       stockLevels: [{ quantity: 9999 }] // Ignored by typescript interface, but passing to test runtime behavior
     };
 

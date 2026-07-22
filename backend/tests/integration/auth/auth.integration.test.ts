@@ -436,6 +436,7 @@ describe('Auth Integration Tests', () => {
         role: UserRole.STAFF,
         tenantId: staffUser.tenantId,
         tenantSlug: 'acme',
+        warehouseId: null,
       });
 
       await request(app)
@@ -720,6 +721,7 @@ describe('Auth Integration Tests', () => {
         role: UserRole.SUPER_ADMIN,
         tenantId: null,
         tenantSlug: null,
+        warehouseId: null,
       });
 
       // SUPER_ADMIN can invite on Tenant A
@@ -766,3 +768,4 @@ describe('Auth Integration Tests', () => {
     });
   });
 });
+

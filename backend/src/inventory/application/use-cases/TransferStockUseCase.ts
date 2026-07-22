@@ -13,6 +13,7 @@ export interface TransferStockDTO {
   reason?: string;
   authorUserId: string;
   authorRole: UserRole;
+  authorWarehouseId?: string | null;
 }
 
 export class TransferStockUseCase {
@@ -22,8 +23,12 @@ export class TransferStockUseCase {
   ) {}
 
   async execute(dto: TransferStockDTO): Promise<{ sourceStock: StockLevel; destStock: StockLevel; movement: StockMovement }> {
-    if (dto.authorRole !== UserRole.BUSINESS_OWNER && dto.authorRole !== UserRole.STAFF) {
+    if (dto.authorRole !== UserRole.BUSINESS_OWNER && dto.authorRole !== UserRole.STAFF && dto.authorRole !== UserRole.SUPER_ADMIN) {
       throw new Error('Unauthorized: Only Business Owners and Staff can transfer stock.');
+    }
+
+    if (dto.authorRole === UserRole.STAFF && dto.authorWarehouseId !== dto.fromWarehouseId) {
+      throw new Error('Unauthorized: You can only transfer stock out of your assigned warehouse.');
     }
 
     if (dto.quantity <= 0) {

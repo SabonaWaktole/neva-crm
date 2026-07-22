@@ -9,6 +9,7 @@ import { GetTenantStaffUseCase } from '@auth/application/use-cases/GetTenantStaf
 import { GetPendingInvitationsUseCase } from '@auth/application/use-cases/GetPendingInvitationsUseCase';
 import { UpdateUserProfileUseCase } from '@auth/application/use-cases/UpdateUserProfileUseCase';
 import { GetUserProfileUseCase } from '@auth/application/use-cases/GetUserProfileUseCase';
+import { UpdateUserRoleUseCase } from '@auth/application/use-cases/UpdateUserRoleUseCase';
 import { ITenantRepository } from '@tenant/domain/repositories/ITenantRepository';
 import { UserRole } from '@auth/domain/enums/UserRole';
 export class AuthController {
@@ -23,7 +24,8 @@ export class AuthController {
     private getTenantStaffUseCase: GetTenantStaffUseCase,
     private getPendingInvitationsUseCase: GetPendingInvitationsUseCase,
     private updateUserProfileUseCase: UpdateUserProfileUseCase,
-    private getUserProfileUseCase: GetUserProfileUseCase
+    private getUserProfileUseCase: GetUserProfileUseCase,
+    private updateUserRoleUseCase: UpdateUserRoleUseCase
   ) {}
 
   register = async (req: Request, res: Response) => {
@@ -109,10 +111,27 @@ export class AuthController {
         tenantId: req.tenant!.id,
         inviteeEmail: req.body.email,
         role: req.body.role,
+        warehouseId: req.body.warehouseId,
         tenantName: tenant!.name,
       });
       res.status(200).json({ message: 'Invitation sent' });
     } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  };
+
+  updateStaffRole = async (req: Request, res: Response) => {
+    try {
+      await this.updateUserRoleUseCase.execute({
+        invitingUserRole: req.user!.role as any,
+        tenantId: req.tenant!.id,
+        userIdToUpdate: req.params.id as string,
+        newRole: req.body.role,
+        newWarehouseId: req.body.warehouseId,
+      });
+      res.status(200).json({ message: 'User role and permissions updated' });
+    } catch (error: any) {
+      if (error.message.includes('Unauthorized')) return res.status(403).json({ error: error.message });
       res.status(400).json({ error: error.message });
     }
   };

@@ -67,5 +67,14 @@ export const createTenantAuthRoutes = (
     authController.getTenantStaff
   );
 
+  router.put(
+    '/staff/:id',
+    authMw,
+    resolveTenantMw,
+    authorize([UserRole.BUSINESS_OWNER, UserRole.SUPER_ADMIN]),
+    validateRequest(authSchemas.updateStaffRole),
+    authController.updateStaffRole
+  );
+
   return router;
 };
