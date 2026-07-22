@@ -12,6 +12,7 @@ describe('GetWarehousesUseCase', () => {
       findById: jest.fn(),
       findAllByTenantId: jest.fn(),
       save: jest.fn(),
+      update: jest.fn(),
       delete: jest.fn(),
     };
     useCase = new GetWarehousesUseCase(warehouseRepo);

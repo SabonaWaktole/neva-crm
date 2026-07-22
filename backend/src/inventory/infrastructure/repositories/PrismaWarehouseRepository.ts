@@ -34,15 +34,20 @@ export class PrismaWarehouseRepository implements IWarehouseRepository {
   }
 
   async save(warehouse: Warehouse): Promise<void> {
-    await this.prisma.warehouse.upsert({
-      where: { id: warehouse.id },
-      update: {
+    await this.prisma.warehouse.create({
+      data: {
+        id: warehouse.id,
+        tenantId: warehouse.tenantId,
         name: warehouse.name,
         address: warehouse.address,
       },
-      create: {
-        id: warehouse.id,
-        tenantId: warehouse.tenantId,
+    });
+  }
+
+  async update(warehouse: Warehouse): Promise<void> {
+    await this.prisma.warehouse.update({
+      where: { id: warehouse.id },
+      data: {
         name: warehouse.name,
         address: warehouse.address,
       },

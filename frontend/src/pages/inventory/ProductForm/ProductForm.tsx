@@ -9,7 +9,8 @@ import { WarehouseStockAllocation } from '../../../components/inventory/Warehous
 import styles from './ProductForm.module.css';
 
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { useCategories, useWarehouses, useCreateProduct } from '../../../hooks/useInventory';
+import { useCategories, useCreateProduct } from '../../../hooks/useInventory';
+import { useWarehouses } from '../../../hooks/useWarehouses';
 import { AppLayout } from '../../../components/layout/AppLayout/AppLayout';
 import { Sidebar } from '../../../components/layout/Sidebar/Sidebar';
 import { useAuthStore } from '../../../store/useAuthStore';

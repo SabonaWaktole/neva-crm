@@ -8,7 +8,7 @@ import type { WarehouseFormData } from '../../../components/inventory/WarehouseF
 import { DeleteWarehouseModal } from '../../../components/inventory/DeleteWarehouseModal/DeleteWarehouseModal';
 import styles from './WarehouseList.module.css';
 
-import { useWarehouses, useCreateWarehouse, useUpdateWarehouse, useDeleteWarehouse } from '../../../hooks/useInventory';
+import { useWarehouses, useCreateWarehouse, useUpdateWarehouse, useDeleteWarehouse } from '../../../hooks/useWarehouses';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { AppLayout } from '../../../components/layout/AppLayout/AppLayout';
 import { Sidebar } from '../../../components/layout/Sidebar/Sidebar';
@@ -72,6 +72,9 @@ const WarehouseListContent: React.FC = () => {
     address: w.address ?? null,
   }));
 
+  const { user } = useAuthStore();
+  const isBusinessOwner = user?.role === 'BUSINESS_OWNER';
+
   return (
     <div className={styles.pageContainer}>
       <header className={styles.header}>
@@ -79,10 +82,12 @@ const WarehouseListContent: React.FC = () => {
           <h2 className={styles.pageTitle}>Warehouse Infrastructure</h2>
           <p className={styles.pageSubtitle}>Configure and manage your regional logistics hubs.</p>
         </div>
-        <button className={styles.addButton} onClick={handleOpenAdd}>
-          <Plus size={20} />
-          Add Warehouse
-        </button>
+        {isBusinessOwner && (
+          <button className={styles.addButton} onClick={handleOpenAdd}>
+            <Plus size={20} />
+            Add Warehouse
+          </button>
+        )}
       </header>
 
       {/* MOCK DATA - Backend currently only supports Warehouse entities, not capacity/traffic KPIs */}
@@ -112,6 +117,7 @@ const WarehouseListContent: React.FC = () => {
         warehouses={warehouseRows}
         onEdit={handleOpenEdit}
         onDelete={handleOpenDelete}
+        readOnly={!isBusinessOwner}
       />
 
       <WarehouseFormModal

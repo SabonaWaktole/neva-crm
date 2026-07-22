@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate, useNavigate, useParams, useLocation } from 'react-router-dom';
+import { getUserDisplayName } from '../../utils/userUtils';
 import { AppLayout } from '../../components/layout/AppLayout/AppLayout';
 import { Sidebar } from '../../components/layout/Sidebar/Sidebar';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -20,7 +21,7 @@ export const SuperAdminShell = () => {
     navigate('/login'); // Super Admin login is at root
   };
 
-  const userName = user?.userId ? `Admin ${user.userId.substring(0, 8)}` : 'Super Admin';
+  const userName = getUserDisplayName(user);
 
   return (
     <AppLayout

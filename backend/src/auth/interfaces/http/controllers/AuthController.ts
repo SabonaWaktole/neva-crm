@@ -92,6 +92,7 @@ export class AuthController {
           phone: user.phone,
           role: user.role,
           tenantId: user.tenantId,
+          tenantSlug: req.user.tenantSlug,
         }
       });
     } catch (error: any) {

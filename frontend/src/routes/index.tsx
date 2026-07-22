@@ -192,7 +192,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: 'inventory/warehouses',
+        path: 'settings/warehouses',
         element: (
           <ProtectedRoute>
             <WarehouseList />

@@ -5,7 +5,8 @@ import { SelectInput } from '../../ui/SelectInput';
 import { TextInput } from '../../ui/TextInput';
 import { TextareaInput } from '../../ui/TextareaInput';
 import { Button } from '../../ui/Button';
-import { useProductStock, useWarehouses, useAdjustStock, useTransferStock } from '../../../hooks/useInventory';
+import { useProductStock, useAdjustStock, useTransferStock } from '../../../hooks/useInventory';
+import { useWarehouses } from '../../../hooks/useWarehouses';
 import styles from './StockAdjustmentPanel.module.css';
 
 export interface StockAdjustmentPanelProps {

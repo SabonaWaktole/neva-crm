@@ -13,6 +13,7 @@ describe('InviteStaffUseCase', () => {
     invitationRepository = {
       create: jest.fn(),
       findByToken: jest.fn(),
+      findByTenantId: jest.fn(),
       markAccepted: jest.fn(),
     };
     emailSender = {

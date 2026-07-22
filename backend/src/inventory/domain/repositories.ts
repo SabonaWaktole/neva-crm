@@ -37,6 +37,7 @@ export interface IWarehouseRepository {
   findById(tenantId: string, id: string): Promise<Warehouse | null>;
   findAllByTenantId(tenantId: string): Promise<Warehouse[]>;
   save(warehouse: Warehouse): Promise<void>;
+  update(warehouse: Warehouse): Promise<void>;
   delete(tenantId: string, id: string): Promise<void>;
 }
 

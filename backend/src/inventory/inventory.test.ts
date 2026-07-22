@@ -356,7 +356,7 @@ describe('Inventory Module Integration Tests', () => {
         .set('Authorization', `Bearer ${tokenTenant1Staff}`) // Staff attempting to create warehouse
         .send({ name: 'Staff Warehouse' });
       expect(createWhRes.status).toBe(403);
-      expect(createWhRes.body.error).toContain('Unauthorized');
+      expect(createWhRes.body.error).toContain('Forbidden');
 
       // 2. Business-Owner-or-Staff endpoint: Adjust Stock (Super Admin is rejected)
       // First create a product as owner so we have something to adjust

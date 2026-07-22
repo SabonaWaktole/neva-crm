@@ -1,35 +1,26 @@
-import styles from './StaffDashboard.module.css';
-import { 
-  Users, 
-  CalendarCheck, 
-  AlertTriangle,
-  History,
-  FileText,
-  UserPlus,
-  CalendarPlus,
-  TrendingUp,
-  CheckCircle2,
-  TrendingDown,
-  Download
-} from 'lucide-react';
-import { Button } from '../../components/ui/Button/Button';
-import { KPICard } from '../../components/ui/KPICard';
-import { TimelineItem } from '../../components/ui/TimelineItem';
-import { StaffScheduleTable } from '../../components/widgets/StaffScheduleTable';
-import { getActivityConfig } from '../../utils/activityMapper';
-import { useDashboardMetrics, useActivityFeed } from '../../hooks/useDashboard';
+import { getUserFirstName } from '../../utils/userUtils';
+import styles from './StaffDashboard.module.css'; 
+import { Users, CalendarCheck, AlertTriangle, History, FileText, UserPlus, CalendarPlus, TrendingUp, CheckCircle2, TrendingDown, Download } from 'lucide-react'; 
+import { Button } from '../../components/ui/Button/Button'; 
+import { KPICard } from '../../components/ui/KPICard'; 
+import { TimelineItem } from '../../components/ui/TimelineItem'; 
+import { StaffScheduleTable } from '../../components/widgets/StaffScheduleTable'; 
+import { getActivityConfig } from '../../utils/activityMapper'; 
+import { useDashboardMetrics, useActivityFeed } from '../../hooks/useDashboard'; 
 import { useAppointmentsByDateRange } from '../../hooks/useAppointments';
+import { useAuthStore } from '../../store/useAuthStore';
 
 export const StaffDashboard = () => {
+  const { user } = useAuthStore();
   const { metrics, isLoading: isLoadingMetrics } = useDashboardMetrics();
   const { activities, isLoading: isLoadingFeed } = useActivityFeed(5);
-  
+      
   // Today's boundaries for appointments
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
   const endOfDay = new Date();
   endOfDay.setHours(23, 59, 59, 999);
-  
+      
   const { appointments, isLoading: isLoadingAppointments } = useAppointmentsByDateRange(
     startOfDay.toISOString(),
     endOfDay.toISOString()
@@ -46,10 +37,10 @@ export const StaffDashboard = () => {
 
   return (
     <div className={styles.dashboardContainer}>
-      
+             
       {/* Mobile-Only Header */}
       <div className={styles.mobileHeader}>
-        <h1 className={styles.titleMobile}>Hello, Alex</h1>
+        <h1 className={styles.titleMobile}>Hello, {getUserFirstName(user)}</h1>
         <p className={styles.subtitleMobile}>You have {appointments?.length || 0} appointments scheduled for today.</p>
       </div>
 
@@ -68,7 +59,7 @@ export const StaffDashboard = () => {
       {/* Desktop Header */}
       <header className={styles.desktopHeader}>
         <div className={styles.headerContent}>
-          <h1 className={styles.title}>Welcome back, Alex.</h1>
+          <h1 className={styles.title}>Welcome back, {getUserFirstName(user)}.</h1>
           <p className={styles.subtitle}>Here's a summary of your individual pipeline for today.</p>
         </div>
         <div className={styles.headerActions}>
@@ -117,10 +108,10 @@ export const StaffDashboard = () => {
 
       {/* Main Grid Layout */}
       <div className={styles.mainGrid}>
-        
+                 
         {/* Left Column: Schedule Table & Actions */}
         <div className={styles.leftColumn}>
-          
+                     
           <div className={styles.scheduleCard}>
             <div className={styles.scheduleHeader}>
               <div className={styles.scheduleTitleGroup}>
@@ -135,7 +126,7 @@ export const StaffDashboard = () => {
               <StaffScheduleTable appointments={appointments || []} />
             )}
           </div>
-          
+                     
           {/* Mobile-Only Horizontal Stats Scroll */}
           <div className={styles.mobileStatsSection}>
              <h3>My Stats</h3>
@@ -175,10 +166,9 @@ export const StaffDashboard = () => {
                 </div>
              </div>
           </div>
-
-        </div>
-
-        {/* Right Column: Activity Feed */}
+         </div>
+         
+         {/* Right Column: Activity Feed */}
         <div className={styles.rightColumn}>
           <div className={styles.feedCard}>
             <div className={styles.feedHeader}>
@@ -187,7 +177,7 @@ export const StaffDashboard = () => {
                 <h2>My Activity</h2>
               </div>
             </div>
-            
+                         
             <div className={styles.feedList}>
               {isLoadingFeed ? (
                 <p style={{ padding: '1rem', color: 'var(--color-on-surface-variant)' }}>Loading activity...</p>
@@ -211,7 +201,7 @@ export const StaffDashboard = () => {
                 })
               )}
             </div>
-            
+                         
             <div className={styles.feedFooter}>
               <Button variant="ghost" fullWidth>View All Activity</Button>
             </div>

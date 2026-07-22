@@ -30,6 +30,12 @@ class InMemoryUserRepository implements IUserRepository {
   async findByEmail(email: string, tenantId: string): Promise<User | null> {
     return this.users.find(u => u.email === email && u.tenantId === tenantId) ?? null;
   }
+  async findAnyByEmail(email: string): Promise<User | null> {
+    return this.users.find(u => u.email === email) ?? null;
+  }
+  async findByTenantId(tenantId: string): Promise<User[]> {
+    return this.users.filter(u => u.tenantId === tenantId);
+  }
   async findSuperAdminByEmail(email: string): Promise<User | null> {
     return this.users.find(u => u.email === email && u.role === UserRole.SUPER_ADMIN) ?? null;
   }
@@ -49,6 +55,24 @@ class InMemoryUserRepository implements IUserRepository {
         role: user.role,
         tenantId: user.tenantId,
         createdAt: user.createdAt,
+      });
+    }
+  }
+
+  async updateProfile(userId: string, data: { firstName?: string | null; lastName?: string | null; phone?: string | null; email?: string }): Promise<void> {
+    const user = this.users.find(u => u.id === userId);
+    if (user) {
+      const idx = this.users.indexOf(user);
+      this.users[idx] = User.create({
+        id: user.id,
+        email: data.email ?? user.email,
+        hashedPassword: user.hashedPassword,
+        role: user.role,
+        tenantId: user.tenantId,
+        createdAt: user.createdAt,
+        firstName: data.firstName !== undefined ? data.firstName : user.firstName,
+        lastName: data.lastName !== undefined ? data.lastName : user.lastName,
+        phone: data.phone !== undefined ? data.phone : user.phone,
       });
     }
   }
@@ -101,6 +125,9 @@ class InMemoryInvitationRepository implements IInvitationRepository {
   }
   async findByToken(token: string): Promise<Invitation | null> {
     return this.invitations.find(i => i.token === token) ?? null;
+  }
+  async findByTenantId(tenantId: string): Promise<Invitation[]> {
+    return this.invitations.filter(i => i.tenantId === tenantId);
   }
   async markAccepted(id: string, acceptedAt: Date): Promise<void> {
     const idx = this.invitations.findIndex(i => i.id === id);
