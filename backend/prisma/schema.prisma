@@ -31,6 +31,9 @@ model Tenant {
 
   // Quotations
   quotations Quotation[]
+
+  // Integrations
+  integrations Integration[]
 }
 
 model User {
@@ -342,4 +345,22 @@ model QuotationStatusHistory {
   changedBy User      @relation(fields: [changedByUserId], references: [id])
 
   @@index([tenantId, quotationId])
+}
+
+// ==========================================
+// SETTINGS / INTEGRATIONS MODULE
+// ==========================================
+
+model Integration {
+  id        String   @id
+  tenantId  String
+  provider  String   // e.g., 'GOOGLE_CALENDAR'
+  status    String   // 'CONNECTED', 'DISCONNECTED'
+  config    Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, provider])
 }

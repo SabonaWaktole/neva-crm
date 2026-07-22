@@ -43,6 +43,7 @@ export interface AppDependencies {
   tokenService: ITokenService;
   emailSender: IEmailSender;
   unitOfWork: IUnitOfWork;
+  integrationRepository?: any;
 }
 
 export const createApp = (overrides?: Partial<AppDependencies>) => {
@@ -254,6 +255,30 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const settingsController = new SettingsController(tenantRepository);
   const settingsRoutes = createSettingsRouter(settingsController, tokenService, tenantRepository);
   app.use('/api/:tenantSlug/settings', settingsRoutes);
+
+  // Integrations Routes
+  const { PrismaIntegrationRepository } = require('../integrations/infrastructure/repositories/PrismaIntegrationRepository');
+  const { GetIntegrationsUseCase } = require('../integrations/application/use-cases/GetIntegrationsUseCase');
+  const { ConnectIntegrationUseCase } = require('../integrations/application/use-cases/ConnectIntegrationUseCase');
+  const { DisconnectIntegrationUseCase } = require('../integrations/application/use-cases/DisconnectIntegrationUseCase');
+  const { IntegrationsController } = require('../integrations/interfaces/http/IntegrationsController');
+  const { createIntegrationRouter } = require('../integrations/interfaces/http/integrationRoutes');
+
+  const integrationRepo = overrides?.integrationRepository ?? new PrismaIntegrationRepository(prisma);
+
+  const integrationsController = new IntegrationsController(
+    new GetIntegrationsUseCase(integrationRepo),
+    new ConnectIntegrationUseCase(integrationRepo),
+    new DisconnectIntegrationUseCase(integrationRepo)
+  );
+
+  const integrationRoutes = createIntegrationRouter(integrationsController, tokenService, tenantRepository);
+  app.use('/api/:tenantSlug/integrations', integrationRoutes);
+
+  app.use((err: any, req: any, res: any, next: any) => {
+    console.error("GLOBAL ERROR:", err);
+    res.status(500).json({ error: err.message, stack: err.stack });
+  });
 
   return app;
 };

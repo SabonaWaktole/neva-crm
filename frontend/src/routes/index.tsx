@@ -25,6 +25,7 @@ import { QuotationList } from '../pages/quotations/QuotationList';
 import { QuotationDetail } from '../pages/quotations/QuotationDetail';
 import { CreateQuotation } from '../pages/quotations/CreateQuotation';
 import { EditQuotation } from '../pages/quotations/EditQuotation';
+import { IntegrationsPage } from '../pages/IntegrationsPage';
 import { ProtectedRoute } from './ProtectedRoute';
 import { RoleGuard } from './RoleGuard';
 import { TenantGuard } from './TenantGuard';
@@ -107,6 +108,16 @@ export const router = createBrowserRouter([
           <ProtectedRoute>
             <RoleGuard allowedRoles={['BUSINESS_OWNER', 'SUPER_ADMIN']}>
               <TeamSettingsPage />
+            </RoleGuard>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'settings/integrations',
+        element: (
+          <ProtectedRoute>
+            <RoleGuard allowedRoles={['BUSINESS_OWNER', 'SUPER_ADMIN', 'STAFF']}>
+              <IntegrationsPage />
             </RoleGuard>
           </ProtectedRoute>
         ),
