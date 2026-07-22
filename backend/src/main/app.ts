@@ -51,7 +51,11 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const app = express();
   app.use(cors({
     origin: (origin, callback) => {
-      if (!origin || /^http:\/\/localhost:\d+$/.test(origin)) {
+      const allowedOrigins = [
+        'https://neva-crm.vercel.app',
+        process.env.FRONTEND_URL
+      ];
+      if (!origin || /^http:\/\/localhost:\d+$/.test(origin) || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
         callback(new Error('Not allowed by CORS'));
