@@ -7,6 +7,14 @@ export const apiClient = axios.create({
   withCredentials: true, // This ensures httpOnly cookies are sent with every request
 });
 
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 // We can add interceptors here to globally handle 401s (e.g. redirect to login)
 apiClient.interceptors.response.use(
   (response) => response,

@@ -12,6 +12,9 @@ export const useLogin = () => {
     setError(null);
     try {
       const result = await authService.login(email, password, tenantSlug);
+      if (result.token) {
+        localStorage.setItem('token', result.token);
+      }
       const user = await authService.getMe();
       setUser(user);
       return result.tenantSlug;
