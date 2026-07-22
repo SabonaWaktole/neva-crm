@@ -7,19 +7,10 @@ import { useReports } from '../hooks/useReports';
 import { Sidebar } from '../components/layout/Sidebar/Sidebar';
 import { AppLayout } from '../components/layout/AppLayout/AppLayout';
 import { useAuthStore } from '../store/useAuthStore';
-import { useNavigate } from 'react-router-dom';
-import type { NavItem } from '../components/layout/Sidebar/Sidebar';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigation } from '../hooks/useNavigation';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
-
-const mockNavItems: NavItem[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
-  { id: 'clients', label: 'Clients', icon: 'group' },
-  { id: 'appointments', label: 'Appointments', icon: 'event' },
-  { id: 'inventory', label: 'Products & Stock', icon: 'inventory_2' },
-  { id: 'quotations', label: 'Quotations', icon: 'request_quote' },
-  { id: 'reports', label: 'Reports', icon: 'bar_chart' },
-];
 
 export const ReportsPage: React.FC = () => {
   const user = useAuthStore(state => state.user);
@@ -30,6 +21,9 @@ export const ReportsPage: React.FC = () => {
   const logout = useAuthStore(state => state.logout);
   const { revenue, clients, inventory, loading, error, refresh } = useReports();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const navItems = useNavigation(user, location.pathname);
 
   const handleLogout = async () => {
     await logout();
@@ -40,7 +34,9 @@ export const ReportsPage: React.FC = () => {
     <Sidebar 
       orgName={tenantSlug || 'Workspace'} 
       orgTier={roleName || ''} 
-      navItems={mockNavItems} 
+      navItems={navItems} 
+      onNavItemClick={(id) => navigate(`/${tenantSlug}/${id}`)}
+      onLogoutClick={handleLogout}
     />
   );
 

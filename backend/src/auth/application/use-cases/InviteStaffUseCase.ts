@@ -32,7 +32,11 @@ export class InviteStaffUseCase {
     });
 
     await this.invitationRepository.create(invitation);
-    await this.emailSender.sendInvitationEmail(input.inviteeEmail, token, input.tenantName);
+    
+    // Send email in background without blocking the UI response
+    this.emailSender.sendInvitationEmail(input.inviteeEmail, token, input.tenantName).catch((err) => {
+      console.error('Failed to send invitation email in background:', err);
+    });
 
     return { email: input.inviteeEmail, token };
   }
