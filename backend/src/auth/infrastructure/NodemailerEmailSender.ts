@@ -19,7 +19,7 @@ export class NodemailerEmailSender implements IEmailSender {
       connectionTimeout: 10000, // increased to 10s for remote servers
       greetingTimeout: 10000,
       socketTimeout: 15000, 
-    });
+    } as any);
   }
 
   async sendInvitationEmail(to: string, token: string, tenantName: string): Promise<void> {
