@@ -104,7 +104,7 @@ export const OnboardingPage = () => {
               <div className={`${styles.formContent} ${styles.formContentMaxW}`}>
                 {error && (
                   <div style={{ color: 'var(--color-error)', fontSize: 'var(--font-size-label-sm)', background: 'var(--color-error-light)', padding: 'var(--spacing-sm)', borderRadius: 'var(--radius-sm)', marginBottom: 'var(--spacing-sm)' }}>
-                    {error}
+                    {typeof error === 'string' ? error : JSON.stringify(error)}
                   </div>
                 )}
                 <TextInput 
