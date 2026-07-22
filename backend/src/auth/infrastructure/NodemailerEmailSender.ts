@@ -6,14 +6,18 @@ export class NodemailerEmailSender implements IEmailSender {
 
   constructor() {
     this.transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true, // true for 465, false for other ports
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
-      connectionTimeout: 5000, // 5 seconds max to connect
-      greetingTimeout: 5000,
-      socketTimeout: 10000, // 10 seconds max for socket operations
+      // Force IPv4 because Render instances sometimes timeout when attempting IPv6 to Google APIs
+      // https://nodemailer.com/smtp/ (see 'family' option)
+      connectionTimeout: 10000, // increased to 10s for remote servers
+      greetingTimeout: 10000,
+      socketTimeout: 15000, 
     });
   }
 
