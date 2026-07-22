@@ -275,6 +275,24 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const integrationRoutes = createIntegrationRouter(integrationsController, tokenService, tenantRepository);
   app.use('/api/:tenantSlug/integrations', integrationRoutes);
 
+  // Report Routes
+  const { PrismaReportRepository } = require('../reports/infrastructure/PrismaReportRepository');
+  const { GetRevenueReportUseCase } = require('../reports/application/use-cases/GetRevenueReportUseCase');
+  const { GetClientReportUseCase } = require('../reports/application/use-cases/GetClientReportUseCase');
+  const { GetInventoryReportUseCase } = require('../reports/application/use-cases/GetInventoryReportUseCase');
+  const { ReportsController } = require('../reports/interfaces/http/ReportsController');
+  const { createReportRouter } = require('../reports/interfaces/http/reportRoutes');
+
+  const reportRepo = new PrismaReportRepository(prisma);
+  const reportsController = new ReportsController(
+    new GetRevenueReportUseCase(reportRepo),
+    new GetClientReportUseCase(reportRepo),
+    new GetInventoryReportUseCase(reportRepo)
+  );
+
+  const reportRoutes = createReportRouter(reportsController, tokenService, tenantRepository);
+  app.use('/api/:tenantSlug/reports', reportRoutes);
+
   app.use((err: any, req: any, res: any, next: any) => {
     console.error("GLOBAL ERROR:", err);
     res.status(500).json({ error: err.message, stack: err.stack });
