@@ -15,6 +15,7 @@ export class NodemailerEmailSender implements IEmailSender {
       },
       // Force IPv4 because Render instances sometimes timeout when attempting IPv6 to Google APIs
       // https://nodemailer.com/smtp/ (see 'family' option)
+      family: 4,
       connectionTimeout: 10000, // increased to 10s for remote servers
       greetingTimeout: 10000,
       socketTimeout: 15000, 
