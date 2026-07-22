@@ -28,6 +28,8 @@ export class RequestPasswordResetUseCase {
     });
 
     await this.prtRepository.create(prt);
-    await this.emailSender.sendPasswordResetEmail(user.email, token);
+    this.emailSender.sendPasswordResetEmail(user.email, token).catch((err) => {
+      console.error('Failed to send password reset email in background:', err);
+    });
   }
 }

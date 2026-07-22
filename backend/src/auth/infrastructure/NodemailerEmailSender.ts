@@ -11,6 +11,9 @@ export class NodemailerEmailSender implements IEmailSender {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
+      connectionTimeout: 5000, // 5 seconds max to connect
+      greetingTimeout: 5000,
+      socketTimeout: 10000, // 10 seconds max for socket operations
     });
   }
 

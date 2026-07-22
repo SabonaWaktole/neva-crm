@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useIntegrations } from '../hooks/useIntegrations';
 import { useAuthStore } from '../store/useAuthStore';
 import { useLogout } from '../hooks/useLogout';
+import { useNavigation } from '../hooks/useNavigation';
 import { AppLayout } from '../components/layout/AppLayout/AppLayout';
 import { Sidebar } from '../components/layout/Sidebar/Sidebar';
-import type { NavItem } from '../components/layout/Sidebar/Sidebar';
 import { SettingsLayout } from '../components/layout/SettingsLayout/SettingsLayout';
 
 const AVAILABLE_INTEGRATIONS = [
@@ -23,23 +23,16 @@ const AVAILABLE_INTEGRATIONS = [
   }
 ];
 
-const mockNavItems: NavItem[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
-  { id: 'clients', label: 'Clients', icon: 'group' },
-  { id: 'appointments', label: 'Appointments', icon: 'event' },
-  { id: 'inventory', label: 'Products & Stock', icon: 'inventory_2' },
-  { id: 'quotations', label: 'Quotations', icon: 'description' },
-  { id: 'reports', label: 'Reports', icon: 'bar_chart' },
-  { id: 'settings', label: 'Settings', icon: 'settings', isActive: true },
-];
-
 export const IntegrationsPage: React.FC = () => {
   const { user } = useAuthStore();
   const { logout } = useLogout();
   const navigate = useNavigate();
+  const location = useLocation();
   const { tenantSlug } = useParams();
   const { integrations, error, connectIntegration, disconnectIntegration } = useIntegrations();
   const [connecting, setConnecting] = useState<string | null>(null);
+
+  const navItems = useNavigation(user, location.pathname);
 
   const isBusinessOwner = user?.role === 'BUSINESS_OWNER';
   const userName = user?.userId ? `User ${user.userId.substring(0, 8)}` : 'Settings User';
@@ -86,7 +79,9 @@ export const IntegrationsPage: React.FC = () => {
         <Sidebar 
           orgName={tenantSlug || 'Workspace'} 
           orgTier={roleName} 
-          navItems={mockNavItems} 
+          navItems={navItems} 
+          onNavItemClick={(id) => navigate(`/${tenantSlug}/${id}`)}
+          onLogoutClick={handleLogout}
         />
       }
     >
