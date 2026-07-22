@@ -39,4 +39,10 @@ export class PrismaInvitationRepository implements IInvitationRepository {
       data: { acceptedAt },
     });
   }
+
+  async delete(id: string): Promise<void> {
+    await prisma.invitation.delete({
+      where: { id },
+    });
+  }
 }

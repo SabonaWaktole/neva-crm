@@ -4,11 +4,11 @@ import { Button } from '../../../components/ui/Button/Button';
 import { useTeam, type StaffMember } from '../../../hooks/useTeam';
 import { InviteMemberModal } from './InviteMemberModal';
 import { EditMemberModal } from './EditMemberModal';
-import { Mail, Shield, Clock, Edit2 } from 'lucide-react';
+import { Mail, Shield, Clock, Edit2, Trash2 } from 'lucide-react';
 import { useAuthStore } from '../../../store/useAuthStore';
 
 export const TeamSettingsContent: React.FC = () => {
-  const { staff, pendingInvitations, loadingStaff, loadingInvitations, fetchStaff, fetchPendingInvitations, inviteStaff, updateStaffRole } = useTeam();
+  const { staff, pendingInvitations, loadingStaff, loadingInvitations, fetchStaff, fetchPendingInvitations, inviteStaff, updateStaffRole, cancelInvitation } = useTeam();
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<StaffMember | null>(null);
   const { user } = useAuthStore();
@@ -21,6 +21,12 @@ export const TeamSettingsContent: React.FC = () => {
 
   const handleInvite = async (email: string, role: string, warehouseId?: string) => {
     await inviteStaff(email, role, warehouseId);
+  };
+
+  const handleCancelInvitation = async (invitationId: string) => {
+    if (window.confirm('Are you sure you want to cancel this invitation?')) {
+      await cancelInvitation(invitationId);
+    }
   };
 
   return (
@@ -98,9 +104,21 @@ export const TeamSettingsContent: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--color-surface-container-highest)', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 500 }}>
-                    <Shield size={14} />
-                    {inv.role === 'STAFF' ? 'Sales Rep' : inv.role}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--color-surface-container-highest)', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 500 }}>
+                      <Shield size={14} />
+                      {inv.role === 'STAFF' ? 'Sales Rep' : inv.role}
+                    </div>
+                    {isOwner && (
+                      <Button
+                        variant="outline"
+                        onClick={() => handleCancelInvitation(inv.id)}
+                        style={{ padding: '4px 8px', color: 'var(--color-error)', borderColor: 'var(--color-error)' }}
+                        title="Cancel Invitation"
+                      >
+                        <Trash2 size={14} />
+                      </Button>
+                    )}
                   </div>
                 </div>
               ))}

@@ -74,6 +74,17 @@ export const useTeam = () => {
     }
   };
 
+  const cancelInvitation = async (invitationId: string) => {
+    if (!tenantSlug) return;
+    try {
+      await api.delete(`/${tenantSlug}/auth/invitations/${invitationId}`);
+      await fetchPendingInvitations();
+    } catch (error) {
+      console.error('Failed to cancel invitation', error);
+      throw error;
+    }
+  };
+
   return {
     staff,
     pendingInvitations,
@@ -83,5 +94,6 @@ export const useTeam = () => {
     fetchPendingInvitations,
     inviteStaff,
     updateStaffRole,
+    cancelInvitation,
   };
 };

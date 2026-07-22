@@ -10,6 +10,7 @@ import { GetPendingInvitationsUseCase } from '@auth/application/use-cases/GetPen
 import { UpdateUserProfileUseCase } from '@auth/application/use-cases/UpdateUserProfileUseCase';
 import { GetUserProfileUseCase } from '@auth/application/use-cases/GetUserProfileUseCase';
 import { UpdateUserRoleUseCase } from '@auth/application/use-cases/UpdateUserRoleUseCase';
+import { CancelInvitationUseCase } from '@auth/application/use-cases/CancelInvitationUseCase';
 import { ITenantRepository } from '@tenant/domain/repositories/ITenantRepository';
 import { UserRole } from '@auth/domain/enums/UserRole';
 export class AuthController {
@@ -25,7 +26,8 @@ export class AuthController {
     private getPendingInvitationsUseCase: GetPendingInvitationsUseCase,
     private updateUserProfileUseCase: UpdateUserProfileUseCase,
     private getUserProfileUseCase: GetUserProfileUseCase,
-    private updateUserRoleUseCase: UpdateUserRoleUseCase
+    private updateUserRoleUseCase: UpdateUserRoleUseCase,
+    private cancelInvitationUseCase?: CancelInvitationUseCase
   ) {}
 
   register = async (req: Request, res: Response) => {
@@ -205,6 +207,20 @@ export class AuthController {
       } else {
         res.status(400).json({ error: error.message });
       }
+    }
+  };
+
+  cancelInvitation = async (req: Request, res: Response, next: any) => {
+    try {
+      if (this.cancelInvitationUseCase) {
+        await this.cancelInvitationUseCase.execute({
+          invitationId: req.params.id as string,
+          requestingUserRole: req.user!.role,
+        });
+      }
+      res.status(200).json({ message: 'Invitation canceled successfully' });
+    } catch (error: any) {
+      next(error);
     }
   };
 }

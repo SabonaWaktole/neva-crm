@@ -5,4 +5,5 @@ export interface IInvitationRepository {
   findByToken(token: string): Promise<Invitation | null>;
   findByTenantId(tenantId: string): Promise<Invitation[]>;
   markAccepted(id: string, acceptedAt: Date): Promise<void>;
+  delete(id: string): Promise<void>;
 }
