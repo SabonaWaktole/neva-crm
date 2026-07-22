@@ -12,6 +12,7 @@ describe('GetWarehousesUseCase', () => {
       findById: jest.fn(),
       findAllByTenantId: jest.fn(),
       save: jest.fn(),
+      update: jest.fn(),
       delete: jest.fn(),
     };
     useCase = new GetWarehousesUseCase(warehouseRepo);
@@ -40,7 +41,8 @@ describe('GetWarehousesUseCase', () => {
 
     const results = await useCase.execute({
       tenantId: 'tenant1',
-      authorRole: UserRole.STAFF
+      authorRole: UserRole.STAFF,
+      authorWarehouseId: 'w1'
     });
 
     expect(results).toHaveLength(1);
@@ -50,8 +52,8 @@ describe('GetWarehousesUseCase', () => {
   it('should reject SUPER_ADMIN from listing tenant warehouses', async () => {
     await expect(useCase.execute({
       tenantId: 'tenant1',
-      authorRole: UserRole.SUPER_ADMIN
-    })).rejects.toThrow('Unauthorized');
+      authorRole: UserRole.SUPER_ADMIN as any
+    })).rejects.toThrow('Unauthorized: Only Business Owners and Staff can view warehouses.');
   });
 
   it('should explicitly scope query to tenantId, proving tenant isolation', async () => {

@@ -17,7 +17,7 @@ describe('TeamSettingsContent', () => {
     vi.clearAllMocks();
 
     (useAuthStore as any).mockReturnValue({
-      user: { role: 'BUSINESS_OWNER' }
+      user: { role: 'BUSINESS_OWNER', email: 'test@example.com' }
     });
 
     (useTeam as any).mockReturnValue({
@@ -43,7 +43,7 @@ describe('TeamSettingsContent', () => {
 
   it('hides Invite Member button and Pending Invitations for STAFF role', () => {
     (useAuthStore as any).mockReturnValue({
-      user: { role: 'STAFF' }
+      user: { role: 'STAFF', email: 'test@example.com' }
     });
 
     render(<TeamSettingsContent />);

@@ -1,23 +1,10 @@
-import styles from './BusinessOwnerDashboard.module.css';
-import { 
-  Users, 
-  CalendarCheck, 
-  Clock, 
-  Package, 
-  Plus,
-  History
-} from 'lucide-react';
-import { Button } from '../../components/ui/Button/Button';
-import { KPICard } from '../../components/ui/KPICard';
-import { UpcomingAppointmentsWidget } from '../../components/widgets/UpcomingAppointmentsWidget';
-import { TimelineItem } from '../../components/ui/TimelineItem';
-import { getActivityConfig } from '../../utils/activityMapper';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useDashboardMetrics, useActivityFeed } from '../../hooks/useDashboard';
+import { getUserFirstName } from '../../utils/userUtils';
+import styles from './BusinessOwnerDashboard.module.css'; import {    Users,    CalendarCheck,    Clock,    Package,    Plus,   History } from 'lucide-react'; import { Button } from '../../components/ui/Button/Button'; import { KPICard } from '../../components/ui/KPICard'; import { UpcomingAppointmentsWidget } from '../../components/widgets/UpcomingAppointmentsWidget'; import { TimelineItem } from '../../components/ui/TimelineItem'; import { getActivityConfig } from '../../utils/activityMapper'; import { useNavigate, useParams } from 'react-router-dom'; import { useDashboardMetrics, useActivityFeed } from '../../hooks/useDashboard'; import { useAuthStore } from '../../store/useAuthStore';
 
 export const BusinessOwnerDashboard = () => {
   const { tenantSlug } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuthStore();
   const { metrics, isLoading: isLoadingMetrics } = useDashboardMetrics();
   const { activities, isLoading: isLoadingFeed } = useActivityFeed(5);
 
@@ -34,7 +21,7 @@ export const BusinessOwnerDashboard = () => {
     <div className={styles.dashboardContainer}>
       <header className={styles.header}>
         <div className={styles.headerContent}>
-          <h1 className={styles.title}>Welcome back, Alex.</h1>
+          <h1 className={styles.title}>Welcome back, {getUserFirstName(user)}.</h1>
           <p className={styles.subtitle}>Here's a summary of your workspace for today.</p>
         </div>
         <div className={styles.headerActions}>
@@ -50,7 +37,7 @@ export const BusinessOwnerDashboard = () => {
       {/* KPI Bento Grid */}
       <section className={styles.kpiGrid}>
         <div className={styles.kpiItem}>
-          <KPICard 
+          <KPICard
             title="TOTAL CLIENTS"
             value={isLoadingMetrics ? '...' : (metrics?.totalClients || 0)}
             icon={<Users size={24} />}
@@ -60,7 +47,7 @@ export const BusinessOwnerDashboard = () => {
           />
         </div>
         <div className={styles.kpiItem}>
-          <KPICard 
+          <KPICard
             title="APPOINTMENTS"
             value="8"
             icon={<CalendarCheck size={24} />}
@@ -73,7 +60,7 @@ export const BusinessOwnerDashboard = () => {
         </div>
         {/* Expensive placeholers: opacity-60, ---, coming soon tag */}
         <div className={`${styles.kpiItem} ${styles.mobileHidden}`}>
-          <KPICard 
+          <KPICard
             title="OPEN QUOTATIONS"
             value="---"
             icon={<Clock size={24} />}
@@ -82,7 +69,7 @@ export const BusinessOwnerDashboard = () => {
           />
         </div>
         <div className={`${styles.kpiItem} ${styles.mobileHidden}`}>
-          <KPICard 
+          <KPICard
             title="INVENTORY ALERTS"
             value="---"
             icon={<Package size={24} />}
@@ -134,7 +121,7 @@ export const BusinessOwnerDashboard = () => {
                 activities.map((activity, index) => {
                   const config = getActivityConfig(activity.type);
                   return (
-                    <TimelineItem 
+                    <TimelineItem
                       key={activity.id}
                       title={activity.type.replace(/_/g, ' ')}
                       subtitle={new Date(activity.timestamp).toLocaleString()}

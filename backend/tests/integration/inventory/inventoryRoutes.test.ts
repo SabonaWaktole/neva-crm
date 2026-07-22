@@ -53,9 +53,9 @@ describe('Inventory Routes Integration - GetWarehouses & GetCategories', () => {
     const owner2 = await prisma.user.create({ data: { id: uuidv4(), tenantId: tenant2Id, email: 'owner2@test.com', hashedPassword: 'hash', role: 'BUSINESS_OWNER' } });
 
     // Generate Tokens
-    owner1Token = tokenService.sign({ userId: owner1.id, tenantId: tenant1Id, tenantSlug: 'tenant1', role: 'BUSINESS_OWNER' });
-    staff1Token = tokenService.sign({ userId: staff1.id, tenantId: tenant1Id, tenantSlug: 'tenant1', role: 'STAFF' });
-    owner2Token = tokenService.sign({ userId: owner2.id, tenantId: tenant2Id, tenantSlug: 'tenant2', role: 'BUSINESS_OWNER' });
+    owner1Token = tokenService.sign({ userId: owner1.id, tenantId: tenant1Id, tenantSlug: 'tenant1', role: 'BUSINESS_OWNER', warehouseId: null });
+    staff1Token = tokenService.sign({ userId: staff1.id, tenantId: tenant1Id, tenantSlug: 'tenant1', role: 'STAFF', warehouseId: null });
+    owner2Token = tokenService.sign({ userId: owner2.id, tenantId: tenant2Id, tenantSlug: 'tenant2', role: 'BUSINESS_OWNER', warehouseId: null });
 
     // Seed Warehouses & Categories
     await prisma.warehouse.create({ data: { id: uuidv4(), tenantId: tenant1Id, name: 'T1 WH 1', address: '123 A' } });

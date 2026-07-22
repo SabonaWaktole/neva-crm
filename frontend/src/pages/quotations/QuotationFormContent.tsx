@@ -10,7 +10,8 @@ import styles from './QuotationFormContent.module.css';
 
 import { useQuotations } from '../../hooks/useQuotations';
 import { useClients } from '../../hooks/useClients';
-import { useProducts, useWarehouses } from '../../hooks/useInventory';
+import { useProducts } from '../../hooks/useInventory';
+import { useWarehouses } from '../../hooks/useWarehouses';
 
 interface QuotationFormProps {
   mode: 'create' | 'edit';

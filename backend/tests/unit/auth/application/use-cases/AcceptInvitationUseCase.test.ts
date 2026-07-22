@@ -1,6 +1,7 @@
 import { AcceptInvitationUseCase } from '@auth/application/use-cases/AcceptInvitationUseCase';
 import { IInvitationRepository } from '@auth/domain/repositories/IInvitationRepository';
 import { IUserRepository } from '@auth/domain/repositories/IUserRepository';
+import { ITenantRepository } from '@tenant/domain/repositories/ITenantRepository';
 import { IPasswordHasher } from '@auth/application/ports/IPasswordHasher';
 import { UserRole } from '@auth/domain/enums/UserRole';
 import { InvitationExpiredError, InvitationAlreadyAcceptedError } from '@auth/domain/errors';
@@ -12,25 +13,40 @@ describe('AcceptInvitationUseCase', () => {
   let userRepository: jest.Mocked<IUserRepository>;
   let passwordHasher: jest.Mocked<IPasswordHasher>;
 
+  let tenantRepository: jest.Mocked<ITenantRepository>;
+
   beforeEach(() => {
     invitationRepository = {
       create: jest.fn(),
       findByToken: jest.fn(),
+      findByTenantId: jest.fn(),
       markAccepted: jest.fn(),
     };
     userRepository = {
       create: jest.fn(),
       findById: jest.fn(),
       findByEmail: jest.fn(),
+      findAnyByEmail: jest.fn(),
+      findByTenantId: jest.fn(),
       findSuperAdminByEmail: jest.fn(),
       updatePassword: jest.fn(),
+      updateProfile: jest.fn(),
+      updateRoleAndWarehouse: jest.fn(),
     };
     passwordHasher = {
       hash: jest.fn(),
       compare: jest.fn(),
     };
 
-    useCase = new AcceptInvitationUseCase(invitationRepository, userRepository, passwordHasher);
+    tenantRepository = {
+      create: jest.fn(),
+      findById: jest.fn().mockResolvedValue({ id: 'tenant-1', urlSlug: 'test-tenant' }),
+      findBySlug: jest.fn(),
+      findAll: jest.fn(),
+      updateSettings: jest.fn(),
+    };
+
+    useCase = new AcceptInvitationUseCase(invitationRepository, userRepository, passwordHasher, tenantRepository);
   });
 
   it('should accept an invitation and create a user', async () => {
@@ -48,16 +64,17 @@ describe('AcceptInvitationUseCase', () => {
     passwordHasher.hash.mockResolvedValue('hashed-pass');
     userRepository.create.mockImplementation(async (user) => user);
 
-    const user = await useCase.execute({
+    const result = await useCase.execute({
       token: 'valid-token',
       newPassword: 'StrongPassword123!',
     });
 
-    expect(user.email).toBe('staff@example.com');
-    expect(user.role).toBe(UserRole.STAFF);
-    expect(user.tenantId).toBe('tenant-1');
-    expect(invitationRepository.markAccepted).toHaveBeenCalledWith('inv-1', expect.any(Date));
+    expect(result.user.email).toBe('staff@example.com');
+    expect(result.user.role).toBe(UserRole.STAFF);
+    expect(result.user.tenantId).toBe('tenant-1');
+    expect(result.tenantSlug).toBe('test-tenant');
     expect(userRepository.create).toHaveBeenCalled();
+    expect(invitationRepository.markAccepted).toHaveBeenCalledWith('inv-1', expect.any(Date));
   });
 
   it('should throw InvitationExpiredError if token is expired', async () => {

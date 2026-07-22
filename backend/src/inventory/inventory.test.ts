@@ -40,9 +40,9 @@ describe('Inventory Module Integration Tests', () => {
     });
 
     // 2. Generate Tokens
-    tokenTenant1Owner = tokenService.sign({ userId: t1OwnerId, role: UserRole.BUSINESS_OWNER, tenantId: t1Id, tenantSlug: 't1-inv' });
-    tokenTenant1Staff = tokenService.sign({ userId: t1StaffId, role: UserRole.STAFF, tenantId: t1Id, tenantSlug: 't1-inv' });
-    tokenTenant2Owner = tokenService.sign({ userId: t2OwnerId, role: UserRole.BUSINESS_OWNER, tenantId: t2Id, tenantSlug: 't2-inv' });
+    tokenTenant1Owner = tokenService.sign({ userId: t1OwnerId, role: UserRole.BUSINESS_OWNER, tenantId: t1Id, tenantSlug: 't1-inv', warehouseId: null });
+    tokenTenant1Staff = tokenService.sign({ userId: t1StaffId, role: UserRole.STAFF, tenantId: t1Id, tenantSlug: 't1-inv', warehouseId: 'dummy-warehouse-id' });
+    tokenTenant2Owner = tokenService.sign({ userId: t2OwnerId, role: UserRole.BUSINESS_OWNER, tenantId: t2Id, tenantSlug: 't2-inv', warehouseId: null });
   });
 
   afterAll(async () => {
@@ -174,8 +174,11 @@ describe('Inventory Module Integration Tests', () => {
             { warehouseId: destWhId, quantity: 10 }
           ]
         });
-      productId = p.body.product.id;
-    });
+        productId = p.body.product.id;
+
+        // Give the staff access to the source warehouse
+        tokenTenant1Staff = tokenService.sign({ userId: t1StaffId, role: UserRole.STAFF, tenantId: t1Id, tenantSlug: 't1-inv', warehouseId: sourceWhId });
+      });
 
     it('should execute a valid transfer atomically', async () => {
       const res = await request(app).post(`/api/t1-inv/inventory/products/${productId}/transfer`)
@@ -259,7 +262,7 @@ describe('Inventory Module Integration Tests', () => {
       const t2WarehouseId = t2Wh.body.id;
 
       const res = await request(app).post(`/api/t1-inv/inventory/products/${productId}/adjust`)
-        .set('Authorization', `Bearer ${tokenTenant1Staff}`) // Attempting as T1
+        .set('Authorization', `Bearer ${tokenService.sign({ userId: t1StaffId, role: UserRole.STAFF, tenantId: t1Id, tenantSlug: 't1-inv', warehouseId: t2WarehouseId })}`) // Attempting as T1 but signed to T2 warehouse
         .send({
           warehouseId: t2WarehouseId, // Sneaking in T2's warehouse
           quantityChange: 50,
@@ -280,6 +283,9 @@ describe('Inventory Module Integration Tests', () => {
       testWh1Id = w1.body.id;
       const w2 = await request(app).post('/api/t1-inv/inventory/warehouses').set('Authorization', `Bearer ${tokenTenant1Owner}`).send({ name: 'Scope Hub 2' });
       testWh2Id = w2.body.id;
+
+      // Give staff access to testWh1Id
+      tokenTenant1Staff = tokenService.sign({ userId: t1StaffId, role: UserRole.STAFF, tenantId: t1Id, tenantSlug: 't1-inv', warehouseId: testWh1Id });
     });
 
     it('Product creation: supports 0 locations vs multiple locations', async () => {
@@ -356,7 +362,7 @@ describe('Inventory Module Integration Tests', () => {
         .set('Authorization', `Bearer ${tokenTenant1Staff}`) // Staff attempting to create warehouse
         .send({ name: 'Staff Warehouse' });
       expect(createWhRes.status).toBe(403);
-      expect(createWhRes.body.error).toContain('Unauthorized');
+      expect(createWhRes.body.error).toContain('Forbidden');
 
       // 2. Business-Owner-or-Staff endpoint: Adjust Stock (Super Admin is rejected)
       // First create a product as owner so we have something to adjust
@@ -364,7 +370,7 @@ describe('Inventory Module Integration Tests', () => {
         .set('Authorization', `Bearer ${tokenTenant1Owner}`)
         .send({ name: 'RoleTest Prod', description: 'D', price: 10, initialStock: [{ warehouseId: testWh1Id, quantity: 50 }] });
       
-      const tokenSuperAdmin = tokenService.sign({ userId: 'u_super', role: UserRole.SUPER_ADMIN as any, tenantId: t1Id, tenantSlug: 't1-inv' });
+      const tokenSuperAdmin = tokenService.sign({ userId: 'u_super', role: UserRole.SUPER_ADMIN as any, tenantId: t1Id, tenantSlug: 't1-inv', warehouseId: null });
       
       const adjustRes = await request(app).post(`/api/t1-inv/inventory/products/${p.body.product.id}/adjust`)
         .set('Authorization', `Bearer ${tokenSuperAdmin}`) // SUPER_ADMIN attempting to adjust tenant stock

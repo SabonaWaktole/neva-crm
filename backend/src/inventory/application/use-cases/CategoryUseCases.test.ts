@@ -14,7 +14,10 @@ describe('Category Use Cases (Business Owner only)', () => {
     categoryRepo = {
       findById: jest.fn(),
       findAllByTenantId: jest.fn(),
+      findAllWithItemCount: jest.fn(),
+      findLeastRecentlyUsedCategories: jest.fn(),
       save: jest.fn(),
+      update: jest.fn(),
       delete: jest.fn(),
     };
     productRepo = {
@@ -83,7 +86,7 @@ describe('Category Use Cases (Business Owner only)', () => {
       });
 
       expect(result.name).toBe('New Name');
-      expect(categoryRepo.save).toHaveBeenCalledTimes(1);
+      expect(categoryRepo.update).toHaveBeenCalledTimes(1);
     });
 
     it('should reject STAFF', async () => {

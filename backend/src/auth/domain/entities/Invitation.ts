@@ -8,6 +8,7 @@ interface InvitationProps {
   token: string;
   expiresAt: Date;
   acceptedAt: Date | null;
+  warehouseId?: string | null;
 }
 
 export class Invitation {
@@ -18,6 +19,7 @@ export class Invitation {
   public readonly token: string;
   public readonly expiresAt: Date;
   public readonly acceptedAt: Date | null;
+  public readonly warehouseId: string | null;
 
   private constructor(props: InvitationProps) {
     this.id = props.id;
@@ -27,6 +29,7 @@ export class Invitation {
     this.token = props.token;
     this.expiresAt = props.expiresAt;
     this.acceptedAt = props.acceptedAt;
+    this.warehouseId = props.warehouseId || null;
   }
 
   public static create(props: InvitationProps): Invitation {

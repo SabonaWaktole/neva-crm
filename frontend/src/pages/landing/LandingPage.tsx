@@ -29,7 +29,7 @@ export const LandingPage: React.FC = () => {
             fontWeight: 700, 
             color: 'var(--color-on-surface)' 
           }}>
-            Nexus CRM
+            Neva CRM
           </span>
         </div>
         <div style={{ display: 'flex', gap: 'var(--spacing-md)' }}>
@@ -58,7 +58,7 @@ export const LandingPage: React.FC = () => {
           marginBottom: '32px'
         }}>
           <Zap size={14} />
-          <span>Nexus v2.0 is now live!</span>
+          <span>Neva v2.0 is now live!</span>
         </div>
         
         <h1 style={{
@@ -162,7 +162,7 @@ export const LandingPage: React.FC = () => {
         fontFamily: 'var(--font-family-body-sm)',
         fontSize: '14px'
       }}>
-        © 2026 Nexus CRM. All rights reserved.
+        © 2026 Neva CRM. All rights reserved.
       </footer>
     </div>
   );

@@ -7,6 +7,13 @@ export interface Warehouse {
 export interface Category {
   id: string;
   name: string;
+  description?: string;
+  isArchived?: boolean;
+}
+
+export interface CategoryWithItemCount {
+  category: Category;
+  itemCount: number;
 }
 
 export interface StockLevel {

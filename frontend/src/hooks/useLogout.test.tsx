@@ -9,7 +9,7 @@ import { UserRole } from '../../../backend/src/auth/domain/enums/UserRole';
 describe('useLogout hook', () => {
   beforeEach(() => {
     useAuthStore.setState({
-      user: { userId: '1', role: UserRole.STAFF, tenantId: 'tenant-1', tenantSlug: 'test-tenant' },
+      user: { userId: '1', role: UserRole.STAFF, tenantId: 'tenant-1', tenantSlug: 'test-tenant', email: 'test@example.com' },
       isAuthenticated: true,
     });
   });

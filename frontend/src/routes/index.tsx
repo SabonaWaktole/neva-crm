@@ -15,6 +15,7 @@ import { AppointmentsPage } from '../pages/appointments/AppointmentsPage';
 import { CreateAppointmentPage } from '../pages/appointments/CreateAppointmentPage';
 import { ClientSettingsPage } from '../pages/settings/ClientSettingsPage';
 import { TeamSettingsPage } from '../pages/settings/team/TeamSettingsPage';
+import { ProfilePage } from '../pages/settings/profile/ProfilePage';
 import { AcceptInvitationPage } from '../pages/auth/AcceptInvitationPage';
 import { InventoryList } from '../pages/inventory/InventoryList';
 import { ProductForm } from '../pages/inventory/ProductForm/ProductForm';
@@ -24,6 +25,7 @@ import { QuotationList } from '../pages/quotations/QuotationList';
 import { QuotationDetail } from '../pages/quotations/QuotationDetail';
 import { CreateQuotation } from '../pages/quotations/CreateQuotation';
 import { EditQuotation } from '../pages/quotations/EditQuotation';
+import { IntegrationsPage } from '../pages/IntegrationsPage';
 import { ProtectedRoute } from './ProtectedRoute';
 import { RoleGuard } from './RoleGuard';
 import { TenantGuard } from './TenantGuard';
@@ -111,6 +113,24 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: 'settings/integrations',
+        element: (
+          <ProtectedRoute>
+            <RoleGuard allowedRoles={['BUSINESS_OWNER', 'SUPER_ADMIN', 'STAFF']}>
+              <IntegrationsPage />
+            </RoleGuard>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'settings/profile',
+        element: (
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: 'clients',
         element: (
           <ProtectedRoute>
@@ -183,7 +203,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: 'inventory/warehouses',
+        path: 'settings/warehouses',
         element: (
           <ProtectedRoute>
             <WarehouseList />
@@ -191,7 +211,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: 'inventory/categories',
+        path: 'settings/categories',
         element: (
           <ProtectedRoute>
             <CategoryList />

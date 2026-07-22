@@ -30,9 +30,9 @@ describe('Tenant Routes (Integration)', () => {
       ],
     });
 
-    superAdminToken = tokenService.sign({ userId: saId, role: 'SUPER_ADMIN', tenantId: null, tenantSlug: null });
-    businessOwnerToken = tokenService.sign({ userId: boId, role: 'BUSINESS_OWNER', tenantId, tenantSlug: 't-tenant-routes' });
-    staffToken = tokenService.sign({ userId: stId, role: 'STAFF', tenantId, tenantSlug: 't-tenant-routes' });
+    superAdminToken = tokenService.sign({ userId: saId, role: 'SUPER_ADMIN', tenantId: null, tenantSlug: null, warehouseId: null });
+    businessOwnerToken = tokenService.sign({ userId: boId, role: 'BUSINESS_OWNER', tenantId, tenantSlug: 't-tenant-routes', warehouseId: null });
+    staffToken = tokenService.sign({ userId: stId, role: 'STAFF', tenantId, tenantSlug: 't-tenant-routes', warehouseId: null });
   });
 
   afterAll(async () => {

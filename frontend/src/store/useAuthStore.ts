@@ -4,9 +4,14 @@ export type Role = 'SUPER_ADMIN' | 'BUSINESS_OWNER' | 'STAFF';
 
 export interface User {
   userId: string;
+  email: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  phone?: string | null;
   role: Role;
   tenantId: string | null;
   tenantSlug: string | null;
+  warehouseId?: string | null;
 }
 
 interface AuthState {

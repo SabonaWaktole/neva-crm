@@ -28,6 +28,7 @@ export class InviteStaffUseCase {
       token,
       expiresAt,
       acceptedAt: null,
+      warehouseId: input.warehouseId || null,
     });
 
     await this.invitationRepository.create(invitation);

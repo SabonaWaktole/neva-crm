@@ -248,7 +248,7 @@ const CalendarMobileAgenda = ({
       {/* Top App Bar */}
       <header className={styles.mobileHeader}>
         <div className={styles.mobileHeaderTop}>
-          <h1 className={styles.mobileTitle}>Nexus CRM</h1>
+          <h1 className={styles.mobileTitle}>Neva CRM</h1>
           <div className={styles.mobileActions}>
             <button><Bell size={20} /></button>
             <Avatar fallback="AR" size="sm" />

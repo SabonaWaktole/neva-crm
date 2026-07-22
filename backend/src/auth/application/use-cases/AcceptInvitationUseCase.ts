@@ -32,6 +32,7 @@ export class AcceptInvitationUseCase {
       hashedPassword,
       role: invitation.role,
       tenantId: invitation.tenantId,
+      warehouseId: invitation.warehouseId,
       createdAt: new Date(),
     });
 

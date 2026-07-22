@@ -39,7 +39,8 @@ describe('AdjustStockUseCase', () => {
       quantityChange: 10,
       reason: 'Received shipment',
       authorUserId: 'u1',
-      authorRole: UserRole.STAFF
+      authorRole: UserRole.STAFF,
+      authorWarehouseId: 'w1'
     });
 
     expect(result.stockLevel.quantity).toBe(30);
@@ -87,7 +88,8 @@ describe('AdjustStockUseCase', () => {
       quantityChange: -10,
       reason: 'Removing stock',
       authorUserId: 'u1',
-      authorRole: UserRole.STAFF
+      authorRole: UserRole.STAFF,
+      authorWarehouseId: 'w1'
     })).rejects.toThrow(NegativeStockError);
 
     // Verify no saves happened after the domain error
@@ -104,7 +106,8 @@ describe('AdjustStockUseCase', () => {
       quantityChange: 5,
       reason: 'Test',
       authorUserId: 'u1',
-      authorRole: UserRole.STAFF
+      authorRole: UserRole.STAFF,
+      authorWarehouseId: 'w1'
     })).rejects.toThrow('Stock level not found for product p1 at warehouse w1');
 
     expect(stockLevelRepo.save).not.toHaveBeenCalled();

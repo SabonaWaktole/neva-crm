@@ -15,6 +15,11 @@ export const authSchemas = {
   inviteStaff: z.object({
     email: z.string().email(),
     role: z.enum(['STAFF', 'BUSINESS_OWNER']),
+    warehouseId: z.string().optional().nullable(),
+  }),
+  updateStaffRole: z.object({
+    role: z.enum(['STAFF', 'BUSINESS_OWNER']),
+    warehouseId: z.string().optional().nullable(),
   }),
   acceptInvitation: z.object({
     token: z.string().min(1),
@@ -26,5 +31,11 @@ export const authSchemas = {
   resetPassword: z.object({
     token: z.string().min(1),
     newPassword: z.string().min(8).regex(/[A-Z]/).regex(/[a-z]/).regex(/[0-9]/),
+  }),
+  updateProfile: z.object({
+    firstName: z.string().min(1).optional().nullable(),
+    lastName: z.string().min(1).optional().nullable(),
+    phone: z.string().optional().nullable(),
+    email: z.string().email().optional(),
   }),
 };

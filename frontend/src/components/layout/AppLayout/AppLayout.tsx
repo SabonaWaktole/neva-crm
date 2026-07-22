@@ -19,7 +19,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   sidebar,
   userAvatarSrc,
   userName = 'User',
-  logoText = 'Nexus CRM',
+  logoText = 'Neva CRM',
   onLogout,
   onSettingsClick,
 }) => {

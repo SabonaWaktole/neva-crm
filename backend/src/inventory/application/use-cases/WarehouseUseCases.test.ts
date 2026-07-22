@@ -15,6 +15,7 @@ describe('Warehouse Use Cases (Business Owner only)', () => {
       findById: jest.fn(),
       findAllByTenantId: jest.fn(),
       save: jest.fn(),
+      update: jest.fn(),
       delete: jest.fn(),
     };
     stockLevelRepo = {

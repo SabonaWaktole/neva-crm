@@ -11,6 +11,9 @@ import { RequestPasswordResetUseCase } from '@auth/application/use-cases/Request
 import { ResetPasswordUseCase } from '@auth/application/use-cases/ResetPasswordUseCase';
 import { GetTenantStaffUseCase } from '@auth/application/use-cases/GetTenantStaffUseCase';
 import { GetPendingInvitationsUseCase } from '@auth/application/use-cases/GetPendingInvitationsUseCase';
+import { UpdateUserProfileUseCase } from '@auth/application/use-cases/UpdateUserProfileUseCase';
+import { GetUserProfileUseCase } from '@auth/application/use-cases/GetUserProfileUseCase';
+import { UpdateUserRoleUseCase } from '@auth/application/use-cases/UpdateUserRoleUseCase';
 import { PrismaUserRepository } from '@auth/infrastructure/repositories/PrismaUserRepository';
 import { PrismaTenantRepository } from '@tenant/infrastructure/repositories/PrismaTenantRepository';
 import { PrismaInvitationRepository } from '@auth/infrastructure/repositories/PrismaInvitationRepository';
@@ -40,11 +43,21 @@ export interface AppDependencies {
   tokenService: ITokenService;
   emailSender: IEmailSender;
   unitOfWork: IUnitOfWork;
+  integrationRepository?: any;
 }
 
 export const createApp = (overrides?: Partial<AppDependencies>) => {
   const app = express();
-  app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+  app.use(cors({
+    origin: (origin, callback) => {
+      if (!origin || /^http:\/\/localhost:\d+$/.test(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+  }));
   app.use(express.json());
   app.use(cookieParser());
 
@@ -67,6 +80,9 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const resetPasswordUseCase = new ResetPasswordUseCase(prtRepository, userRepository, passwordHasher);
   const getTenantStaffUseCase = new GetTenantStaffUseCase(userRepository);
   const getPendingInvitationsUseCase = new GetPendingInvitationsUseCase(invitationRepository);
+  const updateUserProfileUseCase = new UpdateUserProfileUseCase(userRepository);
+  const getUserProfileUseCase = new GetUserProfileUseCase(userRepository);
+  const updateUserRoleUseCase = new UpdateUserRoleUseCase(userRepository);
 
   // Controller
   const authController = new AuthController(
@@ -78,7 +94,10 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
     resetPasswordUseCase,
     tenantRepository,
     getTenantStaffUseCase,
-    getPendingInvitationsUseCase
+    getPendingInvitationsUseCase,
+    updateUserProfileUseCase,
+    getUserProfileUseCase,
+    updateUserRoleUseCase
   );
 
   // Auth Routes
@@ -151,6 +170,7 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const { DeleteCategoryUseCase } = require('../inventory/application/use-cases/DeleteCategoryUseCase');
   const { GetWarehousesUseCase } = require('../inventory/application/use-cases/GetWarehousesUseCase');
   const { GetCategoriesUseCase } = require('../inventory/application/use-cases/GetCategoriesUseCase');
+  const { ArchiveUnusedCategoriesUseCase } = require('../inventory/application/use-cases/ArchiveUnusedCategoriesUseCase');
   
   const { InventoryController } = require('../inventory/interfaces/http/inventoryController');
   const { createInventoryRouter } = require('../inventory/interfaces/http/inventoryRoutes');
@@ -176,7 +196,8 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
     new CreateCategoryUseCase(categoryRepo),
     new UpdateCategoryUseCase(categoryRepo),
     new DeleteCategoryUseCase(categoryRepo, productRepo),
-    new GetCategoriesUseCase(categoryRepo)
+    new GetCategoriesUseCase(categoryRepo),
+    new ArchiveUnusedCategoriesUseCase(categoryRepo)
   );
 
   const inventoryRoutes = createInventoryRouter(inventoryController, tokenService, tenantRepository);
@@ -234,6 +255,30 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const settingsController = new SettingsController(tenantRepository);
   const settingsRoutes = createSettingsRouter(settingsController, tokenService, tenantRepository);
   app.use('/api/:tenantSlug/settings', settingsRoutes);
+
+  // Integrations Routes
+  const { PrismaIntegrationRepository } = require('../integrations/infrastructure/repositories/PrismaIntegrationRepository');
+  const { GetIntegrationsUseCase } = require('../integrations/application/use-cases/GetIntegrationsUseCase');
+  const { ConnectIntegrationUseCase } = require('../integrations/application/use-cases/ConnectIntegrationUseCase');
+  const { DisconnectIntegrationUseCase } = require('../integrations/application/use-cases/DisconnectIntegrationUseCase');
+  const { IntegrationsController } = require('../integrations/interfaces/http/IntegrationsController');
+  const { createIntegrationRouter } = require('../integrations/interfaces/http/integrationRoutes');
+
+  const integrationRepo = overrides?.integrationRepository ?? new PrismaIntegrationRepository(prisma);
+
+  const integrationsController = new IntegrationsController(
+    new GetIntegrationsUseCase(integrationRepo),
+    new ConnectIntegrationUseCase(integrationRepo),
+    new DisconnectIntegrationUseCase(integrationRepo)
+  );
+
+  const integrationRoutes = createIntegrationRouter(integrationsController, tokenService, tenantRepository);
+  app.use('/api/:tenantSlug/integrations', integrationRoutes);
+
+  app.use((err: any, req: any, res: any, next: any) => {
+    console.error("GLOBAL ERROR:", err);
+    res.status(500).json({ error: err.message, stack: err.stack });
+  });
 
   return app;
 };

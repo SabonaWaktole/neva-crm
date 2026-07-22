@@ -19,7 +19,7 @@ type Story = StoryObj<typeof meta>;
 
 export const LoginExample: Story = {
   args: {
-    title: 'Nexus CRM',
+    title: 'Neva CRM',
     subtitle: 'Sign in to your workspace',
     logoIcon: <Network size={32} color="var(--color-primary)" />,
     children: (

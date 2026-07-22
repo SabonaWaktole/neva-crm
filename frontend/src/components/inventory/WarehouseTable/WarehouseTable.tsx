@@ -13,6 +13,7 @@ export interface WarehouseTableProps {
   warehouses: WarehouseRowData[];
   onEdit: (warehouse: WarehouseRowData) => void;
   onDelete: (warehouse: WarehouseRowData) => void;
+  readOnly?: boolean;
 }
 
 const getRandomIcon = (index: number) => {
@@ -28,6 +29,7 @@ export const WarehouseTable: React.FC<WarehouseTableProps> = ({
   warehouses,
   onEdit,
   onDelete,
+  readOnly = false,
 }) => {
   return (
     <div className={styles.tableContainer}>
@@ -47,7 +49,7 @@ export const WarehouseTable: React.FC<WarehouseTableProps> = ({
           <tr>
             <th className={styles.th}>FACILITY NAME</th>
             <th className={styles.th}>ADDRESS</th>
-            <th className={`${styles.th} ${styles.textRight}`}>ACTIONS</th>
+            {!readOnly && <th className={`${styles.th} ${styles.textRight}`}>ACTIONS</th>}
           </tr>
         </thead>
         <tbody className={styles.tbody}>
@@ -67,24 +69,26 @@ export const WarehouseTable: React.FC<WarehouseTableProps> = ({
               <td className={styles.td}>
                 <div className={styles.addressText}>{wh.address || '—'}</div>
               </td>
-              <td className={`${styles.td} ${styles.textRight}`}>
-                <div className={styles.rowActions}>
-                  <button 
-                    className={`${styles.actionButton} ${styles.editButton}`}
-                    onClick={() => onEdit(wh)}
-                    aria-label="Edit"
-                  >
-                    <Edit2 size={18} />
-                  </button>
-                  <button 
-                    className={`${styles.actionButton} ${styles.deleteButton}`}
-                    onClick={() => onDelete(wh)}
-                    aria-label="Delete"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              </td>
+              {!readOnly && (
+                <td className={`${styles.td} ${styles.textRight}`}>
+                  <div className={styles.rowActions}>
+                    <button 
+                      className={`${styles.actionButton} ${styles.editButton}`}
+                      onClick={() => onEdit(wh)}
+                      aria-label="Edit"
+                    >
+                      <Edit2 size={18} />
+                    </button>
+                    <button 
+                      className={`${styles.actionButton} ${styles.deleteButton}`}
+                      onClick={() => onDelete(wh)}
+                      aria-label="Delete"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>

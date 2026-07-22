@@ -16,14 +16,14 @@ describe('useLogin hook', () => {
         return HttpResponse.json({ token: 'mock-token', tenantSlug: 'tenant-1' });
       }),
       http.get('http://localhost:3000/api/auth/me', () => {
-        return HttpResponse.json({ user: { userId: 'user-1', email: 'test@example.com', role: 'STAFF' } });
+        return HttpResponse.json({ user: { userId: 'user-1', email: 'user@example.com', role: 'STAFF' } });
       })
     );
 
     const { result } = renderHook(() => useLogin());
 
     await act(async () => {
-      const tenantSlug = await result.current.login('test@example.com', 'password', null);
+      const tenantSlug = await result.current.login('user@example.com', 'password', null);
       expect(tenantSlug).toBe('tenant-1');
     });
 

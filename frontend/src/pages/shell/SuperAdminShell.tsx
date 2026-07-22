@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate, useNavigate, useParams, useLocation } from 'react-router-dom';
+import { getUserDisplayName } from '../../utils/userUtils';
 import { AppLayout } from '../../components/layout/AppLayout/AppLayout';
 import { Sidebar } from '../../components/layout/Sidebar/Sidebar';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -13,14 +14,14 @@ export const SuperAdminShell = () => {
   const { logout } = useLogout();
   const location = useLocation();
 
-  const navItemsWithActiveState = useNavigation(user?.role, location.pathname);
+  const navItemsWithActiveState = useNavigation(user, location.pathname);
 
   const handleLogout = async () => {
     await logout();
     navigate('/login'); // Super Admin login is at root
   };
 
-  const userName = user?.userId ? `Admin ${user.userId.substring(0, 8)}` : 'Super Admin';
+  const userName = getUserDisplayName(user);
 
   return (
     <AppLayout
@@ -29,7 +30,7 @@ export const SuperAdminShell = () => {
       onSettingsClick={() => navigate('/settings')}
       sidebar={
         <Sidebar 
-          orgName="Nexus CRM Platform" 
+          orgName="Neva CRM Platform" 
           orgTier="Global Administration" 
           navItems={navItemsWithActiveState} 
           onNavItemClick={(id) => navigate(`/${id}`)}

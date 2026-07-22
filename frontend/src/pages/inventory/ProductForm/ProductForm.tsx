@@ -9,7 +9,9 @@ import { WarehouseStockAllocation } from '../../../components/inventory/Warehous
 import styles from './ProductForm.module.css';
 
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { useCategories, useWarehouses, useCreateProduct } from '../../../hooks/useInventory';
+import { useCreateProduct } from '../../../hooks/useInventory';
+import { useCategories } from '../../../hooks/useCategories';
+import { useWarehouses } from '../../../hooks/useWarehouses';
 import { AppLayout } from '../../../components/layout/AppLayout/AppLayout';
 import { Sidebar } from '../../../components/layout/Sidebar/Sidebar';
 import { useAuthStore } from '../../../store/useAuthStore';
@@ -31,10 +33,7 @@ const ProductFormContent: React.FC = () => {
   const [description, setDescription] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [price, setPrice] = useState('');
-  const [allocationRows, setAllocationRows] = useState<{ id: string; warehouseId: string; quantity: number }[]>([
-    { id: '1', warehouseId: 'wh-1', quantity: 50 },
-    { id: '2', warehouseId: 'wh-2', quantity: 0 },
-  ]);
+  const [allocationRows, setAllocationRows] = useState<{ id: string; warehouseId: string; quantity: number }[]>([]);
 
 
 
@@ -118,7 +117,7 @@ const ProductFormContent: React.FC = () => {
                   >
                     <option value="">Select category...</option>
                     {categories.map(cat => (
-                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                      <option key={cat.category.id} value={cat.category.id}>{cat.category.name}</option>
                     ))}
                   </SelectInput>
                   <TextInput 
@@ -193,7 +192,7 @@ export const ProductForm: React.FC = () => {
   const { user } = useAuthStore();
   const { logout } = useLogout();
   const location = useLocation();
-  const navItems = useNavigation(user?.role, location.pathname);
+  const navItems = useNavigation(user, location.pathname);
 
   const handleLogout = async () => {
     await logout();
@@ -207,7 +206,7 @@ export const ProductForm: React.FC = () => {
     <AppLayout
       userName={userName}
       onLogout={handleLogout}
-      onSettingsClick={() => navigate(`/${tenantSlug}/settings`)}
+      onSettingsClick={() => navigate(`/${tenantSlug}/settings/profile`)}
       userAvatarSrc="https://lh3.googleusercontent.com/aida-public/AB6AXuCUVO_U904UXtp4jWW0TlbxmzPuBGIREJnS7rJvUtLWgv77vYvS4vxvhNtsn7uCPM4v19ncCYsTNjqR9gmBTthGZKxWksFTi3WHzwUACJE3fdYz43ve1_UcjRrGN0DsSAnzWy8bcm_ue3gBSicCHOQXi3nTG59avgqC7yDJvl_xzAPCtNRbIGrfduLtU3kRkzKkv4b6G4JpGzlfYerk5A74tOh2EEID2ccvMJyWClcbv_w3W2yL1Gy2hiSvmpCVC63iIga-3SmPV8Nj"
       sidebar={
         <Sidebar 

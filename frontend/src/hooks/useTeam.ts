@@ -8,6 +8,7 @@ export interface StaffMember {
   role: string;
   firstName?: string;
   lastName?: string;
+  warehouseId?: string;
 }
 
 export interface PendingInvitation {
@@ -15,6 +16,7 @@ export interface PendingInvitation {
   email: string;
   role: string;
   expiresAt: string;
+  warehouseId?: string;
 }
 
 export const useTeam = () => {
@@ -50,13 +52,24 @@ export const useTeam = () => {
     }
   }, [tenantSlug]);
 
-  const inviteStaff = async (email: string, role: string) => {
+  const inviteStaff = async (email: string, role: string, warehouseId?: string) => {
     if (!tenantSlug) return;
     try {
-      await api.post(`/${tenantSlug}/auth/invitations`, { email, role });
+      await api.post(`/${tenantSlug}/auth/invitations`, { email, role, warehouseId });
       await fetchPendingInvitations();
     } catch (error) {
       console.error('Failed to invite staff', error);
+      throw error;
+    }
+  };
+
+  const updateStaffRole = async (userId: string, role: string, warehouseId?: string) => {
+    if (!tenantSlug) return;
+    try {
+      await api.put(`/${tenantSlug}/auth/staff/${userId}`, { role, warehouseId });
+      await fetchStaff();
+    } catch (error) {
+      console.error('Failed to update staff role', error);
       throw error;
     }
   };
@@ -68,6 +81,7 @@ export const useTeam = () => {
     loadingInvitations,
     fetchStaff,
     fetchPendingInvitations,
-    inviteStaff
+    inviteStaff,
+    updateStaffRole,
   };
 };

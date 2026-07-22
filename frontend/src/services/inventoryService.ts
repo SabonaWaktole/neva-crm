@@ -1,5 +1,5 @@
 import { apiClient } from '../api';
-import type { Product, StockLevel, StockMovement, Category, Warehouse } from '../types/inventory';
+import type { Product, StockLevel, StockMovement, Category, CategoryWithItemCount } from '../types/inventory';
 
 export const inventoryService = {
   // PRODUCTS
@@ -52,43 +52,30 @@ export const inventoryService = {
     return response.data;
   },
 
-  // WAREHOUSES
-  getWarehouses: async (tenantSlug: string): Promise<Warehouse[]> => {
-    const response = await apiClient.get(`/${tenantSlug}/inventory/warehouses`);
-    return response.data;
-  },
-
-  createWarehouse: async (tenantSlug: string, data: { name: string; address?: string }): Promise<Warehouse> => {
-    const response = await apiClient.post(`/${tenantSlug}/inventory/warehouses`, data);
-    return response.data;
-  },
-
-  updateWarehouse: async (tenantSlug: string, warehouseId: string, data: { name?: string; address?: string }): Promise<Warehouse> => {
-    const response = await apiClient.put(`/${tenantSlug}/inventory/warehouses/${warehouseId}`, data);
-    return response.data;
-  },
-
-  deleteWarehouse: async (tenantSlug: string, warehouseId: string): Promise<void> => {
-    await apiClient.delete(`/${tenantSlug}/inventory/warehouses/${warehouseId}`);
-  },
-
   // CATEGORIES
-  getCategories: async (tenantSlug: string): Promise<Category[]> => {
-    const response = await apiClient.get(`/${tenantSlug}/inventory/categories`);
+  getCategories: async (tenantSlug: string, includeArchived?: boolean): Promise<CategoryWithItemCount[]> => {
+    const params = new URLSearchParams();
+    if (includeArchived) params.append('includeArchived', 'true');
+    const response = await apiClient.get(`/${tenantSlug}/inventory/categories?${params.toString()}`);
     return response.data;
   },
 
-  createCategory: async (tenantSlug: string, data: { name: string }): Promise<Category> => {
+  createCategory: async (tenantSlug: string, data: { name: string, description?: string }): Promise<Category> => {
     const response = await apiClient.post(`/${tenantSlug}/inventory/categories`, data);
     return response.data;
   },
 
-  updateCategory: async (tenantSlug: string, categoryId: string, data: { name: string }): Promise<Category> => {
+  updateCategory: async (tenantSlug: string, categoryId: string, data: { name?: string, description?: string }): Promise<Category> => {
     const response = await apiClient.put(`/${tenantSlug}/inventory/categories/${categoryId}`, data);
     return response.data;
   },
 
   deleteCategory: async (tenantSlug: string, categoryId: string): Promise<void> => {
     await apiClient.delete(`/${tenantSlug}/inventory/categories/${categoryId}`);
+  },
+
+  cleanupCategories: async (tenantSlug: string): Promise<{ count: number }> => {
+    const response = await apiClient.post(`/${tenantSlug}/inventory/categories/cleanup`);
+    return response.data;
   }
 };

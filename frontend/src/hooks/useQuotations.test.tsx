@@ -13,7 +13,7 @@ vi.mock('react-router-dom', () => ({
 describe('useQuotations Hooks', () => {
   beforeEach(() => {
     useAuthStore.setState({
-      user: { userId: 'user-1', role: 'BUSINESS_OWNER', tenantId: 'tenant-1', tenantSlug: 'tenant-1' },
+      user: { userId: 'user-1', role: 'BUSINESS_OWNER', tenantId: 'tenant-1', tenantSlug: 'tenant-1', email: 'test@example.com' },
       isAuthenticated: true,
     });
   });

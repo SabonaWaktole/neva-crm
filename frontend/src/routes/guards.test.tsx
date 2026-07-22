@@ -41,7 +41,7 @@ describe('Route Guards', () => {
     it('renders children if authenticated', () => {
       useAuthStore.setState({ 
         isAuthenticated: true, 
-        user: { userId: '1', role: 'STAFF', tenantId: 'tenant-1', tenantSlug: 'tenant-1' } 
+        user: { userId: '1', role: 'STAFF', tenantId: 'tenant-1', tenantSlug: 'tenant-1', email: 'test@example.com' } 
       });
       render(
         <MemoryRouter initialEntries={['/protected']}>
@@ -58,7 +58,7 @@ describe('Route Guards', () => {
     it('blocks user without required role and renders fallback', () => {
       useAuthStore.setState({ 
         isAuthenticated: true, 
-        user: { userId: '1', role: 'STAFF', tenantId: 'tenant-1', tenantSlug: 'tenant-1' } 
+        user: { userId: '1', role: 'STAFF', tenantId: 'tenant-1', tenantSlug: 'tenant-1', email: 'test@example.com' } 
       });
       render(
         <MemoryRouter initialEntries={['/admin-only']}>
@@ -77,7 +77,7 @@ describe('Route Guards', () => {
     it('allows user with required role', () => {
       useAuthStore.setState({ 
         isAuthenticated: true, 
-        user: { userId: '1', role: 'BUSINESS_OWNER', tenantId: 'tenant-1', tenantSlug: 'tenant-1' } 
+        user: { userId: '1', role: 'BUSINESS_OWNER', tenantId: 'tenant-1', tenantSlug: 'tenant-1', email: 'test@example.com' } 
       });
       render(
         <MemoryRouter initialEntries={['/admin-only']}>
@@ -98,7 +98,7 @@ describe('Route Guards', () => {
     it('blocks user authenticated for a different tenant', () => {
       useAuthStore.setState({ 
         isAuthenticated: true, 
-        user: { userId: '1', role: 'STAFF', tenantId: 'id-A', tenantSlug: 'tenant-A' } 
+        user: { userId: '1', role: 'STAFF', tenantId: 'id-A', tenantSlug: 'tenant-A', email: 'test@example.com' } 
       });
       render(
         <MemoryRouter initialEntries={['/tenant-B/dashboard']}>
@@ -117,7 +117,7 @@ describe('Route Guards', () => {
     it('allows user authenticated for the same tenant', () => {
       useAuthStore.setState({ 
         isAuthenticated: true, 
-        user: { userId: '1', role: 'STAFF', tenantId: 'id-A', tenantSlug: 'tenant-A' } 
+        user: { userId: '1', role: 'STAFF', tenantId: 'id-A', tenantSlug: 'tenant-A', email: 'test@example.com' } 
       });
       render(
         <MemoryRouter initialEntries={['/tenant-A/dashboard']}>

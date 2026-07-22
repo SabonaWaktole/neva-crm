@@ -44,7 +44,8 @@ describe('SearchProductsUseCase', () => {
     const results = await useCase.execute({
       tenantId: 'tenant1',
       name: 'Product',
-      authorRole: UserRole.STAFF
+      authorRole: UserRole.STAFF,
+      authorWarehouseId: 'w1'
     });
 
     expect(results.length).toBe(1);
@@ -52,7 +53,7 @@ describe('SearchProductsUseCase', () => {
     expect(productRepo.search).toHaveBeenCalledWith('tenant1', {
       name: 'Product',
       categoryId: undefined,
-      warehouseId: undefined,
+      warehouseId: 'w1',
       availability: undefined,
     });
   });
@@ -70,7 +71,8 @@ describe('SearchProductsUseCase', () => {
 
     const results = await useCase.execute({
       tenantId: 'tenant1',
-      authorRole: UserRole.STAFF
+      authorRole: UserRole.STAFF,
+      authorWarehouseId: 'w1'
     });
 
     expect(results[0].availability).toBe('LOW_STOCK');
@@ -84,7 +86,8 @@ describe('SearchProductsUseCase', () => {
 
     const results = await useCase.execute({
       tenantId: 'tenant1',
-      authorRole: UserRole.STAFF
+      authorRole: UserRole.STAFF,
+      authorWarehouseId: 'w1'
     });
 
     expect(results[0].availability).toBe('IN_STOCK');
@@ -98,7 +101,8 @@ describe('SearchProductsUseCase', () => {
 
     const results = await useCase.execute({
       tenantId: 'tenant1',
-      authorRole: UserRole.STAFF
+      authorRole: UserRole.STAFF,
+      authorWarehouseId: 'w1'
     });
 
     expect(results[0].availability).toBe('LOW_STOCK');
@@ -112,7 +116,8 @@ describe('SearchProductsUseCase', () => {
 
     const results = await useCase.execute({
       tenantId: 'tenant1',
-      authorRole: UserRole.STAFF
+      authorRole: UserRole.STAFF,
+      authorWarehouseId: 'w1'
     });
 
     expect(results[0].availability).toBe('OUT_OF_STOCK');
@@ -125,7 +130,8 @@ describe('SearchProductsUseCase', () => {
     await useCase.execute({
       tenantId: 'tenant1',
       availability: 'LOW_STOCK',
-      authorRole: UserRole.STAFF
+      authorRole: UserRole.STAFF,
+      authorWarehouseId: 'w1'
     });
 
     expect(productRepo.search).toHaveBeenCalledWith('tenant1', expect.objectContaining({
@@ -136,7 +142,7 @@ describe('SearchProductsUseCase', () => {
   it('should reject unauthorized roles', async () => {
     await expect(useCase.execute({
       tenantId: 'tenant1',
-      authorRole: UserRole.SUPER_ADMIN
-    })).rejects.toThrow('Unauthorized');
+      authorRole: UserRole.SUPER_ADMIN as any
+    })).rejects.toThrow('Unauthorized: Only Business Owners and Staff can search products.');
   });
 });

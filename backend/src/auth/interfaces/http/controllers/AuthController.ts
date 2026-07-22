@@ -7,6 +7,9 @@ import { RequestPasswordResetUseCase } from '@auth/application/use-cases/Request
 import { ResetPasswordUseCase } from '@auth/application/use-cases/ResetPasswordUseCase';
 import { GetTenantStaffUseCase } from '@auth/application/use-cases/GetTenantStaffUseCase';
 import { GetPendingInvitationsUseCase } from '@auth/application/use-cases/GetPendingInvitationsUseCase';
+import { UpdateUserProfileUseCase } from '@auth/application/use-cases/UpdateUserProfileUseCase';
+import { GetUserProfileUseCase } from '@auth/application/use-cases/GetUserProfileUseCase';
+import { UpdateUserRoleUseCase } from '@auth/application/use-cases/UpdateUserRoleUseCase';
 import { ITenantRepository } from '@tenant/domain/repositories/ITenantRepository';
 import { UserRole } from '@auth/domain/enums/UserRole';
 export class AuthController {
@@ -19,7 +22,10 @@ export class AuthController {
     private resetPasswordUseCase: ResetPasswordUseCase,
     private tenantRepository: ITenantRepository,
     private getTenantStaffUseCase: GetTenantStaffUseCase,
-    private getPendingInvitationsUseCase: GetPendingInvitationsUseCase
+    private getPendingInvitationsUseCase: GetPendingInvitationsUseCase,
+    private updateUserProfileUseCase: UpdateUserProfileUseCase,
+    private getUserProfileUseCase: GetUserProfileUseCase,
+    private updateUserRoleUseCase: UpdateUserRoleUseCase
   ) {}
 
   register = async (req: Request, res: Response) => {
@@ -72,10 +78,29 @@ export class AuthController {
 
   getMe = async (req: Request, res: Response) => {
     if (!req.user) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      return res.status(200).json({ user: null });
     }
-    // We can just return the decoded token data which has userId, role, tenantId
-    res.status(200).json({ user: req.user });
+    try {
+      const user = await this.getUserProfileUseCase.execute(req.user.userId);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      res.status(200).json({
+        user: {
+          userId: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          phone: user.phone,
+          role: user.role,
+          tenantId: user.tenantId,
+          tenantSlug: req.user.tenantSlug,
+          warehouseId: user.warehouseId,
+        }
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
   };
 
   inviteStaff = async (req: Request, res: Response) => {
@@ -87,10 +112,27 @@ export class AuthController {
         tenantId: req.tenant!.id,
         inviteeEmail: req.body.email,
         role: req.body.role,
+        warehouseId: req.body.warehouseId,
         tenantName: tenant!.name,
       });
       res.status(200).json({ message: 'Invitation sent' });
     } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  };
+
+  updateStaffRole = async (req: Request, res: Response) => {
+    try {
+      await this.updateUserRoleUseCase.execute({
+        invitingUserRole: req.user!.role as any,
+        tenantId: req.tenant!.id,
+        userIdToUpdate: req.params.id as string,
+        newRole: req.body.role,
+        newWarehouseId: req.body.warehouseId,
+      });
+      res.status(200).json({ message: 'User role and permissions updated' });
+    } catch (error: any) {
+      if (error.message.includes('Unauthorized')) return res.status(403).json({ error: error.message });
       res.status(400).json({ error: error.message });
     }
   };
@@ -143,6 +185,26 @@ export class AuthController {
       res.json(result);
     } catch (error: any) {
       next(error);
+    }
+  };
+  updateMe = async (req: Request, res: Response, next: any) => {
+    try {
+      await this.updateUserProfileUseCase.execute({
+        userId: req.user!.userId,
+        requestingUserId: req.user!.userId,
+        requestingUserRole: req.user!.role as UserRole,
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        phone: req.body.phone,
+        email: req.body.email,
+      });
+      res.status(200).json({ message: 'Profile updated successfully' });
+    } catch (error: any) {
+      if (error.name === 'UnauthorizedError') {
+        res.status(403).json({ error: error.message });
+      } else {
+        res.status(400).json({ error: error.message });
+      }
     }
   };
 }

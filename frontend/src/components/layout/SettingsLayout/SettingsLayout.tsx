@@ -1,6 +1,7 @@
 import React from 'react';
 import type { ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { useAuthStore } from '../../../store/useAuthStore';
 import { User, Building2, Sliders, UsersRound, Puzzle, PackageOpen, FolderTree } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import styles from './SettingsLayout.module.css';
@@ -31,34 +32,38 @@ export const SettingsLayout: React.FC<SettingsLayoutProps> = ({
   activeNavId,
 }) => {
   const { tenantSlug } = useParams();
+  const { user } = useAuthStore();
+  const isStaff = user?.role === 'STAFF';
   
   return (
     <div className={styles.layout}>
       {/* Left Sidebar for Settings */}
-      <aside className={styles.sidebar}>
-        <h2 className={styles.title}>Settings</h2>
-        <nav className={styles.nav}>
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeNavId === item.id;
-            const itemClasses = [
-              styles.navItem,
-              isActive ? styles.navItemActive : ''
-            ].filter(Boolean).join(' ');
+      {!isStaff && (
+        <aside className={styles.sidebar}>
+          <h2 className={styles.title}>Settings</h2>
+          <nav className={styles.nav}>
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeNavId === item.id;
+              const itemClasses = [
+                styles.navItem,
+                isActive ? styles.navItemActive : ''
+              ].filter(Boolean).join(' ');
 
-            return (
-              <Link
-                key={item.id}
-                to={`/${tenantSlug}/settings${item.id === 'profile' ? '' : `/${item.id}`}`}
-                className={itemClasses}
-              >
-                <Icon className={styles.navIcon} size={20} />
-                <span className={styles.navLabel}>{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-      </aside>
+              return (
+                <Link
+                  key={item.id}
+                  to={`/${tenantSlug}/settings${item.id === 'company' ? '' : `/${item.id}`}`}
+                  className={itemClasses}
+                >
+                  <Icon className={styles.navIcon} size={20} />
+                  <span className={styles.navLabel}>{item.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+        </aside>
+      )}
 
       {/* Right Content Area */}
       <main className={styles.content}>

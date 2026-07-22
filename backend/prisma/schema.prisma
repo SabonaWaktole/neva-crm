@@ -31,17 +31,25 @@ model Tenant {
 
   // Quotations
   quotations Quotation[]
+
+  // Integrations
+  integrations Integration[]
 }
 
 model User {
   id             String   @id
   email          String
   hashedPassword String
+  firstName      String?
+  lastName       String?
+  phone          String?
   role           String // 'SUPER_ADMIN', 'BUSINESS_OWNER', 'STAFF'
   tenantId       String?
   createdAt      DateTime @default(now())
 
   tenant               Tenant?                  @relation(fields: [tenantId], references: [id])
+  warehouseId          String?
+  warehouse            Warehouse?               @relation("UserWarehouse", fields: [warehouseId], references: [id])
   passwordResetTokens  PasswordResetToken[]
   assignedClients      Client[]                 @relation("AssignedClients")
   updatedClients       Client[]                 @relation("LastUpdatedClients")
@@ -60,8 +68,10 @@ model Invitation {
   token      String    @unique
   expiresAt  DateTime
   acceptedAt DateTime?
+  warehouseId String?
 
-  tenant Tenant @relation(fields: [tenantId], references: [id])
+  tenant    Tenant     @relation(fields: [tenantId], references: [id])
+  warehouse Warehouse? @relation("InvitationWarehouse", fields: [warehouseId], references: [id])
 }
 
 model PasswordResetToken {
@@ -181,9 +191,13 @@ model AppointmentAuditLog {
 // ==========================================
 
 model Category {
-  id       String @id
-  tenantId String
-  name     String
+  id          String   @id
+  tenantId    String
+  name        String
+  description String?
+  isArchived  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   tenant   Tenant    @relation(fields: [tenantId], references: [id])
   products Product[]
@@ -192,12 +206,16 @@ model Category {
 }
 
 model Warehouse {
-  id       String  @id
-  tenantId String
-  name     String
-  address  String?
+  id        String   @id
+  tenantId  String
+  name      String
+  address   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   tenant             Tenant              @relation(fields: [tenantId], references: [id])
+  managers           User[]              @relation("UserWarehouse")
+  invitations        Invitation[]        @relation("InvitationWarehouse")
   stockLevels        StockLevel[]
   movements          StockMovement[]     @relation("AdjustmentWarehouse")
   movementsFrom      StockMovement[]     @relation("FromWarehouse")
@@ -327,4 +345,22 @@ model QuotationStatusHistory {
   changedBy User      @relation(fields: [changedByUserId], references: [id])
 
   @@index([tenantId, quotationId])
+}
+
+// ==========================================
+// SETTINGS / INTEGRATIONS MODULE
+// ==========================================
+
+model Integration {
+  id        String   @id
+  tenantId  String
+  provider  String   // e.g., 'GOOGLE_CALENDAR'
+  status    String   // 'CONNECTED', 'DISCONNECTED'
+  config    Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, provider])
 }

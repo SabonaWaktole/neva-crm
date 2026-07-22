@@ -34,8 +34,12 @@ export class PrismaUserRepository implements IUserRepository {
         id: user.id,
         email: user.email,
         hashedPassword: user.hashedPassword,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: user.phone,
         role: user.role,
         tenantId: user.tenantId,
+        warehouseId: user.warehouseId,
         createdAt: user.createdAt,
       },
     });
@@ -49,8 +53,22 @@ export class PrismaUserRepository implements IUserRepository {
     });
   }
 
+  async updateProfile(userId: string, data: { firstName?: string | null; lastName?: string | null; phone?: string | null; email?: string }): Promise<void> {
+    await prisma.user.update({
+      where: { id: userId },
+      data,
+    });
+  }
+
   async findByTenantId(tenantId: string): Promise<User[]> {
     const data = await prisma.user.findMany({ where: { tenantId } });
     return data.map(u => User.create({ ...u, role: u.role as UserRole }));
+  }
+
+  async updateRoleAndWarehouse(userId: string, role: string, warehouseId: string | null): Promise<void> {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { role, warehouseId },
+    });
   }
 }

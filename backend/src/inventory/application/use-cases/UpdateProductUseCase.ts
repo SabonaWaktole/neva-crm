@@ -11,6 +11,7 @@ export interface UpdateProductDTO {
   price?: number;
   lowStockThreshold?: number;
   authorRole: UserRole;
+  authorWarehouseId?: string | null;
 }
 
 export class UpdateProductUseCase {
@@ -19,6 +20,10 @@ export class UpdateProductUseCase {
   async execute(dto: UpdateProductDTO): Promise<Product> {
     if (dto.authorRole !== UserRole.BUSINESS_OWNER && dto.authorRole !== UserRole.STAFF) {
       throw new Error('Unauthorized: Only Business Owners and Staff can update products.');
+    }
+
+    if (dto.authorRole === UserRole.STAFF && !dto.authorWarehouseId) {
+      throw new Error('Unauthorized: You must be assigned to a warehouse to update products.');
     }
 
     const product = await this.productRepo.findById(dto.tenantId, dto.id);

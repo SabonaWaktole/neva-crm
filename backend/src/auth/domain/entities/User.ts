@@ -4,8 +4,12 @@ interface UserProps {
   id: string;
   email: string;
   hashedPassword: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  phone?: string | null;
   role: UserRole;
   tenantId: string | null;
+  warehouseId?: string | null;
   createdAt: Date;
 }
 
@@ -13,16 +17,24 @@ export class User {
   public readonly id: string;
   public readonly email: string;
   public readonly hashedPassword: string;
+  public readonly firstName: string | null;
+  public readonly lastName: string | null;
+  public readonly phone: string | null;
   public readonly role: UserRole;
   public readonly tenantId: string | null;
+  public warehouseId: string | null;
   public readonly createdAt: Date;
 
   private constructor(props: UserProps) {
     this.id = props.id;
     this.email = props.email;
     this.hashedPassword = props.hashedPassword;
+    this.firstName = props.firstName || null;
+    this.lastName = props.lastName || null;
+    this.phone = props.phone || null;
     this.role = props.role;
     this.tenantId = props.tenantId;
+    this.warehouseId = props.warehouseId || null;
     this.createdAt = props.createdAt;
   }
 

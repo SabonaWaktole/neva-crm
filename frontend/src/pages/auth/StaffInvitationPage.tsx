@@ -36,7 +36,7 @@ export const StaffInvitationPage = () => {
   return (
     <AuthLayout
       title="Join Workspace"
-      subtitle="You've been invited to join a workspace on Nexus CRM. Create a password to get started."
+      subtitle="You've been invited to join a workspace on Neva CRM. Create a password to get started."
       logoIcon={<Handshake size={32} color="var(--color-primary)" />}
     >
       {isSuccess ? (

@@ -1,0 +1,20 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-sm);
+}
+
+.actions > * {
+  flex: 1;
+}

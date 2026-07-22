@@ -52,7 +52,7 @@ const mockGlobalEvents = [
     id: 'e-4',
     type: 'PAYMENT_SUCCEEDED',
     title: 'Payment Succeeded',
-    description: 'Subscription renewal for "Nexus AI Agency" processed successfully.',
+    description: 'Subscription renewal for "Neva AI Agency" processed successfully.',
     timeAgo: '5 hours ago',
     icon: <CreditCard size={20} />,
     color: 'var(--color-on-secondary-container)',

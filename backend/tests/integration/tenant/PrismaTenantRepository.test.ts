@@ -23,6 +23,7 @@ describe('PrismaTenantRepository Integration', () => {
     await prisma.client.deleteMany({});
     await prisma.customFieldDefinition.deleteMany({});
     await prisma.passwordResetToken.deleteMany({});
+    await prisma.invitation.deleteMany({});
     await prisma.user.deleteMany({});
     await prisma.outcomeCategory.deleteMany({});
     await prisma.tenant.deleteMany({});

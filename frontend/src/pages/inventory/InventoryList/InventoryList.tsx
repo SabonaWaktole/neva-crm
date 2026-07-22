@@ -6,7 +6,9 @@ import { TextInput } from '../../../components/ui/TextInput';
 import { SelectInput } from '../../../components/ui/SelectInput';
 import { InventoryTable } from '../../../components/inventory/InventoryTable';
 import { StockAdjustmentPanel } from '../../../components/inventory/StockAdjustmentPanel/StockAdjustmentPanel';
-import { useProducts, useCategories, useWarehouses } from '../../../hooks/useInventory';
+import { useProducts } from '../../../hooks/useInventory';
+import { useCategories } from '../../../hooks/useCategories';
+import { useWarehouses } from '../../../hooks/useWarehouses';
 import { PlusSquare, Search, Download, TrendingUp, AlertCircle, DollarSign, Database } from 'lucide-react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { AppLayout } from '../../../components/layout/AppLayout/AppLayout';
@@ -16,6 +18,9 @@ import { useLogout } from '../../../hooks/useLogout';
 import { useNavigation } from '../../../hooks/useNavigation';
 
 const InventoryListContent: React.FC = () => {
+  const navigate = useNavigate();
+  const { tenantSlug } = useParams();
+  
   const [searchQuery, setSearchQuery] = React.useState('');
   const [categoryId, setCategoryId] = React.useState('');
   // statusFilter: Not mapped to backend yet, deferred to future iteration
@@ -53,7 +58,7 @@ const InventoryListContent: React.FC = () => {
           <h1 className={styles.title}>Inventory Management</h1>
           <p className={styles.subtitle}>Manage your products, stock levels, and warehouse allocations.</p>
         </div>
-        <Button variant="primary" icon={<PlusSquare size={20} />}>
+        <Button variant="primary" icon={<PlusSquare size={20} />} onClick={() => navigate(`/${tenantSlug}/inventory/new`)}>
           Add Product
         </Button>
       </div>
@@ -115,7 +120,7 @@ const InventoryListContent: React.FC = () => {
           >
             <option value="">All Categories</option>
             {categories.map(cat => (
-              <option key={cat.id} value={cat.id}>{cat.name}</option>
+              <option key={cat.category.id} value={cat.category.id}>{cat.category.name}</option>
             ))}
           </SelectInput>
           <SelectInput className={styles.selectInput} defaultValue="">
@@ -141,16 +146,22 @@ const InventoryListContent: React.FC = () => {
         {isLoading ? (
           <div>Loading products...</div>
         ) : (
-          <InventoryTable 
-            products={products.map((p: any) => ({
-              ...p,
-              // Map backend Category object to string for the table
-              category: p.category ? p.category.name : 'Uncategorized',
-              totalUnits: p.totalUnits ?? 0,
-              stockBreakdown: p.stockBreakdown ?? []
-            }))} 
-            onAdjustStock={handleAdjustStock} 
-          />
+            <InventoryTable 
+              products={products.map((p: any) => {
+                const prod = p.product || p; // Handle nested { product, totalStock } from backend
+                return {
+                  id: prod.id,
+                  name: prod.name,
+                  sku: prod.sku || '', // SKU might not exist on backend yet
+                  price: prod.price || 0,
+                  status: p.availability || p.status || 'OUT_OF_STOCK',
+                  category: prod.category?.name || p.category?.name || 'Uncategorized',
+                  totalUnits: p.totalStock ?? p.totalUnits ?? 0,
+                  stockBreakdown: p.stockBreakdown ?? []
+                };
+              })} 
+              onAdjustStock={handleAdjustStock} 
+            />
         )}
       </div>
 
@@ -172,7 +183,7 @@ export const InventoryList: React.FC = () => {
   const { user } = useAuthStore();
   const { logout } = useLogout();
   const location = useLocation();
-  const navItems = useNavigation(user?.role, location.pathname);
+  const navItems = useNavigation(user, location.pathname);
 
   const handleLogout = async () => {
     await logout();
@@ -186,7 +197,7 @@ export const InventoryList: React.FC = () => {
     <AppLayout
       userName={userName}
       onLogout={handleLogout}
-      onSettingsClick={() => navigate(`/${tenantSlug}/settings`)}
+      onSettingsClick={() => navigate(`/${tenantSlug}/settings/profile`)}
       userAvatarSrc="https://lh3.googleusercontent.com/aida-public/AB6AXuCUVO_U904UXtp4jWW0TlbxmzPuBGIREJnS7rJvUtLWgv77vYvS4vxvhNtsn7uCPM4v19ncCYsTNjqR9gmBTthGZKxWksFTi3WHzwUACJE3fdYz43ve1_UcjRrGN0DsSAnzWy8bcm_ue3gBSicCHOQXi3nTG59avgqC7yDJvl_xzAPCtNRbIGrfduLtU3kRkzKkv4b6G4JpGzlfYerk5A74tOh2EEID2ccvMJyWClcbv_w3W2yL1Gy2hiSvmpCVC63iIga-3SmPV8Nj"
       sidebar={
         <Sidebar 

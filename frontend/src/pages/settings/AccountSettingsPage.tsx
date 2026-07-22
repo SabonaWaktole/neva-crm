@@ -62,7 +62,7 @@ export const AccountSettingsPage = () => {
     <AppLayout
       userName={userName}
       onLogout={handleLogout}
-      onSettingsClick={() => navigate(`/${tenantSlug}/settings`)}
+      onSettingsClick={() => navigate(`/${tenantSlug}/settings/profile`)}
       userAvatarSrc="https://lh3.googleusercontent.com/aida-public/AB6AXuCUVO_U904UXtp4jWW0TlbxmzPuBGIREJnS7rJvUtLWgv77vYvS4vxvhNtsn7uCPM4v19ncCYsTNjqR9gmBTthGZKxWksFTi3WHzwUACJE3fdYz43ve1_UcjRrGN0DsSAnzWy8bcm_ue3gBSicCHOQXi3nTG59avgqC7yDJvl_xzAPCtNRbIGrfduLtU3kRkzKkv4b6G4JpGzlfYerk5A74tOh2EEID2ccvMJyWClcbv_w3W2yL1Gy2hiSvmpCVC63iIga-3SmPV8Nj"
       sidebar={
         <Sidebar 

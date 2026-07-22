@@ -12,6 +12,7 @@ export interface AdjustStockDTO {
   reason: string;
   authorUserId: string;
   authorRole: UserRole;
+  authorWarehouseId?: string | null;
 }
 
 export class AdjustStockUseCase {
@@ -23,6 +24,10 @@ export class AdjustStockUseCase {
   async execute(dto: AdjustStockDTO): Promise<{ stockLevel: StockLevel; movement: StockMovement }> {
     if (dto.authorRole !== UserRole.BUSINESS_OWNER && dto.authorRole !== UserRole.STAFF) {
       throw new Error('Unauthorized: Only Business Owners and Staff can adjust stock.');
+    }
+
+    if (dto.authorRole === UserRole.STAFF && dto.authorWarehouseId !== dto.warehouseId) {
+      throw new Error('Unauthorized: You can only adjust stock in your assigned warehouse.');
     }
 
     const stockLevel = await this.stockLevelRepo.findByProductAndWarehouse(

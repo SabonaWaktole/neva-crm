@@ -13,6 +13,7 @@ import { UpdateCategoryUseCase } from '../../application/use-cases/UpdateCategor
 import { DeleteCategoryUseCase } from '../../application/use-cases/DeleteCategoryUseCase';
 import { GetWarehousesUseCase } from '../../application/use-cases/GetWarehousesUseCase';
 import { GetCategoriesUseCase } from '../../application/use-cases/GetCategoriesUseCase';
+import { ArchiveUnusedCategoriesUseCase } from '../../application/use-cases/ArchiveUnusedCategoriesUseCase';
 import { AvailabilityStatus } from '../../domain/repositories';
 import { NegativeStockError } from '../../domain/errors';
 import { WarehouseInUseError, CategoryInUseError } from '../../domain/inUseErrors';
@@ -36,7 +37,8 @@ export class InventoryController {
     private createCategoryUseCase: CreateCategoryUseCase,
     private updateCategoryUseCase: UpdateCategoryUseCase,
     private deleteCategoryUseCase: DeleteCategoryUseCase,
-    private getCategoriesUseCase: GetCategoriesUseCase
+    private getCategoriesUseCase: GetCategoriesUseCase,
+    private archiveUnusedCategoriesUseCase: ArchiveUnusedCategoriesUseCase
   ) {}
 
   // ======================
@@ -51,6 +53,7 @@ export class InventoryController {
         warehouseId: req.query.warehouseId as string | undefined,
         availability: req.query.availability as AvailabilityStatus | undefined,
         authorRole: req.user!.role as any,
+        authorWarehouseId: req.user!.warehouseId,
       });
       res.json(results);
     } catch (error: any) {
@@ -65,6 +68,7 @@ export class InventoryController {
       const result = await this.createProductUseCase.execute({
         tenantId: req.user!.tenantId!,
         authorRole: req.user!.role as any,
+        authorWarehouseId: req.user!.warehouseId,
         ...parsed,
         categoryId: parsed.categoryId ?? null,
       });
@@ -83,6 +87,7 @@ export class InventoryController {
         tenantId: req.user!.tenantId!,
         id: req.params.id as string,
         authorRole: req.user!.role as any,
+        authorWarehouseId: req.user!.warehouseId,
         ...parsed,
         categoryId: parsed.categoryId !== undefined ? (parsed.categoryId ?? null) : undefined,
       });
@@ -118,6 +123,7 @@ export class InventoryController {
         productId: req.params.id as string,
         authorUserId: req.user!.userId,
         authorRole: req.user!.role as any,
+        authorWarehouseId: req.user!.warehouseId,
         warehouseId: parsed.warehouseId,
         quantityChange: parsed.quantityChange,
         reason: parsed.reason || 'Manual adjustment',
@@ -140,6 +146,7 @@ export class InventoryController {
         productId: req.params.id as string,
         authorUserId: req.user!.userId,
         authorRole: req.user!.role as any,
+        authorWarehouseId: req.user!.warehouseId,
         ...parsed,
       });
       res.json(result);
@@ -160,6 +167,7 @@ export class InventoryController {
       const results = await this.getWarehousesUseCase.execute({
         tenantId: req.user!.tenantId!,
         authorRole: req.user!.role as any,
+        authorWarehouseId: req.user!.warehouseId,
       });
       res.json(results);
     } catch (error: any) {
@@ -226,6 +234,7 @@ export class InventoryController {
       const results = await this.getCategoriesUseCase.execute({
         tenantId: req.user!.tenantId!,
         authorRole: req.user!.role as any,
+        includeArchived: req.query.includeArchived === 'true',
       });
       res.json(results);
     } catch (error: any) {
@@ -280,6 +289,20 @@ export class InventoryController {
       if (error.message.includes('Unauthorized')) return res.status(403).json({ error: error.message });
       if (error.message.includes('not found')) return res.status(404).json({ error: error.message });
       if (error instanceof CategoryInUseError) return res.status(409).json({ error: error.message });
+      res.status(400).json({ error: error.message });
+    }
+  };
+
+  cleanupCategories = async (req: Request, res: Response) => {
+    try {
+      const result = await this.archiveUnusedCategoriesUseCase.execute({
+        tenantId: req.user!.tenantId!,
+        authorRole: req.user!.role as any,
+        limit: 3 // Fixed limit matching UI mock
+      });
+      res.json(result);
+    } catch (error: any) {
+      if (error.message.includes('Unauthorized')) return res.status(403).json({ error: error.message });
       res.status(400).json({ error: error.message });
     }
   };

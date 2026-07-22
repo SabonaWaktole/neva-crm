@@ -9,6 +9,7 @@ declare global {
         role: string;
         tenantId: string | null;
         tenantSlug: string | null;
+        warehouseId: string | null;
       };
     }
   }

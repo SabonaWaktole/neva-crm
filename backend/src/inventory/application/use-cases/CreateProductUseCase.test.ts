@@ -23,6 +23,7 @@ describe('CreateProductUseCase', () => {
       findById: jest.fn(),
       findAllByTenantId: jest.fn(),
       save: jest.fn(),
+      update: jest.fn(),
       delete: jest.fn(),
     };
     stockLevelRepo = {
@@ -72,7 +73,8 @@ describe('CreateProductUseCase', () => {
       categoryId: null,
       price: 100,
       initialStock: [{ warehouseId: 'w1', quantity: 50 }],
-      authorRole: UserRole.STAFF
+      authorRole: UserRole.STAFF,
+      authorWarehouseId: 'w1'
     });
 
     expect(result.product.name).toBe('Test Product');
@@ -127,7 +129,7 @@ describe('CreateProductUseCase', () => {
       categoryId: null,
       price: 100,
       initialStock: [],
-      authorRole: UserRole.SUPER_ADMIN
+      authorRole: UserRole.SUPER_ADMIN as any
     })).rejects.toThrow('Unauthorized: Only Business Owners and Staff can create products.');
   });
 

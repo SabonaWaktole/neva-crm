@@ -38,9 +38,9 @@ describe('Dashboard Routes (Integration)', () => {
       skipDuplicates: true,
     });
 
-    t1BusinessOwnerToken = tokenService.sign({ userId: t1BoId, role: 'BUSINESS_OWNER', tenantId: tenant1Id, tenantSlug: 't-dash-1' });
-    t1StaffToken = tokenService.sign({ userId: t1StId, role: 'STAFF', tenantId: tenant1Id, tenantSlug: 't-dash-1' });
-    t2BusinessOwnerToken = tokenService.sign({ userId: t2BoId, role: 'BUSINESS_OWNER', tenantId: tenant2Id, tenantSlug: 't-dash-2' });
+    t1BusinessOwnerToken = tokenService.sign({ userId: t1BoId, role: 'BUSINESS_OWNER', tenantId: tenant1Id, tenantSlug: 't-dash-1', warehouseId: null });
+    t1StaffToken = tokenService.sign({ userId: t1StId, role: 'STAFF', tenantId: tenant1Id, tenantSlug: 't-dash-1', warehouseId: null });
+    t2BusinessOwnerToken = tokenService.sign({ userId: t2BoId, role: 'BUSINESS_OWNER', tenantId: tenant2Id, tenantSlug: 't-dash-2', warehouseId: null });
 
     // Seed some basic data so metrics aren't zero
     await prisma.client.createMany({

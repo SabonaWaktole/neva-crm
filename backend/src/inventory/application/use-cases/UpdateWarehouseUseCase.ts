@@ -24,7 +24,7 @@ export class UpdateWarehouseUseCase {
     }
 
     warehouse.update({ name: dto.name, address: dto.address });
-    await this.warehouseRepo.save(warehouse);
+    await this.warehouseRepo.update(warehouse);
     return warehouse;
   }
 }

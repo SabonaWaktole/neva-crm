@@ -94,7 +94,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({ products, onAdju
                 />
               </td>
               <td className={styles.secondaryText}>
-                ${product.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                ${Number(product.price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </td>
               <td className={styles.actionsCell}>
                 <DropdownMenu

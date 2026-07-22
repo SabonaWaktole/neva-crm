@@ -8,6 +8,7 @@ export interface SearchProductsDTO {
   warehouseId?: string;
   availability?: 'IN_STOCK' | 'LOW_STOCK' | 'OUT_OF_STOCK';
   authorRole: UserRole;
+  authorWarehouseId?: string | null;
 }
 
 export class SearchProductsUseCase {
@@ -18,10 +19,20 @@ export class SearchProductsUseCase {
       throw new Error('Unauthorized: Only Business Owners and Staff can search products.');
     }
 
+    if (dto.authorRole === UserRole.STAFF && !dto.authorWarehouseId) {
+      throw new Error('Unauthorized: You must be assigned to a warehouse to view products.');
+    }
+
+    let filterWarehouseId = dto.warehouseId;
+    if (dto.authorRole === UserRole.STAFF) {
+      // Force the filter to the staff's assigned warehouse
+      filterWarehouseId = dto.authorWarehouseId as string;
+    }
+
     const filters: ProductSearchFilters = {
       name: dto.name,
       categoryId: dto.categoryId,
-      warehouseId: dto.warehouseId,
+      warehouseId: filterWarehouseId,
       availability: dto.availability,
     };
 

@@ -1,4 +1,5 @@
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { getUserDisplayName } from '../../utils/userUtils';
 import { AppLayout } from '../../components/layout/AppLayout/AppLayout';
 import { Sidebar } from '../../components/layout/Sidebar/Sidebar';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -13,20 +14,20 @@ export const BusinessOwnerShell = () => {
   const { logout } = useLogout();
   const location = useLocation();
 
-  const navItemsWithActiveState = useNavigation(user?.role, location.pathname);
+  const navItemsWithActiveState = useNavigation(user, location.pathname);
 
   const handleLogout = async () => {
     await logout();
     navigate('/login');
   };
 
-  const userName = user?.userId ? `User ${user.userId.substring(0, 8)}` : 'Business Owner';
+  const userName = getUserDisplayName(user);
 
   return (
     <AppLayout
       userName={userName}
       onLogout={handleLogout}
-      onSettingsClick={() => navigate(`/${tenantSlug}/settings`)}
+      onSettingsClick={() => navigate(`/${tenantSlug}/settings/profile`)}
       sidebar={
         <Sidebar 
           orgName="My Workspace" 
