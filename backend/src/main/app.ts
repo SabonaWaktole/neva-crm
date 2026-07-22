@@ -22,7 +22,7 @@ import { PrismaPasswordResetTokenRepository } from '@auth/infrastructure/reposit
 import { BcryptPasswordHasher } from '@auth/infrastructure/BcryptPasswordHasher';
 import { JwtTokenService } from '@auth/infrastructure/JwtTokenService';
 import { ConsoleEmailSender } from '@auth/infrastructure/ConsoleEmailSender';
-import { ResendEmailSender } from '@auth/infrastructure/ResendEmailSender';
+import { EmailJsSender } from '@auth/infrastructure/EmailJsSender';
 import { PrismaUnitOfWork } from '@shared/infrastructure/prisma/PrismaUnitOfWork';
 import { IUserRepository } from '@auth/domain/repositories/IUserRepository';
 import { ITenantRepository } from '@tenant/domain/repositories/ITenantRepository';
@@ -69,7 +69,7 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const prtRepository = overrides?.prtRepository ?? new PrismaPasswordResetTokenRepository();
   const passwordHasher = overrides?.passwordHasher ?? new BcryptPasswordHasher();
   const tokenService = overrides?.tokenService ?? new JwtTokenService();
-  const emailSender = overrides?.emailSender ?? new ResendEmailSender();
+  const emailSender = overrides?.emailSender ?? new EmailJsSender();
   const unitOfWork = overrides?.unitOfWork ?? new PrismaUnitOfWork();
 
   // Use Cases
