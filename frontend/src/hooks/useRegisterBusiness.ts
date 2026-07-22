@@ -26,13 +26,15 @@ export const useRegisterBusiness = () => {
       const data = err.response?.data;
       if (data) {
         if (data.error) {
-          errorMessage = data.error;
+          errorMessage = typeof data.error === 'string' ? data.error : JSON.stringify(data.error);
         } else if (data.issues && Array.isArray(data.issues)) {
           // Zod error array
           errorMessage = data.issues.map((i: any) => `${i.path.join('.')}: ${i.message}`).join(', ');
         } else if (data.message) {
-          errorMessage = data.message;
+          errorMessage = typeof data.message === 'string' ? data.message : JSON.stringify(data.message);
         }
+      } else if (err.message) {
+        errorMessage = err.message;
       }
       setError(errorMessage);
       throw err;
