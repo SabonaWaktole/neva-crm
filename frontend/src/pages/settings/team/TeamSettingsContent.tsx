@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card } from '../../../components/ui/Card/Card';
 import { Button } from '../../../components/ui/Button/Button';
-import { useTeam, StaffMember } from '../../../hooks/useTeam';
+import { useTeam, type StaffMember } from '../../../hooks/useTeam';
 import { InviteMemberModal } from './InviteMemberModal';
 import { EditMemberModal } from './EditMemberModal';
 import { Mail, Shield, Clock, Edit2 } from 'lucide-react';
@@ -64,7 +64,7 @@ export const TeamSettingsContent: React.FC = () => {
                     {member.role === 'STAFF' ? 'Sales Rep' : member.role}
                   </div>
                   {isOwner && (
-                    <Button variant="outline" size="sm" onClick={() => setEditingMember(member)} style={{ padding: '4px 8px' }}>
+                    <Button variant="outline" onClick={() => setEditingMember(member)} style={{ padding: '4px 8px' }}>
                       <Edit2 size={14} />
                     </Button>
                   )}

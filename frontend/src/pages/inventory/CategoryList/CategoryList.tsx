@@ -5,33 +5,98 @@ import styles from './CategoryList.module.css';
 interface CategoryRowData {
   id: string;
   name: string;
-  itemCount: number; // MOCK DATA
-  // Tax Logic omitted per Step 3 constraints
+  description?: string;
+  isArchived?: boolean;
+  itemCount: number;
   iconType: 'hardware' | 'description' | 'manufacturing' | 'security';
 }
 
-import { useCategories } from '../../../hooks/useInventory';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { AppLayout } from '../../../components/layout/AppLayout/AppLayout';
-import { Sidebar } from '../../../components/layout/Sidebar/Sidebar';
+import { useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory, useArchiveCategories } from '../../../hooks/useCategories';
+import { CategoryFormModal, type CategoryFormData } from '../../../components/inventory/CategoryFormModal/CategoryFormModal';
+import { DeleteCategoryModal } from '../../../components/inventory/DeleteCategoryModal/DeleteCategoryModal';
+import { useNavigate, useParams } from 'react-router-dom';
+import { SettingsLayout } from '../../../components/layout/SettingsLayout/SettingsLayout';
 import { useAuthStore } from '../../../store/useAuthStore';
-import { useLogout } from '../../../hooks/useLogout';
-import { useNavigation } from '../../../hooks/useNavigation';
 
 const CategoryListContent: React.FC = () => {
-  const { categories: realCategories, fetchCategories } = useCategories();
+  const [showArchived, setShowArchived] = React.useState(false);
+  const { categories: realCategories, fetchCategories } = useCategories(showArchived);
+  const { createCategory } = useCreateCategory();
+  const { updateCategory } = useUpdateCategory();
+  const { deleteCategory } = useDeleteCategory();
+  const { cleanupCategories, isPending: isCleaningUp } = useArchiveCategories();
+  
+  const { user } = useAuthStore();
+  const isBusinessOwner = user?.role === 'BUSINESS_OWNER';
 
   React.useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);
 
-  // MOCK DATA - item counts and icons are decorative
-  const categories: CategoryRowData[] = realCategories.map((c, i) => ({
-    id: c.id,
-    name: c.name,
-    itemCount: Math.floor(Math.random() * 500) + 10, // Mock item count
-    iconType: ['hardware', 'description', 'manufacturing', 'security'][i % 4] as CategoryRowData['iconType']
-  }));
+  const [isFormModalOpen, setIsFormModalOpen] = React.useState(false);
+  const [editingCategory, setEditingCategory] = React.useState<CategoryRowData | null>(null);
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
+  const [deletingCategory, setDeletingCategory] = React.useState<CategoryRowData | null>(null);
+
+  const handleOpenAdd = () => {
+    setEditingCategory(null);
+    setIsFormModalOpen(true);
+  };
+
+  const handleOpenEdit = (cat: CategoryRowData) => {
+    setEditingCategory(cat);
+    setIsFormModalOpen(true);
+  };
+
+  const handleSaveForm = async (data: CategoryFormData) => {
+    if (editingCategory) {
+      await updateCategory(editingCategory.id, data);
+    } else {
+      await createCategory(data);
+    }
+    await fetchCategories();
+    setIsFormModalOpen(false);
+  };
+
+  const handleOpenDelete = (cat: CategoryRowData) => {
+    setDeletingCategory(cat);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (deletingCategory) {
+      await deleteCategory(deletingCategory.id);
+      await fetchCategories();
+      setIsDeleteModalOpen(false);
+    }
+  };
+
+  const navigate = useNavigate();
+  const { tenantSlug } = useParams();
+
+  const handleRunCleanup = async () => {
+    try {
+      const result = await cleanupCategories();
+      alert(`System Cleanup: ${result.count} unused categories have been archived successfully.`);
+      await fetchCategories();
+    } catch (err) {
+      alert('Failed to cleanup categories.');
+    }
+  };
+
+  // MOCK DATA - item counts and icons are decorative. useMemo prevents them from changing on re-renders.
+  // Real Item Counts with deterministic decorative icons
+  const categories = React.useMemo(() => {
+    return realCategories.map((c, i) => ({
+      id: c.category.id,
+      name: c.category.name,
+      description: c.category.description || undefined,
+      isArchived: c.category.isArchived,
+      itemCount: c.itemCount,
+      iconType: ['hardware', 'description', 'manufacturing', 'security'][i % 4] as CategoryRowData['iconType']
+    }));
+  }, [realCategories]);
 
   const getIcon = (type: CategoryRowData['iconType']) => {
     switch (type) {
@@ -58,10 +123,18 @@ const CategoryListContent: React.FC = () => {
             <h1 className={styles.pageTitle}>Category Management</h1>
             <p className={styles.pageSubtitle}>Define and organize product categories for the global inventory ledger.</p>
           </div>
-          <button className={styles.primaryButton}>
-            <Plus size={20} />
-            New Category
-          </button>
+          {isBusinessOwner && (
+            <div style={{ display: 'flex', gap: 'var(--spacing-md)', alignItems: 'center' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                <input type="checkbox" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />
+                Show Archived
+              </label>
+              <button className={styles.primaryButton} onClick={handleOpenAdd}>
+                <Plus size={20} />
+                New Category
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -71,19 +144,19 @@ const CategoryListContent: React.FC = () => {
           <div className={styles.sidebarBox}>
             <h3 className={styles.sidebarTitle}>INVENTORY CONFIG</h3>
             <nav className={styles.navLinks}>
-              <a href="#" className={styles.navLink}>
+              <a href={`/${tenantSlug}/settings/company`} onClick={(e) => { e.preventDefault(); navigate(`/${tenantSlug}/settings/company`); }} className={styles.navLink}>
                 <span>General Defaults</span>
                 <ChevronRight size={18} />
               </a>
-              <a href="#" className={`${styles.navLink} ${styles.navLinkActive}`}>
+              <a href={`/${tenantSlug}/settings/categories`} onClick={(e) => { e.preventDefault(); navigate(`/${tenantSlug}/settings/categories`); }} className={`${styles.navLink} ${styles.navLinkActive}`}>
                 <span>Category Labels</span>
                 <Tags size={18} />
               </a>
-              <a href="#" className={styles.navLink}>
+              <a href={`/${tenantSlug}/settings/warehouses`} onClick={(e) => { e.preventDefault(); navigate(`/${tenantSlug}/settings/warehouses`); }} className={styles.navLink}>
                 <span>Warehouse Zones</span>
                 <WarehouseIcon size={18} />
               </a>
-              <a href="#" className={styles.navLink}>
+              <a href={`/${tenantSlug}/settings/tax`} onClick={(e) => { e.preventDefault(); alert('Tax Configurations coming soon'); }} className={styles.navLink}>
                 <span>Tax Configurations</span>
                 <FileText size={18} />
               </a>
@@ -107,7 +180,7 @@ const CategoryListContent: React.FC = () => {
             <div className={styles.listHeader}>
               <div className={styles.colName}>CATEGORY NAME</div>
               <div className={styles.colItems}>ITEM COUNT</div>
-              <div className={styles.colActions}>ACTIONS</div>
+              {isBusinessOwner && <div className={styles.colActions}>ACTIONS</div>}
             </div>
 
             <div className={styles.listBody}>
@@ -118,7 +191,9 @@ const CategoryListContent: React.FC = () => {
                       {getIcon(cat.iconType)}
                     </div>
                     <div>
-                      <div className={styles.catName}>{cat.name}</div>
+                      <div className={styles.catName}>
+                        {cat.name} {cat.isArchived && <span style={{ fontSize: '12px', padding: '2px 6px', background: '#e0e0e0', borderRadius: '4px', marginLeft: '8px' }}>Archived</span>}
+                      </div>
                       <div className={styles.catId}>Key ID: {cat.id} • Root Category</div>
                     </div>
                   </div>
@@ -128,11 +203,17 @@ const CategoryListContent: React.FC = () => {
                       <span>{cat.itemCount.toLocaleString()} Items</span>
                     </div>
                   </div>
-                  <div className={styles.colActions}>
-                    <button className={styles.actionBtn} title="Edit"><Edit2 size={18} /></button>
-                    <button className={`${styles.actionBtn} ${styles.actionBtnDanger}`} title="Delete"><Trash2 size={18} /></button>
-                    <button className={styles.actionBtn}><MoreVertical size={18} /></button>
-                  </div>
+                  {isBusinessOwner && (
+                    <div className={styles.colActions}>
+                      <button className={styles.actionBtn} title="Edit" onClick={() => handleOpenEdit(cat)}>
+                        <Edit2 size={18} />
+                      </button>
+                      <button className={`${styles.actionBtn} ${styles.actionBtnDanger}`} title="Delete" onClick={() => handleOpenDelete(cat)}>
+                        <Trash2 size={18} />
+                      </button>
+                      <button className={styles.actionBtn}><MoreVertical size={18} /></button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -181,13 +262,29 @@ const CategoryListContent: React.FC = () => {
                   <div className={styles.auditSub}>Consider archiving for database cleanup.</div>
                 </div>
               </div>
-              <button className={styles.auditBtn}>
-                Run System Cleanup
+              <button className={styles.auditBtn} onClick={handleRunCleanup} disabled={isCleaningUp}>
+                {isCleaningUp ? 'Cleaning up...' : 'Run System Cleanup'}
               </button>
             </div>
           </div>
         </div>
       </div>
+
+      <CategoryFormModal
+        isOpen={isFormModalOpen}
+        onClose={() => setIsFormModalOpen(false)}
+        onSave={handleSaveForm}
+        initialData={editingCategory ? { name: editingCategory.name, description: editingCategory.description || '' } : null}
+      />
+
+      {deletingCategory && (
+        <DeleteCategoryModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={handleConfirmDelete}
+          categoryName={deletingCategory.name}
+        />
+      )}
     </div>
   );
 };
@@ -199,38 +296,9 @@ function PrecisionManufacturing(props: any) { return <Activity {...props} />; }
 function Security(props: any) { return <AlertTriangle {...props} />; }
 
 export const CategoryList: React.FC = () => {
-  const navigate = useNavigate();
-  const { tenantSlug } = useParams();
-  const { user } = useAuthStore();
-  const { logout } = useLogout();
-  const location = useLocation();
-  const navItems = useNavigation(user?.role, location.pathname);
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
-
-  const userName = user?.userId ? `User ${user.userId.substring(0, 8)}` : 'Business Owner';
-  const roleName = user?.role === 'STAFF' ? 'Sales Representative' : 'Enterprise Tier';
-
   return (
-    <AppLayout
-      userName={userName}
-      onLogout={handleLogout}
-      onSettingsClick={() => navigate(`/${tenantSlug}/settings`)}
-      userAvatarSrc="https://lh3.googleusercontent.com/aida-public/AB6AXuCUVO_U904UXtp4jWW0TlbxmzPuBGIREJnS7rJvUtLWgv77vYvS4vxvhNtsn7uCPM4v19ncCYsTNjqR9gmBTthGZKxWksFTi3WHzwUACJE3fdYz43ve1_UcjRrGN0DsSAnzWy8bcm_ue3gBSicCHOQXi3nTG59avgqC7yDJvl_xzAPCtNRbIGrfduLtU3kRkzKkv4b6G4JpGzlfYerk5A74tOh2EEID2ccvMJyWClcbv_w3W2yL1Gy2hiSvmpCVC63iIga-3SmPV8Nj"
-      sidebar={
-        <Sidebar 
-          orgName={tenantSlug || 'Workspace'} 
-          orgTier={roleName} 
-          navItems={navItems} 
-          onLogoutClick={handleLogout}
-          onNavItemClick={(id) => navigate(`/${tenantSlug || ''}/${id === 'dashboard' ? '' : id}`)}
-        />
-      }
-    >
+    <SettingsLayout activeNavId="settings/categories">
       <CategoryListContent />
-    </AppLayout>
+    </SettingsLayout>
   );
 };

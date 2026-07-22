@@ -15,7 +15,7 @@ export class SearchProductsUseCase {
   constructor(private productRepo: IProductRepository) {}
 
   async execute(dto: SearchProductsDTO): Promise<ProductWithStock[]> {
-    if (dto.authorRole !== UserRole.BUSINESS_OWNER && dto.authorRole !== UserRole.STAFF && dto.authorRole !== UserRole.SUPER_ADMIN) {
+    if (dto.authorRole !== UserRole.BUSINESS_OWNER && dto.authorRole !== UserRole.STAFF) {
       throw new Error('Unauthorized: Only Business Owners and Staff can search products.');
     }
 

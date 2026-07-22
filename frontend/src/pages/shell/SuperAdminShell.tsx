@@ -14,7 +14,7 @@ export const SuperAdminShell = () => {
   const { logout } = useLogout();
   const location = useLocation();
 
-  const navItemsWithActiveState = useNavigation(user?.role, location.pathname);
+  const navItemsWithActiveState = useNavigation(user, location.pathname);
 
   const handleLogout = async () => {
     await logout();

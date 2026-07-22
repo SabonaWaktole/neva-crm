@@ -14,7 +14,7 @@ export const TeamSettingsPage = () => {
   const { user } = useAuthStore();
   const { logout } = useLogout();
   const location = useLocation();
-  const navItems = useNavigation(user?.role, location.pathname);
+  const navItems = useNavigation(user, location.pathname);
 
   const handleLogout = async () => {
     await logout();
@@ -32,7 +32,7 @@ export const TeamSettingsPage = () => {
     <AppLayout
       userName={userName}
       onLogout={handleLogout}
-      onSettingsClick={() => navigate(`/${tenantSlug}/settings`)}
+      onSettingsClick={() => navigate(`/${tenantSlug}/settings/profile`)}
       userAvatarSrc="https://lh3.googleusercontent.com/aida-public/AB6AXuCUVO_U904UXtp4jWW0TlbxmzPuBGIREJnS7rJvUtLWgv77vYvS4vxvhNtsn7uCPM4v19ncCYsTNjqR9gmBTthGZKxWksFTi3WHzwUACJE3fdYz43ve1_UcjRrGN0DsSAnzWy8bcm_ue3gBSicCHOQXi3nTG59avgqC7yDJvl_xzAPCtNRbIGrfduLtU3kRkzKkv4b6G4JpGzlfYerk5A74tOh2EEID2ccvMJyWClcbv_w3W2yL1Gy2hiSvmpCVC63iIga-3SmPV8Nj"
       sidebar={
         <Sidebar 
@@ -50,7 +50,7 @@ export const TeamSettingsPage = () => {
           <div style={{ marginBottom: 'var(--spacing-lg)' }}>
             <nav aria-label="Breadcrumb" style={{ display: 'flex', alignItems: 'center', color: 'var(--color-on-surface-variant)', fontSize: 'var(--font-size-label-sm)', marginBottom: 'var(--spacing-xs)' }}>
               <ol style={{ display: 'flex', alignItems: 'center', listStyle: 'none', padding: 0, margin: 0, gap: '8px' }}>
-                <li><a href="#settings" onClick={(e) => { e.preventDefault(); navigate(`/${tenantSlug}/settings`); }} style={{ color: 'inherit', textDecoration: 'none' }}>Settings</a></li>
+                <li><a href="#settings" onClick={(e) => { e.preventDefault(); navigate(`/${tenantSlug}/settings/profile`); }} style={{ color: 'inherit', textDecoration: 'none' }}>Settings</a></li>
                 <li><ChevronRight size={14} /></li>
                 <li aria-current="page" style={{ color: 'var(--color-on-surface)', fontWeight: 600 }}>Team Settings</li>
               </ol>

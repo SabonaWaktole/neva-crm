@@ -9,7 +9,7 @@ export const authService = {
 
   getMe: async () => {
     const response = await apiClient.get('/auth/me');
-    return response.data.user;
+    return response.data.user ?? null;
   },
 
   updateProfile: async (data: { firstName?: string | null; lastName?: string | null; phone?: string | null; email?: string }) => {

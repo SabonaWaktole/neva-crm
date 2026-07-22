@@ -3,6 +3,7 @@ import { AuthController } from '@auth/interfaces/http/controllers/AuthController
 import { validateRequest } from '@main/interfaces/http/middlewares/validateRequest';
 import { authSchemas } from '@auth/interfaces/http/schemas/authSchemas';
 import { authenticate } from '@main/interfaces/http/middlewares/authenticate';
+import { optionalAuthenticate } from '@main/interfaces/http/middlewares/optionalAuthenticate';
 import { authorize } from '@main/interfaces/http/middlewares/authorize';
 import { resolveTenant } from '@main/interfaces/http/middlewares/resolveTenant';
 import { UserRole } from '@auth/domain/enums/UserRole';
@@ -15,6 +16,7 @@ export const createGlobalAuthRoutes = (
 ): Router => {
   const router = Router();
   const authMw = authenticate(tokenService);
+  const optionalAuthMw = optionalAuthenticate(tokenService);
 
   router.post('/register', validateRequest(authSchemas.register), authController.register);
   router.post('/login', validateRequest(authSchemas.login), authController.loginGlobal);
@@ -24,7 +26,7 @@ export const createGlobalAuthRoutes = (
   router.post('/password-reset/reset', validateRequest(authSchemas.resetPassword), authController.resetPassword);
 
   // Profile endpoints
-  router.get('/me', authMw, authController.getMe);
+  router.get('/me', optionalAuthMw, authController.getMe);
   router.put('/me', authMw, validateRequest(authSchemas.updateProfile), authController.updateMe);
 
   return router;

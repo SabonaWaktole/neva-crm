@@ -64,7 +64,7 @@ describe('UpdateProductUseCase', () => {
       tenantId: 'tenant1',
       id: 'p1',
       name: 'New Name',
-      authorRole: UserRole.SUPER_ADMIN
+      authorRole: UserRole.SUPER_ADMIN as any
     })).rejects.toThrow('Unauthorized: Only Business Owners and Staff can update products.');
   });
 });

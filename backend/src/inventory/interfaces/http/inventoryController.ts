@@ -13,6 +13,7 @@ import { UpdateCategoryUseCase } from '../../application/use-cases/UpdateCategor
 import { DeleteCategoryUseCase } from '../../application/use-cases/DeleteCategoryUseCase';
 import { GetWarehousesUseCase } from '../../application/use-cases/GetWarehousesUseCase';
 import { GetCategoriesUseCase } from '../../application/use-cases/GetCategoriesUseCase';
+import { ArchiveUnusedCategoriesUseCase } from '../../application/use-cases/ArchiveUnusedCategoriesUseCase';
 import { AvailabilityStatus } from '../../domain/repositories';
 import { NegativeStockError } from '../../domain/errors';
 import { WarehouseInUseError, CategoryInUseError } from '../../domain/inUseErrors';
@@ -36,7 +37,8 @@ export class InventoryController {
     private createCategoryUseCase: CreateCategoryUseCase,
     private updateCategoryUseCase: UpdateCategoryUseCase,
     private deleteCategoryUseCase: DeleteCategoryUseCase,
-    private getCategoriesUseCase: GetCategoriesUseCase
+    private getCategoriesUseCase: GetCategoriesUseCase,
+    private archiveUnusedCategoriesUseCase: ArchiveUnusedCategoriesUseCase
   ) {}
 
   // ======================
@@ -232,6 +234,7 @@ export class InventoryController {
       const results = await this.getCategoriesUseCase.execute({
         tenantId: req.user!.tenantId!,
         authorRole: req.user!.role as any,
+        includeArchived: req.query.includeArchived === 'true',
       });
       res.json(results);
     } catch (error: any) {
@@ -286,6 +289,20 @@ export class InventoryController {
       if (error.message.includes('Unauthorized')) return res.status(403).json({ error: error.message });
       if (error.message.includes('not found')) return res.status(404).json({ error: error.message });
       if (error instanceof CategoryInUseError) return res.status(409).json({ error: error.message });
+      res.status(400).json({ error: error.message });
+    }
+  };
+
+  cleanupCategories = async (req: Request, res: Response) => {
+    try {
+      const result = await this.archiveUnusedCategoriesUseCase.execute({
+        tenantId: req.user!.tenantId!,
+        authorRole: req.user!.role as any,
+        limit: 3 // Fixed limit matching UI mock
+      });
+      res.json(result);
+    } catch (error: any) {
+      if (error.message.includes('Unauthorized')) return res.status(403).json({ error: error.message });
       res.status(400).json({ error: error.message });
     }
   };

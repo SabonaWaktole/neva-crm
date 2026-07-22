@@ -12,7 +12,7 @@ export class GetWarehousesUseCase {
   constructor(private warehouseRepository: IWarehouseRepository) {}
 
   async execute(request: GetWarehousesRequest): Promise<Warehouse[]> {
-    if (request.authorRole !== UserRole.BUSINESS_OWNER && request.authorRole !== UserRole.STAFF && request.authorRole !== UserRole.SUPER_ADMIN) {
+    if (request.authorRole !== UserRole.BUSINESS_OWNER && request.authorRole !== UserRole.STAFF) {
       throw new Error('Unauthorized: Only Business Owners and Staff can view warehouses.');
     }
 

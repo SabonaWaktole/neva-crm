@@ -25,6 +25,7 @@ const iconMap: Record<string, LucideIcon> = {
 
 export interface NavItem {
   id: string;
+  path?: string;
   label: string;
   icon: string;
   isActive?: boolean;
@@ -79,9 +80,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className={`${styles.navItem} ${item.isActive ? styles.navItemActive : ''}`}
               onClick={(e) => {
                 e.preventDefault();
-                if (onNavItemClick) onNavItemClick(item.id);
+                if (onNavItemClick) onNavItemClick(item.path || item.id);
               }}
-              href={`#${item.id}`}
+              href={`#${item.path || item.id}`}
             >
               <IconComponent className={styles.navIcon} size={20} />
               <span className={styles.navLabel}>{item.label}</span>

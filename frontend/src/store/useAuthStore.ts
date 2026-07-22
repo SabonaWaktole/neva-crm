@@ -11,6 +11,7 @@ export interface User {
   role: Role;
   tenantId: string | null;
   tenantSlug: string | null;
+  warehouseId?: string | null;
 }
 
 interface AuthState {

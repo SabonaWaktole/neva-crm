@@ -47,7 +47,16 @@ export interface AppDependencies {
 
 export const createApp = (overrides?: Partial<AppDependencies>) => {
   const app = express();
-  app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+  app.use(cors({
+    origin: (origin, callback) => {
+      if (!origin || /^http:\/\/localhost:\d+$/.test(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+  }));
   app.use(express.json());
   app.use(cookieParser());
 
@@ -160,6 +169,7 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const { DeleteCategoryUseCase } = require('../inventory/application/use-cases/DeleteCategoryUseCase');
   const { GetWarehousesUseCase } = require('../inventory/application/use-cases/GetWarehousesUseCase');
   const { GetCategoriesUseCase } = require('../inventory/application/use-cases/GetCategoriesUseCase');
+  const { ArchiveUnusedCategoriesUseCase } = require('../inventory/application/use-cases/ArchiveUnusedCategoriesUseCase');
   
   const { InventoryController } = require('../inventory/interfaces/http/inventoryController');
   const { createInventoryRouter } = require('../inventory/interfaces/http/inventoryRoutes');
@@ -185,7 +195,8 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
     new CreateCategoryUseCase(categoryRepo),
     new UpdateCategoryUseCase(categoryRepo),
     new DeleteCategoryUseCase(categoryRepo, productRepo),
-    new GetCategoriesUseCase(categoryRepo)
+    new GetCategoriesUseCase(categoryRepo),
+    new ArchiveUnusedCategoriesUseCase(categoryRepo)
   );
 
   const inventoryRoutes = createInventoryRouter(inventoryController, tokenService, tenantRepository);

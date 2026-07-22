@@ -26,10 +26,18 @@ export interface IProductRepository {
   countByCategoryId(tenantId: string, categoryId: string): Promise<number>;
 }
 
+export interface CategoryWithItemCount {
+  category: Category;
+  itemCount: number;
+}
+
 export interface ICategoryRepository {
   findById(tenantId: string, id: string): Promise<Category | null>;
-  findAllByTenantId(tenantId: string): Promise<Category[]>;
+  findAllByTenantId(tenantId: string, includeArchived?: boolean): Promise<Category[]>;
+  findAllWithItemCount(tenantId: string, includeArchived?: boolean): Promise<CategoryWithItemCount[]>;
+  findLeastRecentlyUsedCategories(tenantId: string, limit: number): Promise<Category[]>;
   save(category: Category): Promise<void>;
+  update(category: Category): Promise<void>;
   delete(tenantId: string, id: string): Promise<void>;
 }
 

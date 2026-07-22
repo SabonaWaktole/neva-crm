@@ -78,7 +78,7 @@ export class AuthController {
 
   getMe = async (req: Request, res: Response) => {
     if (!req.user) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      return res.status(200).json({ user: null });
     }
     try {
       const user = await this.getUserProfileUseCase.execute(req.user.userId);
@@ -95,6 +95,7 @@ export class AuthController {
           role: user.role,
           tenantId: user.tenantId,
           tenantSlug: req.user.tenantSlug,
+          warehouseId: user.warehouseId,
         }
       });
     } catch (error: any) {

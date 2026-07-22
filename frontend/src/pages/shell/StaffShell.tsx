@@ -14,7 +14,7 @@ export const StaffShell = () => {
   const { logout } = useLogout();
   const location = useLocation();
 
-  const navItemsWithActiveState = useNavigation(user?.role, location.pathname);
+  const navItemsWithActiveState = useNavigation(user, location.pathname);
 
   const handleLogout = async () => {
     await logout();
@@ -27,7 +27,7 @@ export const StaffShell = () => {
     <AppLayout
       userName={userName}
       onLogout={handleLogout}
-      onSettingsClick={() => navigate(`/${tenantSlug}/settings`)}
+      onSettingsClick={() => navigate(`/${tenantSlug}/settings/profile`)}
       sidebar={
         <Sidebar 
           orgName="My Workspace" 

@@ -129,7 +129,7 @@ describe('CreateProductUseCase', () => {
       categoryId: null,
       price: 100,
       initialStock: [],
-      authorRole: UserRole.SUPER_ADMIN
+      authorRole: UserRole.SUPER_ADMIN as any
     })).rejects.toThrow('Unauthorized: Only Business Owners and Staff can create products.');
   });
 

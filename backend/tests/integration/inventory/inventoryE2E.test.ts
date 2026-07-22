@@ -23,6 +23,9 @@ describe('Inventory End-to-End User Flow', () => {
     tokenService = new JwtTokenService();
 
     // Clean up
+    await prisma.quotationStatusHistory.deleteMany();
+    await prisma.quotationLineItem.deleteMany();
+    await prisma.quotation.deleteMany();
     await prisma.stockMovement.deleteMany();
     await prisma.stockLevel.deleteMany();
     await prisma.product.deleteMany();
@@ -31,6 +34,7 @@ describe('Inventory End-to-End User Flow', () => {
     await prisma.interaction.deleteMany();
     await prisma.appointment.deleteMany();
     await prisma.client.deleteMany();
+    await prisma.invitation.deleteMany();
     await prisma.user.deleteMany();
     await prisma.tenant.deleteMany();
 
@@ -60,11 +64,15 @@ describe('Inventory End-to-End User Flow', () => {
   });
 
   afterAll(async () => {
+    await prisma.quotationStatusHistory.deleteMany();
+    await prisma.quotationLineItem.deleteMany();
+    await prisma.quotation.deleteMany();
     await prisma.stockMovement.deleteMany();
     await prisma.stockLevel.deleteMany();
     await prisma.product.deleteMany();
     await prisma.warehouse.deleteMany();
     await prisma.category.deleteMany();
+    await prisma.invitation.deleteMany();
     await prisma.user.deleteMany();
     await prisma.tenant.deleteMany();
     await prisma.$disconnect();

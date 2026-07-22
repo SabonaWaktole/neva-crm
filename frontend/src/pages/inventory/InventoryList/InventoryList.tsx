@@ -6,7 +6,8 @@ import { TextInput } from '../../../components/ui/TextInput';
 import { SelectInput } from '../../../components/ui/SelectInput';
 import { InventoryTable } from '../../../components/inventory/InventoryTable';
 import { StockAdjustmentPanel } from '../../../components/inventory/StockAdjustmentPanel/StockAdjustmentPanel';
-import { useProducts, useCategories } from '../../../hooks/useInventory';
+import { useProducts } from '../../../hooks/useInventory';
+import { useCategories } from '../../../hooks/useCategories';
 import { useWarehouses } from '../../../hooks/useWarehouses';
 import { PlusSquare, Search, Download, TrendingUp, AlertCircle, DollarSign, Database } from 'lucide-react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
@@ -119,7 +120,7 @@ const InventoryListContent: React.FC = () => {
           >
             <option value="">All Categories</option>
             {categories.map(cat => (
-              <option key={cat.id} value={cat.id}>{cat.name}</option>
+              <option key={cat.category.id} value={cat.category.id}>{cat.category.name}</option>
             ))}
           </SelectInput>
           <SelectInput className={styles.selectInput} defaultValue="">
@@ -182,7 +183,7 @@ export const InventoryList: React.FC = () => {
   const { user } = useAuthStore();
   const { logout } = useLogout();
   const location = useLocation();
-  const navItems = useNavigation(user?.role, location.pathname);
+  const navItems = useNavigation(user, location.pathname);
 
   const handleLogout = async () => {
     await logout();
@@ -196,7 +197,7 @@ export const InventoryList: React.FC = () => {
     <AppLayout
       userName={userName}
       onLogout={handleLogout}
-      onSettingsClick={() => navigate(`/${tenantSlug}/settings`)}
+      onSettingsClick={() => navigate(`/${tenantSlug}/settings/profile`)}
       userAvatarSrc="https://lh3.googleusercontent.com/aida-public/AB6AXuCUVO_U904UXtp4jWW0TlbxmzPuBGIREJnS7rJvUtLWgv77vYvS4vxvhNtsn7uCPM4v19ncCYsTNjqR9gmBTthGZKxWksFTi3WHzwUACJE3fdYz43ve1_UcjRrGN0DsSAnzWy8bcm_ue3gBSicCHOQXi3nTG59avgqC7yDJvl_xzAPCtNRbIGrfduLtU3kRkzKkv4b6G4JpGzlfYerk5A74tOh2EEID2ccvMJyWClcbv_w3W2yL1Gy2hiSvmpCVC63iIga-3SmPV8Nj"
       sidebar={
         <Sidebar 

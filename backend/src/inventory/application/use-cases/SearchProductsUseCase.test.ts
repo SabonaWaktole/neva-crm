@@ -53,7 +53,7 @@ describe('SearchProductsUseCase', () => {
     expect(productRepo.search).toHaveBeenCalledWith('tenant1', {
       name: 'Product',
       categoryId: undefined,
-      warehouseId: undefined,
+      warehouseId: 'w1',
       availability: undefined,
     });
   });
@@ -142,7 +142,7 @@ describe('SearchProductsUseCase', () => {
   it('should reject unauthorized roles', async () => {
     await expect(useCase.execute({
       tenantId: 'tenant1',
-      authorRole: UserRole.SUPER_ADMIN
-    })).rejects.toThrow('Unauthorized');
+      authorRole: UserRole.SUPER_ADMIN as any
+    })).rejects.toThrow('Unauthorized: Only Business Owners and Staff can search products.');
   });
 });

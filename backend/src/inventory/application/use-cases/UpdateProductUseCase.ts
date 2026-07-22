@@ -18,7 +18,7 @@ export class UpdateProductUseCase {
   constructor(private productRepo: IProductRepository) {}
 
   async execute(dto: UpdateProductDTO): Promise<Product> {
-    if (dto.authorRole !== UserRole.BUSINESS_OWNER && dto.authorRole !== UserRole.STAFF && dto.authorRole !== UserRole.SUPER_ADMIN) {
+    if (dto.authorRole !== UserRole.BUSINESS_OWNER && dto.authorRole !== UserRole.STAFF) {
       throw new Error('Unauthorized: Only Business Owners and Staff can update products.');
     }
 

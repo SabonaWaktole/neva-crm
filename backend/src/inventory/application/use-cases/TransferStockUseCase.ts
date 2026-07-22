@@ -23,7 +23,7 @@ export class TransferStockUseCase {
   ) {}
 
   async execute(dto: TransferStockDTO): Promise<{ sourceStock: StockLevel; destStock: StockLevel; movement: StockMovement }> {
-    if (dto.authorRole !== UserRole.BUSINESS_OWNER && dto.authorRole !== UserRole.STAFF && dto.authorRole !== UserRole.SUPER_ADMIN) {
+    if (dto.authorRole !== UserRole.BUSINESS_OWNER && dto.authorRole !== UserRole.STAFF) {
       throw new Error('Unauthorized: Only Business Owners and Staff can transfer stock.');
     }
 

@@ -43,6 +43,9 @@ class InMemoryUserRepository implements IUserRepository {
     this.users.push(user);
     return user;
   }
+  async delete(id: string): Promise<void> {
+    this.users = this.users.filter(u => u.id !== id);
+  }
   async updatePassword(userId: string, hashedPassword: string): Promise<void> {
     const user = this.users.find(u => u.id === userId);
     if (user) {

@@ -200,7 +200,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: 'inventory/categories',
+        path: 'settings/categories',
         element: (
           <ProtectedRoute>
             <CategoryList />

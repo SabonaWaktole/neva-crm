@@ -171,8 +171,8 @@ describe('TransferStockUseCase', () => {
       toWarehouseId: 'w2',
       quantity: 10,
       authorUserId: 'u1',
-      authorRole: UserRole.SUPER_ADMIN
-    })).rejects.toThrow('Unauthorized');
+      authorRole: UserRole.SUPER_ADMIN as any
+    })).rejects.toThrow('Unauthorized: Only Business Owners and Staff can transfer stock.');
   });
 
   it('should reject zero or negative transfer quantity', async () => {

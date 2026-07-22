@@ -33,10 +33,11 @@ export const createInventoryRouter = (
   router.delete('/warehouses/:id', authorize([UserRole.BUSINESS_OWNER]), controller.deleteWarehouse);
 
   // Categories
-  router.get('/categories', controller.getCategories);
-  router.post('/categories', controller.createCategory);
-  router.put('/categories/:id', controller.updateCategory);
-  router.delete('/categories/:id', controller.deleteCategory);
+  router.get('/categories', authorize([UserRole.BUSINESS_OWNER, UserRole.STAFF]), controller.getCategories);
+  router.post('/categories', authorize([UserRole.BUSINESS_OWNER]), controller.createCategory);
+  router.post('/categories/cleanup', authorize([UserRole.BUSINESS_OWNER]), controller.cleanupCategories);
+  router.put('/categories/:id', authorize([UserRole.BUSINESS_OWNER]), controller.updateCategory);
+  router.delete('/categories/:id', authorize([UserRole.BUSINESS_OWNER]), controller.deleteCategory);
 
   return router;
 };

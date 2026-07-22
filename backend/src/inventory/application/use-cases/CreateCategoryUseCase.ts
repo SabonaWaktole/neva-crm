@@ -6,6 +6,7 @@ import { randomUUID } from 'crypto';
 export interface CreateCategoryDTO {
   tenantId: string;
   name: string;
+  description?: string;
   authorRole: UserRole;
 }
 
@@ -21,6 +22,7 @@ export class CreateCategoryUseCase {
       id: randomUUID(),
       tenantId: dto.tenantId,
       name: dto.name,
+      description: dto.description,
     });
 
     await this.categoryRepo.save(category);

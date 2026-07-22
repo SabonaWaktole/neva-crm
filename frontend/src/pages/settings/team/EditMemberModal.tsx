@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '../../../components/ui/Card/Card';
 import { Button } from '../../../components/ui/Button/Button';
 import { useWarehouses } from '../../../hooks/useWarehouses';
-import { StaffMember } from '../../../hooks/useTeam';
+import type { StaffMember } from '../../../hooks/useTeam';
 
 interface EditMemberModalProps {
   member: StaffMember | null;

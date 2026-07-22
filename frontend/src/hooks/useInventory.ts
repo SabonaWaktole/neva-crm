@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { inventoryService } from '../services/inventoryService';
 import { useParams } from 'react-router-dom';
-import type { Product, StockLevel, Category, Warehouse } from '../types/inventory';
+import type { Product, StockLevel } from '../types/inventory';
 import { useDebounce } from './useDebounce';
 
 // ========================
@@ -156,98 +156,4 @@ export const useTransferStock = () => {
 // WAREHOUSES
 // ========================
 
-// ========================
-// CATEGORIES
-// ========================
 
-export const useCategories = () => {
-  const { tenantSlug } = useParams();
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchCategories = useCallback(async () => {
-    if (!tenantSlug) return;
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await inventoryService.getCategories(tenantSlug);
-      setCategories(data);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to fetch categories');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [tenantSlug]);
-
-  return { categories, isLoading, error, fetchCategories };
-};
-
-export const useCreateCategory = () => {
-  const { tenantSlug } = useParams();
-  const [isPending, setIsPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const createCategory = async (data: { name: string }) => {
-    if (!tenantSlug) throw new Error('Missing tenant context');
-    setIsPending(true);
-    setError(null);
-    try {
-      return await inventoryService.createCategory(tenantSlug, data);
-    } catch (err: any) {
-      const msg = err.response?.data?.error || 'Failed to create category';
-      setError(msg);
-      throw err;
-    } finally {
-      setIsPending(false);
-    }
-  };
-
-  return { createCategory, isPending, error };
-};
-
-export const useUpdateCategory = () => {
-  const { tenantSlug } = useParams();
-  const [isPending, setIsPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const updateCategory = async (categoryId: string, data: { name: string }) => {
-    if (!tenantSlug) throw new Error('Missing tenant context');
-    setIsPending(true);
-    setError(null);
-    try {
-      return await inventoryService.updateCategory(tenantSlug, categoryId, data);
-    } catch (err: any) {
-      const msg = err.response?.data?.error || 'Failed to update category';
-      setError(msg);
-      throw err;
-    } finally {
-      setIsPending(false);
-    }
-  };
-
-  return { updateCategory, isPending, error };
-};
-
-export const useDeleteCategory = () => {
-  const { tenantSlug } = useParams();
-  const [isPending, setIsPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const deleteCategory = async (categoryId: string) => {
-    if (!tenantSlug) throw new Error('Missing tenant context');
-    setIsPending(true);
-    setError(null);
-    try {
-      return await inventoryService.deleteCategory(tenantSlug, categoryId);
-    } catch (err: any) {
-      const msg = err.response?.data?.error || 'Failed to delete category';
-      setError(msg);
-      throw err;
-    } finally {
-      setIsPending(false);
-    }
-  };
-
-  return { deleteCategory, isPending, error };
-};

@@ -6,6 +6,7 @@ export interface UpdateCategoryDTO {
   tenantId: string;
   id: string;
   name?: string;
+  description?: string;
   authorRole: UserRole;
 }
 
@@ -22,8 +23,8 @@ export class UpdateCategoryUseCase {
       throw new Error(`Category ${dto.id} not found`);
     }
 
-    category.update({ name: dto.name });
-    await this.categoryRepo.save(category);
+    category.update({ name: dto.name, description: dto.description });
+    await this.categoryRepo.update(category);
     return category;
   }
 }
