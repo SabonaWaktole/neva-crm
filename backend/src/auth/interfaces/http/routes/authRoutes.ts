@@ -61,6 +61,14 @@ export const createTenantAuthRoutes = (
     authController.getPendingInvitations
   );
 
+  router.delete(
+    '/invitations/:id',
+    authMw,
+    resolveTenantMw,
+    authorize([UserRole.BUSINESS_OWNER, UserRole.SUPER_ADMIN]),
+    authController.cancelInvitation
+  );
+
   router.get(
     '/staff',
     authMw,
