@@ -149,6 +149,8 @@ export class PrismaAppointmentRepository implements IAppointmentRepository {
       await tx.appointment.update({
         where: { id: appointment.id },
         data: {
+          clientId: appointment.clientId,
+          assignedUserId: appointment.assignedUserId,
           scheduledAt: appointment.scheduledAt,
           status: appointment.status,
           notes: appointment.notes,

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { AppointmentController } from '../controllers/AppointmentController';
 import { CreateAppointmentUseCase } from '../../../application/use-cases/CreateAppointmentUseCase';
+import { UpdateAppointmentUseCase } from '../../../application/use-cases/UpdateAppointmentUseCase';
 import { RescheduleAppointmentUseCase } from '../../../application/use-cases/RescheduleAppointmentUseCase';
 import { CancelAppointmentUseCase } from '../../../application/use-cases/CancelAppointmentUseCase';
 import { UpdateAppointmentStatusUseCase } from '../../../application/use-cases/UpdateAppointmentStatusUseCase';
@@ -32,6 +33,7 @@ export const createAppointmentRouter = (
 
   // Use Cases
   const createAppointmentUseCase = new CreateAppointmentUseCase(appointmentRepo, clientRepo, userRepo);
+  const updateAppointmentUseCase = new UpdateAppointmentUseCase(appointmentRepo, clientRepo, userRepo);
   const rescheduleAppointmentUseCase = new RescheduleAppointmentUseCase(appointmentRepo);
   const cancelAppointmentUseCase = new CancelAppointmentUseCase(appointmentRepo);
   const updateAppointmentStatusUseCase = new UpdateAppointmentStatusUseCase(appointmentRepo);
@@ -42,6 +44,7 @@ export const createAppointmentRouter = (
   // Controller
   const appointmentController = new AppointmentController(
     createAppointmentUseCase,
+    updateAppointmentUseCase,
     rescheduleAppointmentUseCase,
     cancelAppointmentUseCase,
     updateAppointmentStatusUseCase,
@@ -62,6 +65,8 @@ export const createAppointmentRouter = (
   router.get('/search', appointmentController.searchAppointments);
   router.get('/upcoming', appointmentController.getUpcomingAppointments);
   router.get('/:appointmentId/history', appointmentController.getAppointmentHistory);
+  
+  router.put('/:appointmentId', appointmentController.updateAppointment);
   
   router.put('/:appointmentId/reschedule', appointmentController.rescheduleAppointment);
   router.put('/:appointmentId/cancel', appointmentController.cancelAppointment);

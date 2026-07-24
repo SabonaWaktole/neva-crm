@@ -14,8 +14,10 @@ import {
   updateAppointmentStatusSchema,
   searchAppointmentsSchema,
   getUpcomingAppointmentsSchema,
+  updateAppointmentSchema,
 } from '../schemas/appointmentSchemas';
 import { Appointment } from '../../../domain/entities/Appointment';
+import { UpdateAppointmentUseCase } from '../../../application/use-cases/UpdateAppointmentUseCase';
 
 const mapToDTO = (appointment: Appointment) => ({
   id: appointment.id,
@@ -33,6 +35,7 @@ const mapToDTO = (appointment: Appointment) => ({
 export class AppointmentController {
   constructor(
     private createAppointmentUseCase: CreateAppointmentUseCase,
+    private updateAppointmentUseCase: UpdateAppointmentUseCase,
     private rescheduleAppointmentUseCase: RescheduleAppointmentUseCase,
     private cancelAppointmentUseCase: CancelAppointmentUseCase,
     private updateAppointmentStatusUseCase: UpdateAppointmentStatusUseCase,
@@ -52,6 +55,30 @@ export class AppointmentController {
       });
 
       res.status(201).json(mapToDTO(appointment));
+    } catch (error: any) {
+      if (error.message.includes('not found')) {
+        res.status(404).json({ error: error.message });
+      } else if (error instanceof DomainError) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(400).json({ error: error.message });
+      }
+    }
+  };
+
+  public updateAppointment = async (req: Request, res: Response) => {
+    try {
+      const validatedData = updateAppointmentSchema.parse(req.body);
+      const tenantId = req.tenant!.id;
+      const id = req.params.appointmentId as string;
+
+      const appointment = await this.updateAppointmentUseCase.execute({
+        id,
+        tenantId,
+        ...validatedData,
+      });
+
+      res.status(200).json(mapToDTO(appointment));
     } catch (error: any) {
       if (error.message.includes('not found')) {
         res.status(404).json({ error: error.message });

@@ -140,6 +140,32 @@ export const useCreateAppointment = () => {
   return { createAppointment, isLoading, error };
 };
 
+export const useUpdateAppointment = () => {
+  const { tenantSlug } = useParams();
+  const authTenantId = useAuthStore((state) => state.user?.tenantId);
+  const activeTenant = tenantSlug || authTenantId;
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const updateAppointment = async (appointmentId: string, data: { clientId?: string; assignedUserId?: string; scheduledAt?: string; notes?: string }) => {
+    if (!activeTenant) throw new Error('Missing tenant context');
+    setIsLoading(true);
+    setError(null);
+    try {
+      return await appointmentService.updateAppointment(activeTenant, appointmentId, data);
+    } catch (err: any) {
+      const msg = err.response?.data?.error || 'Failed to update appointment';
+      setError(msg);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return { updateAppointment, isLoading, error };
+};
+
 export const useRescheduleAppointment = () => {
   const { tenantSlug } = useParams();
   const authTenantId = useAuthStore((state) => state.user?.tenantId);

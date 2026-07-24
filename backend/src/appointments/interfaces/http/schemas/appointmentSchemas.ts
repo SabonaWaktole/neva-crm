@@ -11,6 +11,16 @@ export const createAppointmentSchema = z.object({
   notes: z.string().optional(),
 });
 
+export const updateAppointmentSchema = z.object({
+  clientId: z.string().min(1, 'Client ID is required').optional(),
+  assignedUserId: z.string().min(1, 'Assigned user ID is required').optional(),
+  scheduledAt: z.coerce.date().refine(
+    (date) => date > new Date(),
+    { message: 'Scheduled date must be in the future' }
+  ).optional(),
+  notes: z.string().optional(),
+});
+
 export const rescheduleAppointmentSchema = z.object({
   newDate: z.coerce.date().refine(
     (date) => date > new Date(),
@@ -43,3 +53,4 @@ export const searchAppointmentsSchema = z.object({
 export const getUpcomingAppointmentsSchema = z.object({
   limit: z.coerce.number().min(1).max(50).default(5),
 });
+

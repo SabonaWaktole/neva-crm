@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { RescheduleModal } from './RescheduleModal';
 import { AppointmentDetailPanel } from '../../components/panels/AppointmentDetailPanel/AppointmentDetailPanel';
 import { 
   ChevronLeft, 
@@ -16,7 +17,7 @@ import { Badge } from '../../components/ui/Badge/Badge';
 import { Avatar } from '../../components/ui/Avatar/Avatar';
 import styles from './CalendarContent.module.css';
 
-import { useAppointmentsByDateRange } from '../../hooks/useAppointments';
+import { useAppointmentsByDateRange, useRescheduleAppointment } from '../../hooks/useAppointments';
 import { isSameDayLocal } from '../../utils/dateUtils';
 import type { Appointment } from '../../types/appointment';
 
@@ -321,10 +322,28 @@ export const CalendarContent = () => {
   const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59).toISOString();
 
   const { appointments, isLoading, error, updateAppointmentLocally } = useAppointmentsByDateRange(startOfMonth, endOfMonth);
+  const { rescheduleAppointment, isLoading: isRescheduling } = useRescheduleAppointment();
+  const navigate = useNavigate();
+  const { tenantSlug } = useParams();
+  
+  const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
 
   const handleAppointmentUpdated = (updated: Appointment) => {
     updateAppointmentLocally(updated);
     setSelectedAppointment(updated);
+  };
+
+  const handleReschedule = async (appointmentId: string, newDate: string, reason: string) => {
+    try {
+      const updated = await rescheduleAppointment(appointmentId, { newDate, reason });
+      handleAppointmentUpdated(updated);
+    } catch (e) {
+      throw e;
+    }
+  };
+
+  const handleEdit = (appointment: Appointment) => {
+    navigate(`/${tenantSlug}/appointments/${appointment.id}/edit`);
   };
 
   if (isLoading) return <div>Loading calendar...</div>;
@@ -340,6 +359,16 @@ export const CalendarContent = () => {
         onClose={() => setSelectedAppointment(null)}
         appointment={selectedAppointment}
         onAppointmentUpdated={handleAppointmentUpdated}
+        onEdit={() => selectedAppointment && handleEdit(selectedAppointment)}
+        onReschedule={() => setIsRescheduleModalOpen(true)}
+      />
+      
+      <RescheduleModal
+        isOpen={isRescheduleModalOpen}
+        onClose={() => setIsRescheduleModalOpen(false)}
+        appointment={selectedAppointment}
+        onConfirm={handleReschedule}
+        isLoading={isRescheduling}
       />
     </>
   );

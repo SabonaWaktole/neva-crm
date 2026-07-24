@@ -13,6 +13,7 @@ import { ClientListPage } from '../pages/clients/ClientListPage';
 import { ClientDetailPage } from '../pages/clients/ClientDetailPage';
 import { ClientFormPage } from '../pages/clients/ClientFormPage';
 import { AppointmentsPage } from '../pages/appointments/AppointmentsPage';
+import { EditAppointmentPage } from '../pages/appointments/EditAppointmentPage';
 import { CreateAppointmentPage } from '../pages/appointments/CreateAppointmentPage';
 import { ClientSettingsPage } from '../pages/settings/ClientSettingsPage';
 import { TeamSettingsPage } from '../pages/settings/team/TeamSettingsPage';
@@ -186,6 +187,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <CreateAppointmentPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'appointments/:appointmentId/edit',
+        element: (
+          <ProtectedRoute>
+            <EditAppointmentPage />
           </ProtectedRoute>
         ),
       },
