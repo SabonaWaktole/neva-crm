@@ -104,7 +104,7 @@ export const BusinessOwnerDashboard = () => {
 
         {/* Right Column: Activity Feed */}
         <div className={styles.rightColumn}>
-          <div className={styles.feedCard}>
+          <div className={`${styles.feedCard} premium-card`}>
             <div className={styles.feedHeader}>
               <div className={styles.feedTitleGroup}>
                 <History size={20} color="var(--color-on-surface-variant)" />

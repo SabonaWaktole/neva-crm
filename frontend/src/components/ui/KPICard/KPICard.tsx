@@ -32,7 +32,7 @@ export const KPICard: React.FC<KPICardProps> = ({
 }) => {
   return (
     <div className={`${styles.wrapper} ${isPlaceholder ? styles.placeholder : ''}`}>
-      <Card className={styles.card}>
+      <Card className={`${styles.card} premium-card`}>
         <div className={styles.header}>
           <h3 className={styles.title}>{title}</h3>
           <div 

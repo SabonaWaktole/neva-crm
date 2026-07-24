@@ -35,6 +35,8 @@ export interface SidebarProps {
   orgName: string;
   orgTier?: string;
   navItems: NavItem[];
+  isOpen?: boolean;
+  onClose?: () => void;
   onNavItemClick?: (id: string) => void;
   onNewEntryClick?: () => void;
   onLogoutClick?: () => void;
@@ -44,12 +46,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
   orgName,
   orgTier = 'Standard Tier',
   navItems,
+  isOpen = false,
+  onClose,
   onNavItemClick,
   onNewEntryClick,
   onLogoutClick,
 }) => {
   return (
-    <nav className={styles.sidebar}>
+    <>
+      {/* Mobile Backdrop */}
+      {isOpen && (
+        <div className={styles.backdrop} onClick={onClose} />
+      )}
+      <nav className={`${styles.sidebar} ${isOpen ? styles.sidebarOpen : ''}`}>
       <div className={styles.orgSection}>
         <div className={styles.orgIcon}>
           <Building size={20} />
@@ -113,5 +122,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </a>
       </div>
     </nav>
+    </>
   );
 };
