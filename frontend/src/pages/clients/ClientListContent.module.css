@@ -8,8 +8,16 @@
 
 .header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+  .header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
 }
 
 .headerTitle {
@@ -28,17 +36,31 @@
 
 .title {
   font-family: var(--font-family-base);
-  font-size: var(--font-size-headline-lg);
+  font-size: var(--font-size-headline-lg-mobile);
   font-weight: var(--font-weight-headline-lg);
-  line-height: var(--font-line-height-headline-lg);
+  line-height: var(--font-line-height-headline-lg-mobile);
   letter-spacing: var(--font-letter-spacing-headline-lg);
   color: var(--color-on-surface);
   margin: 0;
 }
 
+@media (min-width: 768px) {
+  .title {
+    font-size: var(--font-size-headline-lg);
+    line-height: var(--font-line-height-headline-lg);
+  }
+}
+
 .headerActions {
   display: flex;
   gap: var(--spacing-sm);
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .headerActions {
+    width: auto;
+  }
 }
 
 .tableCard {
@@ -55,12 +77,26 @@
   padding: var(--spacing-md);
   border-bottom: 1px solid var(--color-outline-variant);
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+  .tableToolbar {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
 }
 
 .searchWrapper {
-  width: 320px;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .searchWrapper {
+    width: 320px;
+  }
 }
 
 .tableContainer {

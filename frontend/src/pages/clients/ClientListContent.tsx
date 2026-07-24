@@ -62,7 +62,7 @@ export const ClientListContent: React.FC = () => {
       </div>
 
       {/* Table Card */}
-      <div className={styles.tableCard}>
+      <div className={`${styles.tableCard} premium-card`}>
         {/* Toolbar */}
         <div className={styles.tableToolbar}>
           <div className={styles.searchWrapper}>

@@ -62,10 +62,11 @@
 .stepContent {
   position: absolute;
   inset: 0;
-  padding: var(--spacing-2xl);
+  padding: var(--spacing-xl) var(--spacing-2xl);
   display: flex;
   flex-direction: column;
   transition: all 0.5s ease-in-out;
+  overflow-y: auto; /* Allow scrolling if it still overflows */
 }
 
 .stepContentHiddenRight {
@@ -98,7 +99,7 @@
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
   color: var(--color-on-surface-variant);
-  margin: 0 0 var(--spacing-xl) 0;
+  margin: 0 0 var(--spacing-md) 0;
 }
 
 .formContent {

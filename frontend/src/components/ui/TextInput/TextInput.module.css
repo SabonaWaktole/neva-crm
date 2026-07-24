@@ -77,11 +77,13 @@
 
 .iconWrapper {
   position: absolute;
-  top: 0;
-  bottom: 0;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
+  justify-content: center;
   color: var(--color-outline);
+  height: 100%;
 }
 
 .iconLeft {
@@ -96,6 +98,9 @@
   background: none;
   border: none;
   padding: 0;
+  margin: 0;
+  height: 100%;
+  outline: none;
   cursor: pointer;
   color: var(--color-outline);
   display: flex;

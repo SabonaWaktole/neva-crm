@@ -1,23 +1,40 @@
 .sidebar {
   position: fixed;
-  left: 0;
+  left: -240px; /* Hidden off-canvas by default on mobile */
   top: 64px; /* below header */
   height: calc(100vh - 64px);
   z-index: 40;
-  display: none; /* hidden on mobile by default */
+  display: flex;
   flex-direction: column;
   padding: var(--spacing-md) 0;
   background-color: var(--color-surface);
   border-right: 1px solid var(--color-outline-variant);
   width: var(--spacing-sidebar-width);
-  transition: width 0.3s ease-in-out;
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
 }
 
-/* Show sidebar on md screens and up */
+.sidebarOpen {
+  left: 0;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  top: 64px;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 39;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+/* On tablet and up, sidebar is always visible and normal */
 @media (min-width: 768px) {
   .sidebar {
-    display: flex;
+    left: 0;
+  }
+  .backdrop {
+    display: none;
   }
 }
 

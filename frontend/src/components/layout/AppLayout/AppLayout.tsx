@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import type { ReactNode } from 'react';
-import { Search, Bell, HelpCircle, Settings, LogOut } from 'lucide-react';
+import type { ReactNode, ReactElement } from 'react';
+import { Search, Bell, HelpCircle, Settings, LogOut, Menu } from 'lucide-react';
 import { Avatar } from '../../ui/Avatar/Avatar';
 import styles from './AppLayout.module.css';
 
 export interface AppLayoutProps {
   children: ReactNode;
-  sidebar?: ReactNode;
+  sidebar?: ReactElement<any>; // Changed to ReactElement to clone
   userAvatarSrc?: string;
   userName?: string;
   logoText?: string;
@@ -24,6 +24,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   onSettingsClick,
 }) => {
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -39,8 +40,15 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   return (
     <div className={styles.layout}>
       {/* Top App Bar */}
-      <header className={styles.header}>
+      <header className={`${styles.header} glass`}>
         <div className={styles.headerLeft}>
+          <button 
+            className={`${styles.iconBtn} ${styles.menuBtn}`} 
+            onClick={() => setIsSidebarOpen(true)}
+            aria-label="Open menu"
+          >
+            <Menu size={24} />
+          </button>
           <span className={styles.logoText}>{logoText}</span>
         </div>
         
@@ -57,7 +65,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           <button className={styles.iconBtn} aria-label="Notifications">
             <Bell size={20} />
           </button>
-          <button className={styles.iconBtn} aria-label="Help">
+          <button className={`${styles.iconBtn} ${styles.helpBtn}`} aria-label="Help">
             <HelpCircle size={20} />
           </button>
           <div style={{ position: 'relative' }} ref={dropdownRef}>
@@ -124,7 +132,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
 
       <div className={styles.contentArea}>
         {/* Sidebar injected here */}
-        {sidebar}
+        {sidebar && React.cloneElement(sidebar, {
+          isOpen: isSidebarOpen,
+          onClose: () => setIsSidebarOpen(false)
+        })}
         
         {/* Main Content Area */}
         <main className={styles.mainContent}>
