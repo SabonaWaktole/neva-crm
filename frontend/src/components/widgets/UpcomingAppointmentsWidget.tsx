@@ -22,10 +22,10 @@ export const UpcomingAppointmentsWidget: React.FC = () => {
   const getStatusToken = (status: string) => {
     switch (status) {
       case 'SCHEDULED': return 'primary';
-      case 'CONFIRMED': return 'emerald';
-      case 'COMPLETED': return 'slate';
+      case 'CONFIRMED': return 'success';
+      case 'COMPLETED': return 'secondary';
       case 'CANCELLED': return 'error';
-      default: return 'amber';
+      default: return 'warning';
     }
   };
 

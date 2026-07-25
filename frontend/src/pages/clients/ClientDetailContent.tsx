@@ -12,12 +12,28 @@ import { DropdownMenu } from '../../components/ui/DropdownMenu/DropdownMenu';
 import { SelectInput } from '../../components/ui/SelectInput/SelectInput';
 import { TextareaInput } from '../../components/ui/TextareaInput/TextareaInput';
 import { TimelineItem } from '../../components/ui/TimelineItem/TimelineItem';
+import { Tabs } from '../../components/ui/Tabs';
 import { getActivityConfig } from '../../utils/activityMapper';
 import { AppointmentDetailPanel } from '../../components/panels/AppointmentDetailPanel/AppointmentDetailPanel';
 import { AppointmentForm } from '../../components/forms/AppointmentForm/AppointmentForm';
 import { useAddInteraction } from '../../hooks/useClients';
 import type { Appointment } from '../../types/appointment';
 import styles from './ClientDetailContent.module.css';
+
+const getAppointmentStatusVariant = (status: Appointment['status']) => {
+  switch (status) {
+    case 'SCHEDULED':
+      return 'primary' as const;
+    case 'CONFIRMED':
+      return 'success' as const;
+    case 'COMPLETED':
+      return 'secondary' as const;
+    case 'CANCELLED':
+      return 'error' as const;
+    default:
+      return 'warning' as const;
+  }
+};
 
 export const ClientDetailContent: React.FC = () => {
   const { clientId, tenantSlug } = useParams();
@@ -192,36 +208,16 @@ export const ClientDetailContent: React.FC = () => {
 
         {/* Right Column */}
         <div className={styles.rightColumn}>
-          <div className={styles.tabsContainer} style={{ display: 'flex', gap: '16px', marginBottom: '16px', borderBottom: '1px solid var(--color-outline-variant)' }}>
-            <button 
-              onClick={() => setActiveTab('timeline')}
-              style={{ 
-                background: 'none', 
-                border: 'none', 
-                padding: '8px 16px', 
-                cursor: 'pointer',
-                fontWeight: activeTab === 'timeline' ? 600 : 400,
-                borderBottom: activeTab === 'timeline' ? '2px solid var(--color-primary)' : '2px solid transparent',
-                color: activeTab === 'timeline' ? 'var(--color-primary)' : 'var(--color-on-surface-variant)'
-              }}
-            >
-              Timeline
-            </button>
-            <button 
-              onClick={() => setActiveTab('appointments')}
-              style={{ 
-                background: 'none', 
-                border: 'none', 
-                padding: '8px 16px', 
-                cursor: 'pointer',
-                fontWeight: activeTab === 'appointments' ? 600 : 400,
-                borderBottom: activeTab === 'appointments' ? '2px solid var(--color-primary)' : '2px solid transparent',
-                color: activeTab === 'appointments' ? 'var(--color-primary)' : 'var(--color-on-surface-variant)'
-              }}
-            >
-              Appointments
-            </button>
-          </div>
+          <Tabs
+            className={styles.tabsContainer}
+            label="Client detail sections"
+            activeId={activeTab}
+            onChange={setActiveTab}
+            tabs={[
+              { id: 'timeline', label: 'Timeline', count: history?.timeline.length },
+              { id: 'appointments', label: 'Appointments', count: appointments.length },
+            ]}
+          />
 
           {activeTab === 'timeline' ? (
             <Card padding="lg" className={styles.timelineCard}>
@@ -253,11 +249,9 @@ export const ClientDetailContent: React.FC = () => {
             </div>
 
             <div className={styles.timelineList}>
-              {isHistoryLoading && <div>Loading history...</div>}
+              {isHistoryLoading && <div className={styles.emptyMessage}>Loading history...</div>}
               {!isHistoryLoading && history?.timeline.length === 0 && (
-                <div style={{ padding: '20px', textAlign: 'center', color: 'var(--color-on-surface-variant)' }}>
-                  No interactions yet.
-                </div>
+                <div className={styles.emptyMessage}>No interactions yet.</div>
               )}
               {!isHistoryLoading && history?.timeline.map((item, index) => {
                 const config = getActivityConfig(item.type, item.details);
@@ -295,38 +289,28 @@ export const ClientDetailContent: React.FC = () => {
                   New Appointment
                 </Button>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
-                {isAppointmentsLoading && <div>Loading appointments...</div>}
+              <div className={styles.appointmentList}>
+                {isAppointmentsLoading && (
+                  <div className={styles.emptyMessage}>Loading appointments...</div>
+                )}
                 {!isAppointmentsLoading && appointments.length === 0 && (
-                  <div style={{ padding: '20px', textAlign: 'center', color: 'var(--color-on-surface-variant)' }}>
-                    No appointments scheduled.
-                  </div>
+                  <div className={styles.emptyMessage}>No appointments scheduled.</div>
                 )}
                 {!isAppointmentsLoading && appointments.map(app => (
-                  <div 
-                    key={app.id} 
+                  <button
+                    key={app.id}
+                    type="button"
+                    className={styles.appointmentRow}
                     onClick={() => setSelectedAppointment(app)}
-                    style={{ 
-                      padding: '16px', 
-                      borderRadius: '8px', 
-                      border: '1px solid var(--color-outline-variant)',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center'
-                    }}
                   >
-                    <div>
-                      <div style={{ fontWeight: 600, color: 'var(--color-on-surface)' }}>{new Date(app.scheduledAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</div>
-                      <div style={{ fontSize: '14px', color: 'var(--color-on-surface-variant)' }}>{app.notes || 'No notes'}</div>
+                    <div className={styles.appointmentInfo}>
+                      <span className={styles.appointmentDate}>
+                        {new Date(app.scheduledAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+                      </span>
+                      <span className={styles.appointmentNotes}>{app.notes || 'No notes'}</span>
                     </div>
-                    <Badge variant={
-                      app.status === 'SCHEDULED' ? 'primary' :
-                      app.status === 'CONFIRMED' ? 'emerald' :
-                      app.status === 'COMPLETED' ? 'slate' :
-                      app.status === 'CANCELLED' ? 'error' : 'amber'
-                    }>{app.status}</Badge>
-                  </div>
+                    <Badge variant={getAppointmentStatusVariant(app.status)}>{app.status}</Badge>
+                  </button>
                 ))}
               </div>
             </Card>
@@ -339,7 +323,7 @@ export const ClientDetailContent: React.FC = () => {
         onClose={() => setIsInteractionSlideOverOpen(false)}
         title="Add Interaction"
         footer={
-          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+          <div className={styles.slideOverFooter}>
             <Button variant="outline" onClick={() => setIsInteractionSlideOverOpen(false)}>Cancel</Button>
             <Button onClick={handleAddInteraction} disabled={isAddingInteraction || !interactionContent}>
               {isAddingInteraction ? 'Saving...' : 'Save Interaction'}
@@ -347,7 +331,7 @@ export const ClientDetailContent: React.FC = () => {
           </div>
         }
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px' }}>
+        <div className={styles.slideOverForm}>
           <SelectInput label="Channel" value={interactionChannel} onChange={e => setInteractionChannel(e.target.value)}>
             <option value="CALL">Call</option>
             <option value="EMAIL">Email</option>
@@ -377,8 +361,8 @@ export const ClientDetailContent: React.FC = () => {
         onClose={() => setIsAppointmentSlideOverOpen(false)}
         title="Schedule Appointment"
       >
-        <div style={{ padding: '16px' }}>
-          <AppointmentForm 
+        <div className={styles.slideOverBody}>
+          <AppointmentForm
             lockedClientId={clientId}
             onSubmit={() => {
               setIsAppointmentSlideOverOpen(false);

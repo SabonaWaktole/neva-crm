@@ -44,18 +44,3 @@
   color: var(--color-on-warning-container);
 }
 
-/* Deprecated aliases, kept for backward compatibility with existing callers */
-.emerald {
-  background-color: var(--color-success-container);
-  color: var(--color-on-success-container);
-}
-
-.slate {
-  background-color: var(--color-surface-variant);
-  color: var(--color-on-surface-variant);
-}
-
-.amber {
-  background-color: var(--color-warning-container);
-  color: var(--color-on-warning-container);
-}

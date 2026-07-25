@@ -59,11 +59,11 @@ export const QuotationDetailContent: React.FC = () => {
   const getStatusBadgeVariant = (status: string): BadgeProps['variant'] => {
     switch (status) {
       case 'DRAFT': return 'secondary';
-      case 'PENDING_APPROVAL': return 'amber';
+      case 'PENDING_APPROVAL': return 'warning';
       case 'SENT': return 'primary';
-      case 'ACCEPTED': return 'emerald';
+      case 'ACCEPTED': return 'success';
       case 'REJECTED': return 'error';
-      case 'EXPIRED': return 'slate';
+      case 'EXPIRED': return 'secondary';
       default: return 'secondary';
     }
   };

@@ -317,3 +317,86 @@
   gap: var(--spacing-md);
   padding-left: var(--spacing-xs);
 }
+
+/* Tabs */
+.tabsContainer {
+  margin-bottom: var(--spacing-md);
+}
+
+/* Appointments tab */
+.appointmentList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+.appointmentRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  width: 100%;
+  padding: var(--spacing-md);
+  text-align: left;
+  background-color: var(--color-surface-container-lowest);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-family: var(--font-family-base);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.appointmentRow:hover {
+  background-color: var(--color-surface-container-low);
+  border-color: var(--color-outline);
+}
+
+.appointmentRow:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+.appointmentInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.appointmentDate {
+  font-size: var(--font-size-body-md);
+  font-weight: 600;
+  color: var(--color-on-surface);
+}
+
+.appointmentNotes {
+  font-size: var(--font-size-body-md);
+  color: var(--color-on-surface-variant);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.emptyMessage {
+  padding: var(--spacing-xl);
+  text-align: center;
+  color: var(--color-on-surface-variant);
+}
+
+/* SlideOver content */
+.slideOverForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.slideOverBody {
+  padding: var(--spacing-xs) 0;
+}
+
+.slideOverFooter {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: flex-end;
+}
