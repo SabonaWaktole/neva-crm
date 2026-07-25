@@ -16,6 +16,7 @@ export const LandingPage: React.FC = () => {
           <span className={styles.brandText}>Neva CRM</span>
         </div>
         <div className={styles.navActions}>
+          <ThemeToggle />
           <Button variant="outline" onClick={() => navigate('/login')}>
             Sign In
           </Button>
