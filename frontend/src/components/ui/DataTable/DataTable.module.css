@@ -1,8 +1,19 @@
+/* ============================================================================
+ * DataTable
+ * The details that make a table feel like enterprise software rather than a
+ * spreadsheet: an uppercase micro-label header that stays frosted while you
+ * scroll, generous row height, hairline separators that stop short of the
+ * card edge, and a hover state that lifts rather than shouts.
+ * ========================================================================= */
+
 .wrapper {
   width: 100%;
   background-color: var(--color-surface-container-lowest);
-  border: 1px solid var(--color-outline-variant);
+  border: none;
   border-radius: var(--radius-xl);
+  box-shadow:
+    var(--shadow-xs),
+    inset 0 0 0 1px var(--border-hairline);
   overflow: hidden;
 }
 
@@ -13,6 +24,7 @@
 .scrollArea {
   overflow: auto;
   max-height: 100%;
+  overscroll-behavior-x: contain;
 }
 
 .table {
@@ -20,43 +32,50 @@
   border-collapse: separate;
   border-spacing: 0;
   text-align: left;
+  font-variant-numeric: tabular-nums lining-nums;
 }
 
 .table th {
-  padding: var(--spacing-sm) var(--spacing-lg);
+  padding: 0 var(--spacing-lg);
   font-family: var(--font-family-base);
-  font-size: var(--font-size-label-md);
-  font-weight: 500;
-  line-height: var(--font-line-height-label-md);
-  color: var(--color-on-surface-variant);
-  background-color: var(--color-surface-container-lowest);
-  border-bottom: 1px solid var(--color-outline-variant);
+  font-size: var(--font-size-label-sm);
+  font-weight: 600;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  line-height: var(--font-line-height-label-sm);
+  color: var(--text-tertiary);
+  background-color: var(--color-surface-container-low);
+  border-bottom: 1px solid var(--border-subtle);
   white-space: nowrap;
   height: 40px;
+  /* Header text should never be selected while drag-selecting rows. */
+  user-select: none;
 }
 
+/* Frosted sticky header: content scrolls beneath it and stays faintly visible. */
 .stickyHeader th {
   position: sticky;
   top: 0;
   z-index: 2;
+  background: var(--glass-bg-strong);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .table td {
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-bottom: 1px solid var(--color-outline-variant);
+  padding: var(--spacing-base) var(--spacing-lg);
+  border-bottom: 1px solid var(--border-hairline);
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
   line-height: var(--font-line-height-body-md);
-  color: var(--color-on-surface);
+  color: var(--text-primary);
   vertical-align: middle;
+  height: 56px;
+  transition: background-color var(--duration-instant) var(--ease-out);
 }
 
 .table tbody tr:last-child td {
   border-bottom: none;
-}
-
-.table tbody tr {
-  transition: background-color var(--transition-fast);
 }
 
 .table tbody tr:hover td {
@@ -67,13 +86,39 @@
   cursor: pointer;
 }
 
+/* An accent rail slides in on the leading edge of a hovered row — the row
+   reads as "aimed at" without any colour wash. */
+.rowInteractive td:first-child {
+  position: relative;
+}
+
+.rowInteractive td:first-child::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background-color: var(--color-primary);
+  transform: scaleY(0);
+  transform-origin: center;
+  transition: transform var(--transition-fast);
+}
+
+.rowInteractive:hover td:first-child::before {
+  transform: scaleY(1);
+}
+
 .rowInteractive:focus-visible {
   outline: none;
 }
 
 .rowInteractive:focus-visible td {
-  background-color: var(--color-surface-container-low);
-  box-shadow: inset 0 0 0 2px var(--color-primary);
+  background-color: var(--color-primary-a10);
+}
+
+.rowInteractive:focus-visible td:first-child {
+  box-shadow: inset 3px 0 0 var(--color-primary);
 }
 
 .alignRight {
@@ -92,18 +137,20 @@
 
 .skeleton {
   display: block;
-  height: 12px;
+  height: 10px;
   width: 100%;
   max-width: 180px;
-  border-radius: var(--radius-default);
-  background: linear-gradient(
+  border-radius: var(--radius-full);
+  background-color: var(--skeleton-base);
+  background-image: linear-gradient(
     90deg,
-    var(--color-surface-container) 25%,
-    var(--color-surface-container-high) 37%,
-    var(--color-surface-container) 63%
+    transparent 0%,
+    var(--skeleton-sheen) 50%,
+    transparent 100%
   );
-  background-size: 400% 100%;
-  animation: shimmer 1.4s ease-in-out infinite;
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: shimmer 1.6s var(--ease-in-out) infinite;
 }
 
 .alignRight .skeleton {
@@ -124,12 +171,8 @@
 }
 
 @keyframes shimmer {
-  from {
-    background-position: 100% 50%;
-  }
-  to {
-    background-position: 0 50%;
-  }
+  from { background-position: -200% 0; }
+  to { background-position: 200% 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -146,28 +189,39 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-2xl) var(--spacing-lg);
+  gap: 6px;
+  padding: var(--spacing-3xl) var(--spacing-lg);
 }
 
+/* Concentric rings give the empty icon presence without adding an illustration. */
 .emptyIcon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  margin-bottom: var(--spacing-xs);
+  width: 52px;
+  height: 52px;
+  margin-bottom: var(--spacing-base);
   border-radius: var(--radius-full);
-  background-color: var(--color-surface-container);
-  color: var(--color-on-surface-variant);
+  background-color: var(--color-surface-container-low);
+  color: var(--text-tertiary);
+  box-shadow:
+    inset 0 0 0 1px var(--border-hairline),
+    0 0 0 8px color-mix(in srgb, var(--color-surface-container) 45%, transparent);
+}
+
+.emptyIcon > svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 1.5;
 }
 
 .emptyTitle {
   margin: 0;
-  font-family: var(--font-family-base);
+  font-family: var(--font-family-display);
   font-size: var(--font-size-body-lg);
-  font-weight: 600;
-  color: var(--color-on-surface);
+  font-weight: 620;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
 }
 
 .emptyDescription {
@@ -176,17 +230,17 @@
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
   line-height: var(--font-line-height-body-md);
-  color: var(--color-on-surface-variant);
+  color: var(--text-secondary);
 }
 
 .emptyAction {
-  margin-top: var(--spacing-sm);
+  margin-top: var(--spacing-base);
 }
 
 .inlineEmpty {
   padding: var(--spacing-xl);
   text-align: center;
-  color: var(--color-on-surface-variant);
+  color: var(--text-secondary);
 }
 
 /* --------------------------------------------------------- card (mobile) */
@@ -199,9 +253,9 @@
 .card {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: 6px;
   padding: var(--spacing-md);
-  border-bottom: 1px solid var(--color-outline-variant);
+  border-bottom: 1px solid var(--border-hairline);
 }
 
 .card:last-child {
@@ -211,6 +265,7 @@
 .cardInteractive {
   cursor: pointer;
   transition: background-color var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .cardInteractive:active {
@@ -238,21 +293,25 @@
 .cardLabel {
   flex-shrink: 0;
   font-family: var(--font-family-base);
-  font-size: var(--font-size-label-md);
+  font-size: var(--font-size-body-sm);
   font-weight: 500;
-  color: var(--color-on-surface-variant);
+  color: var(--text-tertiary);
 }
 
 .cardValue {
   min-width: 0;
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
-  color: var(--color-on-surface);
+  color: var(--text-primary);
   text-align: right;
 }
 
+/* The title row gets promoted typographically. */
 .cardField:has(> .cardValue:only-child) .cardValue {
   text-align: left;
+  font-size: var(--font-size-headline-sm);
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 /* ------------------------------------------------------------------ a11y */

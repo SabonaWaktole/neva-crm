@@ -1,17 +1,20 @@
+/* ============================================================================
+ * BusinessOwnerDashboard
+ * A bento layout: a KPI row that scans as figures, then an 8/4 split of
+ * primary content and activity feed. Sections are separated by whitespace
+ * rather than rules, which is what keeps a dense dashboard feeling calm.
+ * ========================================================================= */
+
 .dashboardContainer {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xl);
   height: 100%;
   overflow-y: auto;
-  padding: var(--spacing-md);
+  padding: var(--spacing-xs) 0 var(--spacing-2xl);
 }
 
-@media (min-width: 768px) {
-  .dashboardContainer {
-    padding: var(--spacing-lg);
-  }
-}
+/* ---------------------------------------------------------------- header */
 
 .header {
   display: flex;
@@ -23,21 +26,23 @@
   .header {
     flex-direction: row;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: flex-end;
   }
 }
 
 .headerContent {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: 5px;
 }
 
 .title {
-  font-family: var(--font-family-base);
+  font-family: var(--font-family-display);
   font-size: var(--font-size-headline-lg-mobile);
   font-weight: var(--font-weight-headline-lg);
-  color: var(--color-on-surface);
+  letter-spacing: var(--font-letter-spacing-headline-lg);
+  line-height: 1.15;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -50,16 +55,18 @@
 .subtitle {
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
-  color: var(--color-on-surface-variant);
+  color: var(--text-secondary);
   margin: 0;
 }
 
 .headerActions {
   display: flex;
   gap: var(--spacing-sm);
+  flex-shrink: 0;
 }
 
-/* Bento Grid */
+/* ------------------------------------------------------------- bento KPI */
+
 .kpiGrid {
   display: grid;
   grid-template-columns: 1fr;
@@ -75,7 +82,6 @@
 @media (min-width: 1024px) {
   .kpiGrid {
     grid-template-columns: repeat(4, 1fr);
-    gap: var(--spacing-lg);
   }
 }
 
@@ -85,11 +91,13 @@
   }
 }
 
-/* Main Layout Grid */
+/* --------------------------------------------------------- main 8/4 grid */
+
 .mainGrid {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--spacing-lg);
+  align-items: start;
 }
 
 @media (min-width: 1024px) {
@@ -102,6 +110,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
+  min-width: 0;
 }
 
 @media (min-width: 1024px) {
@@ -114,6 +123,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-width: 0;
 }
 
 @media (min-width: 1024px) {
@@ -122,7 +132,8 @@
   }
 }
 
-/* Placeholders grid (Bottom of left column) */
+/* ---------------------------------------------------- "coming soon" tiles */
+
 .placeholdersGrid {
   display: grid;
   grid-template-columns: 1fr;
@@ -135,8 +146,10 @@
   }
 }
 
+/* Dashed, unfilled and low-contrast: clearly a future slot, not a broken
+   card. Lifts very slightly on hover so it still feels alive. */
 .dashedPlaceholder {
-  border: 1px dashed var(--color-outline-variant);
+  border: 1px dashed var(--border-subtle);
   border-radius: var(--radius-xl);
   padding: var(--spacing-xl) var(--spacing-lg);
   display: flex;
@@ -144,19 +157,29 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  gap: var(--spacing-sm);
+  gap: 6px;
   background-color: transparent;
+  transition:
+    border-color var(--transition-normal),
+    background-color var(--transition-normal);
+}
+
+.dashedPlaceholder:hover {
+  border-color: var(--border-strong);
+  background-color: color-mix(in srgb, var(--color-surface-container) 40%, transparent);
 }
 
 .placeholderIcon {
-  color: var(--color-outline);
+  color: var(--text-quaternary);
+  margin-bottom: 2px;
 }
 
 .dashedPlaceholder h3 {
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
   font-weight: 600;
-  color: var(--color-on-surface-variant);
+  letter-spacing: -0.01em;
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -164,25 +187,29 @@
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-sm);
   line-height: var(--font-line-height-body-sm);
-  color: var(--color-outline);
+  color: var(--text-quaternary);
   margin: 0;
   max-width: 32ch;
 }
 
-/* Feed Card */
+/* ------------------------------------------------------------- feed card */
+
 .feedCard {
   background-color: var(--color-surface-container-lowest);
   border-radius: var(--radius-xl);
-  box-shadow: var(--elevation-1);
+  border: none;
+  box-shadow:
+    var(--shadow-xs),
+    inset 0 0 0 1px var(--border-hairline);
   display: flex;
   flex-direction: column;
   height: 100%;
-  border: 1px solid var(--color-outline-variant);
+  overflow: hidden;
 }
 
 .feedHeader {
-  padding: var(--spacing-lg);
-  border-bottom: 1px solid var(--color-outline-variant);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--border-hairline);
 }
 
 .feedTitleGroup {
@@ -192,22 +219,29 @@
 }
 
 .feedTitleGroup h2 {
-  font-family: var(--font-family-base);
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--color-on-surface);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-headline-sm);
+  font-weight: 620;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
   margin: 0;
 }
 
+.feedTitleGroup > svg {
+  color: var(--text-tertiary);
+}
+
 .feedList {
-  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md) var(--spacing-lg);
+  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-sm);
   display: flex;
   flex-direction: column;
   flex: 1;
+  overflow-y: auto;
 }
 
 .feedFooter {
-  padding: var(--spacing-md);
-  border-top: 1px solid var(--color-outline-variant);
+  padding: var(--spacing-base) var(--spacing-md);
+  border-top: 1px solid var(--border-hairline);
   margin-top: auto;
+  background-color: var(--color-surface-container-low);
 }

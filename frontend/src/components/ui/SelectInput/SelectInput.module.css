@@ -1,15 +1,19 @@
+/* ============================================================================
+ * SelectInput — matches TextInput exactly so mixed forms stay on one grid.
+ * ========================================================================= */
+
 .container {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: 6px;
 }
 
 .label {
   font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
-  font-weight: var(--font-weight-label-md);
+  font-weight: 540;
   line-height: var(--font-line-height-label-md);
-  color: var(--color-on-surface);
+  color: var(--text-primary);
   letter-spacing: var(--font-letter-spacing-label-md);
 }
 
@@ -26,17 +30,21 @@
 
 .input {
   width: 100%;
-  height: 36px;
-  padding: 0 var(--spacing-sm);
+  height: 38px;
+  padding: 0 var(--spacing-base);
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
   line-height: var(--font-line-height-body-md);
-  color: var(--color-on-surface);
+  color: var(--text-primary);
   background-color: var(--color-surface-container-lowest);
-  border: 1px solid var(--color-outline-variant);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-default);
   outline: none;
-  transition: all 0.2s ease-in-out;
+  box-shadow: var(--shadow-xs);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background-color var(--transition-fast);
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -44,19 +52,29 @@
 }
 
 .input::placeholder {
-  color: var(--color-outline);
+  color: var(--text-quaternary);
+}
+
+.input:hover:not(:disabled):not(:focus) {
+  border-color: var(--border-strong);
 }
 
 .input:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px var(--color-primary-fixed);
+  box-shadow: var(--focus-ring-tight);
 }
 
 .input:disabled {
   background-color: var(--color-surface-container);
-  color: var(--color-outline);
+  color: var(--text-quaternary);
   cursor: not-allowed;
-  opacity: 0.7;
+  box-shadow: none;
+}
+
+/* The dropdown list itself is OS-drawn; at minimum keep it theme-correct. */
+.input option {
+  background-color: var(--color-surface-container-lowest);
+  color: var(--text-primary);
 }
 
 /* Error State */
@@ -66,16 +84,16 @@
 
 .inputError:focus {
   border-color: var(--color-error);
-  box-shadow: 0 0 0 2px var(--color-error-container);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-error) 20%, transparent);
 }
 
 .helperText {
-  margin-top: var(--spacing-xs);
+  margin-top: 2px;
   font-family: var(--font-family-base);
-  font-size: var(--font-size-label-sm);
+  font-size: var(--font-size-body-sm);
   font-weight: 400;
-  line-height: var(--font-line-height-label-sm);
-  color: var(--color-on-surface-variant);
+  line-height: var(--font-line-height-body-sm);
+  color: var(--text-secondary);
 }
 
 .helperTextError {
@@ -83,11 +101,11 @@
 }
 
 .hasIconRight {
-  padding-right: 40px;
+  padding-right: 38px;
 }
 
 .hasIconLeft {
-  padding-left: 40px;
+  padding-left: 38px;
 }
 
 .iconWrapper {
@@ -96,15 +114,26 @@
   bottom: 0;
   display: flex;
   align-items: center;
-  color: var(--color-outline);
+  color: var(--text-tertiary);
+  transition: color var(--transition-fast);
+}
+
+.iconWrapper > svg {
+  width: 16px;
+  height: 16px;
 }
 
 .iconLeft {
-  left: var(--spacing-sm);
+  left: var(--spacing-base);
 }
 
 .iconRight {
-  right: var(--spacing-sm);
+  right: var(--spacing-base);
+}
+
+/* The chevron picks up the accent on focus, mirroring TextInput. */
+.inputWrapper:focus-within .iconRight {
+  color: var(--color-primary);
 }
 
 .pointerEventsNone {

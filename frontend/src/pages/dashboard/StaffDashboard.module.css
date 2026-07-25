@@ -1,58 +1,82 @@
+/* ============================================================================
+ * StaffDashboard
+ * Mobile-first for staff who work from a phone: big tappable quick actions and
+ * a horizontally scrolling stat strip. Desktop promotes the same information
+ * into a bento grid.
+ * ========================================================================= */
+
 .dashboardContainer {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xl);
   height: 100%;
   overflow-y: auto;
-  padding: var(--spacing-md);
+  padding: var(--spacing-xs) 0 var(--spacing-2xl);
 }
 
-@media (min-width: 768px) {
-  .dashboardContainer {
-    padding: var(--spacing-lg);
-  }
-}
+/* --------------------------------------------------------- mobile header */
 
-/* Mobile Header Elements */
 .mobileHeader {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: 5px;
 }
 
 .titleMobile {
-  font-family: var(--font-family-base);
+  font-family: var(--font-family-display);
   font-size: var(--font-size-headline-lg-mobile);
   font-weight: var(--font-weight-headline-lg);
-  color: var(--color-on-surface);
+  letter-spacing: var(--font-letter-spacing-headline-lg-mobile);
+  line-height: 1.15;
+  color: var(--text-primary);
   margin: 0;
 }
 
 .subtitleMobile {
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
-  color: var(--color-on-surface-variant);
+  color: var(--text-secondary);
   margin: 0;
 }
 
 .mobileQuickActions {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-base);
 }
 
-.quickActionButtonPrimary, .quickActionButtonSecondary {
+.quickActionButtonPrimary,
+.quickActionButtonSecondary {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-sm);
-  height: 80px;
-  border-radius: var(--radius-lg);
+  gap: 6px;
+  height: 88px;
+  border-radius: var(--radius-xl);
   border: none;
   font-family: var(--font-family-base);
+  font-size: var(--font-size-label-md);
   font-weight: 600;
+  letter-spacing: -0.008em;
   cursor: pointer;
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+  transition:
+    transform var(--duration-instant) var(--ease-out),
+    box-shadow var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.quickActionButtonPrimary:active,
+.quickActionButtonSecondary:active {
+  transform: scale(0.97);
+}
+
+.quickActionButtonPrimary > svg,
+.quickActionButtonSecondary > svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 1.75;
 }
 
 .quickActionButtonPrimary {
@@ -67,12 +91,15 @@
 
 /* Hide mobile elements on desktop */
 @media (min-width: 1024px) {
-  .mobileHeader, .mobileQuickActions, .mobileStatsSection {
+  .mobileHeader,
+  .mobileQuickActions,
+  .mobileStatsSection {
     display: none !important;
   }
 }
 
-/* Desktop Header Elements */
+/* -------------------------------------------------------- desktop header */
+
 .desktopHeader {
   display: none;
 }
@@ -81,34 +108,37 @@
   .desktopHeader {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: flex-end;
   }
 }
 
 .headerContent {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: 5px;
 }
 
 .title {
-  font-family: var(--font-family-base);
+  font-family: var(--font-family-display);
   font-size: var(--font-size-headline-lg);
   font-weight: var(--font-weight-headline-lg);
-  color: var(--color-on-surface);
+  letter-spacing: var(--font-letter-spacing-headline-lg);
+  line-height: 1.15;
+  color: var(--text-primary);
   margin: 0;
 }
 
 .subtitle {
   font-family: var(--font-family-base);
-  font-size: var(--font-size-body-lg);
-  color: var(--color-on-surface-variant);
+  font-size: var(--font-size-body-md);
+  color: var(--text-secondary);
   margin: 0;
 }
 
 .headerActions {
   display: flex;
   gap: var(--spacing-sm);
+  flex-shrink: 0;
 }
 
 /* Desktop KPI Bento */
@@ -120,7 +150,7 @@
   .kpiGridDesktop {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-lg);
+    gap: var(--spacing-md);
   }
 }
 
@@ -129,6 +159,7 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--spacing-lg);
+  align-items: start;
 }
 
 @media (min-width: 1024px) {
@@ -141,6 +172,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
+  min-width: 0;
 }
 
 @media (min-width: 1024px) {
@@ -153,6 +185,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-width: 0;
 }
 
 @media (min-width: 1024px) {
@@ -161,52 +194,85 @@
   }
 }
 
-/* Mobile Stats Scroll */
+/* ---------------------------------------------------- mobile stats strip */
+
 .mobileStatsSection h3 {
   font-family: var(--font-family-base);
-  font-size: 16px;
-  color: var(--color-on-surface);
-  margin: 0 0 var(--spacing-sm) 0;
+  font-size: var(--font-size-label-sm);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin: 0 0 var(--spacing-base) 0;
 }
 
+/* Bleeds to the viewport edges so cards scroll off-screen rather than
+   stopping at a hard margin — the iOS carousel convention. */
 .statsScrollContainer {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-base);
   overflow-x: auto;
   padding-bottom: var(--spacing-sm);
   margin: 0 calc(-1 * var(--spacing-md));
   padding-left: var(--spacing-md);
   padding-right: var(--spacing-md);
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.statsScrollContainer::-webkit-scrollbar {
+  display: none;
 }
 
 .statCard {
-  min-width: 120px;
-  background-color: var(--color-surface-container-low);
-  border: 1px solid var(--color-outline-variant);
-  border-radius: var(--radius-lg);
+  min-width: 132px;
+  scroll-snap-align: start;
+  background-color: var(--color-surface-container-lowest);
+  border: none;
+  border-radius: var(--radius-xl);
   padding: var(--spacing-md);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
+  box-shadow:
+    var(--shadow-xs),
+    inset 0 0 0 1px var(--border-hairline);
 }
 
 .statLabel {
-  font-size: 11px;
+  font-size: var(--font-size-label-sm);
   font-weight: 600;
-  color: var(--color-on-surface-variant);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
 }
 
 .statValue {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--color-on-surface);
+  font-family: var(--font-family-display);
+  font-size: 26px;
+  font-weight: 660;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
 }
 
-.statTrendUp { color: var(--color-success); display: flex; align-items: center; gap: 4px; font-size: 12px; }
-.statTrendDown { color: var(--color-error); display: flex; align-items: center; gap: 4px; font-size: 12px; }
-.statTrendNeutral { color: var(--color-on-surface-variant); display: flex; align-items: center; gap: 4px; font-size: 12px; }
+.statTrendUp,
+.statTrendDown,
+.statTrendNeutral {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: var(--font-size-body-sm);
+  font-weight: 550;
+  font-variant-numeric: tabular-nums;
+}
 
-/* Desktop Quick Actions */
+.statTrendUp { color: var(--color-success); }
+.statTrendDown { color: var(--color-error); }
+.statTrendNeutral { color: var(--text-tertiary); }
+
+/* -------------------------------------------------- desktop quick actions */
+
 .desktopQuickActions {
   display: none;
 }
@@ -215,60 +281,85 @@
   .desktopQuickActions {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-lg);
+    gap: var(--spacing-md);
   }
 }
 
 .glassButton {
   background-color: var(--color-surface-container-lowest);
-  border: 1px solid var(--color-outline-variant);
+  border: none;
   border-radius: var(--radius-xl);
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
   display: flex;
   gap: var(--spacing-md);
   align-items: center;
+  text-align: left;
   cursor: pointer;
-  transition: background-color var(--transition-normal), border-color var(--transition-normal);
+  box-shadow:
+    var(--shadow-xs),
+    inset 0 0 0 1px var(--border-hairline);
+  transition:
+    box-shadow var(--transition-normal),
+    transform var(--transition-normal);
 }
 
 .glassButton:hover {
-  background-color: var(--color-surface-container-low);
-  border-color: var(--color-outline);
+  box-shadow:
+    var(--shadow-md),
+    inset 0 0 0 1px var(--border-subtle);
+  transform: translateY(-1px);
+}
+
+.glassButton:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.glassButton:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .glassButtonContent {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+  min-width: 0;
 }
 
 .glassButtonContent h3 {
   margin: 0;
   font-family: var(--font-family-base);
-  font-size: 14px;
-  color: var(--color-on-surface);
+  font-size: var(--font-size-label-md);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
 }
 
 .glassButtonContent p {
   margin: 0;
-  font-size: 13px;
-  color: var(--color-on-surface-variant);
+  font-size: var(--font-size-body-sm);
+  line-height: var(--font-line-height-body-sm);
+  color: var(--text-secondary);
 }
 
-/* Feed Card */
+/* ------------------------------------------------------------- feed card */
+
 .feedCard {
   background-color: var(--color-surface-container-lowest);
   border-radius: var(--radius-xl);
-  box-shadow: var(--elevation-1);
+  border: none;
+  box-shadow:
+    var(--shadow-xs),
+    inset 0 0 0 1px var(--border-hairline);
   display: flex;
   flex-direction: column;
   height: 100%;
-  border: 1px solid var(--color-outline-variant);
+  overflow: hidden;
 }
 
 .feedHeader {
-  padding: var(--spacing-lg);
-  border-bottom: 1px solid var(--color-outline-variant);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--border-hairline);
 }
 
 .feedTitleGroup {
@@ -278,22 +369,29 @@
 }
 
 .feedTitleGroup h2 {
-  font-family: var(--font-family-base);
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--color-on-surface);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-headline-sm);
+  font-weight: 620;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
   margin: 0;
 }
 
+.feedTitleGroup > svg {
+  color: var(--text-tertiary);
+}
+
 .feedList {
-  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md) var(--spacing-lg);
+  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-sm);
   display: flex;
   flex-direction: column;
   flex: 1;
+  overflow-y: auto;
 }
 
 .feedFooter {
-  padding: var(--spacing-md);
-  border-top: 1px solid var(--color-outline-variant);
+  padding: var(--spacing-base) var(--spacing-md);
+  border-top: 1px solid var(--border-hairline);
   margin-top: auto;
+  background-color: var(--color-surface-container-low);
 }

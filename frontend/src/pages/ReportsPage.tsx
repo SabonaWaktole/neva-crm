@@ -1,23 +1,89 @@
 import React from 'react';
-import { 
+import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line
 } from 'recharts';
+import { AlertCircle, BarChart3 } from 'lucide-react';
 import { useReports } from '../hooks/useReports';
 import { Sidebar } from '../components/layout/Sidebar/Sidebar';
 import { AppLayout } from '../components/layout/AppLayout/AppLayout';
+import { Button } from '../components/ui/Button/Button';
 import { useAuthStore } from '../store/useAuthStore';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useNavigation } from '../hooks/useNavigation';
+import styles from './ReportsPage.module.css';
 
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+/**
+ * Fixed categorical order, read from the validated chart tokens. Slots are
+ * assigned by index and never cycled — see the note in tokens.css.
+ */
+const COLORS = [
+  'var(--chart-1)',
+  'var(--chart-2)',
+  'var(--chart-3)',
+  'var(--chart-4)',
+  'var(--chart-5)',
+  'var(--chart-6)',
+];
+
+const currency = new Intl.NumberFormat(undefined, {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 0,
+});
+
+const compactCurrency = (value: number) =>
+  `$${Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 }).format(value)}`;
+
+/** Shared tooltip so every chart on the page reads identically. */
+const ChartTooltip: React.FC<{
+  active?: boolean;
+  payload?: any[];
+  label?: string;
+  format?: (value: number) => string;
+}> = ({ active, payload, label, format }) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className={styles.tooltip}>
+      {label !== undefined && <div className={styles.tooltipLabel}>{label}</div>}
+      {payload.map((entry, index) => (
+        <div className={styles.tooltipRow} key={`${entry.name}-${index}`}>
+          <span className={styles.tooltipName}>
+            <span
+              className={styles.tooltipSwatch}
+              style={{ backgroundColor: entry.color ?? entry.payload?.fill }}
+            />
+            {entry.name}
+          </span>
+          <span className={styles.tooltipValue}>
+            {format ? format(Number(entry.value)) : entry.value}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const EmptyChart: React.FC<{ message: string }> = ({ message }) => (
+  <div className={styles.emptyChart}>
+    <BarChart3 size={22} strokeWidth={1.5} />
+    <span>{message}</span>
+  </div>
+);
+
+const axisProps = {
+  stroke: 'var(--chart-axis)',
+  tickLine: false,
+  axisLine: false,
+  tick: { fontSize: 12 },
+} as const;
 
 export const ReportsPage: React.FC = () => {
   const user = useAuthStore(state => state.user);
   const tenantSlug = user?.tenantSlug;
   const roleName = user?.role;
   const userName = user?.firstName ? `${user.firstName} ${user.lastName || ''}` : user?.email || 'User';
-  
+
   const logout = useAuthStore(state => state.logout);
   const { revenue, clients, inventory, loading, error, refresh } = useReports();
   const navigate = useNavigate();
@@ -31,10 +97,10 @@ export const ReportsPage: React.FC = () => {
   };
 
   const sidebarElement = (
-    <Sidebar 
-      orgName={tenantSlug || 'Workspace'} 
-      orgTier={roleName || ''} 
-      navItems={navItems} 
+    <Sidebar
+      orgName={tenantSlug || 'Workspace'}
+      orgTier={roleName || ''}
+      navItems={navItems}
       onNavItemClick={(id) => navigate(`/${tenantSlug}/${id}`)}
       onLogoutClick={handleLogout}
     />
@@ -48,8 +114,18 @@ export const ReportsPage: React.FC = () => {
         onSettingsClick={() => navigate(`/${tenantSlug}/settings/profile`)}
         sidebar={sidebarElement}
       >
-        <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-          <div style={{ color: 'var(--color-on-surface-variant)' }}>Loading reports...</div>
+        <div className={styles.page}>
+          <div className={styles.header}>
+            <div className={styles.headerContent}>
+              <h1 className={styles.title}>Reports &amp; Analytics</h1>
+              <p className={styles.subtitle}>Loading your latest figures…</p>
+            </div>
+          </div>
+          {/* Skeletons in the final layout, so nothing jumps when data lands. */}
+          <div className={styles.loadingGrid} aria-busy="true" aria-label="Loading reports">
+            <div className={`${styles.skeletonCard} skeleton`} />
+            <div className={`${styles.skeletonCard} skeleton`} />
+          </div>
         </div>
       </AppLayout>
     );
@@ -62,70 +138,68 @@ export const ReportsPage: React.FC = () => {
       onSettingsClick={() => navigate(`/${tenantSlug}/settings/profile`)}
       sidebar={sidebarElement}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <header style={{
-          backgroundColor: 'var(--color-surface)',
-          borderBottom: '1px solid var(--color-outline-variant)',
-          padding: 'var(--spacing-md) var(--spacing-lg)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 'var(--spacing-sm)',
-          flexShrink: 0
-        }}>
-          <h1 style={{ margin: 0, fontSize: 'var(--font-size-headline-sm)', color: 'var(--color-on-surface)' }}>Reports & Analytics</h1>
-          <div style={{ display: 'flex', gap: 'var(--spacing-md)' }}>
-            <button 
-              onClick={refresh}
-              style={{
-                backgroundColor: 'transparent',
-                border: '1px solid var(--color-outline)',
-                color: 'var(--color-on-surface)',
-                padding: 'var(--spacing-xs) var(--spacing-sm)',
-                borderRadius: 'var(--radius-default)',
-                cursor: 'pointer'
-              }}
-            >
-              Refresh Data
-            </button>
+      <div className={styles.page}>
+        <header className={styles.header}>
+          <div className={styles.headerContent}>
+            <h1 className={styles.title}>Reports &amp; Analytics</h1>
+            <p className={styles.subtitle}>Revenue, client mix and inventory at a glance.</p>
           </div>
+          <Button variant="outline" onClick={refresh}>
+            Refresh data
+          </Button>
         </header>
 
-        <main style={{ flex: 1, overflowY: 'auto', padding: 'var(--spacing-md)' }}>
+        <main className={styles.main}>
           {error && (
-            <div style={{ backgroundColor: 'var(--color-error-container)', color: 'var(--color-on-error-container)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-lg)', marginBottom: 'var(--spacing-lg)' }}>
+            <div className={styles.errorBanner} role="alert">
+              <AlertCircle size={16} />
               {error}
             </div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(400px, 100%), 1fr))', gap: 'var(--spacing-xl)' }}>
-            
+          <div className={styles.grid}>
             {/* Revenue Chart */}
-            <div style={{ backgroundColor: 'var(--color-surface)', padding: 'var(--spacing-lg)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--elevation-1)', border: '1px solid var(--color-outline-variant)' }}>
-              <h2 style={{ fontSize: 'var(--font-size-headline-md)', color: 'var(--color-on-surface)', marginBottom: 'var(--spacing-lg)', marginTop: 0 }}>Monthly Revenue</h2>
-              <div style={{ height: '320px' }}>
+            <div className={styles.chartCard}>
+              <div className={styles.chartHeader}>
+                <h2 className={styles.chartTitle}>Monthly revenue</h2>
+                <p className={styles.chartCaption}>Total invoiced value per month</p>
+              </div>
+              <div className={styles.chartBody}>
                 {revenue.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={revenue}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                      <XAxis dataKey="month" />
-                      <YAxis tickFormatter={(value: number) => `$${value}`} />
-                      <Tooltip formatter={(value: any) => [`$${value}`, 'Revenue']} />
-                      <Legend />
-                      <Line type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 8 }} />
+                    <LineChart data={revenue} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+                      <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
+                      <XAxis dataKey="month" {...axisProps} />
+                      <YAxis tickFormatter={compactCurrency} width={56} {...axisProps} />
+                      <Tooltip
+                        content={<ChartTooltip format={(v) => currency.format(v)} />}
+                        cursor={{ stroke: 'var(--border-strong)', strokeWidth: 1 }}
+                      />
+                      {/* Single series: the card title names it, so no legend box. */}
+                      <Line
+                        type="monotone"
+                        dataKey="revenue"
+                        name="Revenue"
+                        stroke="var(--chart-1)"
+                        strokeWidth={2}
+                        dot={{ r: 3, strokeWidth: 0, fill: 'var(--chart-1)' }}
+                        activeDot={{ r: 5, strokeWidth: 2, stroke: 'var(--color-surface-container-lowest)' }}
+                      />
                     </LineChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-on-surface-variant)' }}>No revenue data available</div>
+                  <EmptyChart message="No revenue data yet" />
                 )}
               </div>
             </div>
 
             {/* Client Status Chart */}
-            <div style={{ backgroundColor: 'var(--color-surface)', padding: 'var(--spacing-lg)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--elevation-1)', border: '1px solid var(--color-outline-variant)' }}>
-              <h2 style={{ fontSize: 'var(--font-size-headline-md)', color: 'var(--color-on-surface)', marginBottom: 'var(--spacing-lg)', marginTop: 0 }}>Client Distribution</h2>
-              <div style={{ height: '320px' }}>
+            <div className={styles.chartCard}>
+              <div className={styles.chartHeader}>
+                <h2 className={styles.chartTitle}>Client distribution</h2>
+                <p className={styles.chartCaption}>Share of clients by status</p>
+              </div>
+              <div className={styles.chartBody}>
                 {clients.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -133,51 +207,99 @@ export const ReportsPage: React.FC = () => {
                         data={clients}
                         cx="50%"
                         cy="50%"
-                        innerRadius={80}
-                        outerRadius={120}
-                        fill="#8884d8"
-                        paddingAngle={5}
+                        innerRadius={68}
+                        outerRadius={104}
+                        paddingAngle={2}
                         dataKey="count"
                         nameKey="status"
-                        label={(props: any) => `${props.name} ${(props.percent * 100).toFixed(0)}%`}
+                        stroke="var(--color-surface-container-lowest)"
+                        strokeWidth={2}
                       >
                         {clients.map((_, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
-                      <Tooltip />
-                      <Legend />
+                      <Tooltip content={<ChartTooltip />} />
+                      <Legend
+                        verticalAlign="bottom"
+                        iconType="circle"
+                        iconSize={8}
+                      />
                     </PieChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-on-surface-variant)' }}>No client data available</div>
+                  <EmptyChart message="No client data yet" />
                 )}
               </div>
             </div>
 
-            {/* Inventory Chart */}
-            <div style={{ gridColumn: '1 / -1', backgroundColor: 'var(--color-surface)', padding: 'var(--spacing-lg)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--elevation-1)', border: '1px solid var(--color-outline-variant)' }}>
-              <h2 style={{ fontSize: 'var(--font-size-headline-md)', color: 'var(--color-on-surface)', marginBottom: 'var(--spacing-lg)', marginTop: 0 }}>Inventory Value by Warehouse</h2>
-              <div style={{ height: '320px' }}>
+            {/*
+              Inventory was one chart with two y-axes (dollars on the left,
+              item counts on the right). Two scales on one plot make the
+              series look comparable when they are not, so the same data is
+              now shown as two charts sharing an x-axis.
+            */}
+            <div className={styles.chartCard}>
+              <div className={styles.chartHeader}>
+                <h2 className={styles.chartTitle}>Inventory value by warehouse</h2>
+                <p className={styles.chartCaption}>Total stock value held at each location</p>
+              </div>
+              <div className={styles.chartBody}>
                 {inventory.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={inventory} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                      <XAxis dataKey="warehouseName" />
-                      <YAxis yAxisId="left" orientation="left" stroke="#3b82f6" tickFormatter={(value: number) => `$${value}`} />
-                      <YAxis yAxisId="right" orientation="right" stroke="#10b981" />
-                      <Tooltip />
-                      <Legend />
-                      <Bar yAxisId="left" dataKey="totalValue" name="Total Value ($)" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                      <Bar yAxisId="right" dataKey="totalItems" name="Total Items" fill="#10b981" radius={[4, 4, 0, 0]} />
+                    <BarChart data={inventory} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+                      <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
+                      <XAxis dataKey="warehouseName" {...axisProps} />
+                      <YAxis tickFormatter={compactCurrency} width={56} {...axisProps} />
+                      <Tooltip
+                        content={<ChartTooltip format={(v) => currency.format(v)} />}
+                        cursor={{ fill: 'var(--color-primary-a10)' }}
+                      />
+                      <Bar
+                        dataKey="totalValue"
+                        name="Total value"
+                        fill="var(--chart-1)"
+                        radius={[4, 4, 0, 0]}
+                        maxBarSize={44}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-on-surface-variant)' }}>No inventory data available</div>
+                  <EmptyChart message="No inventory data yet" />
                 )}
               </div>
             </div>
 
+            <div className={styles.chartCard}>
+              <div className={styles.chartHeader}>
+                <h2 className={styles.chartTitle}>Items held by warehouse</h2>
+                <p className={styles.chartCaption}>Unit count at each location</p>
+              </div>
+              <div className={styles.chartBody}>
+                {inventory.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={inventory} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+                      <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
+                      <XAxis dataKey="warehouseName" {...axisProps} />
+                      <YAxis width={48} {...axisProps} />
+                      <Tooltip
+                        content={<ChartTooltip />}
+                        cursor={{ fill: 'var(--color-primary-a10)' }}
+                      />
+                      <Bar
+                        dataKey="totalItems"
+                        name="Total items"
+                        fill="var(--chart-2)"
+                        radius={[4, 4, 0, 0]}
+                        maxBarSize={44}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <EmptyChart message="No inventory data yet" />
+                )}
+              </div>
+            </div>
           </div>
         </main>
       </div>

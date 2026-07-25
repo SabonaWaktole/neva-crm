@@ -1,15 +1,37 @@
+/* ============================================================================
+ * LoginPage — the form inside AuthLayout's centred card.
+ * ========================================================================= */
+
 .form {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  background-color: var(--color-surface-container-lowest);
+  border-radius: var(--radius-2xl);
+  box-shadow:
+    var(--shadow-lg),
+    inset 0 0 0 1px var(--border-hairline);
 }
 
 .errorBanner {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
   color: var(--color-on-error-container);
   background-color: var(--color-error-container);
-  font-size: var(--font-size-label-sm);
-  padding: var(--spacing-sm);
+  font-size: var(--font-size-body-sm);
+  line-height: var(--font-line-height-body-sm);
+  padding: 10px var(--spacing-base);
   border-radius: var(--radius-default);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-error) 20%, transparent);
+  /* Slides in so a failed attempt is noticed without a jarring layout jump. */
+  animation: bannerIn var(--duration-normal) var(--ease-out);
+}
+
+@keyframes bannerIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .passwordGroup {
@@ -29,21 +51,23 @@
 
 .metaText {
   font-family: var(--font-family-base);
-  font-size: var(--font-size-label-sm);
-  color: var(--color-on-surface-variant);
+  font-size: var(--font-size-body-sm);
+  color: var(--text-secondary);
 }
 
 .link {
   font-family: var(--font-family-base);
-  font-size: var(--font-size-label-sm);
-  font-weight: 500;
+  font-size: var(--font-size-body-sm);
+  font-weight: 550;
   color: var(--color-primary);
   text-decoration: none;
-  border-radius: var(--radius-default);
+  border-radius: var(--radius-sm);
+  transition: opacity var(--transition-fast);
 }
 
 .link:hover {
   text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .link:focus-visible {
@@ -52,5 +76,5 @@
 }
 
 .submitRow {
-  padding-top: var(--spacing-sm);
+  padding-top: var(--spacing-xs);
 }

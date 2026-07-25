@@ -1,10 +1,22 @@
+/* ============================================================================
+ * Card — the base raised surface.
+ * The edge is an inset ring rather than a border, so it never adds to the box
+ * model and stays perfectly crisp at any device pixel ratio.
+ * ========================================================================= */
+
 .card {
+  position: relative;
   background-color: var(--color-surface-container-lowest);
-  border: 1px solid var(--color-outline-variant);
+  border: none;
   border-radius: var(--radius-xl);
-  color: var(--color-on-surface);
-  box-shadow: var(--elevation-1);
-  transition: box-shadow var(--transition-normal), border-color var(--transition-normal);
+  color: var(--text-primary);
+  box-shadow:
+    var(--shadow-xs),
+    inset 0 0 0 1px var(--border-hairline);
+  transition:
+    box-shadow var(--transition-normal),
+    transform var(--transition-normal),
+    background-color var(--transition-normal);
 }
 
 /* --glass-bg is themed in tokens.css, so this adapts automatically. A prior
@@ -14,11 +26,14 @@
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow:
+    var(--shadow-md),
+    inset 0 0 0 1px var(--glass-border);
 }
 
 /* Padding variants */
 .padding-none { padding: 0; }
-.padding-sm { padding: var(--spacing-sm); }
+.padding-sm { padding: var(--spacing-base); }
 .padding-md { padding: var(--spacing-md); }
 .padding-lg { padding: var(--spacing-lg); }
 .padding-xl { padding: var(--spacing-xl); }

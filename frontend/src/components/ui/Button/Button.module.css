@@ -1,4 +1,12 @@
+/* ============================================================================
+ * Button
+ * The press behaviour is the signature: a fast, slight scale-down on :active
+ * with an ease-out release. That single detail is most of what makes a button
+ * feel native rather than web.
+ * ========================================================================= */
+
 .button {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -7,27 +15,47 @@
 
   font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
-  font-weight: var(--font-weight-label-md);
-  line-height: var(--font-line-height-label-md);
-  letter-spacing: var(--font-letter-spacing-label-md);
+  font-weight: 560;
+  line-height: 1;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
 
   border-radius: var(--radius-default);
-  border: none;
+  border: 1px solid transparent;
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
   text-decoration: none;
+  user-select: none;
+  /* Stops the grey tap flash on iOS. */
+  -webkit-tap-highlight-color: transparent;
+
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--duration-instant) var(--ease-out),
+    opacity var(--transition-fast);
+}
+
+.button:active:not(:disabled) {
+  transform: scale(0.97);
+  transition-duration: var(--duration-instant);
 }
 
 .button:disabled {
   cursor: not-allowed;
-  opacity: 0.6;
+  opacity: 0.45;
+  box-shadow: none;
 }
 
-/* Size variants */
+/* ------------------------------------------------------------------ sizes */
+
 .size-sm {
-  height: 32px;
-  padding: 0 var(--spacing-sm);
-  font-size: var(--font-size-label-sm);
+  height: 30px;
+  padding: 0 10px;
+  font-size: var(--font-size-body-sm);
+  border-radius: var(--radius-sm);
+  gap: 6px;
 }
 
 .size-md {
@@ -38,6 +66,7 @@
   height: 44px;
   padding: 0 var(--spacing-lg);
   font-size: var(--font-size-body-md);
+  border-radius: var(--radius-lg);
 }
 
 /* Touch targets need to be at least 44px tall on touch-sized viewports */
@@ -48,80 +77,139 @@
   }
 }
 
-/* Focus State */
+/* ------------------------------------------------------------------ focus */
+
 .button:focus {
   outline: none;
 }
 
 .button:focus-visible {
-  box-shadow: 0 0 0 2px var(--color-surface-container-lowest), 0 0 0 4px var(--color-primary);
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
-/* Primary Variant */
+/* ---------------------------------------------------------------- primary */
+
+/* The inset top highlight + darker bottom edge is the classic Apple/Stripe
+   "lit from above" button. It survives on flat colour, unlike a gradient. */
 .primary {
   background-color: var(--color-primary);
   color: var(--color-on-primary);
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+  box-shadow:
+    var(--shadow-accent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
-.primary:hover {
-  background-color: var(--color-on-primary-fixed-variant);
+.primary:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
 }
 
-.primary:active {
-  background-color: var(--color-primary);
+.primary:active:not(:disabled) {
+  background-color: var(--color-primary-active);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-/* Secondary/Outline Variant (derived from general patterns) */
+/* ---------------------------------------------------------------- outline */
+
 .outline {
-  background-color: transparent;
-  color: var(--color-primary);
-  border: 1px solid var(--color-outline-variant);
+  background-color: var(--color-surface-container-lowest);
+  color: var(--text-primary);
+  border-color: var(--border-subtle);
+  box-shadow: var(--shadow-xs);
 }
 
-.outline:hover {
+.outline:hover:not(:disabled) {
+  background-color: var(--color-surface-container-low);
+  border-color: var(--border-strong);
+}
+
+.outline:active:not(:disabled) {
   background-color: var(--color-surface-container);
-  border-color: var(--color-primary);
 }
 
-/* Full Width Modifier */
+/* ------------------------------------------------------------------ ghost */
+
+.ghost {
+  background-color: transparent;
+  color: var(--text-secondary);
+}
+
+.ghost:hover:not(:disabled) {
+  background-color: var(--color-surface-container);
+  color: var(--text-primary);
+}
+
+.ghost:active:not(:disabled) {
+  background-color: var(--color-surface-container-high);
+}
+
+/* ---------------------------------------------------------------- success */
+
+.success {
+  background-color: var(--color-success);
+  color: var(--color-on-success);
+  box-shadow:
+    var(--shadow-sm),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.success:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.success:active:not(:disabled) {
+  filter: brightness(0.94);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* ----------------------------------------------------------------- danger */
+
+/* Destructive actions read as outlined until hovered — they should never be
+   the loudest thing on screen at rest. */
+.danger {
+  background-color: var(--color-surface-container-lowest);
+  color: var(--color-error);
+  border-color: color-mix(in srgb, var(--color-error) 32%, transparent);
+  box-shadow: var(--shadow-xs);
+}
+
+.danger:hover:not(:disabled) {
+  background-color: var(--color-error);
+  border-color: var(--color-error);
+  color: var(--color-on-error);
+}
+
+.danger:active:not(:disabled) {
+  filter: brightness(0.92);
+}
+
+.danger:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--color-surface-container-lowest),
+    0 0 0 4px color-mix(in srgb, var(--color-error) 35%, transparent);
+}
+
+/* --------------------------------------------------------------- modifiers */
+
 .fullWidth {
   width: 100%;
 }
 
 .icon {
-  font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-/* Ghost Variant */
-.ghost {
-  background-color: transparent;
-  color: var(--color-on-surface-variant);
+/* Normalise any lucide icon passed in, so stroke weight and size stay uniform. */
+.icon > svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
 }
 
-.ghost:hover {
-  background-color: var(--color-surface-container);
-  color: var(--color-on-surface);
-}
-
-/* Success Variant - confirming a positive outcome (e.g. Mark Accepted) */
-.success {
-  background-color: var(--color-success);
-  color: var(--color-on-success);
-}
-
-.success:hover {
-  background-color: var(--color-on-success-container);
-}
-
-/* Danger Variant - destructive or negative actions (e.g. Mark Rejected) */
-.danger {
-  background-color: transparent;
-  color: var(--color-error);
-  border: 1px solid var(--color-error);
-}
-
-.danger:hover {
-  background-color: var(--color-error-container);
-  color: var(--color-on-error-container);
+.size-lg .icon > svg {
+  width: 18px;
+  height: 18px;
 }
