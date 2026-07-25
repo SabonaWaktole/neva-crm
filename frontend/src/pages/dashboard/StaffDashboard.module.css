@@ -202,7 +202,7 @@
   color: var(--color-on-surface);
 }
 
-.statTrendUp { color: #10b981; display: flex; align-items: center; gap: 4px; font-size: 12px; }
+.statTrendUp { color: var(--color-success); display: flex; align-items: center; gap: 4px; font-size: 12px; }
 .statTrendDown { color: var(--color-error); display: flex; align-items: center; gap: 4px; font-size: 12px; }
 .statTrendNeutral { color: var(--color-on-surface-variant); display: flex; align-items: center; gap: 4px; font-size: 12px; }
 
@@ -220,7 +220,7 @@
 }
 
 .glassButton {
-  background-color: rgba(30, 41, 59, 0.7); /* Approximate glass-card */
+  background-color: var(--color-surface-container-lowest);
   border: 1px solid var(--color-outline-variant);
   border-radius: var(--radius-xl);
   padding: var(--spacing-lg);
@@ -228,11 +228,12 @@
   gap: var(--spacing-md);
   align-items: center;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color var(--transition-normal), border-color var(--transition-normal);
 }
 
 .glassButton:hover {
-  background-color: var(--color-surface-container-highest);
+  background-color: var(--color-surface-container-low);
+  border-color: var(--color-outline);
 }
 
 .glassButtonContent {

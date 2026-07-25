@@ -34,17 +34,28 @@
   color: var(--color-on-error-container);
 }
 
+.success {
+  background-color: var(--color-success-container);
+  color: var(--color-on-success-container);
+}
+
+.warning {
+  background-color: var(--color-warning-container);
+  color: var(--color-on-warning-container);
+}
+
+/* Deprecated aliases, kept for backward compatibility with existing callers */
 .emerald {
-  background-color: rgba(16, 185, 129, 0.15);
-  color: #047857;
+  background-color: var(--color-success-container);
+  color: var(--color-on-success-container);
 }
 
 .slate {
-  background-color: rgba(100, 116, 139, 0.15);
-  color: #475569;
+  background-color: var(--color-surface-variant);
+  color: var(--color-on-surface-variant);
 }
 
 .amber {
-  background-color: rgba(245, 158, 11, 0.15);
-  color: #b45309;
+  background-color: var(--color-warning-container);
+  color: var(--color-on-warning-container);
 }

@@ -101,8 +101,8 @@ export const SuperAdminDashboard = () => {
           title="System Health"
           value="---"
           icon={<CheckCircle2 size={24} />}
-          iconColor="#10b981"
-          iconBgColor="rgba(16, 185, 129, 0.15)"
+          iconColor="var(--color-success)"
+          iconBgColor="var(--color-success-container)"
           isPlaceholder={true}
           placeholderText="Coming in Phase 5"
         />

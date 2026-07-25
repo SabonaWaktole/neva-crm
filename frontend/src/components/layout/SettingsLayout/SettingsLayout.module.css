@@ -78,7 +78,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 0;
+  padding: 0 var(--spacing-sm);
   margin: 0;
   overflow-y: auto;
 }
@@ -88,21 +88,22 @@
   align-items: center;
   gap: 12px;
   padding: 8px 12px;
+  border-radius: var(--radius-default);
   text-decoration: none;
-  border-left: 2px solid transparent;
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  transition: background-color 0.15s ease-out, color 0.15s ease-out;
   color: var(--color-on-surface-variant);
 }
 
 .navItem:hover {
   background-color: var(--color-surface-container-low);
+  color: var(--color-on-surface);
 }
 
-.navItemActive {
-  background-color: var(--color-secondary-container);
-  color: var(--color-on-secondary-container);
-  border-left-color: var(--color-primary);
+.navItemActive,
+.navItemActive:hover {
+  background-color: var(--color-primary-container);
+  color: var(--color-on-primary-container);
 }
 
 .navIcon {

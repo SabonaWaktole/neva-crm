@@ -25,6 +25,8 @@ body {
 h1, h2, h3, h4, h5, h6 {
   margin-top: 0;
   color: var(--color-on-surface);
+  line-height: 1.25;
+  letter-spacing: -0.015em;
 }
 
 a {
@@ -49,7 +51,7 @@ html {
 }
 
 .premium-card {
-  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
   border-radius: var(--radius-xl);
   box-shadow: var(--elevation-1);
   background-color: var(--color-surface-container-lowest);
@@ -57,8 +59,8 @@ html {
 }
 
 .premium-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--elevation-3);
+  border-color: var(--color-outline);
+  box-shadow: var(--elevation-2);
 }
 
 /* Custom Scrollbar */

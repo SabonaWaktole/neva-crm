@@ -76,7 +76,7 @@ export const StaffDashboard = () => {
       <section className={styles.kpiGridDesktop}>
         <div className={styles.kpiItem}>
           <KPICard 
-            title="NEW CLIENTS"
+            title="New clients"
             value={isLoadingMetrics ? '...' : (metrics?.totalClients || 0)}
             icon={<Users size={24} />}
             trendValue={isLoadingMetrics ? '...' : growthPct}
@@ -86,7 +86,7 @@ export const StaffDashboard = () => {
         </div>
         <div className={styles.kpiItem}>
           <KPICard 
-            title="MY ASSIGNED CLIENTS"
+            title="My assigned clients"
             value="156"
             icon={<Users size={24} />}
             iconColor="var(--color-secondary)"
@@ -97,7 +97,7 @@ export const StaffDashboard = () => {
         {/* Expensive placeholder */}
         <div className={styles.kpiItem}>
           <KPICard 
-            title="OPEN FOLLOW-UPS"
+            title="Open follow-ups"
             value="---"
             icon={<AlertTriangle size={24} />}
             isPlaceholder={true}

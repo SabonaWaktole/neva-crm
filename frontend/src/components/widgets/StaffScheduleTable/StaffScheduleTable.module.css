@@ -118,8 +118,8 @@
 }
 
 .dotScheduled { background-color: var(--color-primary); }
-.dotConfirmed { background-color: #10b981; }
-.dotCompleted { background-color: #10b981; }
+.dotConfirmed { background-color: var(--color-success); }
+.dotCompleted { background-color: var(--color-success); }
 .dotCancelled { background-color: var(--color-error); }
 
 .statusText {
