@@ -19,7 +19,6 @@ import styles from './CreateAppointmentPage.module.css';
 const EditAppointmentContent: React.FC = () => {
   const navigate = useNavigate();
   const { tenantSlug, appointmentId } = useParams();
-  const { user } = useAuthStore();
 
   const { clients, isLoading: clientsLoading, fetchClients } = useClients();
   const { staff, isLoading: staffLoading, fetchStaff } = useStaff();

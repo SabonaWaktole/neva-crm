@@ -79,3 +79,24 @@ html {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-outline);
 }
+
+/*
+ * Shared responsive-table pattern: wrap a <table> in a container with this
+ * class to get horizontal scrolling on narrow viewports plus a subtle edge
+ * fade indicating there's more content to scroll to. The background-image
+ * gradients scroll with the content (attachment: local) while the two radial
+ * shadows stay fixed to the viewport edges (attachment: scroll) to fade in/out.
+ */
+.table-scroll {
+  overflow-x: auto;
+  background:
+    linear-gradient(to right, var(--color-surface-container-lowest) 30%, rgba(255, 255, 255, 0)),
+    linear-gradient(to right, rgba(255, 255, 255, 0), var(--color-surface-container-lowest) 70%) 0 100%,
+    radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0)),
+    radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0)) 0 100%;
+  background-repeat: no-repeat;
+  background-color: var(--color-surface-container-lowest);
+  background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
+  background-attachment: local, local, scroll, scroll;
+  background-position: 0 0, 100% 0, 0 0, 100% 0;
+}

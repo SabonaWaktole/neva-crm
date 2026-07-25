@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Modal } from '../../components/ui/Modal/Modal';
 import { TextInput } from '../../components/ui/TextInput/TextInput';
 import { Button } from '../../components/ui/Button/Button';
-import { Appointment } from '../../types/appointment';
+import type { Appointment } from '../../types/appointment';
 
 interface RescheduleModalProps {
   isOpen: boolean;

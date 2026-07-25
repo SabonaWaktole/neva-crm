@@ -6,6 +6,7 @@ import styles from './Button.module.css';
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
   variant?: 'primary' | 'outline' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;
   icon?: ReactNode;
   iconPosition?: 'left' | 'right';
@@ -15,6 +16,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 export const Button: React.FC<ButtonProps> = ({
   children,
   variant = 'primary',
+  size = 'md',
   fullWidth = false,
   icon,
   iconPosition = 'left',
@@ -25,6 +27,7 @@ export const Button: React.FC<ButtonProps> = ({
   const classNames = [
     styles.button,
     styles[variant],
+    styles[`size-${size}`],
     fullWidth ? styles.fullWidth : '',
     className,
   ]

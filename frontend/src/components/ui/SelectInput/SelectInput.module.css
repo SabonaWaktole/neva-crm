@@ -105,3 +105,10 @@
 .pointerEventsNone {
   pointer-events: none;
 }
+
+@media (max-width: 767px) {
+  .input {
+    height: 44px;
+    font-size: 16px;
+  }
+}

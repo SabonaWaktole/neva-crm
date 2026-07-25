@@ -87,3 +87,16 @@
 .stepLabelFuture {
   color: var(--color-on-surface-variant);
 }
+
+/* Circles + connecting line still show on mobile; labels would overlap/overflow at narrow widths */
+@media (max-width: 480px) {
+  .stepCircle {
+    width: 28px;
+    height: 28px;
+    font-size: var(--font-size-label-sm);
+  }
+
+  .stepLabel {
+    display: none;
+  }
+}

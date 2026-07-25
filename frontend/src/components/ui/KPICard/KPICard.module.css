@@ -24,7 +24,7 @@
 }
 
 .title {
-  font-family: var(--font-family-label-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
   font-weight: var(--font-weight-label-md);
   letter-spacing: var(--font-letter-spacing-label-md);

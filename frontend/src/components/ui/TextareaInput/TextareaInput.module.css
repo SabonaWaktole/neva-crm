@@ -67,3 +67,9 @@
 .helperTextError {
   color: var(--color-error);
 }
+
+@media (max-width: 767px) {
+  .input {
+    font-size: 16px;
+  }
+}

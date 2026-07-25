@@ -28,6 +28,7 @@ import { QuotationDetail } from '../pages/quotations/QuotationDetail';
 import { CreateQuotation } from '../pages/quotations/CreateQuotation';
 import { EditQuotation } from '../pages/quotations/EditQuotation';
 import { IntegrationsPage } from '../pages/IntegrationsPage';
+import { StatusPage } from '../components/StatusPage/StatusPage';
 import { ProtectedRoute } from './ProtectedRoute';
 import { RoleGuard } from './RoleGuard';
 import { TenantGuard } from './TenantGuard';
@@ -284,6 +285,10 @@ export const router = createBrowserRouter([
   },
   {
     path: '/unauthorized',
-    element: <div>Unauthorized Access</div>,
+    element: <StatusPage variant="403" />,
+  },
+  {
+    path: '*',
+    element: <StatusPage variant="404" />,
   },
 ]);

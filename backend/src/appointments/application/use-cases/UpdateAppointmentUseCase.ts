@@ -1,6 +1,6 @@
 import { IAppointmentRepository } from '../../domain/repositories/IAppointmentRepository';
-import { IClientRepository } from '../../../../clients/domain/repositories/IClientRepository';
-import { IUserRepository } from '../../../../auth/domain/repositories/IUserRepository';
+import { IClientRepository } from '../../../clients/domain/repositories/IClientRepository';
+import { IUserRepository } from '../../../auth/domain/repositories/IUserRepository';
 import { Appointment } from '../../domain/entities/Appointment';
 
 export interface UpdateAppointmentDTO {
