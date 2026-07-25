@@ -8,16 +8,11 @@
 
 /* ---------------------------------------------------------------- table */
 
+/* Which of .scrollArea / .cardList renders is decided in JS via useIsDesktop,
+   so neither needs a display toggle here. */
 .scrollArea {
-  display: none;
   overflow: auto;
   max-height: 100%;
-}
-
-@media (min-width: 768px) {
-  .scrollArea {
-    display: block;
-  }
 }
 
 .table {
@@ -199,12 +194,6 @@
 .cardList {
   display: flex;
   flex-direction: column;
-}
-
-@media (min-width: 768px) {
-  .cardList {
-    display: none;
-  }
 }
 
 .card {

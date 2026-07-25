@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useIsDesktop } from '../../../hooks/useMediaQuery';
 import styles from './DataTable.module.css';
 
 export interface DataTableColumn<T> {
@@ -64,6 +65,9 @@ export function DataTable<T>({
 }: DataTableProps<T>) {
   const isEmpty = !isLoading && rows.length === 0;
   const isInteractive = Boolean(onRowClick);
+  // Render one layout or the other, never both, so rows are not duplicated
+  // into the DOM and accessibility tree.
+  const isDesktop = useIsDesktop();
 
   const wrapperClasses = [styles.wrapper, className].filter(Boolean).join(' ');
   const tableClasses = [styles.table, stickyHeader ? styles.stickyHeader : '']
@@ -93,9 +97,55 @@ export function DataTable<T>({
     }
   };
 
+  if (!isDesktop) {
+    return (
+      <div className={wrapperClasses}>
+        <div className={styles.cardList}>
+          {isLoading
+            ? Array.from({ length: loadingRowCount }).map((_, index) => (
+                <div key={`skeleton-card-${index}`} className={styles.card}>
+                  <span className={`${styles.skeleton} ${styles.skeletonCardLine}`} />
+                  <span className={`${styles.skeleton} ${styles.skeletonCardLine}`} />
+                </div>
+              ))
+            : rows.map((row) => {
+                const cardColumns = columns.filter((column) => !column.hideOnCard);
+                return (
+                  <div
+                    key={rowKey(row)}
+                    className={[styles.card, isInteractive ? styles.cardInteractive : '']
+                      .filter(Boolean)
+                      .join(' ')}
+                    onClick={onRowClick ? () => onRowClick(row) : undefined}
+                    onKeyDown={isInteractive ? (e) => handleRowKeyDown(e, row) : undefined}
+                    tabIndex={isInteractive ? 0 : undefined}
+                    role={isInteractive ? 'button' : undefined}
+                  >
+                    {cardColumns.map((column) => {
+                      const label =
+                        column.cardLabel === null
+                          ? null
+                          : column.cardLabel ??
+                            (typeof column.header === 'string' ? column.header : null);
+
+                      return (
+                        <div key={column.id} className={styles.cardField}>
+                          {label && <span className={styles.cardLabel}>{label}</span>}
+                          <span className={styles.cardValue}>{column.render(row)}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+          {isEmpty && !empty && <div className={styles.inlineEmpty}>No results</div>}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={wrapperClasses}>
-      {/* Table layout: tablet and up */}
       <div className={styles.scrollArea}>
         <table className={tableClasses}>
           {caption && <caption className={styles.visuallyHidden}>{caption}</caption>}
@@ -154,47 +204,6 @@ export function DataTable<T>({
             )}
           </tbody>
         </table>
-      </div>
-
-      {/* Card layout: mobile */}
-      <div className={styles.cardList}>
-        {isLoading
-          ? Array.from({ length: loadingRowCount }).map((_, index) => (
-              <div key={`skeleton-card-${index}`} className={styles.card}>
-                <span className={`${styles.skeleton} ${styles.skeletonCardLine}`} />
-                <span className={`${styles.skeleton} ${styles.skeletonCardLine}`} />
-              </div>
-            ))
-          : rows.map((row) => {
-              const cardColumns = columns.filter((column) => !column.hideOnCard);
-              return (
-                <div
-                  key={rowKey(row)}
-                  className={[styles.card, isInteractive ? styles.cardInteractive : '']
-                    .filter(Boolean)
-                    .join(' ')}
-                  onClick={onRowClick ? () => onRowClick(row) : undefined}
-                  onKeyDown={isInteractive ? (e) => handleRowKeyDown(e, row) : undefined}
-                  tabIndex={isInteractive ? 0 : undefined}
-                  role={isInteractive ? 'button' : undefined}
-                >
-                  {cardColumns.map((column) => {
-                    const label =
-                      column.cardLabel === null
-                        ? null
-                        : column.cardLabel ?? (typeof column.header === 'string' ? column.header : null);
-
-                    return (
-                      <div key={column.id} className={styles.cardField}>
-                        {label && <span className={styles.cardLabel}>{label}</span>}
-                        <span className={styles.cardValue}>{column.render(row)}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })}
-        {isEmpty && !empty && <div className={styles.inlineEmpty}>No results</div>}
       </div>
     </div>
   );

@@ -13,6 +13,11 @@
   letter-spacing: var(--font-letter-spacing-label-md);
 }
 
+.required {
+  margin-left: 2px;
+  color: var(--color-error);
+}
+
 .inputWrapper {
   position: relative;
   display: flex;

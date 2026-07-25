@@ -25,6 +25,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           showPassword ? <Eye size={18} /> : <EyeOff size={18} />
         }
         onIconRightClick={togglePasswordVisibility}
+        iconRightLabel={showPassword ? 'Hide password' : 'Show password'}
         {...props}
       />
     );

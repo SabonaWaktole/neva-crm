@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import { useCreateAppointment } from '../../../hooks/useAppointments';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { 
@@ -26,55 +27,73 @@ export interface AppointmentFormProps {
   onCancel?: () => void;
 }
 
-export const AppointmentForm: React.FC<AppointmentFormProps> = ({ 
-  lockedClientId, 
+interface AppointmentFormValues {
+  clientId: string;
+  assignedUserId: string;
+  date: string;
+  time: string;
+  notes: string;
+  /* NON-FUNCTIONAL: see the note on the High Priority toggle below. */
+  isHighPriority: boolean;
+}
+
+export const AppointmentForm: React.FC<AppointmentFormProps> = ({
+  lockedClientId,
   lockedClientName,
   onSubmit,
   onCancel
 }) => {
   const { createAppointment, isLoading, error } = useCreateAppointment();
   const { user } = useAuthStore();
-  
-  // Form State
-  const [clientId, setClientId] = useState(lockedClientId || '');
-  const [assignedUserId, setAssignedUserId] = useState(user?.userId || ''); 
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
-  const [notes, setNotes] = useState('');
-  const [isHighPriority, setIsHighPriority] = useState(false);
 
-  React.useEffect(() => {
-    if (user?.userId && !assignedUserId) {
-      setAssignedUserId(user.userId);
-    }
-  }, [user, assignedUserId]);
+  const isLockedContext = !!lockedClientId;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!date || !time || (!lockedClientId && !clientId)) {
-      return; // Basic validation
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<AppointmentFormValues>({
+    mode: 'onBlur',
+    defaultValues: {
+      clientId: lockedClientId || '',
+      assignedUserId: user?.userId || '',
+      date: '',
+      time: '',
+      notes: '',
+      isHighPriority: false,
+    },
+  });
+
+  useEffect(() => {
+    if (user?.userId) {
+      setValue('assignedUserId', user.userId);
     }
-    
+  }, [user, setValue]);
+
+  const submitForm = async (values: AppointmentFormValues) => {
     try {
-      const scheduledAt = new Date(`${date}T${time}`).toISOString();
+      const scheduledAt = new Date(`${values.date}T${values.time}`).toISOString();
       await createAppointment({
-        clientId: lockedClientId || clientId,
-        assignedUserId,
+        clientId: lockedClientId || values.clientId,
+        assignedUserId: values.assignedUserId,
         scheduledAt,
-        notes
+        notes: values.notes,
       });
       if (onSubmit) {
         onSubmit({});
       }
-    } catch (err) {
+    } catch {
       // error is available in hook state
     }
   };
 
-  const isLockedContext = !!lockedClientId;
-
   return (
-    <form className={`${styles.formContainer} ${isLockedContext ? styles.contextLayout : styles.standaloneLayout}`} onSubmit={handleSubmit}>
+    <form
+      className={`${styles.formContainer} ${isLockedContext ? styles.contextLayout : styles.standaloneLayout}`}
+      onSubmit={handleSubmit(submitForm)}
+      noValidate
+    >
       
       {/* SECTION 1: Client Information */}
       <Card padding="xl" className={styles.sectionCard}>
@@ -96,12 +115,13 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
           </div>
         ) : (
           <div className={styles.formGroup}>
-            <TextInput 
+            <TextInput
               label="Search Client"
               placeholder="Start typing client name..."
               iconLeft={<Search size={18} />}
-              value={clientId}
-              onChange={(e) => setClientId(e.target.value)}
+              required
+              error={errors.clientId?.message}
+              {...register('clientId', { required: 'Select a client for this appointment' })}
             />
           </div>
         )}
@@ -127,33 +147,29 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
 
         <div className={styles.rowGrid}>
           <div className={styles.formGroup}>
-            <TextInput 
+            <TextInput
               type="date"
               label="Date"
               iconRight={<Calendar size={18} />}
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
               required
+              error={errors.date?.message}
+              {...register('date', { required: 'Choose a date' })}
             />
           </div>
           <div className={styles.formGroup}>
-            <TextInput 
+            <TextInput
               type="time"
               label="Time"
               iconRight={<Clock size={18} />}
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
               required
+              error={errors.time?.message}
+              {...register('time', { required: 'Choose a time' })}
             />
           </div>
         </div>
 
         <div className={styles.formGroup}>
-          <SelectInput 
-            label="Assigned Staff"
-            value={assignedUserId}
-            onChange={(e) => setAssignedUserId(e.target.value)}
-          >
+          <SelectInput label="Assigned Staff" {...register('assignedUserId')}>
             {user && <option value={user.userId}>Myself</option>}
             <option value="1">Marcus Thorne (Lead Architect)</option>
             <option value="2">Elena Vance (Senior Consultant)</option>
@@ -162,12 +178,11 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
         </div>
 
         <div className={styles.formGroup}>
-          <TextareaInput 
+          <TextareaInput
             label="Purpose of Appointment"
             placeholder="Briefly describe the objective of this meeting..."
             rows={4}
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
+            {...register('notes')}
           />
         </div>
 
@@ -187,11 +202,11 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
           </div>
           
           <label className={styles.toggleSwitch}>
-            <input 
-              type="checkbox" 
-              checked={isHighPriority}
-              onChange={(e) => setIsHighPriority(e.target.checked)}
+            <span className={styles.visuallyHidden}>High Priority</span>
+            <input
+              type="checkbox"
               className={styles.toggleInput}
+              {...register('isHighPriority')}
             />
             <div className={styles.toggleTrack}></div>
           </label>

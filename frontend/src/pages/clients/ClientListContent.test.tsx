@@ -42,11 +42,13 @@ describe('ClientListContent', () => {
     renderComponent();
     expect(screen.getByText('Client Directory')).toBeInTheDocument();
     expect(screen.getByText('Showing 0 of 0 entries')).toBeInTheDocument();
-    // Since we don't have a dedicated empty state graphic, the table just has headers and no rows
+    // The DataTable renders a dedicated empty state with a call to action
+    expect(screen.getByText('No clients yet')).toBeInTheDocument();
+    expect(screen.getByText('Clients you add will appear here.')).toBeInTheDocument();
     expect(screen.queryByRole('row', { name: /Acme Corp/i })).not.toBeInTheDocument();
   });
 
-  it('renders the loading state', () => {
+  it('renders skeleton placeholders while loading', () => {
     vi.mocked(useClientsModule.useClients).mockReturnValue({
       clients: [],
       total: 0,
@@ -55,7 +57,9 @@ describe('ClientListContent', () => {
       fetchClients: mockFetchClients,
     });
     renderComponent();
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    // Loading shows skeleton rows rather than the empty state
+    expect(screen.queryByText('No clients yet')).not.toBeInTheDocument();
+    expect(screen.getByRole('table', { name: /client directory/i })).toBeInTheDocument();
   });
 
   it('renders the client list correctly', () => {

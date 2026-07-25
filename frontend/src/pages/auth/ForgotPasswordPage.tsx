@@ -29,7 +29,7 @@ export const ForgotPasswordPage = () => {
     >
       {isSuccess ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)', alignItems: 'center', textAlign: 'center' }}>
-          <CheckCircle2 size={48} color="#059669" />
+          <CheckCircle2 size={48} color="var(--color-success)" />
           <p style={{ fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-body-md)', color: 'var(--color-on-surface)' }}>
             If an account exists with that email, we've sent a password reset link.
           </p>

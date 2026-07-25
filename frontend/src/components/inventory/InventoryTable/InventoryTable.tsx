@@ -1,7 +1,9 @@
 import React from 'react';
 import styles from './InventoryTable.module.css';
 import { Badge } from '../../ui/Badge';
-import { MoreHorizontal, Edit, Trash2 } from 'lucide-react';
+import { PackageOpen, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
+import { DataTable } from '../../ui/DataTable';
+import type { DataTableColumn } from '../../ui/DataTable';
 import { DropdownMenu } from '../../ui/DropdownMenu';
 import type { DropdownMenuItemType } from '../../ui/DropdownMenu';
 import { MultiLocationStockIndicator } from '../../ui/MultiLocationStockIndicator/MultiLocationStockIndicator';
@@ -21,19 +23,24 @@ export interface Product {
 interface InventoryTableProps {
   products: Product[];
   onAdjustStock?: (product: Product) => void;
+  isLoading?: boolean;
 }
 
-export const InventoryTable: React.FC<InventoryTableProps> = ({ products, onAdjustStock }) => {
-  const getStatusVariant = (status: Product['status']): 'emerald' | 'amber' | 'error' | 'slate' => {
+export const InventoryTable: React.FC<InventoryTableProps> = ({
+  products,
+  onAdjustStock,
+  isLoading,
+}) => {
+  const getStatusVariant = (status: Product['status']): 'success' | 'warning' | 'error' | 'secondary' => {
     switch (status) {
       case 'IN_STOCK':
-        return 'emerald';
+        return 'success';
       case 'LOW_STOCK':
-        return 'amber';
+        return 'warning';
       case 'OUT_OF_STOCK':
         return 'error';
       default:
-        return 'slate';
+        return 'secondary';
     }
   };
 
@@ -63,58 +70,80 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({ products, onAdju
     return items;
   };
 
+  const columns: DataTableColumn<Product>[] = [
+    {
+      id: 'name',
+      header: 'Product Name',
+      cardLabel: null,
+      render: (product) => <span className={styles.productName}>{product.name}</span>,
+    },
+    {
+      id: 'sku',
+      header: 'SKU',
+      nowrap: true,
+      render: (product) => <span className={styles.secondaryText}>{product.sku}</span>,
+    },
+    {
+      id: 'category',
+      header: 'Category',
+      render: (product) => <span className={styles.secondaryText}>{product.category}</span>,
+    },
+    {
+      id: 'status',
+      header: 'Status',
+      render: (product) => (
+        <Badge variant={getStatusVariant(product.status)}>{getStatusLabel(product.status)}</Badge>
+      ),
+    },
+    {
+      id: 'stock',
+      header: 'Stock Level',
+      render: (product) => (
+        <MultiLocationStockIndicator
+          totalUnits={product.totalUnits}
+          breakdown={product.stockBreakdown}
+        />
+      ),
+    },
+    {
+      id: 'price',
+      header: 'Price',
+      align: 'right',
+      nowrap: true,
+      render: (product) => (
+        <span className={styles.secondaryText}>
+          ${Number(product.price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+        </span>
+      ),
+    },
+    {
+      id: 'actions',
+      header: '',
+      align: 'right',
+      width: '64px',
+      cardLabel: null,
+      render: (product) => (
+        <DropdownMenu
+          trigger={<button className={styles.actionButton} aria-label="Product actions"><MoreHorizontal size={16} /></button>}
+          items={getDropdownItems(product)}
+          align="right"
+        />
+      ),
+    },
+  ];
+
   return (
-    <div className={styles.tableContainer}>
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>Product Name</th>
-            <th>SKU</th>
-            <th>Category</th>
-            <th>Status</th>
-            <th>Stock Level</th>
-            <th>Price</th>
-            <th className={styles.actionsColumn}></th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.map((product) => (
-            <tr key={product.id}>
-              <td className={styles.nameCell}>
-                <span className={styles.productName}>{product.name}</span>
-              </td>
-              <td className={styles.secondaryText}>{product.sku}</td>
-              <td className={styles.secondaryText}>{product.category}</td>
-              <td>
-                <Badge variant={getStatusVariant(product.status)}>{getStatusLabel(product.status)}</Badge>
-              </td>
-              <td>
-                <MultiLocationStockIndicator 
-                  totalUnits={product.totalUnits} 
-                  breakdown={product.stockBreakdown} 
-                />
-              </td>
-              <td className={styles.secondaryText}>
-                ${Number(product.price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-              </td>
-              <td className={styles.actionsCell}>
-                <DropdownMenu
-                  trigger={<button className={styles.actionButton}><MoreHorizontal size={16} /></button>}
-                  items={getDropdownItems(product)}
-                  align="right"
-                />
-              </td>
-            </tr>
-          ))}
-          {products.length === 0 && (
-            <tr>
-              <td colSpan={7} className={styles.emptyState}>
-                No products found
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
+    <DataTable
+      columns={columns}
+      rows={products}
+      rowKey={(product) => product.id}
+      isLoading={isLoading}
+      caption="Products and stock levels"
+      empty={{
+        icon: <PackageOpen size={20} />,
+        title: 'No products found',
+        description: 'Products you add to your catalog will appear here.',
+      }}
+    />
   );
 };

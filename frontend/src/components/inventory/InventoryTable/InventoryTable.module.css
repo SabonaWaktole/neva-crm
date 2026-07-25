@@ -1,50 +1,4 @@
-.tableContainer {
-  width: 100%;
-  overflow-x: auto;
-  border-radius: var(--radius-xl);
-  border: 1px solid var(--color-outline-variant);
-  background-color: var(--color-surface-container-lowest);
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-}
-
-.table th {
-  padding: var(--spacing-md) var(--spacing-lg);
-  font-family: var(--font-family-base);
-  font-size: var(--font-size-label-md);
-  font-weight: var(--font-weight-label-md);
-  line-height: var(--font-line-height-label-md);
-  letter-spacing: var(--font-letter-spacing-label-md);
-  color: var(--color-on-surface-variant);
-  text-transform: uppercase;
-  border-bottom: 1px solid var(--color-outline-variant);
-  background-color: var(--color-surface-container-lowest);
-  white-space: nowrap;
-}
-
-.table td {
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-bottom: 1px solid var(--color-outline-variant);
-  font-family: var(--font-family-base);
-  font-size: var(--font-size-body-md);
-  line-height: var(--font-line-height-body-md);
-  color: var(--color-on-surface);
-  white-space: nowrap;
-}
-
-.table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.table tbody tr:hover td {
-  background-color: var(--color-surface-container-low);
-}
-
-.nameCell {
+.productName {
   font-weight: 500;
   color: var(--color-on-surface);
 }
@@ -53,46 +7,26 @@
   color: var(--color-on-surface-variant);
 }
 
-.quantity {
-  color: var(--color-on-surface);
-  font-weight: 500;
-}
-
-.zeroQuantity {
-  color: var(--color-error);
-  font-weight: 500;
-}
-
-.actionsColumn {
-  width: 48px;
-}
-
-.actionsCell {
-  text-align: right;
-}
-
 .actionButton {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 32px;
   height: 32px;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-default);
   border: none;
   background: transparent;
   color: var(--color-on-surface-variant);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 
 .actionButton:hover {
-  background-color: var(--color-surface-variant);
+  background-color: var(--color-surface-container);
   color: var(--color-on-surface);
 }
 
-.emptyState {
-  text-align: center;
-  padding: var(--spacing-2xl) !important;
-  color: var(--color-on-surface-variant);
-  font-style: italic;
+.actionButton:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
 }

@@ -13,6 +13,11 @@
   letter-spacing: var(--font-letter-spacing-label-md);
 }
 
+.required {
+  margin-left: 2px;
+  color: var(--color-error);
+}
+
 .inputWrapper {
   position: relative;
   display: flex;
@@ -117,6 +122,13 @@
 }
 
 .iconButton:hover {
+  color: var(--color-on-surface);
+}
+
+.iconButton:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-default);
   color: var(--color-on-surface);
 }
 
