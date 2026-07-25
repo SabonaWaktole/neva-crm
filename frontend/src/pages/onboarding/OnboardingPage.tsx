@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {} from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { CheckCircle2, Link as LinkIcon, UploadCloud, ChevronDown, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Card } from '../../components/ui/Card/Card';
 import { Stepper } from '../../components/ui/Stepper/Stepper';
@@ -201,13 +201,22 @@ export const OnboardingPage = () => {
           </div>
 
           <div className={styles.footer}>
-            <button 
-              className={`${styles.btnBack} ${currentStep === 1 ? styles.btnBackHidden : ''}`} 
-              onClick={prevStep}
-            >
-              <ArrowLeft size={18} />
-              Back
-            </button>
+            {/* Step 1 has nothing to go back to, so the slot offers a way to sign in
+                instead. Rendering conditionally also keeps a dead "Back" button out
+                of the tab order. */}
+            {currentStep === 1 ? (
+              <span className={styles.signInPrompt}>
+                Already have an account?{' '}
+                <Link to="/login" className={styles.signInLink}>
+                  Sign in
+                </Link>
+              </span>
+            ) : (
+              <button type="button" className={styles.btnBack} onClick={prevStep}>
+                <ArrowLeft size={18} />
+                Back
+              </button>
+            )}
 
             {currentStep < steps.length ? (
               <Button 
