@@ -58,8 +58,8 @@
 }
 
 .successBanner {
-  background-color: rgba(16, 185, 129, 0.12);
-  color: #047857;
+  background-color: var(--color-success-container);
+  color: var(--color-on-success-container);
 }
 
 .errorBanner {

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { ReactNode, ReactElement } from 'react';
 import { Search, Bell, HelpCircle, Settings, LogOut, Menu, X } from 'lucide-react';
 import { Avatar } from '../../ui/Avatar/Avatar';
+import { ThemeToggle } from '../../ui/ThemeToggle';
 import { DropdownMenu } from '../../ui/DropdownMenu/DropdownMenu';
 import type { DropdownMenuItemType } from '../../ui/DropdownMenu/DropdownMenu';
 import styles from './AppLayout.module.css';
@@ -69,6 +70,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           >
             {isMobileSearchOpen ? <X size={20} /> : <Search size={20} />}
           </button>
+          <ThemeToggle className={styles.iconBtn} />
           <button className={styles.iconBtn} aria-label="Notifications">
             <Bell size={20} />
           </button>

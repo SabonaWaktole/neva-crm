@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Network, ArrowRight, Building2, ShieldCheck, Zap } from 'lucide-react';
 import { Button } from '../../components/ui/Button/Button';
+import { ThemeToggle } from '../../components/ui/ThemeToggle';
 import styles from './LandingPage.module.css';
 
 export const LandingPage: React.FC = () => {

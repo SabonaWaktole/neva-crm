@@ -187,7 +187,7 @@
 }
 
 .monthControls button:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: var(--color-surface-container);
 }
 
 .monthControls span {
@@ -225,7 +225,7 @@
 .segmentedControl .activeSegment {
   background-color: var(--color-secondary-container);
   color: var(--color-on-secondary-container);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  box-shadow: var(--elevation-1);
 }
 
 .gridContainer {
@@ -236,7 +236,7 @@
   border: 1px solid var(--color-outline-variant);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--elevation-2);
   min-height: max-content;
 }
 
@@ -244,7 +244,7 @@
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   border-bottom: 1px solid var(--color-outline-variant);
-  background-color: rgba(45, 52, 73, 0.5);
+  background-color: var(--color-surface-container);
 }
 
 .gridHeader div {
@@ -277,7 +277,7 @@
 
 .emptyCell {
   padding: var(--spacing-sm);
-  background-color: rgba(34, 42, 61, 0.4);
+  background-color: var(--color-surface-container-low);
   color: var(--color-outline-variant);
   border-right: 1px solid var(--color-outline-variant);
   border-bottom: 1px solid var(--color-outline-variant);
@@ -290,7 +290,7 @@
 }
 
 .activeCell {
-  background-color: rgba(128, 131, 255, 0.05);
+  background-color: var(--color-primary-container);
 }
 
 .activeDayNumber {
@@ -314,34 +314,35 @@
   text-overflow: ellipsis;
 }
 
+/* Container/on-container token pairs so chips stay legible in both themes. */
 .eventPrimary {
-  background-color: rgba(192, 193, 255, 0.2);
-  border-color: var(--color-primary-container);
-  color: var(--color-primary);
+  background-color: var(--color-primary-container);
+  border-color: var(--color-primary);
+  color: var(--color-on-primary-container);
 }
 
 .eventEmerald {
-  background-color: rgba(16, 185, 129, 0.2);
-  border-color: #10b981;
-  color: #6ee7b7;
+  background-color: var(--color-success-container);
+  border-color: var(--color-success);
+  color: var(--color-on-success-container);
 }
 
 .eventSlate {
-  background-color: rgba(100, 116, 139, 0.2);
-  border-color: #64748b;
-  color: #cbd5e1;
+  background-color: var(--color-surface-container-high);
+  border-color: var(--color-outline);
+  color: var(--color-on-surface-variant);
 }
 
 .eventAmber {
-  background-color: rgba(245, 158, 11, 0.2);
-  border-color: #f59e0b;
-  color: #fcd34d;
+  background-color: var(--color-warning-container);
+  border-color: var(--color-warning);
+  color: var(--color-on-warning-container);
 }
 
 .eventError {
-  background-color: rgba(255, 180, 171, 0.2);
+  background-color: var(--color-error-container);
   border-color: var(--color-error);
-  color: var(--color-error);
+  color: var(--color-on-error-container);
 }
 
 /* Right Queue Sidebar */
@@ -384,7 +385,7 @@
   flex-wrap: wrap;
   gap: var(--spacing-xs);
   padding-bottom: var(--spacing-md);
-  border-bottom: 1px solid rgba(116, 119, 127, 0.3);
+  border-bottom: 1px solid var(--color-outline-variant);
 }
 
 .legendItem {
@@ -395,7 +396,7 @@
   border-radius: 999px;
   font-size: 10px;
   font-weight: 500;
-  background-color: rgba(255,255,255,0.05);
+  background-color: var(--color-surface-container);
 }
 
 .dot {
@@ -405,10 +406,10 @@
 }
 
 .dotPrimary { background-color: var(--color-primary-container); }
-.dotEmerald { background-color: #10b981; }
-.dotSlate { background-color: #64748b; }
+.dotEmerald { background-color: var(--color-success); }
+.dotSlate { background-color: var(--color-outline); }
 .dotError { background-color: var(--color-error); }
-.dotAmber { background-color: #f59e0b; }
+.dotAmber { background-color: var(--color-warning); }
 
 .queueList {
   display: flex;
@@ -418,7 +419,7 @@
 
 .queueCard {
   background-color: var(--color-surface-container);
-  border: 1px solid rgba(116, 119, 127, 0.5);
+  border: 1px solid var(--color-outline-variant);
   border-radius: 12px;
   padding: var(--spacing-md);
   cursor: pointer;
@@ -447,8 +448,8 @@
 }
 
 .textprimary { color: var(--color-primary); }
-.textemerald { color: #34d399; }
-.textslate { color: #94a3b8; }
+.textemerald { color: var(--color-on-success-container); }
+.textslate { color: var(--color-on-surface-variant); }
 
 .moreIcon {
   color: var(--color-outline);
