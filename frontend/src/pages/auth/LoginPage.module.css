@@ -1,0 +1,56 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.errorBanner {
+  color: var(--color-on-error-container);
+  background-color: var(--color-error-container);
+  font-size: var(--font-size-label-sm);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-default);
+}
+
+.passwordGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+/* Sign-up prompt sits opposite the forgot-password link; wraps on narrow cards. */
+.metaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs) var(--spacing-md);
+}
+
+.metaText {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-label-sm);
+  color: var(--color-on-surface-variant);
+}
+
+.link {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-label-sm);
+  font-weight: 500;
+  color: var(--color-primary);
+  text-decoration: none;
+  border-radius: var(--radius-default);
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.submitRow {
+  padding-top: var(--spacing-sm);
+}

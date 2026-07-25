@@ -7,6 +7,7 @@ import { TextInput } from '../../components/ui/TextInput/TextInput';
 import { PasswordInput } from '../../components/ui/PasswordInput/PasswordInput';
 import { Button } from '../../components/ui/Button/Button';
 import { useLogin } from '../../hooks/useLogin';
+import styles from './LoginPage.module.css';
 
 export const LoginPage = () => {
   const { tenantSlug } = useParams();
@@ -35,13 +36,13 @@ export const LoginPage = () => {
       subtitle="Sign in to your Neva CRM account"
       logoIcon={<Network size={32} color="var(--color-primary)" />}
     >
-      <form style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }} onSubmit={handleSubmit}>
+      <form className={styles.form} onSubmit={handleSubmit}>
         {error && (
-          <div style={{ color: 'var(--color-error)', fontSize: 'var(--font-size-label-sm)', background: 'var(--color-error-container)', padding: 'var(--spacing-sm)', borderRadius: 'var(--radius-default)' }}>
+          <div className={styles.errorBanner} role="alert">
             {error}
           </div>
         )}
-        <TextInput 
+        <TextInput
           label="Email Address" 
           placeholder="name@company.com" 
           type="email"
@@ -51,32 +52,29 @@ export const LoginPage = () => {
           required
         />
         
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)' }}>
-          <PasswordInput 
-            label="Password" 
-            placeholder="••••••••" 
+        <div className={styles.passwordGroup}>
+          <PasswordInput
+            label="Password"
+            placeholder="••••••••"
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Link 
-              to={`/${tenantSlug || 'admin'}/forgot-password`} 
-              style={{ 
-                fontFamily: 'var(--font-family-base)', 
-                fontSize: 'var(--font-size-label-sm)', 
-                color: 'var(--color-primary)', 
-                textDecoration: 'none',
-                fontWeight: 500
-              }}
-            >
+          <div className={styles.metaRow}>
+            <span className={styles.metaText}>
+              Don't have an account?{' '}
+              <Link to="/register-business" className={styles.link}>
+                Sign up
+              </Link>
+            </span>
+            <Link to={`/${tenantSlug || 'admin'}/forgot-password`} className={styles.link}>
               Forgot password?
             </Link>
           </div>
         </div>
 
-        <div style={{ paddingTop: 'var(--spacing-sm)' }}>
+        <div className={styles.submitRow}>
           <Button fullWidth variant="primary" type="submit" isLoading={isLoading}>
             Sign In
           </Button>
