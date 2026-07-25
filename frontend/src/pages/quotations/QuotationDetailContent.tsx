@@ -80,10 +80,14 @@ export const QuotationDetailContent: React.FC = () => {
       {/* Header */}
       <div className={styles.header}>
         <div>
-          <div className={styles.breadcrumb} onClick={() => navigate(`/${tenantSlug}/quotations`)} style={{ cursor: 'pointer' }}>
-            <ArrowLeft size={14} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />
+          <button
+            type="button"
+            className={styles.breadcrumb}
+            onClick={() => navigate(`/${tenantSlug}/quotations`)}
+          >
+            <ArrowLeft size={14} />
             CRM &gt; Quotations &gt; {quotation.id.split('-')[0].toUpperCase()}
-          </div>
+          </button>
           <div className={styles.headerTitleRow}>
             <h1 className={styles.title}>Quotation {quotation.id.split('-')[0].toUpperCase()}</h1>
             <Badge variant={getStatusBadgeVariant(quotation.status)}>
@@ -105,10 +109,10 @@ export const QuotationDetailContent: React.FC = () => {
             <Button variant="primary" icon={<CheckCircle size={16} />} onClick={() => handleAction('APPROVE')}>Approve</Button>
           )}
           {permittedActions.includes('MARK_ACCEPTED') && (
-            <Button variant="primary" style={{ backgroundColor: '#059669' }} icon={<CheckCircle size={16} />} onClick={() => handleAction('MARK_ACCEPTED')}>Mark Accepted</Button>
+            <Button variant="success" icon={<CheckCircle size={16} />} onClick={() => handleAction('MARK_ACCEPTED')}>Mark Accepted</Button>
           )}
           {permittedActions.includes('MARK_REJECTED') && (
-            <Button variant="outline" style={{ color: 'var(--color-error)', borderColor: 'var(--color-error)' }} icon={<XCircle size={16} />} onClick={() => handleAction('MARK_REJECTED')}>Mark Rejected</Button>
+            <Button variant="danger" icon={<XCircle size={16} />} onClick={() => handleAction('MARK_REJECTED')}>Mark Rejected</Button>
           )}
           {permittedActions.includes('EXPIRE') && (
             <Button variant="outline" icon={<Archive size={16} />} onClick={() => handleAction('EXPIRE')}>Expire</Button>
@@ -120,7 +124,7 @@ export const QuotationDetailContent: React.FC = () => {
       </div>
       
       {actionError && (
-        <div style={{ padding: '12px 16px', background: 'var(--color-error-container, #fdecea)', color: 'var(--color-on-error-container, #b71c1c)', borderRadius: '8px', marginBottom: '16px' }}>
+        <div className={styles.errorBanner} role="alert">
           {actionError}
         </div>
       )}

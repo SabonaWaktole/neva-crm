@@ -43,10 +43,37 @@
 }
 
 .breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-sm);
   color: var(--color-on-surface-variant);
   margin-bottom: var(--spacing-xs);
+  transition: color var(--transition-fast);
+}
+
+.breadcrumb:hover {
+  color: var(--color-on-surface);
+}
+
+.breadcrumb:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-default);
+}
+
+.errorBanner {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-error-container);
+  color: var(--color-on-error-container);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-md);
+  font-size: var(--font-size-body-md);
 }
 
 .title {
