@@ -2,16 +2,38 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
-  padding: 0;
+  padding: var(--spacing-md);
   max-width: 1024px;
   margin: 0 auto;
   width: 100%;
 }
 
+@media (min-width: 768px) {
+  .container {
+    padding: 0;
+  }
+}
+
 .header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  align-items: flex-start;
+}
+
+@media (min-width: 640px) {
+  .header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+}
+
+.sectionsWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+  margin-top: var(--spacing-lg);
 }
 
 .breadcrumb {
@@ -44,6 +66,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
   border-bottom: 1px solid var(--color-outline-variant);
   padding-bottom: var(--spacing-sm);
 }
@@ -58,19 +82,25 @@
 
 .formGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: var(--spacing-lg);
+}
+
+@media (min-width: 640px) {
+  .formGrid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .lineItemsContainer {
   background-color: var(--color-surface);
   border: 1px solid var(--color-outline-variant);
   border-radius: var(--radius-xl);
-  overflow: hidden;
 }
 
 .table {
   width: 100%;
+  min-width: 720px;
   border-collapse: collapse;
 }
 
@@ -128,7 +158,8 @@
   border: 1px solid var(--color-outline-variant);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
-  width: 320px;
+  width: 100%;
+  max-width: 320px;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);

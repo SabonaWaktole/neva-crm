@@ -133,6 +133,15 @@
   background-color: var(--color-surface-container-highest);
 }
 
+.moreButton:disabled {
+  cursor: not-allowed;
+}
+
+.moreButton:disabled:hover {
+  color: var(--color-outline);
+  background-color: transparent;
+}
+
 /* Responsive */
 @media (max-width: 640px) {
   .appointmentRow {

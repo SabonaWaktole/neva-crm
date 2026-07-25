@@ -14,7 +14,7 @@ const AVAILABLE_INTEGRATIONS = [
     name: 'Google Calendar',
     description: 'Sync your CRM appointments directly to your Google Calendar.',
     icon: (
-      <svg className="w-12 h-12" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <svg width="32" height="32" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path d="M14.135 12.01L14.135 12.01H12.01V14.135H14.135V12.01ZM14.135 16.26H12.01V18.385H14.135V16.26ZM18.385 12.01H16.26V14.135H18.385V12.01ZM18.385 16.26H16.26V18.385H18.385V16.26ZM18.385 10.947H16.26V12.01H14.135V10.947H12.01V12.01H10.947V10.947H8.822V12.01H6.697V10.947H5.635V20.51H19.447V10.947H18.385ZM19.447 7.76H17.322V5.635H15.197V7.76H9.885V5.635H7.76V7.76H5.635C4.467 7.76 3.51 8.716 3.51 9.885L3.51 20.51C3.51 21.678 4.467 22.635 5.635 22.635H19.447C20.616 22.635 21.572 21.678 21.572 20.51V9.885C21.572 8.716 20.616 7.76 19.447 7.76ZM19.447 20.51H5.635V9.885H19.447V20.51Z" fill="#4285F4"/>
         <path d="M9.885 5.635H7.76V7.76H9.885V5.635Z" fill="#34A853"/>
         <path d="M17.322 5.635H15.197V7.76H17.322V5.635Z" fill="#EA4335"/>
@@ -86,7 +86,7 @@ export const IntegrationsPage: React.FC = () => {
       }
     >
       <SettingsLayout activeNavId="integrations">
-        <div style={{ padding: 'var(--spacing-xl)', maxWidth: '1200px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xl)' }}>
+        <div style={{ padding: 'var(--spacing-md)', maxWidth: '1200px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
           {/* Header */}
           <div>
             <nav aria-label="Breadcrumb" style={{ marginBottom: 'var(--spacing-md)' }}>
@@ -112,7 +112,7 @@ export const IntegrationsPage: React.FC = () => {
             </div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 'var(--spacing-lg)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(320px, 100%), 1fr))', gap: 'var(--spacing-lg)' }}>
             {AVAILABLE_INTEGRATIONS.map(def => {
               const connectedInt = integrations.find(i => i.provider === def.provider && i.status === 'CONNECTED');
               const isConnected = !!connectedInt;
@@ -126,7 +126,7 @@ export const IntegrationsPage: React.FC = () => {
                   padding: 'var(--spacing-lg)',
                   display: 'flex',
                   flexDirection: 'column',
-                  boxShadow: 'var(--shadow-sm)'
+                  boxShadow: 'var(--elevation-1)'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)', marginBottom: 'var(--spacing-md)' }}>
                     <div style={{ 
@@ -140,7 +140,7 @@ export const IntegrationsPage: React.FC = () => {
                       {def.icon}
                     </div>
                     <div>
-                      <h3 style={{ margin: '0 0 var(--spacing-xxs) 0', fontSize: 'var(--font-size-title-md)', fontWeight: 500, color: 'var(--color-on-surface)' }}>{def.name}</h3>
+                      <h3 style={{ margin: '0 0 var(--spacing-xs) 0', fontSize: 'var(--font-size-headline-md)', fontWeight: 500, color: 'var(--color-on-surface)' }}>{def.name}</h3>
                       <span style={{ 
                         fontSize: '11px', 
                         fontWeight: 600, 

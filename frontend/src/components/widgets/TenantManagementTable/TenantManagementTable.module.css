@@ -38,6 +38,15 @@
   text-decoration: underline;
 }
 
+.viewAllButton:disabled {
+  color: var(--color-outline);
+  cursor: not-allowed;
+}
+
+.viewAllButton:disabled:hover {
+  text-decoration: none;
+}
+
 .tableWrapper {
   overflow-x: auto;
 }
@@ -145,6 +154,16 @@
 .actionButton:hover {
   color: var(--color-primary);
   background-color: var(--color-surface-container-high);
+}
+
+.actionButton:disabled {
+  color: var(--color-outline);
+  cursor: not-allowed;
+}
+
+.actionButton:disabled:hover {
+  color: var(--color-outline);
+  background-color: transparent;
 }
 
 .emptyState {

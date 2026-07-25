@@ -120,7 +120,7 @@ export const QuotationFormContent: React.FC<QuotationFormProps> = ({ mode }) => 
           </div>
         )}
 
-        <div className="mt-lg">
+        <div className={styles.sectionsWrapper}>
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
               <h2 className={styles.sectionTitle}>1. Client Details</h2>
@@ -159,15 +159,15 @@ export const QuotationFormContent: React.FC<QuotationFormProps> = ({ mode }) => 
             </Card>
           </div>
 
-          <div className={`${styles.section} mt-xl`}>
+          <div className={styles.section}>
             <div className={styles.sectionHeader}>
               <h2 className={styles.sectionTitle}>2. Line Items</h2>
               <Button type="button" variant="outline" icon={<Plus size={16} />} onClick={() => append({ productId: '', warehouseId: '', quantity: 1, unitPrice: 0 })}>
                 Add Row
               </Button>
             </div>
-            
-            <div className={styles.lineItemsContainer}>
+
+            <div className={`${styles.lineItemsContainer} table-scroll`}>
               <table className={styles.table}>
                 <thead>
                   <tr>

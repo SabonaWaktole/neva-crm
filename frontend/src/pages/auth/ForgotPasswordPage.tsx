@@ -29,7 +29,7 @@ export const ForgotPasswordPage = () => {
     >
       {isSuccess ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)', alignItems: 'center', textAlign: 'center' }}>
-          <CheckCircle2 size={48} color="var(--color-success)" />
+          <CheckCircle2 size={48} color="#059669" />
           <p style={{ fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-body-md)', color: 'var(--color-on-surface)' }}>
             If an account exists with that email, we've sent a password reset link.
           </p>
@@ -52,7 +52,7 @@ export const ForgotPasswordPage = () => {
       ) : (
         <form style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }} onSubmit={handleSubmit}>
           {error && (
-            <div style={{ color: 'var(--color-error)', fontSize: 'var(--font-size-label-sm)', background: 'var(--color-error-light)', padding: 'var(--spacing-sm)', borderRadius: 'var(--radius-sm)' }}>
+            <div style={{ color: 'var(--color-error)', fontSize: 'var(--font-size-label-sm)', background: 'var(--color-error-container)', padding: 'var(--spacing-sm)', borderRadius: 'var(--radius-default)' }}>
               {error}
             </div>
           )}

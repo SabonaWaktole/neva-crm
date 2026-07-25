@@ -66,7 +66,7 @@ export const OnboardingPage = () => {
           </div>
           <Card padding="none" className={styles.cardContainer}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--spacing-lg)', padding: 'var(--spacing-2xl)' }}>
-              <CheckCircle2 size={64} color="var(--color-success)" />
+              <CheckCircle2 size={64} color="#059669" />
               <h2 className={styles.stepTitle}>Workspace Created!</h2>
               <p className={styles.stepSubtitle}>Your workspace is ready at <strong>neva.crm/{tenantSlug}</strong></p>
               <Button
@@ -103,7 +103,7 @@ export const OnboardingPage = () => {
               
               <div className={`${styles.formContent} ${styles.formContentMaxW}`}>
                 {error && (
-                  <div style={{ color: 'var(--color-error)', fontSize: 'var(--font-size-label-sm)', background: 'var(--color-error-light)', padding: 'var(--spacing-sm)', borderRadius: 'var(--radius-sm)', marginBottom: 'var(--spacing-sm)' }}>
+                  <div style={{ color: 'var(--color-on-error-container)', fontSize: 'var(--font-size-label-sm)', background: 'var(--color-error-container)', padding: 'var(--spacing-sm)', borderRadius: 'var(--radius-default)', marginBottom: 'var(--spacing-sm)' }}>
                     {typeof error === 'string' ? error : JSON.stringify(error)}
                   </div>
                 )}

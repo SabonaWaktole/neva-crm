@@ -36,64 +36,66 @@ export const WarehouseTable: React.FC<WarehouseTableProps> = ({
       <div className={styles.header}>
         <h3 className={styles.headerTitle}>Global Facilities List</h3>
         <div className={styles.headerActions}>
-          <button className={styles.iconButton} aria-label="Filter">
+          <button className={styles.iconButton} aria-label="Filter" disabled title="Filtering coming soon">
             <Filter size={18} />
           </button>
-          <button className={styles.iconButton} aria-label="Download">
+          <button className={styles.iconButton} aria-label="Download" disabled title="Export coming soon">
             <Download size={18} />
           </button>
         </div>
       </div>
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th className={styles.th}>FACILITY NAME</th>
-            <th className={styles.th}>ADDRESS</th>
-            {!readOnly && <th className={`${styles.th} ${styles.textRight}`}>ACTIONS</th>}
-          </tr>
-        </thead>
-        <tbody className={styles.tbody}>
-          {warehouses.map((wh, index) => (
-            <tr key={wh.id} className={styles.tr}>
-              <td className={styles.td}>
-                <div className={styles.nameCell}>
-                  <div className={styles.iconWrapper}>
-                    {getRandomIcon(index)}
-                  </div>
-                  <div>
-                    <div className={styles.whName}>{wh.name}</div>
-                    <div className={styles.whId}>WH-ID: {wh.id.substring(0, 6).toUpperCase()}</div>
-                  </div>
-                </div>
-              </td>
-              <td className={styles.td}>
-                <div className={styles.addressText}>{wh.address || '—'}</div>
-              </td>
-              {!readOnly && (
-                <td className={`${styles.td} ${styles.textRight}`}>
-                  <div className={styles.rowActions}>
-                    <button 
-                      className={`${styles.actionButton} ${styles.editButton}`}
-                      onClick={() => onEdit(wh)}
-                      aria-label="Edit"
-                    >
-                      <Edit2 size={18} />
-                    </button>
-                    <button 
-                      className={`${styles.actionButton} ${styles.deleteButton}`}
-                      onClick={() => onDelete(wh)}
-                      aria-label="Delete"
-                    >
-                      <Trash2 size={18} />
-                    </button>
+      <div className="table-scroll">
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th className={styles.th}>FACILITY NAME</th>
+              <th className={styles.th}>ADDRESS</th>
+              {!readOnly && <th className={`${styles.th} ${styles.textRight}`}>ACTIONS</th>}
+            </tr>
+          </thead>
+          <tbody className={styles.tbody}>
+            {warehouses.map((wh, index) => (
+              <tr key={wh.id} className={styles.tr}>
+                <td className={styles.td}>
+                  <div className={styles.nameCell}>
+                    <div className={styles.iconWrapper}>
+                      {getRandomIcon(index)}
+                    </div>
+                    <div>
+                      <div className={styles.whName}>{wh.name}</div>
+                      <div className={styles.whId}>WH-ID: {wh.id.substring(0, 6).toUpperCase()}</div>
+                    </div>
                   </div>
                 </td>
-              )}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      
+                <td className={styles.td}>
+                  <div className={styles.addressText}>{wh.address || '—'}</div>
+                </td>
+                {!readOnly && (
+                  <td className={`${styles.td} ${styles.textRight}`}>
+                    <div className={styles.rowActions}>
+                      <button
+                        className={`${styles.actionButton} ${styles.editButton}`}
+                        onClick={() => onEdit(wh)}
+                        aria-label="Edit"
+                      >
+                        <Edit2 size={18} />
+                      </button>
+                      <button
+                        className={`${styles.actionButton} ${styles.deleteButton}`}
+                        onClick={() => onDelete(wh)}
+                        aria-label="Delete"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
       {/* Visual Pagination Placeholder */}
       <div className={styles.footer}>
         <span>Showing {warehouses.length} facilities</span>

@@ -211,18 +211,13 @@ const CategoryListContent: React.FC = () => {
                       <button className={`${styles.actionBtn} ${styles.actionBtnDanger}`} title="Delete" onClick={() => handleOpenDelete(cat)}>
                         <Trash2 size={18} />
                       </button>
-                      <button className={styles.actionBtn}><MoreVertical size={18} /></button>
+                      <button className={styles.actionBtn} disabled title="More options coming soon">
+                        <MoreVertical size={18} />
+                      </button>
                     </div>
                   )}
                 </div>
               ))}
-            </div>
-
-            <div className={styles.listFooter}>
-              <button className={styles.loadMoreBtn}>
-                <Plus size={18} />
-                Load 12 more categories
-              </button>
             </div>
           </div>
 

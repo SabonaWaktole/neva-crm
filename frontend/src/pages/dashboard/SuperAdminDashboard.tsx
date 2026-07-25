@@ -35,8 +35,8 @@ const mockGlobalEvents = [
     description: 'DB Migration for Core Services scheduled for Oct 15, 02:00 UTC.',
     timeAgo: '1 hour ago',
     icon: <Wrench size={20} />,
-    color: 'var(--color-tertiary)',
-    bg: 'var(--color-tertiary-fixed)'
+    color: 'var(--color-secondary)',
+    bg: 'var(--color-secondary-fixed)'
   },
   {
     id: 'e-3',
@@ -72,7 +72,7 @@ export const SuperAdminDashboard = () => {
           <h1 className={styles.title}>Platform Overview</h1>
           <p className={styles.subtitle}>Real-time health and tenant distribution metrics.</p>
         </div>
-        <Button icon={<Plus size={20} />}>
+        <Button icon={<Plus size={20} />} disabled title="Tenant provisioning is coming soon">
           New Tenant
         </Button>
       </header>
@@ -92,8 +92,8 @@ export const SuperAdminDashboard = () => {
           title="Global MRR"
           value="---"
           icon={<Banknote size={24} />}
-          iconColor="var(--color-tertiary)"
-          iconBgColor="var(--color-tertiary-fixed)"
+          iconColor="var(--color-secondary)"
+          iconBgColor="var(--color-secondary-fixed)"
           isPlaceholder={true}
           placeholderText="Coming in Phase 5"
         />

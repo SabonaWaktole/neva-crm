@@ -2,16 +2,31 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
-  padding: 0;
+  padding: var(--spacing-md);
   max-width: 1440px;
   margin: 0 auto;
   width: 100%;
 }
 
+@media (min-width: 768px) {
+  .container {
+    padding: 0;
+  }
+}
+
 .header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  align-items: flex-start;
+}
+
+@media (min-width: 640px) {
+  .header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
 }
 
 .breadcrumb {
@@ -46,13 +61,22 @@
   padding: var(--spacing-md) var(--spacing-lg);
   border-bottom: 1px solid var(--color-outline-variant);
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+@media (min-width: 900px) {
+  .tableToolbar {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
 }
 
 .tabs {
   display: flex;
   gap: var(--spacing-md);
+  overflow-x: auto;
 }
 
 .tab {
@@ -65,6 +89,8 @@
   font-weight: 500;
   cursor: pointer;
   border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .tabActive {
@@ -73,7 +99,13 @@
 }
 
 .searchWrapper {
-  width: 320px;
+  width: 100%;
+}
+
+@media (min-width: 900px) {
+  .searchWrapper {
+    width: 320px;
+  }
 }
 
 .tableContainer {
@@ -117,6 +149,31 @@
   display: block;
 }
 
+.quoteIdLink {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-md);
+  color: var(--color-on-surface);
+  cursor: pointer;
+}
+
+.quoteIdLink:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.mutedText {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-md);
+  color: var(--color-on-surface-variant);
+}
+
+.amountText {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-md);
+  font-weight: 600;
+  color: var(--color-on-surface);
+}
+
 .clientEmail {
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-sm);
@@ -146,9 +203,18 @@
 .pagination {
   padding: var(--spacing-md) var(--spacing-lg);
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  align-items: flex-start;
   border-top: 1px solid var(--color-outline-variant);
+}
+
+@media (min-width: 640px) {
+  .pagination {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
 }
 
 .paginationText {

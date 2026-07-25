@@ -153,6 +153,15 @@
   background-color: var(--color-surface-container-high);
 }
 
+.actionButton:disabled {
+  cursor: not-allowed;
+}
+
+.actionButton:disabled:hover {
+  color: var(--color-outline);
+  background-color: transparent;
+}
+
 .emptyState {
   text-align: center;
   color: var(--color-on-surface-variant);
@@ -214,4 +223,9 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+}
+
+.iconAction:disabled {
+  color: var(--color-outline);
+  cursor: not-allowed;
 }

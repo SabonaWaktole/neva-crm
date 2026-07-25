@@ -19,7 +19,7 @@ export const TenantManagementTable: React.FC<TenantManagementTableProps> = ({ te
     <div className={styles.tableContainer}>
       <div className={styles.header}>
         <h2 className={styles.title}>Tenant Management</h2>
-        <button className={styles.viewAllButton}>View all tenants</button>
+        <button className={styles.viewAllButton} disabled title="Tenant detail view coming soon">View all tenants</button>
       </div>
       
       <div className={styles.tableWrapper}>
@@ -68,7 +68,7 @@ export const TenantManagementTable: React.FC<TenantManagementTableProps> = ({ te
                     })}
                   </td>
                   <td className={styles.actionsCell}>
-                    <button className={styles.actionButton}>
+                    <button className={styles.actionButton} disabled title="More options coming soon">
                       <MoreVertical size={16} />
                     </button>
                   </td>

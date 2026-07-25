@@ -75,7 +75,7 @@ export const UpcomingAppointmentsWidget: React.FC = () => {
               <Badge variant={getStatusToken(appointment.status) as any}>
                 {appointment.status}
               </Badge>
-              <button className={styles.moreButton}>
+              <button className={styles.moreButton} disabled title="More options coming soon" aria-label="More options (coming soon)">
                 <MoreVertical size={16} />
               </button>
             </div>

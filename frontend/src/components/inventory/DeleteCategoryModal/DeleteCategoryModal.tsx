@@ -24,14 +24,14 @@ export const DeleteCategoryModal: React.FC<DeleteCategoryModalProps> = ({
       maxWidth="sm"
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)', color: 'var(--color-danger)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)', color: 'var(--color-error)' }}>
           <AlertTriangle size={32} />
-          <p style={{ margin: 0, fontSize: 'var(--font-size-body)', color: 'var(--color-on-surface-variant)' }}>
+          <p style={{ margin: 0, fontSize: 'var(--font-size-body-md)', color: 'var(--color-on-surface-variant)' }}>
             Are you sure you want to delete <strong>{categoryName}</strong>? This action cannot be undone.
           </p>
         </div>
-        
-        <p style={{ margin: 0, fontSize: 'var(--font-size-label)', color: 'var(--color-on-surface-variant)' }}>
+
+        <p style={{ margin: 0, fontSize: 'var(--font-size-label-md)', color: 'var(--color-on-surface-variant)' }}>
           Note: You cannot delete a category if there are products assigned to it.
         </p>
 
@@ -42,7 +42,7 @@ export const DeleteCategoryModal: React.FC<DeleteCategoryModalProps> = ({
             </Button>
           </div>
           <div style={{ flex: 1 }}>
-            <Button variant="primary" style={{ backgroundColor: 'var(--color-danger)' }} onClick={onConfirm} fullWidth>
+            <Button variant="primary" style={{ backgroundColor: 'var(--color-error)' }} onClick={onConfirm} fullWidth>
               Delete
             </Button>
           </div>

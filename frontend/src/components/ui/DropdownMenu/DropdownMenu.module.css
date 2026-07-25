@@ -68,6 +68,15 @@
   color: var(--color-error);
 }
 
+.itemDisabled {
+  color: var(--color-outline);
+  cursor: not-allowed;
+}
+
+.itemDisabled:hover {
+  background-color: transparent;
+}
+
 .itemIcon {
   display: flex;
   align-items: center;

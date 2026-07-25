@@ -8,6 +8,8 @@ export interface DropdownMenuItemType {
   icon?: ReactNode;
   onClick: () => void;
   danger?: boolean;
+  disabled?: boolean;
+  title?: string;
 }
 
 export interface DropdownMenuProps {
@@ -50,6 +52,7 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
   const handleToggle = () => setIsOpen((prev) => !prev);
 
   const handleItemClick = (item: DropdownMenuItemType) => {
+    if (item.disabled) return;
     item.onClick();
     setIsOpen(false);
   };
@@ -72,9 +75,12 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
               key={item.id}
               className={[
                 styles.item,
-                item.danger ? styles.itemDanger : ''
+                item.danger ? styles.itemDanger : '',
+                item.disabled ? styles.itemDisabled : ''
               ].filter(Boolean).join(' ')}
               onClick={() => handleItemClick(item)}
+              disabled={item.disabled}
+              title={item.title}
             >
               {item.icon && <span className={styles.itemIcon}>{item.icon}</span>}
               <span>{item.label}</span>

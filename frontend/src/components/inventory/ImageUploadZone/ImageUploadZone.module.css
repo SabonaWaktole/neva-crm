@@ -44,7 +44,7 @@
   font-size: var(--font-size-label-sm);
   font-weight: var(--font-weight-label-sm, 500);
   line-height: var(--font-line-height-label-sm, 1.4);
-  letter-spacing: var(--font-letter-spacing-label-sm, 0.5px);
+  letter-spacing: 0.5px;
   color: var(--color-on-surface);
 }
 

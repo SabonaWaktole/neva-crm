@@ -33,7 +33,7 @@
   padding: 6px;
   background: none;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-default);
   color: var(--color-on-surface-variant);
   cursor: pointer;
   transition: background-color 0.2s;
@@ -46,8 +46,18 @@
   background-color: var(--color-surface-variant);
 }
 
+.iconButton:disabled {
+  color: var(--color-outline);
+  cursor: not-allowed;
+}
+
+.iconButton:disabled:hover {
+  background-color: transparent;
+}
+
 .table {
   width: 100%;
+  min-width: 480px;
   text-align: left;
   border-collapse: collapse;
 }
@@ -104,7 +114,7 @@
 }
 
 .iconPrimary { color: var(--color-primary); }
-.iconTertiary { color: var(--color-tertiary); }
+.iconTertiary { color: var(--color-secondary); }
 .iconSecondary { color: var(--color-secondary); }
 
 .whName {
@@ -116,7 +126,7 @@
 
 .whId {
   font-family: var(--font-family-base);
-  font-size: var(--font-size-caption-xs);
+  font-size: var(--font-size-label-sm);
   color: var(--color-on-surface-variant);
 }
 
@@ -130,12 +140,20 @@
   display: flex;
   justify-content: flex-end;
   gap: var(--spacing-sm);
-  opacity: 0;
-  transition: opacity 0.2s;
 }
 
-.tr:hover .rowActions {
-  opacity: 1;
+/* Reveal-on-hover is a nice-to-have on devices with real hover; touch devices
+   have no hover state, so actions must stay visible there or they'd be unreachable. */
+@media (hover: hover) and (pointer: fine) {
+  .rowActions {
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .tr:hover .rowActions,
+  .tr:focus-within .rowActions {
+    opacity: 1;
+  }
 }
 
 .actionButton {

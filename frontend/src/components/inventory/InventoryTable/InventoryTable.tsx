@@ -3,6 +3,7 @@ import styles from './InventoryTable.module.css';
 import { Badge } from '../../ui/Badge';
 import { MoreHorizontal, Edit, Trash2 } from 'lucide-react';
 import { DropdownMenu } from '../../ui/DropdownMenu';
+import type { DropdownMenuItemType } from '../../ui/DropdownMenu';
 import { MultiLocationStockIndicator } from '../../ui/MultiLocationStockIndicator/MultiLocationStockIndicator';
 import type { StockBreakdown } from '../../ui/MultiLocationStockIndicator/MultiLocationStockIndicator';
 
@@ -50,9 +51,9 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({ products, onAdju
   };
 
   const getDropdownItems = (product: Product) => {
-    const items = [
-      { id: 'edit', label: 'Edit', onClick: () => console.log('Edit', product.id), icon: <Edit size={16} /> },
-      { id: 'delete', label: 'Delete', onClick: () => console.log('Delete', product.id), icon: <Trash2 size={16} /> }
+    const items: DropdownMenuItemType[] = [
+      { id: 'edit', label: 'Edit', onClick: () => {}, icon: <Edit size={16} />, disabled: true, title: 'Editing products is coming soon' },
+      { id: 'delete', label: 'Delete', onClick: () => {}, icon: <Trash2 size={16} />, disabled: true, title: 'Deleting products is coming soon' }
     ];
 
     if (onAdjustStock) {
