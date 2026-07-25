@@ -47,7 +47,7 @@
 }
 
 .sectionLabel {
-  font-family: var(--font-family-label-md);
+  font-family: var(--font-family-base);
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -72,8 +72,8 @@
 }
 
 .personName {
-  font-family: var(--font-family-headline-sm);
-  font-size: var(--font-size-headline-sm);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-lg);
   font-weight: 600;
   margin: 0;
   color: var(--color-on-surface);
@@ -103,7 +103,7 @@
 }
 
 .staffName {
-  font-family: var(--font-family-label-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
   font-weight: 500;
   color: var(--color-on-surface);
@@ -134,7 +134,7 @@
 }
 
 .infoText {
-  font-family: var(--font-family-body-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
   color: var(--color-on-surface);
 }
@@ -148,7 +148,7 @@
 }
 
 .purposeTitle {
-  font-family: var(--font-family-label-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
   font-weight: 500;
   color: var(--color-on-surface);
@@ -188,8 +188,14 @@
 
 .footerSecondary {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-md);
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-sm);
+}
+
+@media (max-width: 400px) {
+  .footerSecondary {
+    grid-template-columns: 1fr;
+  }
 }
 
 .cancelButton {
@@ -199,4 +205,27 @@
 
 .cancelButton:hover {
   background-color: rgba(255, 180, 171, 0.1);
+}
+
+/* Cancel-reason confirmation prompt */
+.cancelPrompt {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.cancelPromptButtons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-sm);
+}
+
+.cancelConfirmBtn {
+  background-color: var(--color-error);
+  color: var(--color-on-error);
+}
+
+.cancelConfirmBtn:hover {
+  background-color: var(--color-error);
+  opacity: 0.9;
 }

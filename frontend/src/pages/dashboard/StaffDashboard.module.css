@@ -21,7 +21,7 @@
 }
 
 .titleMobile {
-  font-family: var(--font-family-headline-lg);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-headline-lg-mobile);
   font-weight: var(--font-weight-headline-lg);
   color: var(--color-on-surface);
@@ -29,7 +29,7 @@
 }
 
 .subtitleMobile {
-  font-family: var(--font-family-body-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
   color: var(--color-on-surface-variant);
   margin: 0;
@@ -50,7 +50,7 @@
   height: 80px;
   border-radius: var(--radius-lg);
   border: none;
-  font-family: var(--font-family-label-md);
+  font-family: var(--font-family-base);
   font-weight: 600;
   cursor: pointer;
 }
@@ -92,7 +92,7 @@
 }
 
 .title {
-  font-family: var(--font-family-headline-lg);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-headline-lg);
   font-weight: var(--font-weight-headline-lg);
   color: var(--color-on-surface);
@@ -100,7 +100,7 @@
 }
 
 .subtitle {
-  font-family: var(--font-family-body-lg);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-body-lg);
   color: var(--color-on-surface-variant);
   margin: 0;
@@ -163,7 +163,7 @@
 
 /* Mobile Stats Scroll */
 .mobileStatsSection h3 {
-  font-family: var(--font-family-headline-sm);
+  font-family: var(--font-family-base);
   font-size: 16px;
   color: var(--color-on-surface);
   margin: 0 0 var(--spacing-sm) 0;
@@ -243,7 +243,7 @@
 
 .glassButtonContent h3 {
   margin: 0;
-  font-family: var(--font-family-label-md);
+  font-family: var(--font-family-base);
   font-size: 14px;
   color: var(--color-on-surface);
 }
@@ -277,7 +277,7 @@
 }
 
 .feedTitleGroup h2 {
-  font-family: var(--font-family-headline-sm);
+  font-family: var(--font-family-base);
   font-size: 16px;
   font-weight: 600;
   color: var(--color-on-surface);

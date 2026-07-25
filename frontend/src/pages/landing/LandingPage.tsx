@@ -52,7 +52,7 @@ export const LandingPage: React.FC = () => {
           borderRadius: 'var(--radius-full)',
           backgroundColor: 'var(--color-primary-container)',
           color: 'var(--color-on-primary-container)',
-          fontFamily: 'var(--font-family-label-md)',
+          fontFamily: 'var(--font-family-base)',
           fontSize: 'var(--font-size-label-md)',
           fontWeight: 600,
           marginBottom: '32px'
@@ -76,7 +76,7 @@ export const LandingPage: React.FC = () => {
         
         <p style={{
           maxWidth: '600px',
-          fontFamily: 'var(--font-family-body-lg)',
+          fontFamily: 'var(--font-family-base)',
           fontSize: '20px',
           color: 'var(--color-on-surface-variant)',
           margin: '0 0 48px 0',
@@ -118,8 +118,8 @@ export const LandingPage: React.FC = () => {
             <div style={{ width: '48px', height: '48px', backgroundColor: 'var(--color-primary-container)', color: 'var(--color-primary)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
               <Building2 size={24} />
             </div>
-            <h3 style={{ fontFamily: 'var(--font-family-headline-md)', fontSize: '20px', fontWeight: 600, margin: '0 0 12px 0', color: 'var(--color-on-surface)' }}>True Multi-Tenancy</h3>
-            <p style={{ fontFamily: 'var(--font-family-body-md)', color: 'var(--color-on-surface-variant)', margin: 0, lineHeight: 1.6 }}>Isolated data environments ensuring complete privacy and dedicated branding for every workspace.</p>
+            <h3 style={{ fontFamily: 'var(--font-family-base)', fontSize: '20px', fontWeight: 600, margin: '0 0 12px 0', color: 'var(--color-on-surface)' }}>True Multi-Tenancy</h3>
+            <p style={{ fontFamily: 'var(--font-family-base)', color: 'var(--color-on-surface-variant)', margin: 0, lineHeight: 1.6 }}>Isolated data environments ensuring complete privacy and dedicated branding for every workspace.</p>
           </div>
 
           <div style={{
@@ -132,8 +132,8 @@ export const LandingPage: React.FC = () => {
             <div style={{ width: '48px', height: '48px', backgroundColor: 'var(--color-secondary-container)', color: 'var(--color-on-secondary-container)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
               <ShieldCheck size={24} />
             </div>
-            <h3 style={{ fontFamily: 'var(--font-family-headline-md)', fontSize: '20px', fontWeight: 600, margin: '0 0 12px 0', color: 'var(--color-on-surface)' }}>Enterprise Security</h3>
-            <p style={{ fontFamily: 'var(--font-family-body-md)', color: 'var(--color-on-surface-variant)', margin: 0, lineHeight: 1.6 }}>Bank-grade encryption, strict Role-Based Access Control (RBAC), and full compliance reporting.</p>
+            <h3 style={{ fontFamily: 'var(--font-family-base)', fontSize: '20px', fontWeight: 600, margin: '0 0 12px 0', color: 'var(--color-on-surface)' }}>Enterprise Security</h3>
+            <p style={{ fontFamily: 'var(--font-family-base)', color: 'var(--color-on-surface-variant)', margin: 0, lineHeight: 1.6 }}>Bank-grade encryption, strict Role-Based Access Control (RBAC), and full compliance reporting.</p>
           </div>
 
           <div style={{
@@ -146,8 +146,8 @@ export const LandingPage: React.FC = () => {
             <div style={{ width: '48px', height: '48px', backgroundColor: 'var(--color-surface-variant)', color: 'var(--color-on-surface-variant)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
               <Zap size={24} />
             </div>
-            <h3 style={{ fontFamily: 'var(--font-family-headline-md)', fontSize: '20px', fontWeight: 600, margin: '0 0 12px 0', color: 'var(--color-on-surface)' }}>Lightning Fast</h3>
-            <p style={{ fontFamily: 'var(--font-family-body-md)', color: 'var(--color-on-surface-variant)', margin: 0, lineHeight: 1.6 }}>Optimized API responses and instantaneous UI updates keep your team moving at the speed of thought.</p>
+            <h3 style={{ fontFamily: 'var(--font-family-base)', fontSize: '20px', fontWeight: 600, margin: '0 0 12px 0', color: 'var(--color-on-surface)' }}>Lightning Fast</h3>
+            <p style={{ fontFamily: 'var(--font-family-base)', color: 'var(--color-on-surface-variant)', margin: 0, lineHeight: 1.6 }}>Optimized API responses and instantaneous UI updates keep your team moving at the speed of thought.</p>
           </div>
         </div>
       </main>
@@ -159,7 +159,7 @@ export const LandingPage: React.FC = () => {
         borderTop: '1px solid var(--color-outline-variant)',
         textAlign: 'center',
         color: 'var(--color-on-surface-variant)',
-        fontFamily: 'var(--font-family-body-sm)',
+        fontFamily: 'var(--font-family-base)',
         fontSize: '14px'
       }}>
         © 2026 Neva CRM. All rights reserved.

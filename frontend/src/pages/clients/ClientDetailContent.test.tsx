@@ -8,6 +8,7 @@ import * as apptHooks from '../../hooks/useAppointments';
 // Mock dependencies
 vi.mock('react-router-dom', () => ({
   useParams: () => ({ clientId: 'client-1' }),
+  useNavigate: () => vi.fn(),
 }));
 
 vi.mock('../../hooks/useClients', () => ({

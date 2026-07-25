@@ -17,7 +17,7 @@
 }
 
 .title {
-  font-family: var(--font-family-headline-sm);
+  font-family: var(--font-family-base);
   font-size: 16px;
   font-weight: 600;
   color: var(--color-on-surface);
@@ -28,7 +28,7 @@
   background: none;
   border: none;
   color: var(--color-primary);
-  font-family: var(--font-family-label-sm);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-label-sm);
   cursor: pointer;
   padding: 0;
@@ -51,7 +51,7 @@
 .table th {
   padding: var(--spacing-md) var(--spacing-lg);
   background-color: var(--color-surface-container-low);
-  font-family: var(--font-family-label-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
   font-weight: var(--font-weight-label-md);
   color: var(--color-on-surface-variant);
@@ -99,7 +99,7 @@
 }
 
 .orgName {
-  font-family: var(--font-family-label-md);
+  font-family: var(--font-family-base);
   font-weight: 500;
   color: var(--color-on-surface);
 }

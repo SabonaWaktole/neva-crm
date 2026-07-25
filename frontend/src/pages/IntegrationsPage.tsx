@@ -96,18 +96,18 @@ export const IntegrationsPage: React.FC = () => {
                 <li aria-current="page" style={{ color: 'var(--color-on-surface)', fontWeight: 600 }}>Integrations</li>
               </ol>
             </nav>
-            <h1 style={{ fontFamily: 'var(--font-family-headline-lg)', fontSize: 'var(--font-size-headline-lg)', color: 'var(--color-on-surface)', margin: 0 }}>Integrations</h1>
-            <p style={{ fontFamily: 'var(--font-family-body-md)', fontSize: '13px', margin: 'var(--spacing-xs) 0 0 0', color: 'var(--color-on-surface-variant)' }}>Manage connections to third-party services.</p>
+            <h1 style={{ fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-headline-lg)', color: 'var(--color-on-surface)', margin: 0 }}>Integrations</h1>
+            <p style={{ fontFamily: 'var(--font-family-base)', fontSize: '13px', margin: 'var(--spacing-xs) 0 0 0', color: 'var(--color-on-surface-variant)' }}>Manage connections to third-party services.</p>
           </div>
 
           {error && (
-            <div style={{ backgroundColor: 'var(--color-error-container)', color: 'var(--color-on-error-container)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-md)' }}>
+            <div style={{ backgroundColor: 'var(--color-error-container)', color: 'var(--color-on-error-container)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-lg)' }}>
               {error}
             </div>
           )}
 
           {!isBusinessOwner && (
-            <div style={{ backgroundColor: 'var(--color-secondary-container)', color: 'var(--color-on-secondary-container)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-md)' }}>
+            <div style={{ backgroundColor: 'var(--color-secondary-container)', color: 'var(--color-on-secondary-container)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-lg)' }}>
               Only Business Owners can connect or disconnect integrations.
             </div>
           )}
@@ -132,7 +132,7 @@ export const IntegrationsPage: React.FC = () => {
                     <div style={{ 
                       padding: 'var(--spacing-sm)', 
                       backgroundColor: 'var(--color-surface-container)', 
-                      borderRadius: 'var(--radius-md)',
+                      borderRadius: 'var(--radius-lg)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center'
@@ -173,7 +173,7 @@ export const IntegrationsPage: React.FC = () => {
                             backgroundColor: 'transparent',
                             color: 'var(--color-error)',
                             border: '1px solid var(--color-error)',
-                            borderRadius: 'var(--radius-md)',
+                            borderRadius: 'var(--radius-lg)',
                             fontSize: '13px',
                             fontWeight: 500,
                             cursor: (!isBusinessOwner || isProcessing) ? 'not-allowed' : 'pointer',
@@ -193,7 +193,7 @@ export const IntegrationsPage: React.FC = () => {
                           backgroundColor: 'var(--color-primary)',
                           color: 'var(--color-on-primary)',
                           border: 'none',
-                          borderRadius: 'var(--radius-md)',
+                          borderRadius: 'var(--radius-lg)',
                           fontSize: '13px',
                           fontWeight: 500,
                           cursor: (!isBusinessOwner || isProcessing) ? 'not-allowed' : 'pointer',

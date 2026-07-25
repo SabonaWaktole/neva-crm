@@ -34,7 +34,7 @@
 }
 
 .title {
-  font-family: var(--font-family-headline-lg);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-headline-lg-mobile);
   font-weight: var(--font-weight-headline-lg);
   color: var(--color-on-surface);
@@ -48,7 +48,7 @@
 }
 
 .subtitle {
-  font-family: var(--font-family-body-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
   color: var(--color-on-surface-variant);
   margin: 0;
@@ -154,7 +154,7 @@
 }
 
 .dashedPlaceholder h3 {
-  font-family: var(--font-family-label-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
   font-weight: var(--font-weight-label-md);
   color: var(--color-on-surface-variant);
@@ -163,7 +163,7 @@
 }
 
 .dashedPlaceholder p {
-  font-family: var(--font-family-body-sm);
+  font-family: var(--font-family-base);
   font-size: 13px;
   color: var(--color-outline);
   margin: 0;
@@ -192,7 +192,7 @@
 }
 
 .feedTitleGroup h2 {
-  font-family: var(--font-family-headline-sm);
+  font-family: var(--font-family-base);
   font-size: 16px;
   font-weight: 600;
   color: var(--color-on-surface);

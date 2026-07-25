@@ -13,6 +13,7 @@ export interface DropdownMenuItemType {
 export interface DropdownMenuProps {
   trigger: ReactNode;
   items: DropdownMenuItemType[];
+  header?: ReactNode;
   align?: 'left' | 'right';
   className?: string;
 }
@@ -20,6 +21,7 @@ export interface DropdownMenuProps {
 export const DropdownMenu: React.FC<DropdownMenuProps> = ({
   trigger,
   items,
+  header,
   align = 'right',
   className = '',
 }) => {
@@ -64,6 +66,7 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
       </div>
       {isOpen && (
         <div className={dropdownClasses}>
+          {header && <div className={styles.header}>{header}</div>}
           {items.map((item) => (
             <button
               key={item.id}

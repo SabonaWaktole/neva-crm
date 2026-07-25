@@ -92,7 +92,7 @@ export const ReportsPage: React.FC = () => {
 
         <main style={{ flex: 1, overflowY: 'auto', padding: 'var(--spacing-xl)' }}>
           {error && (
-            <div style={{ backgroundColor: 'var(--color-error-container)', color: 'var(--color-on-error-container)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', marginBottom: 'var(--spacing-lg)' }}>
+            <div style={{ backgroundColor: 'var(--color-error-container)', color: 'var(--color-on-error-container)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-lg)', marginBottom: 'var(--spacing-lg)' }}>
               {error}
             </div>
           )}

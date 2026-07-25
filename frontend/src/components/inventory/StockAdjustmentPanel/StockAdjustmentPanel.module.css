@@ -75,7 +75,7 @@
 .tabButton {
   flex: 1;
   padding: var(--spacing-md);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   border: 1px solid transparent;
   background: none;
   font-family: var(--font-family-base);
@@ -134,7 +134,7 @@
 .typeBtn {
   flex: 1;
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   font-size: var(--font-size-label-md);
   font-weight: bold;
   cursor: pointer;

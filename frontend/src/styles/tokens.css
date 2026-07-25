@@ -68,6 +68,10 @@
   --font-weight-label-md: 500;
   --font-letter-spacing-label-md: 0.05em;
 
+  --font-size-body-sm: 12px;
+  --font-line-height-body-sm: 16px;
+  --font-weight-body-sm: 400;
+
   --font-size-body-md: 14px;
   --font-line-height-body-md: 20px;
   --font-weight-body-md: 400;
@@ -75,6 +79,10 @@
   --font-size-body-lg: 16px;
   --font-line-height-body-lg: 24px;
   --font-weight-body-lg: 400;
+
+  --font-size-headline-sm: 16px;
+  --font-line-height-headline-sm: 22px;
+  --font-weight-headline-sm: 600;
 
   --font-size-headline-md: 18px;
   --font-line-height-headline-md: 26px;

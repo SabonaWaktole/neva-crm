@@ -32,7 +32,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 var(--spacing-margin-desktop);
+  padding: 0 var(--spacing-lg);
   height: 64px;
   background-color: var(--color-surface-container-low);
   border-bottom: 1px solid var(--color-outline-variant);
@@ -506,7 +506,7 @@
   top: 0;
   z-index: 50;
   border-bottom: 1px solid var(--color-outline-variant);
-  padding: var(--spacing-sm) var(--spacing-margin-mobile);
+  padding: var(--spacing-sm) var(--spacing-md);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
@@ -570,7 +570,7 @@
 }
 
 .horizontalDateScroller {
-  background-color: var(--color-surface-dim);
+  background-color: var(--color-surface-container-low);
   padding-top: var(--spacing-md);
   padding-bottom: var(--spacing-sm);
   border-bottom: 1px solid var(--color-outline-variant);
@@ -583,7 +583,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 var(--spacing-margin-mobile);
+  padding: 0 var(--spacing-md);
   margin-bottom: var(--spacing-md);
 }
 
@@ -597,7 +597,7 @@
   display: flex;
   gap: var(--spacing-md);
   overflow-x: auto;
-  padding: 0 var(--spacing-margin-mobile);
+  padding: 0 var(--spacing-md);
   scroll-snap-type: x mandatory;
 }
 
@@ -615,6 +615,9 @@
   background-color: var(--color-surface-container-high);
   border: 1px solid var(--color-outline-variant);
   scroll-snap-align: center;
+  font-family: inherit;
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
 .dateCard span {
@@ -637,7 +640,7 @@
 }
 
 .agendaList {
-  padding: var(--spacing-lg) var(--spacing-margin-mobile);
+  padding: var(--spacing-lg) var(--spacing-md);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);

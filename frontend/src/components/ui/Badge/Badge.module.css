@@ -33,3 +33,18 @@
   background-color: var(--color-error-container);
   color: var(--color-on-error-container);
 }
+
+.emerald {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #047857;
+}
+
+.slate {
+  background-color: rgba(100, 116, 139, 0.15);
+  color: #475569;
+}
+
+.amber {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #b45309;
+}

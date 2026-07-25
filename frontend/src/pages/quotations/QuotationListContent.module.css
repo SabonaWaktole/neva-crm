@@ -15,14 +15,14 @@
 }
 
 .breadcrumb {
-  font-family: var(--font-family-body-sm);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-body-sm);
   color: var(--color-on-surface-variant);
   margin-bottom: var(--spacing-xs);
 }
 
 .title {
-  font-family: var(--font-family-headline-lg);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-headline-lg);
   font-weight: 700;
   color: var(--color-on-surface);
@@ -60,7 +60,7 @@
   border: none;
   padding: var(--spacing-sm) 0;
   color: var(--color-on-surface-variant);
-  font-family: var(--font-family-label-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
   font-weight: 500;
   cursor: pointer;
@@ -88,7 +88,7 @@
 .table th {
   text-align: left;
   padding: var(--spacing-md) var(--spacing-lg);
-  font-family: var(--font-family-label-sm);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-label-sm);
   color: var(--color-on-surface-variant);
   font-weight: 500;
@@ -110,7 +110,7 @@
 }
 
 .clientName {
-  font-family: var(--font-family-label-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
   font-weight: 500;
   color: var(--color-on-surface);
@@ -118,7 +118,7 @@
 }
 
 .clientEmail {
-  font-family: var(--font-family-body-sm);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-body-sm);
   color: var(--color-on-surface-variant);
   display: block;
@@ -152,7 +152,7 @@
 }
 
 .paginationText {
-  font-family: var(--font-family-body-sm);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-body-sm);
   color: var(--color-on-surface-variant);
 }
@@ -178,14 +178,14 @@
 }
 
 .emptyStateTitle {
-  font-family: var(--font-family-headline-sm);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-headline-sm);
   color: var(--color-on-surface);
   margin: 0 0 8px 0;
 }
 
 .emptyStateMessage {
-  font-family: var(--font-family-body-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
   color: var(--color-on-surface-variant);
   max-width: 400px;

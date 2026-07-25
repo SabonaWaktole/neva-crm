@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronRight, Edit3, Mail, MoreVertical, Phone, Settings, Filter, Search, PhoneCall, Video, FileText, Calendar } from 'lucide-react';
 import { useClientDetail, useClientHistory, useClientSettings } from '../../hooks/useClients';
 import { useClientAppointments } from '../../hooks/useAppointments';
@@ -8,6 +8,7 @@ import { Badge } from '../../components/ui/Badge/Badge';
 import { Avatar } from '../../components/ui/Avatar/Avatar';
 import { Button } from '../../components/ui/Button/Button';
 import { SlideOver } from '../../components/ui/SlideOver';
+import { DropdownMenu } from '../../components/ui/DropdownMenu/DropdownMenu';
 import { SelectInput } from '../../components/ui/SelectInput/SelectInput';
 import { TextareaInput } from '../../components/ui/TextareaInput/TextareaInput';
 import { TimelineItem } from '../../components/ui/TimelineItem/TimelineItem';
@@ -19,7 +20,8 @@ import type { Appointment } from '../../types/appointment';
 import styles from './ClientDetailContent.module.css';
 
 export const ClientDetailContent: React.FC = () => {
-  const { clientId } = useParams();
+  const { clientId, tenantSlug } = useParams();
+  const navigate = useNavigate();
   const { client, isLoading: isClientLoading, fetchClient } = useClientDetail(clientId || '');
   const { history, isLoading: isHistoryLoading, fetchHistory } = useClientHistory(clientId || '');
   const { customFields, outcomeCategories, fetchSettings } = useClientSettings();
@@ -89,15 +91,40 @@ export const ClientDetailContent: React.FC = () => {
             </div>
           </div>
           <div className={styles.headerActions}>
-            <Button variant="outline" className={styles.iconButton}>
+            <Button
+              variant="outline"
+              className={styles.iconButton}
+              aria-label="Edit client"
+              onClick={() => navigate(`/${tenantSlug}/clients/${clientId}/edit`)}
+            >
               <Edit3 size={18} />
             </Button>
-            <Button variant="outline" className={styles.iconButton}>
-              <Mail size={18} />
-            </Button>
-            <Button variant="outline" className={styles.iconButton}>
-              <MoreVertical size={18} />
-            </Button>
+            {client.contactInfo?.email && (
+              <Button
+                variant="outline"
+                className={styles.iconButton}
+                aria-label="Email client"
+                onClick={() => window.location.assign(`mailto:${client.contactInfo?.email}`)}
+              >
+                <Mail size={18} />
+              </Button>
+            )}
+            <DropdownMenu
+              align="right"
+              trigger={
+                <Button variant="outline" className={styles.iconButton} aria-label="More actions">
+                  <MoreVertical size={18} />
+                </Button>
+              }
+              items={[
+                {
+                  id: 'edit',
+                  label: 'Edit Client',
+                  icon: <Edit3 size={16} />,
+                  onClick: () => navigate(`/${tenantSlug}/clients/${clientId}/edit`),
+                },
+              ]}
+            />
           </div>
         </div>
       </div>
@@ -112,7 +139,7 @@ export const ClientDetailContent: React.FC = () => {
             <div className={styles.contactDetails}>
               <Avatar
                 size="lg"
-                fallback="SJ"
+                fallback={client.assignedUserId?.substring(0, 2).toUpperCase() || 'UN'}
                 className={styles.contactAvatar}
               />
               <div className={styles.contactInfo}>
@@ -138,7 +165,12 @@ export const ClientDetailContent: React.FC = () => {
           <Card padding="lg" className={styles.customFieldsCard}>
             <div className={styles.cardHeader}>
               <h2 className={styles.cardTitle}>About</h2>
-              <button className={styles.settingsButton}>
+              <button
+                className={styles.settingsButton}
+                disabled
+                title="Custom field settings coming soon"
+                aria-label="Custom field settings (coming soon)"
+              >
                 <Settings size={16} />
               </button>
             </div>
@@ -196,10 +228,10 @@ export const ClientDetailContent: React.FC = () => {
               <div className={styles.cardHeader}>
                 <h2 className={styles.cardTitle}>Interactions</h2>
                 <div className={styles.timelineActions}>
-                  <Button variant="outline" className={styles.smallIconButton}>
+                  <Button variant="outline" className={styles.smallIconButton} disabled title="Filtering coming soon" aria-label="Filter timeline (coming soon)">
                     <Filter size={16} />
                   </Button>
-                  <Button variant="outline" className={styles.smallIconButton}>
+                  <Button variant="outline" className={styles.smallIconButton} disabled title="Search coming soon" aria-label="Search timeline (coming soon)">
                     <Search size={16} />
                   </Button>
                 </div>

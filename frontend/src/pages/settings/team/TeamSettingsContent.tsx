@@ -33,8 +33,8 @@ export const TeamSettingsContent: React.FC = () => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h2 style={{ fontFamily: 'var(--font-family-headline-sm)', fontSize: 'var(--font-size-headline-sm)', color: 'var(--color-on-surface)', margin: 0 }}>Team Members</h2>
-          <p style={{ fontFamily: 'var(--font-family-body-md)', fontSize: 'var(--font-size-body-md)', color: 'var(--color-on-surface-variant)', margin: 'var(--spacing-xs) 0 0 0' }}>
+          <h2 style={{ fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-headline-sm)', color: 'var(--color-on-surface)', margin: 0 }}>Team Members</h2>
+          <p style={{ fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-body-md)', color: 'var(--color-on-surface-variant)', margin: 'var(--spacing-xs) 0 0 0' }}>
             Manage your team, their roles, and pending invitations.
           </p>
         </div>

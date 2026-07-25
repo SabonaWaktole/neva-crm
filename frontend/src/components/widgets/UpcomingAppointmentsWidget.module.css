@@ -31,7 +31,7 @@
 }
 
 .title {
-  font-family: var(--font-family-headline-sm);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-headline-sm);
   font-weight: 600;
   color: var(--color-on-surface);

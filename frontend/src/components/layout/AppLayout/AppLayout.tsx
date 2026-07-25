@@ -1,7 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import type { ReactNode, ReactElement } from 'react';
-import { Search, Bell, HelpCircle, Settings, LogOut, Menu } from 'lucide-react';
+import { Search, Bell, HelpCircle, Settings, LogOut, Menu, X } from 'lucide-react';
 import { Avatar } from '../../ui/Avatar/Avatar';
+import { DropdownMenu } from '../../ui/DropdownMenu/DropdownMenu';
+import type { DropdownMenuItemType } from '../../ui/DropdownMenu/DropdownMenu';
 import styles from './AppLayout.module.css';
 
 export interface AppLayoutProps {
@@ -23,19 +25,17 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   onLogout,
   onSettingsClick,
 }) => {
-  const [showDropdown, setShowDropdown] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setShowDropdown(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  const profileItems: DropdownMenuItemType[] = [
+    ...(onSettingsClick
+      ? [{ id: 'settings', label: 'Settings', icon: <Settings size={18} />, onClick: onSettingsClick }]
+      : []),
+    ...(onLogout
+      ? [{ id: 'logout', label: 'Log Out', icon: <LogOut size={18} />, onClick: onLogout, danger: true }]
+      : []),
+  ];
 
   return (
     <div className={styles.layout}>
@@ -54,81 +54,56 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         
         <div className={styles.headerCenter}>
           <Search className={styles.searchIcon} size={18} />
-          <input 
-            type="text" 
-            placeholder="Search..." 
+          <input
+            type="text"
+            placeholder="Search..."
             className={styles.searchInput}
           />
         </div>
-        
+
         <div className={styles.headerRight}>
+          <button
+            className={`${styles.iconBtn} ${styles.mobileSearchBtn}`}
+            aria-label="Search"
+            onClick={() => setIsMobileSearchOpen((prev) => !prev)}
+          >
+            {isMobileSearchOpen ? <X size={20} /> : <Search size={20} />}
+          </button>
           <button className={styles.iconBtn} aria-label="Notifications">
             <Bell size={20} />
           </button>
           <button className={`${styles.iconBtn} ${styles.helpBtn}`} aria-label="Help">
             <HelpCircle size={20} />
           </button>
-          <div style={{ position: 'relative' }} ref={dropdownRef}>
-            <button 
-              className={styles.profileBtn} 
-              aria-label="User Profile"
-              onClick={() => setShowDropdown(!showDropdown)}
-            >
-              <Avatar 
-                src={userAvatarSrc} 
-                fallback={userName.charAt(0).toUpperCase()} 
-                size="sm" 
-                alt={`${userName}'s profile`} 
-              />
-            </button>
-            {showDropdown && (
-              <div style={{
-                position: 'absolute',
-                top: '100%',
-                right: 0,
-                marginTop: '4px',
-                backgroundColor: 'var(--color-surface-container-lowest)',
-                border: '1px solid var(--color-outline-variant)',
-                borderRadius: 'var(--radius-default)',
-                boxShadow: 'var(--elevation-2)',
-                minWidth: '180px',
-                zIndex: 100,
-                overflow: 'hidden',
-              }}>
-                <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--color-outline-variant)' }}>
-                  <p style={{ margin: 0, fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-label-md)', fontWeight: 600, color: 'var(--color-on-surface)' }}>{userName}</p>
-                </div>
-                {onSettingsClick && (
-                  <button
-                    onClick={() => { setShowDropdown(false); onSettingsClick(); }}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '10px 16px',
-                      border: 'none', background: 'none', cursor: 'pointer',
-                      fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-body-md)', color: 'var(--color-on-surface)',
-                    }}
-                  >
-                    <Settings size={18} />
-                    Settings
-                  </button>
-                )}
-                {onLogout && (
-                  <button
-                    onClick={() => { setShowDropdown(false); onLogout(); }}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '10px 16px',
-                      border: 'none', background: 'none', cursor: 'pointer',
-                      fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-body-md)', color: 'var(--color-error)',
-                    }}
-                  >
-                    <LogOut size={18} />
-                    Log Out
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+          <DropdownMenu
+            align="right"
+            trigger={
+              <button className={styles.profileBtn} aria-label="User Profile">
+                <Avatar
+                  src={userAvatarSrc}
+                  fallback={userName.charAt(0).toUpperCase()}
+                  size="sm"
+                  alt={`${userName}'s profile`}
+                />
+              </button>
+            }
+            items={profileItems}
+            header={userName}
+          />
         </div>
       </header>
+
+      {isMobileSearchOpen && (
+        <div className={styles.mobileSearchBar}>
+          <Search className={styles.searchIcon} size={18} />
+          <input
+            type="text"
+            placeholder="Search..."
+            className={styles.searchInput}
+            autoFocus
+          />
+        </div>
+      )}
 
       <div className={styles.contentArea}>
         {/* Sidebar injected here */}

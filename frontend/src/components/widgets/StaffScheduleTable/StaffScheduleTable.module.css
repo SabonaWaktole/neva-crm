@@ -27,7 +27,7 @@
 }
 
 .headerLeft h2 {
-  font-family: var(--font-family-headline-sm);
+  font-family: var(--font-family-base);
   font-size: 16px;
   font-weight: 600;
   color: var(--color-on-surface);
@@ -65,7 +65,7 @@
 .table th {
   padding: var(--spacing-md) var(--spacing-lg);
   background-color: var(--color-surface-container-low);
-  font-family: var(--font-family-label-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
   font-weight: var(--font-weight-label-md);
   color: var(--color-on-surface-variant);
@@ -87,7 +87,7 @@
 }
 
 .timeCell {
-  font-family: var(--font-family-label-md);
+  font-family: var(--font-family-base);
   font-weight: 600;
   color: var(--color-on-surface);
   white-space: nowrap;

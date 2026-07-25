@@ -43,7 +43,7 @@
 }
 
 .sectionHeader h2 {
-  font-family: var(--font-family-headline-sm);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-headline-sm);
   font-weight: 600;
   margin: 0;
@@ -67,7 +67,7 @@
 
 /* Locked Client Field */
 .lockedLabel {
-  font-family: var(--font-family-label-md);
+  font-family: var(--font-family-base);
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -88,7 +88,7 @@
 }
 
 .lockedClientName {
-  font-family: var(--font-family-body-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
   font-weight: 600;
   color: var(--color-on-surface);
@@ -121,7 +121,7 @@
 }
 
 .priorityTitle {
-  font-family: var(--font-family-label-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
   font-weight: 500;
   color: var(--color-on-surface);

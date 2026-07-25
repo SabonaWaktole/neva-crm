@@ -29,6 +29,8 @@ const EditAppointmentContent: React.FC = () => {
   const [scheduledAt, setScheduledAt] = useState('');
   const [notes, setNotes] = useState('');
   const [loadingAppt, setLoadingAppt] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     fetchClients();
@@ -38,22 +40,28 @@ const EditAppointmentContent: React.FC = () => {
   useEffect(() => {
     const fetchAppt = async () => {
       if (!tenantSlug || !appointmentId) return;
+      setFetchError(null);
+      setNotFound(false);
       try {
         const results = await appointmentService.searchAppointments(tenantSlug, { startDate: '1970-01-01', endDate: '2100-01-01' });
         const appt = results.find(a => a.id === appointmentId);
-        if (appt) {
-          setClientId(appt.clientId);
-          setAssignedUserId(appt.assignedUserId);
-          
-          // Format Date for datetime-local (YYYY-MM-DDThh:mm)
-          const date = new Date(appt.scheduledAt);
-          date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-          setScheduledAt(date.toISOString().slice(0, 16));
-          
-          setNotes(appt.notes || '');
+        if (!appt) {
+          setNotFound(true);
+          return;
         }
+
+        setClientId(appt.clientId);
+        setAssignedUserId(appt.assignedUserId);
+
+        // Format Date for datetime-local (YYYY-MM-DDThh:mm)
+        const date = new Date(appt.scheduledAt);
+        date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+        setScheduledAt(date.toISOString().slice(0, 16));
+
+        setNotes(appt.notes || '');
       } catch (e) {
         console.error('Failed to fetch appointment', e);
+        setFetchError('Something went wrong while loading this appointment. Please try again.');
       } finally {
         setLoadingAppt(false);
       }
@@ -99,6 +107,22 @@ const EditAppointmentContent: React.FC = () => {
 
       {isDataLoading ? (
         <div className={styles.loadingState}>Loading appointment details...</div>
+      ) : notFound ? (
+        <div className={styles.formCard} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)', alignItems: 'flex-start' }}>
+          <p className={styles.errorBanner}>
+            We couldn't find this appointment. It may have been deleted or the link may be incorrect.
+          </p>
+          <Button variant="outline" onClick={() => navigate(`/${tenantSlug}/appointments`)}>
+            Back to Calendar
+          </Button>
+        </div>
+      ) : fetchError ? (
+        <div className={styles.formCard} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)', alignItems: 'flex-start' }}>
+          <p className={styles.errorBanner}>{fetchError}</p>
+          <Button variant="outline" onClick={() => navigate(`/${tenantSlug}/appointments`)}>
+            Back to Calendar
+          </Button>
+        </div>
       ) : (
         <div className={styles.formCard}>
           <form onSubmit={handleSubmit}>

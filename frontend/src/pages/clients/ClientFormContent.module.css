@@ -44,6 +44,15 @@
   gap: var(--spacing-sm);
 }
 
+.errorBanner {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-error-container);
+  color: var(--color-on-error-container);
+  border-radius: var(--radius-lg);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-md);
+}
+
 .formContainer {
   display: flex;
   flex-direction: column;

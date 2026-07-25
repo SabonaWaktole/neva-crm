@@ -12,6 +12,8 @@ import {
 import { Button } from '../../components/ui/Button/Button';
 import { TextInput } from '../../components/ui/TextInput/TextInput';
 import { DropdownMenu } from '../../components/ui/DropdownMenu/DropdownMenu';
+import { Badge } from '../../components/ui/Badge/Badge';
+import type { BadgeProps } from '../../components/ui/Badge/Badge';
 import styles from './QuotationListContent.module.css';
 
 import { useQuotations, usePendingApprovals } from '../../hooks/useQuotations';

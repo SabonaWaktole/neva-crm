@@ -234,16 +234,26 @@ const CalendarDesktopView = ({
 };
 
 // Sub-component: Mobile Agenda View
-const CalendarMobileAgenda = ({ 
+const CalendarMobileAgenda = ({
   appointments,
-  onAppointmentClick 
-}: { 
+  onAppointmentClick
+}: {
   appointments: Appointment[],
   onAppointmentClick: (app: Appointment) => void
 }) => {
   const today = new Date();
-  const agendaAppointments = appointments.filter(app => isSameDayLocal(app.scheduledAt, today));
-  
+  const [selectedDate, setSelectedDate] = useState(today);
+  const agendaAppointments = appointments.filter(app => isSameDayLocal(app.scheduledAt, selectedDate));
+
+  // Show a 7-day window centered on "today" so the strip always reflects real dates
+  const weekDays = Array.from({ length: 7 }).map((_, i) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() - 3 + i);
+    return d;
+  });
+
+  const monthYearString = selectedDate.toLocaleDateString([], { month: 'long', year: 'numeric' });
+
   return (
     <div className={styles.mobileView}>
       {/* Top App Bar */}
@@ -266,16 +276,23 @@ const CalendarMobileAgenda = ({
       <main className={styles.mobileMain}>
         <section className={styles.horizontalDateScroller}>
           <div className={styles.dateScrollerHeader}>
-            <h2>October 2023</h2>
+            <h2>{monthYearString}</h2>
             <CalendarIcon size={20} />
           </div>
           <div className={styles.dateCards}>
-            <div className={styles.dateCard}><span>MON</span><strong>23</strong></div>
-            <div className={`${styles.dateCard} ${styles.activeDateCard}`}><span>TUE</span><strong>24</strong></div>
-            <div className={styles.dateCard}><span>WED</span><strong>25</strong></div>
-            <div className={styles.dateCard}><span>THU</span><strong>26</strong></div>
-            <div className={styles.dateCard}><span>FRI</span><strong>27</strong></div>
-            <div className={styles.dateCard}><span>SAT</span><strong>28</strong></div>
+            {weekDays.map((d) => {
+              const isActive = d.toDateString() === selectedDate.toDateString();
+              return (
+                <button
+                  key={d.toISOString()}
+                  className={`${styles.dateCard} ${isActive ? styles.activeDateCard : ''}`}
+                  onClick={() => setSelectedDate(d)}
+                >
+                  <span>{d.toLocaleDateString([], { weekday: 'short' }).toUpperCase()}</span>
+                  <strong>{d.getDate()}</strong>
+                </button>
+              );
+            })}
           </div>
         </section>
 

@@ -86,8 +86,8 @@ export const AccountSettingsPage = () => {
                 <li aria-current="page" style={{ color: 'var(--color-on-surface)', fontWeight: 600 }}>Company Settings</li>
               </ol>
             </nav>
-            <h1 style={{ fontFamily: 'var(--font-family-headline-lg)', fontSize: 'var(--font-size-headline-lg)', color: 'var(--color-on-surface)', margin: 0 }}>Company Settings</h1>
-            <p style={{ fontFamily: 'var(--font-family-body-md)', fontSize: 'var(--font-size-body-md)', color: 'var(--color-on-surface-variant)', margin: 'var(--spacing-xs) 0 0 0' }}>
+            <h1 style={{ fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-headline-lg)', color: 'var(--color-on-surface)', margin: 0 }}>Company Settings</h1>
+            <p style={{ fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-body-md)', color: 'var(--color-on-surface-variant)', margin: 'var(--spacing-xs) 0 0 0' }}>
               Manage your organization's core details, localization, and preferences.
             </p>
           </div>
@@ -98,7 +98,7 @@ export const AccountSettingsPage = () => {
               {/* Company Profile Section */}
               <Card padding="lg" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
                 <div style={{ borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: 'var(--spacing-md)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <h2 style={{ fontFamily: 'var(--font-family-headline-md)', fontSize: 'var(--font-size-headline-md)', margin: 0, color: 'var(--color-on-surface)' }}>Company Profile</h2>
+                  <h2 style={{ fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-headline-md)', margin: 0, color: 'var(--color-on-surface)' }}>Company Profile</h2>
                 </div>
                 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
@@ -112,8 +112,8 @@ export const AccountSettingsPage = () => {
                       <ImagePlus color="var(--color-outline-variant)" />
                     </div>
                     <div>
-                      <h3 style={{ fontFamily: 'var(--font-family-label-md)', fontSize: 'var(--font-size-label-md)', margin: '0 0 var(--spacing-xs) 0', color: 'var(--color-on-surface)' }}>Company Logo</h3>
-                      <p style={{ fontFamily: 'var(--font-family-body-md)', fontSize: '13px', margin: '0 0 var(--spacing-sm) 0', color: 'var(--color-on-surface-variant)' }}>Upload a square logo. JPG, PNG, or SVG. Maximum file size 5MB.</p>
+                      <h3 style={{ fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-label-md)', margin: '0 0 var(--spacing-xs) 0', color: 'var(--color-on-surface)' }}>Company Logo</h3>
+                      <p style={{ fontFamily: 'var(--font-family-base)', fontSize: '13px', margin: '0 0 var(--spacing-sm) 0', color: 'var(--color-on-surface-variant)' }}>Upload a square logo. JPG, PNG, or SVG. Maximum file size 5MB.</p>
                       <button style={{ color: 'var(--color-primary)', background: 'none', border: 'none', padding: 0, fontSize: 'var(--font-size-label-sm)', cursor: 'pointer' }}>Upload Image</button>
                     </div>
                   </div>
@@ -143,27 +143,27 @@ export const AccountSettingsPage = () => {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--spacing-lg)' }}>
                 <Card padding="lg">
                   <div style={{ borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: 'var(--spacing-md)', marginBottom: 'var(--spacing-md)' }}>
-                    <h2 style={{ fontFamily: 'var(--font-family-headline-md)', fontSize: 'var(--font-size-headline-md)', margin: 0, color: 'var(--color-on-surface)' }}>Localization</h2>
-                    <p style={{ fontFamily: 'var(--font-family-body-md)', fontSize: '13px', margin: 'var(--spacing-xs) 0 0 0', color: 'var(--color-on-surface-variant)' }}>Regional formats for the organization.</p>
+                    <h2 style={{ fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-headline-md)', margin: 0, color: 'var(--color-on-surface)' }}>Localization</h2>
+                    <p style={{ fontFamily: 'var(--font-family-base)', fontSize: '13px', margin: 'var(--spacing-xs) 0 0 0', color: 'var(--color-on-surface-variant)' }}>Regional formats for the organization.</p>
                   </div>
                   
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)' }}>
-                      <label style={{ fontFamily: 'var(--font-family-label-md)', fontSize: 'var(--font-size-label-md)', color: 'var(--color-on-surface)' }}>Timezone</label>
+                      <label style={{ fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-label-md)', color: 'var(--color-on-surface)' }}>Timezone</label>
                       <select style={{ height: '36px', padding: '0 var(--spacing-sm)', border: '1px solid var(--color-outline-variant)', borderRadius: 'var(--radius-default)', backgroundColor: 'var(--color-surface)', color: 'var(--color-on-surface)', outline: 'none' }}>
                         <option>UTC-08:00 Pacific Time (US & Canada)</option>
                       </select>
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)' }}>
-                      <label style={{ fontFamily: 'var(--font-family-label-md)', fontSize: 'var(--font-size-label-md)', color: 'var(--color-on-surface)' }}>Date Format</label>
+                      <label style={{ fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-label-md)', color: 'var(--color-on-surface)' }}>Date Format</label>
                       <select style={{ height: '36px', padding: '0 var(--spacing-sm)', border: '1px solid var(--color-outline-variant)', borderRadius: 'var(--radius-default)', backgroundColor: 'var(--color-surface)', color: 'var(--color-on-surface)', outline: 'none' }}>
                         <option>MM/DD/YYYY (12/31/2023)</option>
                       </select>
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)' }}>
-                      <label style={{ fontFamily: 'var(--font-family-label-md)', fontSize: 'var(--font-size-label-md)', color: 'var(--color-on-surface)' }}>Base Currency</label>
+                      <label style={{ fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-label-md)', color: 'var(--color-on-surface)' }}>Base Currency</label>
                       <select style={{ height: '36px', padding: '0 var(--spacing-sm)', border: '1px solid var(--color-outline-variant)', borderRadius: 'var(--radius-default)', backgroundColor: 'var(--color-surface)', color: 'var(--color-on-surface)', outline: 'none' }}>
                         <option>USD - US Dollar ($)</option>
                       </select>
@@ -175,11 +175,11 @@ export const AccountSettingsPage = () => {
                 <Card padding="lg">
                   <div style={{ borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: 'var(--spacing-md)', marginBottom: 'var(--spacing-md)', display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
                     <Globe color="var(--color-on-surface-variant)" />
-                    <h2 style={{ fontFamily: 'var(--font-family-headline-md)', fontSize: 'var(--font-size-headline-md)', margin: 0, color: 'var(--color-on-surface)' }}>Language</h2>
+                    <h2 style={{ fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-headline-md)', margin: 0, color: 'var(--color-on-surface)' }}>Language</h2>
                   </div>
                   
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)' }}>
-                    <label style={{ fontFamily: 'var(--font-family-label-md)', fontSize: 'var(--font-size-label-md)', color: 'var(--color-on-surface)' }}>Default System Language</label>
+                    <label style={{ fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-label-md)', color: 'var(--color-on-surface)' }}>Default System Language</label>
                     <select style={{ height: '36px', padding: '0 var(--spacing-sm)', border: '1px solid var(--color-outline-variant)', borderRadius: 'var(--radius-default)', backgroundColor: 'var(--color-surface)', color: 'var(--color-on-surface)', outline: 'none' }}>
                       <option>English (US)</option>
                     </select>
@@ -188,8 +188,8 @@ export const AccountSettingsPage = () => {
 
                 <Card padding="lg">
                   <div style={{ borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: 'var(--spacing-md)', marginBottom: 'var(--spacing-md)' }}>
-                    <h2 style={{ fontFamily: 'var(--font-family-headline-md)', fontSize: 'var(--font-size-headline-md)', margin: 0, color: 'var(--color-on-surface)' }}>Quotations</h2>
-                    <p style={{ fontFamily: 'var(--font-family-body-md)', fontSize: '13px', margin: 'var(--spacing-xs) 0 0 0', color: 'var(--color-on-surface-variant)' }}>Manage quotation workflow settings.</p>
+                    <h2 style={{ fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-headline-md)', margin: 0, color: 'var(--color-on-surface)' }}>Quotations</h2>
+                    <p style={{ fontFamily: 'var(--font-family-base)', fontSize: '13px', margin: 'var(--spacing-xs) 0 0 0', color: 'var(--color-on-surface-variant)' }}>Manage quotation workflow settings.</p>
                   </div>
                   
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)' }}>
@@ -201,7 +201,7 @@ export const AccountSettingsPage = () => {
                         disabled={loading || roleName !== 'Business Owner'}
                         style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary)' }}
                       />
-                      <span style={{ fontFamily: 'var(--font-family-label-md)', fontSize: 'var(--font-size-label-md)', color: 'var(--color-on-surface)' }}>Require Approval for Quotations</span>
+                      <span style={{ fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-label-md)', color: 'var(--color-on-surface)' }}>Require Approval for Quotations</span>
                     </label>
                     <p style={{ fontSize: '12px', color: 'var(--color-outline)', margin: 'var(--spacing-xs) 0 0 26px' }}>If enabled, Staff quotations must be approved by a Business Owner before sending.</p>
                   </div>
