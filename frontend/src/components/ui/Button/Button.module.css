@@ -3,20 +3,49 @@
   align-items: center;
   justify-content: center;
   gap: var(--spacing-sm);
-  height: 36px;
   padding: 0 var(--spacing-md);
-  
+
   font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
   font-weight: var(--font-weight-label-md);
   line-height: var(--font-line-height-label-md);
   letter-spacing: var(--font-letter-spacing-label-md);
-  
+
   border-radius: var(--radius-default);
   border: none;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   text-decoration: none;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Size variants */
+.size-sm {
+  height: 32px;
+  padding: 0 var(--spacing-sm);
+  font-size: var(--font-size-label-sm);
+}
+
+.size-md {
+  height: 36px;
+}
+
+.size-lg {
+  height: 44px;
+  padding: 0 var(--spacing-lg);
+  font-size: var(--font-size-body-md);
+}
+
+/* Touch targets need to be at least 44px tall on touch-sized viewports */
+@media (max-width: 767px) {
+  .size-sm,
+  .size-md {
+    height: 40px;
+  }
 }
 
 /* Focus State */
@@ -73,4 +102,26 @@
 .ghost:hover {
   background-color: var(--color-surface-container);
   color: var(--color-on-surface);
+}
+
+/* Success Variant - confirming a positive outcome (e.g. Mark Accepted) */
+.success {
+  background-color: var(--color-success);
+  color: var(--color-on-success);
+}
+
+.success:hover {
+  background-color: var(--color-on-success-container);
+}
+
+/* Danger Variant - destructive or negative actions (e.g. Mark Rejected) */
+.danger {
+  background-color: transparent;
+  color: var(--color-error);
+  border: 1px solid var(--color-error);
+}
+
+.danger:hover {
+  background-color: var(--color-error-container);
+  color: var(--color-on-error-container);
 }

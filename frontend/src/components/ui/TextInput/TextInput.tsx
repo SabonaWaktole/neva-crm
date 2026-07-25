@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useId } from 'react';
 import type { InputHTMLAttributes, ReactNode } from 'react';
 import styles from './TextInput.module.css';
 
@@ -9,15 +9,32 @@ export interface TextInputProps extends InputHTMLAttributes<HTMLInputElement> {
   iconLeft?: ReactNode;
   iconRight?: ReactNode;
   onIconRightClick?: () => void;
+  /** Accessible name for the right icon button. Required when it is interactive. */
+  iconRightLabel?: string;
 }
 
 export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
   (
-    { label, helperText, error, iconLeft, iconRight, onIconRightClick, className = '', id, ...props },
+    {
+      label,
+      helperText,
+      error,
+      iconLeft,
+      iconRight,
+      onIconRightClick,
+      iconRightLabel,
+      className = '',
+      id,
+      required,
+      ...props
+    },
     ref
   ) => {
-    // Generate a unique ID if none provided, to link label and input
-    const inputId = id || `input-${Math.random().toString(36).substring(2, 9)}`;
+    // useId is stable across renders, unlike a random id regenerated each time.
+    const generatedId = useId();
+    const inputId = id || generatedId;
+    const messageId = `${inputId}-message`;
+    const message = error || helperText;
 
     const inputClasses = [
       styles.input,
@@ -33,30 +50,41 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
         {label && (
           <label htmlFor={inputId} className={styles.label}>
             {label}
+            {required && (
+              <span className={styles.required} aria-hidden="true">
+                *
+              </span>
+            )}
           </label>
         )}
         <div className={styles.inputWrapper}>
           {iconLeft && (
-            <div className={`${styles.iconWrapper} ${styles.iconLeft}`}>
+            <div className={`${styles.iconWrapper} ${styles.iconLeft}`} aria-hidden="true">
               {iconLeft}
             </div>
           )}
-          
+
           <input
             ref={ref}
             id={inputId}
             className={inputClasses}
+            required={required}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={message ? messageId : undefined}
             {...props}
           />
-          
+
           {iconRight && (
-            <div className={`${styles.iconWrapper} ${styles.iconRight}`}>
+            <div
+              className={`${styles.iconWrapper} ${styles.iconRight}`}
+              aria-hidden={onIconRightClick ? undefined : 'true'}
+            >
               {onIconRightClick ? (
                 <button
                   type="button"
                   className={styles.iconButton}
                   onClick={onIconRightClick}
-                  tabIndex={-1}
+                  aria-label={iconRightLabel}
                 >
                   {iconRight}
                 </button>
@@ -66,10 +94,14 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
             </div>
           )}
         </div>
-        
-        {(error || helperText) && (
-          <p className={`${styles.helperText} ${error ? styles.helperTextError : ''}`}>
-            {error || helperText}
+
+        {message && (
+          <p
+            id={messageId}
+            className={`${styles.helperText} ${error ? styles.helperTextError : ''}`}
+            role={error ? 'alert' : undefined}
+          >
+            {message}
           </p>
         )}
       </div>

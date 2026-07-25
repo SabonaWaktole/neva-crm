@@ -19,7 +19,7 @@ export const StaffScheduleTable: React.FC<StaffScheduleTableProps> = ({ appointm
           <h2>My Schedule</h2>
           <span className={styles.headerDate}>Today</span>
         </div>
-        <Button variant="ghost">View Calendar</Button>
+        <Button variant="ghost" disabled title="Coming soon">View Calendar</Button>
       </div>
 
       <div className={styles.tableWrapper}>
@@ -45,7 +45,7 @@ export const StaffScheduleTable: React.FC<StaffScheduleTableProps> = ({ appointm
                     {new Date(apt.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </td>
                   <td>
-                    <div className={styles.clientName}>{apt.clientId}</div>
+                    <div className={styles.clientName}>{apt.clientName || 'Unknown Client'}</div>
                     <div className={styles.appointmentDetail}>{apt.notes || "Standard"}</div>
                   </td>
                   <td>
@@ -65,7 +65,7 @@ export const StaffScheduleTable: React.FC<StaffScheduleTableProps> = ({ appointm
                     </div>
                   </td>
                   <td className={styles.actionsCell}>
-                    <button className={styles.actionButton}>
+                    <button className={styles.actionButton} disabled title="More options coming soon">
                       <MoreVertical size={16} />
                     </button>
                   </td>
@@ -98,9 +98,9 @@ export const StaffScheduleTable: React.FC<StaffScheduleTableProps> = ({ appointm
               <div className={styles.mobileFooter}>
                 <Badge variant="primary">Standard</Badge>
                 <div className={styles.mobileActions}>
-                  <button className={styles.iconAction}><Phone size={16} /></button>
-                  <button className={styles.iconAction}><MapPin size={16} /></button>
-                  <button className={styles.iconAction}><Check size={16} /></button>
+                  <button className={styles.iconAction} disabled title="Call coming soon" aria-label="Call (coming soon)"><Phone size={16} /></button>
+                  <button className={styles.iconAction} disabled title="Directions coming soon" aria-label="Directions (coming soon)"><MapPin size={16} /></button>
+                  <button className={styles.iconAction} disabled title="Mark complete coming soon" aria-label="Mark complete (coming soon)"><Check size={16} /></button>
                 </div>
               </div>
             </div>

@@ -27,7 +27,7 @@
 }
 
 .headerLeft h2 {
-  font-family: var(--font-family-headline-sm);
+  font-family: var(--font-family-base);
   font-size: 16px;
   font-weight: 600;
   color: var(--color-on-surface);
@@ -65,7 +65,7 @@
 .table th {
   padding: var(--spacing-md) var(--spacing-lg);
   background-color: var(--color-surface-container-low);
-  font-family: var(--font-family-label-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
   font-weight: var(--font-weight-label-md);
   color: var(--color-on-surface-variant);
@@ -87,7 +87,7 @@
 }
 
 .timeCell {
-  font-family: var(--font-family-label-md);
+  font-family: var(--font-family-base);
   font-weight: 600;
   color: var(--color-on-surface);
   white-space: nowrap;
@@ -118,8 +118,8 @@
 }
 
 .dotScheduled { background-color: var(--color-primary); }
-.dotConfirmed { background-color: #10b981; }
-.dotCompleted { background-color: #10b981; }
+.dotConfirmed { background-color: var(--color-success); }
+.dotCompleted { background-color: var(--color-success); }
 .dotCancelled { background-color: var(--color-error); }
 
 .statusText {
@@ -151,6 +151,15 @@
 .actionButton:hover {
   color: var(--color-on-surface);
   background-color: var(--color-surface-container-high);
+}
+
+.actionButton:disabled {
+  cursor: not-allowed;
+}
+
+.actionButton:disabled:hover {
+  color: var(--color-outline);
+  background-color: transparent;
 }
 
 .emptyState {
@@ -214,4 +223,9 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+}
+
+.iconAction:disabled {
+  color: var(--color-outline);
+  cursor: not-allowed;
 }

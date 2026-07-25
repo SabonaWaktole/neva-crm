@@ -245,7 +245,7 @@ export const StockAdjustmentPanel: React.FC<StockAdjustmentPanelProps> = ({
 
             <div className={styles.infoBanner}>
               <InfoIcon size={20} className={styles.infoIcon} />
-              <p>Transfers between international hubs may take up to 48 hours for local database synchronization.</p>
+              <p>Stock levels update immediately once the transfer is confirmed.</p>
             </div>
           </div>
         )}

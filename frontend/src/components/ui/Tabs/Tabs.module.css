@@ -1,0 +1,99 @@
+.tabList {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  border-bottom: 1px solid var(--color-outline-variant);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabList::-webkit-scrollbar {
+  display: none;
+}
+
+.tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: none;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-md);
+  font-weight: 500;
+  line-height: var(--font-line-height-body-md);
+  color: var(--color-on-surface-variant);
+
+  transition: color var(--transition-fast);
+}
+
+/* Underline drawn as a pseudo-element so the tab does not shift on activation. */
+.tab::after {
+  content: '';
+  position: absolute;
+  left: var(--spacing-sm);
+  right: var(--spacing-sm);
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background-color: transparent;
+  transition: background-color var(--transition-fast);
+}
+
+.tab:hover:not(:disabled) {
+  color: var(--color-on-surface);
+}
+
+.tab:hover:not(:disabled)::after {
+  background-color: var(--color-outline-variant);
+}
+
+.tabActive,
+.tabActive:hover:not(:disabled) {
+  color: var(--color-primary);
+}
+
+.tabActive::after,
+.tabActive:hover:not(:disabled)::after {
+  background-color: var(--color-primary);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+  border-radius: var(--radius-default);
+}
+
+.tab:disabled {
+  color: var(--color-outline);
+  cursor: not-allowed;
+}
+
+.tabIcon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface-container);
+  color: var(--color-on-surface-variant);
+  font-size: var(--font-size-label-sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.tabActive .count {
+  background-color: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+}

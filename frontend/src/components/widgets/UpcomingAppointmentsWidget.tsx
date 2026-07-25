@@ -22,10 +22,10 @@ export const UpcomingAppointmentsWidget: React.FC = () => {
   const getStatusToken = (status: string) => {
     switch (status) {
       case 'SCHEDULED': return 'primary';
-      case 'CONFIRMED': return 'emerald';
-      case 'COMPLETED': return 'slate';
+      case 'CONFIRMED': return 'success';
+      case 'COMPLETED': return 'secondary';
       case 'CANCELLED': return 'error';
-      default: return 'amber';
+      default: return 'warning';
     }
   };
 
@@ -75,7 +75,7 @@ export const UpcomingAppointmentsWidget: React.FC = () => {
               <Badge variant={getStatusToken(appointment.status) as any}>
                 {appointment.status}
               </Badge>
-              <button className={styles.moreButton}>
+              <button className={styles.moreButton} disabled title="More options coming soon" aria-label="More options (coming soon)">
                 <MoreVertical size={16} />
               </button>
             </div>

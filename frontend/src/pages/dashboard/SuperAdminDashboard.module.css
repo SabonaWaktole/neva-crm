@@ -35,7 +35,7 @@
 }
 
 .title {
-  font-family: var(--font-family-headline-lg);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-headline-lg);
   font-weight: var(--font-weight-headline-lg);
   color: var(--color-on-surface);
@@ -43,7 +43,7 @@
 }
 
 .subtitle {
-  font-family: var(--font-family-body-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
   color: var(--color-on-surface-variant);
   margin: 0;
@@ -120,7 +120,7 @@
 }
 
 .feedTitle {
-  font-family: var(--font-family-headline-sm);
+  font-family: var(--font-family-base);
   font-size: 16px;
   font-weight: 600;
   color: var(--color-on-surface);
@@ -147,7 +147,7 @@
 }
 
 .latencyVisualizer {
-  background-color: rgba(30, 41, 59, 0.7);
+  background-color: var(--color-surface-container-low);
   border: 1px solid var(--color-outline-variant);
   border-radius: var(--radius-xl);
   padding: var(--spacing-lg);
@@ -186,14 +186,14 @@
 }
 
 .pulseDot {
-  width: 12px;
-  height: 12px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background-color: #10b981;
+  background-color: var(--color-success);
 }
 
 .latencyValue {
-  font-family: var(--font-family-headline-md);
+  font-family: var(--font-family-base);
   font-size: 24px;
   font-weight: 600;
   color: var(--color-on-surface);
@@ -247,8 +247,8 @@
   background-color: var(--color-surface-container-high);
   color: var(--color-on-surface-variant);
   padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-label-md);
   font-weight: 500;
-  border: 1px solid var(--color-outline);
+  border: 1px solid var(--color-outline-variant);
 }

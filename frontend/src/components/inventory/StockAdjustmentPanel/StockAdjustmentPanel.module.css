@@ -59,7 +59,7 @@
 }
 
 .distUnits {
-  font-size: var(--font-size-caption-xs);
+  font-size: var(--font-size-label-sm);
   color: var(--color-on-surface-variant);
   font-weight: normal;
 }
@@ -69,13 +69,13 @@
   background-color: var(--color-surface-container-lowest);
   border: 1px solid var(--color-outline-variant);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-unit);
+  padding: var(--spacing-xs);
 }
 
 .tabButton {
   flex: 1;
   padding: var(--spacing-md);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   border: 1px solid transparent;
   background: none;
   font-family: var(--font-family-base);
@@ -127,14 +127,14 @@
   background-color: var(--color-surface-container-low);
   border: 1px solid var(--color-outline-variant);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-unit);
+  padding: var(--spacing-xs);
   height: 44px; /* match input height */
 }
 
 .typeBtn {
   flex: 1;
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   font-size: var(--font-size-label-md);
   font-weight: bold;
   cursor: pointer;
@@ -200,7 +200,7 @@
 .arrowDivider {
   display: flex;
   justify-content: center;
-  margin: -var(--spacing-lg) 0;
+  margin: calc(-1 * var(--spacing-lg)) 0;
   position: relative;
   z-index: 10;
 }
@@ -237,14 +237,14 @@
   display: flex;
   gap: var(--spacing-md);
   padding: var(--spacing-md);
-  background-color: color-mix(in srgb, var(--color-tertiary-container) 10%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-tertiary) 20%, transparent);
+  background-color: color-mix(in srgb, var(--color-secondary-container) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-secondary) 20%, transparent);
   border-radius: var(--radius-lg);
   align-items: flex-start;
 }
 
 .infoIcon {
-  color: var(--color-tertiary);
+  color: var(--color-secondary);
   flex-shrink: 0;
 }
 
@@ -252,7 +252,7 @@
   margin: 0;
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-sm);
-  color: var(--color-tertiary);
+  color: var(--color-secondary);
   line-height: 1.4;
 }
 

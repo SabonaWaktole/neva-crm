@@ -13,6 +13,7 @@ import { ClientListPage } from '../pages/clients/ClientListPage';
 import { ClientDetailPage } from '../pages/clients/ClientDetailPage';
 import { ClientFormPage } from '../pages/clients/ClientFormPage';
 import { AppointmentsPage } from '../pages/appointments/AppointmentsPage';
+import { EditAppointmentPage } from '../pages/appointments/EditAppointmentPage';
 import { CreateAppointmentPage } from '../pages/appointments/CreateAppointmentPage';
 import { ClientSettingsPage } from '../pages/settings/ClientSettingsPage';
 import { TeamSettingsPage } from '../pages/settings/team/TeamSettingsPage';
@@ -27,6 +28,7 @@ import { QuotationDetail } from '../pages/quotations/QuotationDetail';
 import { CreateQuotation } from '../pages/quotations/CreateQuotation';
 import { EditQuotation } from '../pages/quotations/EditQuotation';
 import { IntegrationsPage } from '../pages/IntegrationsPage';
+import { StatusPage } from '../components/StatusPage/StatusPage';
 import { ProtectedRoute } from './ProtectedRoute';
 import { RoleGuard } from './RoleGuard';
 import { TenantGuard } from './TenantGuard';
@@ -190,6 +192,14 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: 'appointments/:appointmentId/edit',
+        element: (
+          <ProtectedRoute>
+            <EditAppointmentPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: 'settings/client-management',
         element: (
           <ProtectedRoute>
@@ -275,6 +285,10 @@ export const router = createBrowserRouter([
   },
   {
     path: '/unauthorized',
-    element: <div>Unauthorized Access</div>,
+    element: <StatusPage variant="403" />,
+  },
+  {
+    path: '*',
+    element: <StatusPage variant="404" />,
   },
 ]);

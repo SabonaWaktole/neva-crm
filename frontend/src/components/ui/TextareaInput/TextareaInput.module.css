@@ -13,6 +13,11 @@
   letter-spacing: var(--font-letter-spacing-label-md);
 }
 
+.required {
+  margin-left: 2px;
+  color: var(--color-error);
+}
+
 .inputWrapper {
   position: relative;
   display: flex;
@@ -45,6 +50,13 @@
   box-shadow: 0 0 0 2px var(--color-primary-fixed);
 }
 
+.input:disabled {
+  background-color: var(--color-surface-container);
+  color: var(--color-outline);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
 /* Error State */
 .inputError {
   border-color: var(--color-error);
@@ -66,4 +78,10 @@
 
 .helperTextError {
   color: var(--color-error);
+}
+
+@media (max-width: 767px) {
+  .input {
+    font-size: 16px;
+  }
 }

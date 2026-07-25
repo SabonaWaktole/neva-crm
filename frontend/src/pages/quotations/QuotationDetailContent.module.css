@@ -10,19 +10,74 @@
 
 .header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  align-items: flex-start;
+}
+
+@media (min-width: 768px) {
+  .header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+}
+
+.headerTitleRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.loadingState {
+  padding: var(--spacing-xl);
+  text-align: center;
+  color: var(--color-on-surface-variant);
+  font-family: var(--font-family-base);
+}
+
+.lineItemsHeader {
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--color-outline-variant);
 }
 
 .breadcrumb {
-  font-family: var(--font-family-body-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-family-base);
   font-size: var(--font-size-body-sm);
   color: var(--color-on-surface-variant);
   margin-bottom: var(--spacing-xs);
+  transition: color var(--transition-fast);
+}
+
+.breadcrumb:hover {
+  color: var(--color-on-surface);
+}
+
+.breadcrumb:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-default);
+}
+
+.errorBanner {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-error-container);
+  color: var(--color-on-error-container);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-md);
+  font-size: var(--font-size-body-md);
 }
 
 .title {
-  font-family: var(--font-family-headline-lg);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-headline-lg);
   font-weight: 700;
   color: var(--color-on-surface);
@@ -60,20 +115,26 @@
 
 .summaryGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr;
   gap: var(--spacing-md);
   margin-top: var(--spacing-md);
 }
 
+@media (min-width: 640px) {
+  .summaryGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 .summaryLabel {
-  font-family: var(--font-family-label-sm);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-label-sm);
   color: var(--color-on-surface-variant);
   margin-bottom: 4px;
 }
 
 .summaryValue {
-  font-family: var(--font-family-body-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
   color: var(--color-on-surface);
   font-weight: 500;
@@ -89,7 +150,7 @@
 }
 
 .sectionTitle {
-  font-family: var(--font-family-headline-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-headline-md);
   font-weight: 600;
   color: var(--color-on-surface);
@@ -104,7 +165,7 @@
 .table th {
   text-align: left;
   padding: var(--spacing-md) var(--spacing-lg);
-  font-family: var(--font-family-label-sm);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-label-sm);
   color: var(--color-on-surface-variant);
   font-weight: 500;
@@ -116,7 +177,7 @@
   padding: var(--spacing-md) var(--spacing-lg);
   border-bottom: 1px solid var(--color-outline-variant);
   vertical-align: middle;
-  font-family: var(--font-family-body-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
   color: var(--color-on-surface);
 }
@@ -136,7 +197,8 @@
   border: 1px solid var(--color-outline-variant);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
-  width: 320px;
+  width: 100%;
+  max-width: 320px;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
@@ -146,7 +208,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-family: var(--font-family-body-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
   color: var(--color-on-surface-variant);
 }
@@ -155,7 +217,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-family: var(--font-family-headline-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-headline-md);
   font-weight: 700;
   color: var(--color-on-surface);
@@ -191,20 +253,20 @@
 }
 
 .timelineStatus {
-  font-family: var(--font-family-label-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
   font-weight: 600;
   color: var(--color-on-surface);
 }
 
 .timelineDate {
-  font-family: var(--font-family-body-sm);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-body-sm);
   color: var(--color-on-surface-variant);
 }
 
 .timelineUser {
-  font-family: var(--font-family-body-sm);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-body-sm);
   color: var(--color-on-surface-variant);
 }

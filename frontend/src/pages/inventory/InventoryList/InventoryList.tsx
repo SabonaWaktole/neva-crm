@@ -123,20 +123,20 @@ const InventoryListContent: React.FC = () => {
               <option key={cat.category.id} value={cat.category.id}>{cat.category.name}</option>
             ))}
           </SelectInput>
-          <SelectInput className={styles.selectInput} defaultValue="">
+          <SelectInput className={styles.selectInput} defaultValue="" disabled title="Warehouse filtering coming soon">
             <option value="" disabled>All Warehouses</option>
             {warehouses.map(wh => (
               <option key={wh.id} value={wh.id}>{wh.name}</option>
             ))}
           </SelectInput>
-          <SelectInput className={styles.selectInput} defaultValue="">
+          <SelectInput className={styles.selectInput} defaultValue="" disabled title="Status filtering coming soon">
             <option value="" disabled>All Statuses</option>
             <option value="in-stock">In Stock</option>
             <option value="low-stock">Low Stock</option>
             <option value="out-of-stock">Out of Stock</option>
           </SelectInput>
         </div>
-        <Button variant="outline" icon={<Download size={18} />}>
+        <Button variant="outline" icon={<Download size={18} />} disabled title="CSV export coming soon">
           Export CSV
         </Button>
       </div>

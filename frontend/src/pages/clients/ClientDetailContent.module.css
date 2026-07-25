@@ -21,7 +21,7 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
-  font-family: var(--font-family-label-sm);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-label-sm);
   color: var(--color-on-surface-variant);
 }
@@ -72,7 +72,7 @@
 }
 
 .companyInitials {
-  font-family: var(--font-family-headline-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-headline-md);
   color: var(--color-on-primary);
   font-weight: 700;
@@ -91,7 +91,7 @@
 }
 
 .companyName {
-  font-family: var(--font-family-headline-lg);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-headline-lg);
   color: var(--color-on-surface);
   margin: 0;
@@ -99,7 +99,7 @@
 }
 
 .companySubtitle {
-  font-family: var(--font-family-body-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
   color: var(--color-on-surface-variant);
   margin: 0;
@@ -143,7 +143,7 @@
 
 /* Card shared styles */
 .cardTitle {
-  font-family: var(--font-family-headline-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-headline-md);
   color: var(--color-on-surface);
   margin: 0 0 var(--spacing-md) 0;
@@ -178,7 +178,7 @@
 }
 
 .contactName {
-  font-family: var(--font-family-label-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
   color: var(--color-on-surface);
   margin: 0;
@@ -186,7 +186,7 @@
 }
 
 .contactTitle {
-  font-family: var(--font-family-body-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-body-sm);
   color: var(--color-on-surface-variant);
   margin: 0;
@@ -202,7 +202,7 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  font-family: var(--font-family-body-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-body-sm);
   color: var(--color-primary);
   text-decoration: none;
@@ -237,6 +237,16 @@
   color: var(--color-on-surface);
 }
 
+.settingsButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.settingsButton:disabled:hover {
+  background-color: transparent;
+  color: var(--color-on-surface-variant);
+}
+
 .fieldsList {
   display: flex;
   flex-direction: column;
@@ -255,13 +265,13 @@
 }
 
 .fieldLabel {
-  font-family: var(--font-family-label-sm);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-label-sm);
   color: var(--color-on-surface-variant);
 }
 
 .fieldValue {
-  font-family: var(--font-family-body-md);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-body-sm);
   color: var(--color-on-surface);
   font-weight: 500;
@@ -306,4 +316,87 @@
   flex-direction: column;
   gap: var(--spacing-md);
   padding-left: var(--spacing-xs);
+}
+
+/* Tabs */
+.tabsContainer {
+  margin-bottom: var(--spacing-md);
+}
+
+/* Appointments tab */
+.appointmentList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+.appointmentRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  width: 100%;
+  padding: var(--spacing-md);
+  text-align: left;
+  background-color: var(--color-surface-container-lowest);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-family: var(--font-family-base);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.appointmentRow:hover {
+  background-color: var(--color-surface-container-low);
+  border-color: var(--color-outline);
+}
+
+.appointmentRow:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+.appointmentInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.appointmentDate {
+  font-size: var(--font-size-body-md);
+  font-weight: 600;
+  color: var(--color-on-surface);
+}
+
+.appointmentNotes {
+  font-size: var(--font-size-body-md);
+  color: var(--color-on-surface-variant);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.emptyMessage {
+  padding: var(--spacing-xl);
+  text-align: center;
+  color: var(--color-on-surface-variant);
+}
+
+/* SlideOver content */
+.slideOverForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.slideOverBody {
+  padding: var(--spacing-xs) 0;
+}
+
+.slideOverFooter {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: flex-end;
 }

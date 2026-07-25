@@ -1,6 +1,7 @@
 import React from 'react';
 import type { ReactNode } from 'react';
 import { Card } from '../../ui/Card/Card';
+import { ThemeToggle } from '../../ui/ThemeToggle';
 import styles from './AuthLayout.module.css';
 
 export interface AuthLayoutProps {
@@ -20,6 +21,9 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
 }) => {
   return (
     <div className={styles.container}>
+      <div className={styles.themeToggleSlot}>
+        <ThemeToggle />
+      </div>
       <Card padding="xl" className={styles.mainCard}>
         <header className={styles.header}>
           {(logoSrc || logoIcon) && (

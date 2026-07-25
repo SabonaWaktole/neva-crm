@@ -12,6 +12,8 @@ import {
 import { Button } from '../../components/ui/Button/Button';
 import { TextInput } from '../../components/ui/TextInput/TextInput';
 import { DropdownMenu } from '../../components/ui/DropdownMenu/DropdownMenu';
+import { Badge } from '../../components/ui/Badge/Badge';
+import type { BadgeProps } from '../../components/ui/Badge/Badge';
 import styles from './QuotationListContent.module.css';
 
 import { useQuotations, usePendingApprovals } from '../../hooks/useQuotations';
@@ -65,15 +67,15 @@ export const QuotationListContent: React.FC = () => {
     loadData();
   }, [fetchQuotations, fetchPendingApprovals, debouncedSearchTerm, activeTab]);
 
-  const getStatusBadgeStyle = (status: string) => {
+  const getStatusBadgeVariant = (status: string): BadgeProps['variant'] => {
     switch (status) {
-      case 'DRAFT': return { bg: 'bg-outline-variant/10', text: 'text-on-surface-variant', border: 'border-outline-variant/20' };
-      case 'PENDING_APPROVAL': return { bg: 'bg-tertiary-container/10', text: 'text-tertiary-container', border: 'border-tertiary-container/20' };
-      case 'SENT': return { bg: 'bg-primary/10', text: 'text-primary', border: 'border-primary/20' };
-      case 'ACCEPTED': return { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20' };
-      case 'REJECTED': return { bg: 'bg-error/10', text: 'text-error', border: 'border-error/20' };
-      case 'EXPIRED': return { bg: 'bg-surface-bright', text: 'text-on-surface-variant', border: 'border-outline-variant' };
-      default: return { bg: 'bg-outline-variant/10', text: 'text-on-surface-variant', border: 'border-outline-variant/20' };
+      case 'DRAFT': return 'secondary';
+      case 'PENDING_APPROVAL': return 'warning';
+      case 'SENT': return 'primary';
+      case 'ACCEPTED': return 'success';
+      case 'REJECTED': return 'error';
+      case 'EXPIRED': return 'secondary';
+      default: return 'secondary';
     }
   };
 
@@ -183,11 +185,10 @@ export const QuotationListContent: React.FC = () => {
               <tbody>
                 {isLoading && <tr><td colSpan={6} style={{textAlign:'center', padding:'20px'}}>Loading...</td></tr>}
                 {!isLoading && quotations.map((quotation) => {
-                  const style = getStatusBadgeStyle(quotation.status);
                   return (
                     <tr key={quotation.id}>
                       <td>
-                        <span className="font-body-md text-on-surface" style={{ cursor: 'pointer' }} onClick={() => navigate(`/${tenantSlug}/quotations/${quotation.id}`)}>
+                        <span className={styles.quoteIdLink} onClick={() => navigate(`/${tenantSlug}/quotations/${quotation.id}`)}>
                           {quotation.id.split('-')[0].toUpperCase()}
                         </span>
                       </td>
@@ -195,19 +196,19 @@ export const QuotationListContent: React.FC = () => {
                         <span className={styles.clientName}>{quotation.clientName || 'Unknown Client'}</span>
                       </td>
                       <td>
-                        <span className="font-body-md text-on-surface-variant">
+                        <span className={styles.mutedText}>
                           {new Date(quotation.createdAt).toLocaleDateString()}
                         </span>
                       </td>
                       <td>
-                        <span className="font-body-md font-semibold text-on-surface">
+                        <span className={styles.amountText}>
                           ${quotation.grandTotal?.toLocaleString() || '0.00'}
                         </span>
                       </td>
                       <td>
-                        <span className={`px-sm py-1 rounded-full text-[11px] font-bold uppercase tracking-widest border ${style.bg} ${style.text} ${style.border}`}>
+                        <Badge variant={getStatusBadgeVariant(quotation.status)}>
                           {getStatusLabel(quotation.status)}
-                        </span>
+                        </Badge>
                       </td>
                       <td className={styles.tdAction}>
                         <DropdownMenu

@@ -63,14 +63,16 @@ export const ReportsPage: React.FC = () => {
       sidebar={sidebarElement}
     >
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <header style={{ 
-          backgroundColor: 'var(--color-surface)', 
-          borderBottom: '1px solid var(--color-outline-variant)', 
-          padding: 'var(--spacing-lg) var(--spacing-xl)', 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          flexShrink: 0 
+        <header style={{
+          backgroundColor: 'var(--color-surface)',
+          borderBottom: '1px solid var(--color-outline-variant)',
+          padding: 'var(--spacing-md) var(--spacing-lg)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 'var(--spacing-sm)',
+          flexShrink: 0
         }}>
           <h1 style={{ margin: 0, fontSize: 'var(--font-size-headline-sm)', color: 'var(--color-on-surface)' }}>Reports & Analytics</h1>
           <div style={{ display: 'flex', gap: 'var(--spacing-md)' }}>
@@ -81,7 +83,7 @@ export const ReportsPage: React.FC = () => {
                 border: '1px solid var(--color-outline)',
                 color: 'var(--color-on-surface)',
                 padding: 'var(--spacing-xs) var(--spacing-sm)',
-                borderRadius: 'var(--radius-sm)',
+                borderRadius: 'var(--radius-default)',
                 cursor: 'pointer'
               }}
             >
@@ -90,18 +92,18 @@ export const ReportsPage: React.FC = () => {
           </div>
         </header>
 
-        <main style={{ flex: 1, overflowY: 'auto', padding: 'var(--spacing-xl)' }}>
+        <main style={{ flex: 1, overflowY: 'auto', padding: 'var(--spacing-md)' }}>
           {error && (
-            <div style={{ backgroundColor: 'var(--color-error-container)', color: 'var(--color-on-error-container)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', marginBottom: 'var(--spacing-lg)' }}>
+            <div style={{ backgroundColor: 'var(--color-error-container)', color: 'var(--color-on-error-container)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-lg)', marginBottom: 'var(--spacing-lg)' }}>
               {error}
             </div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 'var(--spacing-xl)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(400px, 100%), 1fr))', gap: 'var(--spacing-xl)' }}>
             
             {/* Revenue Chart */}
-            <div style={{ backgroundColor: 'var(--color-surface)', padding: 'var(--spacing-lg)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-outline-variant)' }}>
-              <h2 style={{ fontSize: 'var(--font-size-title-md)', color: 'var(--color-on-surface)', marginBottom: 'var(--spacing-lg)', marginTop: 0 }}>Monthly Revenue</h2>
+            <div style={{ backgroundColor: 'var(--color-surface)', padding: 'var(--spacing-lg)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--elevation-1)', border: '1px solid var(--color-outline-variant)' }}>
+              <h2 style={{ fontSize: 'var(--font-size-headline-md)', color: 'var(--color-on-surface)', marginBottom: 'var(--spacing-lg)', marginTop: 0 }}>Monthly Revenue</h2>
               <div style={{ height: '320px' }}>
                 {revenue.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
@@ -121,8 +123,8 @@ export const ReportsPage: React.FC = () => {
             </div>
 
             {/* Client Status Chart */}
-            <div style={{ backgroundColor: 'var(--color-surface)', padding: 'var(--spacing-lg)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-outline-variant)' }}>
-              <h2 style={{ fontSize: 'var(--font-size-title-md)', color: 'var(--color-on-surface)', marginBottom: 'var(--spacing-lg)', marginTop: 0 }}>Client Distribution</h2>
+            <div style={{ backgroundColor: 'var(--color-surface)', padding: 'var(--spacing-lg)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--elevation-1)', border: '1px solid var(--color-outline-variant)' }}>
+              <h2 style={{ fontSize: 'var(--font-size-headline-md)', color: 'var(--color-on-surface)', marginBottom: 'var(--spacing-lg)', marginTop: 0 }}>Client Distribution</h2>
               <div style={{ height: '320px' }}>
                 {clients.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
@@ -154,8 +156,8 @@ export const ReportsPage: React.FC = () => {
             </div>
 
             {/* Inventory Chart */}
-            <div style={{ gridColumn: '1 / -1', backgroundColor: 'var(--color-surface)', padding: 'var(--spacing-lg)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-outline-variant)' }}>
-              <h2 style={{ fontSize: 'var(--font-size-title-md)', color: 'var(--color-on-surface)', marginBottom: 'var(--spacing-lg)', marginTop: 0 }}>Inventory Value by Warehouse</h2>
+            <div style={{ gridColumn: '1 / -1', backgroundColor: 'var(--color-surface)', padding: 'var(--spacing-lg)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--elevation-1)', border: '1px solid var(--color-outline-variant)' }}>
+              <h2 style={{ fontSize: 'var(--font-size-headline-md)', color: 'var(--color-on-surface)', marginBottom: 'var(--spacing-lg)', marginTop: 0 }}>Inventory Value by Warehouse</h2>
               <div style={{ height: '320px' }}>
                 {inventory.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">

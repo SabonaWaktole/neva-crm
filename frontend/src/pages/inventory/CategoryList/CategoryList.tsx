@@ -125,7 +125,7 @@ const CategoryListContent: React.FC = () => {
           </div>
           {isBusinessOwner && (
             <div style={{ display: 'flex', gap: 'var(--spacing-md)', alignItems: 'center' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', color: 'var(--text-secondary)' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', color: 'var(--color-on-surface-variant)' }}>
                 <input type="checkbox" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />
                 Show Archived
               </label>
@@ -211,18 +211,13 @@ const CategoryListContent: React.FC = () => {
                       <button className={`${styles.actionBtn} ${styles.actionBtnDanger}`} title="Delete" onClick={() => handleOpenDelete(cat)}>
                         <Trash2 size={18} />
                       </button>
-                      <button className={styles.actionBtn}><MoreVertical size={18} /></button>
+                      <button className={styles.actionBtn} disabled title="More options coming soon">
+                        <MoreVertical size={18} />
+                      </button>
                     </div>
                   )}
                 </div>
               ))}
-            </div>
-
-            <div className={styles.listFooter}>
-              <button className={styles.loadMoreBtn}>
-                <Plus size={18} />
-                Load 12 more categories
-              </button>
             </div>
           </div>
 

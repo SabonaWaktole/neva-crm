@@ -11,6 +11,11 @@ export const appointmentService = {
     return response.data;
   },
 
+  updateAppointment: async (tenantSlug: string, appointmentId: string, data: { clientId?: string; assignedUserId?: string; scheduledAt?: string; notes?: string }) => {
+    const response = await apiClient.put<Appointment>(`/${tenantSlug}/appointments/${appointmentId}`, data);
+    return response.data;
+  },
+
   rescheduleAppointment: async (tenantSlug: string, appointmentId: string, data: { newDate: string; reason: string }) => {
     const response = await apiClient.put<Appointment>(`/${tenantSlug}/appointments/${appointmentId}/reschedule`, data);
     return response.data;

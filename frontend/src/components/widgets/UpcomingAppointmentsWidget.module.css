@@ -24,14 +24,15 @@
   height: 32px;
   background-color: var(--color-primary-container);
   color: var(--color-on-primary-container);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .title {
-  font-family: var(--font-family-headline-sm);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-headline-sm);
   font-weight: 600;
   color: var(--color-on-surface);
@@ -53,14 +54,14 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--spacing-md);
-  background-color: var(--color-surface-container);
+  background-color: var(--color-surface-container-lowest);
   border: 1px solid var(--color-outline-variant);
   border-radius: var(--radius-lg);
-  transition: background-color 0.2s, border-color 0.2s;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .appointmentRow:hover {
-  background-color: var(--color-surface-container-high);
+  background-color: var(--color-surface-container-low);
   border-color: var(--color-outline);
 }
 
@@ -131,6 +132,15 @@
 .moreButton:hover {
   color: var(--color-on-surface);
   background-color: var(--color-surface-container-highest);
+}
+
+.moreButton:disabled {
+  cursor: not-allowed;
+}
+
+.moreButton:disabled:hover {
+  color: var(--color-outline);
+  background-color: transparent;
 }
 
 /* Responsive */

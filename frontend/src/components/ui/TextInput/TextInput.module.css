@@ -13,6 +13,11 @@
   letter-spacing: var(--font-letter-spacing-label-md);
 }
 
+.required {
+  margin-left: 2px;
+  color: var(--color-error);
+}
+
 .inputWrapper {
   position: relative;
   display: flex;
@@ -41,6 +46,13 @@
 .input:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 2px var(--color-primary-fixed);
+}
+
+.input:disabled {
+  background-color: var(--color-surface-container);
+  color: var(--color-outline);
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 /* Error State */
@@ -111,4 +123,19 @@
 
 .iconButton:hover {
   color: var(--color-on-surface);
+}
+
+.iconButton:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-default);
+  color: var(--color-on-surface);
+}
+
+/* Bump height/font-size on touch viewports: 16px prevents iOS Safari auto-zoom on focus */
+@media (max-width: 767px) {
+  .input {
+    height: 44px;
+    font-size: 16px;
+  }
 }

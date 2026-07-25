@@ -8,11 +8,14 @@ export interface DropdownMenuItemType {
   icon?: ReactNode;
   onClick: () => void;
   danger?: boolean;
+  disabled?: boolean;
+  title?: string;
 }
 
 export interface DropdownMenuProps {
   trigger: ReactNode;
   items: DropdownMenuItemType[];
+  header?: ReactNode;
   align?: 'left' | 'right';
   className?: string;
 }
@@ -20,6 +23,7 @@ export interface DropdownMenuProps {
 export const DropdownMenu: React.FC<DropdownMenuProps> = ({
   trigger,
   items,
+  header,
   align = 'right',
   className = '',
 }) => {
@@ -48,6 +52,7 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
   const handleToggle = () => setIsOpen((prev) => !prev);
 
   const handleItemClick = (item: DropdownMenuItemType) => {
+    if (item.disabled) return;
     item.onClick();
     setIsOpen(false);
   };
@@ -64,14 +69,18 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
       </div>
       {isOpen && (
         <div className={dropdownClasses}>
+          {header && <div className={styles.header}>{header}</div>}
           {items.map((item) => (
             <button
               key={item.id}
               className={[
                 styles.item,
-                item.danger ? styles.itemDanger : ''
+                item.danger ? styles.itemDanger : '',
+                item.disabled ? styles.itemDisabled : ''
               ].filter(Boolean).join(' ')}
               onClick={() => handleItemClick(item)}
+              disabled={item.disabled}
+              title={item.title}
             >
               {item.icon && <span className={styles.itemIcon}>{item.icon}</span>}
               <span>{item.label}</span>

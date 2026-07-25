@@ -172,11 +172,10 @@ const ProductFormContent: React.FC = () => {
       <footer className={styles.footer}>
         <div className={styles.footerLeft}>
           <Info size={16} className={styles.infoIcon} />
-          <span className={styles.infoText}>System auto-saves changes every 30 seconds.</span>
+          <span className={styles.infoText}>Nothing is saved until you commit this product.</span>
         </div>
         <div className={styles.footerRight}>
-          <Button variant="ghost" type="button" onClick={() => navigate(-1)}>Discard Draft</Button>
-          <Button variant="outline" type="button" onClick={() => navigate(-1)}>Save & Close</Button>
+          <Button variant="ghost" type="button" onClick={() => navigate(-1)}>Discard</Button>
           <Button variant="primary" type="button" onClick={handleCommit} disabled={isPending}>
             {isPending ? 'Committing...' : 'Commit Product'}
           </Button>

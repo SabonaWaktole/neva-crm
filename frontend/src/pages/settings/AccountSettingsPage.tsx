@@ -11,6 +11,7 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { useLogout } from '../../hooks/useLogout';
 import { useTenantSettings } from '../../hooks/useTenantSettings';
 import { useEffect, useState } from 'react';
+import styles from './AccountSettingsPage.module.css';
 
 const mockNavItems: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
@@ -28,13 +29,18 @@ export const AccountSettingsPage = () => {
   const { user } = useAuthStore();
   const { logout } = useLogout();
   const { fetchSettings, updateSettings, loading } = useTenantSettings();
-  
+
   const [requiresQuotationApproval, setRequiresQuotationApproval] = useState(true);
 
-  useEffect(() => {
+  const loadSettings = () => {
     fetchSettings().then((settings) => {
       setRequiresQuotationApproval(settings.requiresQuotationApproval);
     }).catch(console.error);
+  };
+
+  useEffect(() => {
+    loadSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchSettings]);
 
   const handleLogout = async () => {
@@ -65,157 +71,156 @@ export const AccountSettingsPage = () => {
       onSettingsClick={() => navigate(`/${tenantSlug}/settings/profile`)}
       userAvatarSrc="https://lh3.googleusercontent.com/aida-public/AB6AXuCUVO_U904UXtp4jWW0TlbxmzPuBGIREJnS7rJvUtLWgv77vYvS4vxvhNtsn7uCPM4v19ncCYsTNjqR9gmBTthGZKxWksFTi3WHzwUACJE3fdYz43ve1_UcjRrGN0DsSAnzWy8bcm_ue3gBSicCHOQXi3nTG59avgqC7yDJvl_xzAPCtNRbIGrfduLtU3kRkzKkv4b6G4JpGzlfYerk5A74tOh2EEID2ccvMJyWClcbv_w3W2yL1Gy2hiSvmpCVC63iIga-3SmPV8Nj"
       sidebar={
-        <Sidebar 
-          orgName={tenantSlug || 'Workspace'} 
-          orgTier={roleName} 
-          navItems={mockNavItems} 
+        <Sidebar
+          orgName={tenantSlug || 'Workspace'}
+          orgTier={roleName}
+          navItems={mockNavItems}
           onLogoutClick={handleLogout}
           onNavItemClick={handleNavClick}
         />
       }
     >
       <SettingsLayout activeNavId="company">
-        <div style={{ maxWidth: '1024px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
-          
+        <div className={styles.container}>
           {/* Page Header */}
-          <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-            <nav aria-label="Breadcrumb" style={{ display: 'flex', alignItems: 'center', color: 'var(--color-on-surface-variant)', fontSize: 'var(--font-size-label-sm)', marginBottom: 'var(--spacing-xs)' }}>
-              <ol style={{ display: 'flex', alignItems: 'center', listStyle: 'none', padding: 0, margin: 0, gap: '8px' }}>
-                <li><a href="#settings" style={{ color: 'inherit', textDecoration: 'none' }}>Settings</a></li>
+          <div className={styles.headerBlock}>
+            <nav aria-label="Breadcrumb" className={styles.breadcrumb}>
+              <ol className={styles.breadcrumbList}>
+                <li><a href="#settings" className={styles.breadcrumbLink}>Settings</a></li>
                 <li><ChevronRight size={14} /></li>
-                <li aria-current="page" style={{ color: 'var(--color-on-surface)', fontWeight: 600 }}>Company Settings</li>
+                <li aria-current="page" className={styles.breadcrumbCurrent}>Company Settings</li>
               </ol>
             </nav>
-            <h1 style={{ fontFamily: 'var(--font-family-headline-lg)', fontSize: 'var(--font-size-headline-lg)', color: 'var(--color-on-surface)', margin: 0 }}>Company Settings</h1>
-            <p style={{ fontFamily: 'var(--font-family-body-md)', fontSize: 'var(--font-size-body-md)', color: 'var(--color-on-surface-variant)', margin: 'var(--spacing-xs) 0 0 0' }}>
+            <h1 className={styles.title}>Company Settings</h1>
+            <p className={styles.subtitle}>
               Manage your organization's core details, localization, and preferences.
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--spacing-lg)' }}>
-            {/* Left Column (Main Settings) */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)', gridColumn: '1 / -1' }}>
-              {/* Company Profile Section */}
-              <Card padding="lg" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
-                <div style={{ borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: 'var(--spacing-md)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <h2 style={{ fontFamily: 'var(--font-family-headline-md)', fontSize: 'var(--font-size-headline-md)', margin: 0, color: 'var(--color-on-surface)' }}>Company Profile</h2>
+          <div className={styles.sectionsColumn}>
+            {/* Company Profile Section — not yet backed by the API, shown disabled */}
+            <Card padding="lg" className={`${styles.card} ${styles.disabledSection}`}>
+              <div className={styles.cardHeader}>
+                <h2 className={styles.cardTitle}>Company Profile</h2>
+                <span className={styles.comingSoonBadge}>Coming soon</span>
+              </div>
+
+              <div className={styles.logoRow}>
+                <div className={styles.logoBox}>
+                  <ImagePlus color="var(--color-outline-variant)" />
                 </div>
-                
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
-                  {/* Logo Upload */}
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--spacing-lg)' }}>
-                    <div style={{ 
-                      width: '80px', height: '80px', backgroundColor: 'var(--color-surface-container)', 
-                      border: '1px dashed var(--color-outline-variant)', borderRadius: 'var(--radius-lg)', 
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' 
-                    }}>
-                      <ImagePlus color="var(--color-outline-variant)" />
-                    </div>
-                    <div>
-                      <h3 style={{ fontFamily: 'var(--font-family-label-md)', fontSize: 'var(--font-size-label-md)', margin: '0 0 var(--spacing-xs) 0', color: 'var(--color-on-surface)' }}>Company Logo</h3>
-                      <p style={{ fontFamily: 'var(--font-family-body-md)', fontSize: '13px', margin: '0 0 var(--spacing-sm) 0', color: 'var(--color-on-surface-variant)' }}>Upload a square logo. JPG, PNG, or SVG. Maximum file size 5MB.</p>
-                      <button style={{ color: 'var(--color-primary)', background: 'none', border: 'none', padding: 0, fontSize: 'var(--font-size-label-sm)', cursor: 'pointer' }}>Upload Image</button>
-                    </div>
-                  </div>
+                <div>
+                  <h3 className={styles.logoInfoTitle}>Company Logo</h3>
+                  <p className={styles.logoInfoText}>Upload a square logo. JPG, PNG, or SVG. Maximum file size 5MB.</p>
+                  <button className={styles.linkButton} disabled>Upload Image</button>
+                </div>
+              </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)' }}>
-                    <TextInput label="Company Name *" defaultValue="Corporate Modern Inc." />
-                    <TextInput label="Registration Number" placeholder="e.g. 12345678" />
-                  </div>
+              <div className={styles.twoColGrid}>
+                <TextInput label="Company Name *" placeholder="Your company name" disabled />
+                <TextInput label="Registration Number" placeholder="e.g. 12345678" disabled />
+              </div>
 
+              <div>
+                <TextInput label="Registered Address" placeholder="Street address" disabled />
+                <div className={styles.addressRow}>
+                  <TextInput placeholder="City" disabled />
+                  <TextInput placeholder="State/Region" disabled />
+                  <TextInput placeholder="Postal Code" disabled />
+                </div>
+              </div>
+
+              <div className={styles.twoColGrid}>
+                <TextInput label="Primary Contact Email *" type="email" placeholder="billing@yourcompany.com" disabled />
+                <TextInput label="Contact Phone" type="tel" placeholder="+1 (555) 000-0000" disabled />
+              </div>
+            </Card>
+
+            <div className={styles.localizationGrid}>
+              {/* Localization — not yet backed by the API, shown disabled */}
+              <Card padding="lg" className={styles.disabledSection}>
+                <div className={styles.cardHeader}>
                   <div>
-                    <TextInput label="Registered Address" placeholder="Street address" style={{ marginBottom: 'var(--spacing-sm)' }} />
-                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 'var(--spacing-md)' }}>
-                      <TextInput placeholder="City" />
-                      <TextInput placeholder="State/Region" />
-                      <TextInput placeholder="Postal Code" />
-                    </div>
+                    <h2 className={styles.cardTitle}>Localization</h2>
+                    <p className={styles.cardSubtitle}>Regional formats for the organization.</p>
+                  </div>
+                  <span className={styles.comingSoonBadge}>Coming soon</span>
+                </div>
+
+                <div className={styles.sectionsColumn} style={{ marginTop: 'var(--spacing-md)' }}>
+                  <div className={styles.fieldGroup}>
+                    <label className={styles.fieldLabel}>Timezone</label>
+                    <select className={styles.nativeSelect} disabled>
+                      <option>UTC-08:00 Pacific Time (US & Canada)</option>
+                    </select>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)' }}>
-                    <TextInput label="Primary Contact Email *" type="email" defaultValue="billing@corporatemodern.com" />
-                    <TextInput label="Contact Phone" type="tel" placeholder="+1 (555) 000-0000" />
+                  <div className={styles.fieldGroup}>
+                    <label className={styles.fieldLabel}>Date Format</label>
+                    <select className={styles.nativeSelect} disabled>
+                      <option>MM/DD/YYYY (12/31/2023)</option>
+                    </select>
+                  </div>
+
+                  <div className={styles.fieldGroup}>
+                    <label className={styles.fieldLabel}>Base Currency</label>
+                    <select className={styles.nativeSelect} disabled>
+                      <option>USD - US Dollar ($)</option>
+                    </select>
+                    <p className={styles.helperText}>Changing base currency affects all historical reporting.</p>
                   </div>
                 </div>
               </Card>
 
-              {/* Localization Section */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--spacing-lg)' }}>
-                <Card padding="lg">
-                  <div style={{ borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: 'var(--spacing-md)', marginBottom: 'var(--spacing-md)' }}>
-                    <h2 style={{ fontFamily: 'var(--font-family-headline-md)', fontSize: 'var(--font-size-headline-md)', margin: 0, color: 'var(--color-on-surface)' }}>Localization</h2>
-                    <p style={{ fontFamily: 'var(--font-family-body-md)', fontSize: '13px', margin: 'var(--spacing-xs) 0 0 0', color: 'var(--color-on-surface-variant)' }}>Regional formats for the organization.</p>
-                  </div>
-                  
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)' }}>
-                      <label style={{ fontFamily: 'var(--font-family-label-md)', fontSize: 'var(--font-size-label-md)', color: 'var(--color-on-surface)' }}>Timezone</label>
-                      <select style={{ height: '36px', padding: '0 var(--spacing-sm)', border: '1px solid var(--color-outline-variant)', borderRadius: 'var(--radius-default)', backgroundColor: 'var(--color-surface)', color: 'var(--color-on-surface)', outline: 'none' }}>
-                        <option>UTC-08:00 Pacific Time (US & Canada)</option>
-                      </select>
-                    </div>
+              {/* Language — not yet backed by the API, shown disabled */}
+              <Card padding="lg" className={styles.disabledSection}>
+                <div className={styles.cardHeaderWithIcon} style={{ borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: 'var(--spacing-md)', marginBottom: 'var(--spacing-md)' }}>
+                  <Globe color="var(--color-on-surface-variant)" />
+                  <h2 className={styles.cardTitle}>Language</h2>
+                  <span className={styles.comingSoonBadge} style={{ marginLeft: 'auto' }}>Coming soon</span>
+                </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)' }}>
-                      <label style={{ fontFamily: 'var(--font-family-label-md)', fontSize: 'var(--font-size-label-md)', color: 'var(--color-on-surface)' }}>Date Format</label>
-                      <select style={{ height: '36px', padding: '0 var(--spacing-sm)', border: '1px solid var(--color-outline-variant)', borderRadius: 'var(--radius-default)', backgroundColor: 'var(--color-surface)', color: 'var(--color-on-surface)', outline: 'none' }}>
-                        <option>MM/DD/YYYY (12/31/2023)</option>
-                      </select>
-                    </div>
+                <div className={styles.fieldGroup}>
+                  <label className={styles.fieldLabel}>Default System Language</label>
+                  <select className={styles.nativeSelect} disabled>
+                    <option>English (US)</option>
+                  </select>
+                </div>
+              </Card>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)' }}>
-                      <label style={{ fontFamily: 'var(--font-family-label-md)', fontSize: 'var(--font-size-label-md)', color: 'var(--color-on-surface)' }}>Base Currency</label>
-                      <select style={{ height: '36px', padding: '0 var(--spacing-sm)', border: '1px solid var(--color-outline-variant)', borderRadius: 'var(--radius-default)', backgroundColor: 'var(--color-surface)', color: 'var(--color-on-surface)', outline: 'none' }}>
-                        <option>USD - US Dollar ($)</option>
-                      </select>
-                      <p style={{ fontSize: '12px', color: 'var(--color-outline)', margin: 'var(--spacing-xs) 0 0 0' }}>Changing base currency affects all historical reporting.</p>
-                    </div>
+              {/* Quotations — the only section actually wired to the backend */}
+              <Card padding="lg">
+                <div className={styles.cardHeader} style={{ borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: 'var(--spacing-md)', marginBottom: 'var(--spacing-md)' }}>
+                  <div>
+                    <h2 className={styles.cardTitle}>Quotations</h2>
+                    <p className={styles.cardSubtitle}>Manage quotation workflow settings.</p>
                   </div>
-                </Card>
+                </div>
 
-                <Card padding="lg">
-                  <div style={{ borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: 'var(--spacing-md)', marginBottom: 'var(--spacing-md)', display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
-                    <Globe color="var(--color-on-surface-variant)" />
-                    <h2 style={{ fontFamily: 'var(--font-family-headline-md)', fontSize: 'var(--font-size-headline-md)', margin: 0, color: 'var(--color-on-surface)' }}>Language</h2>
-                  </div>
-                  
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)' }}>
-                    <label style={{ fontFamily: 'var(--font-family-label-md)', fontSize: 'var(--font-size-label-md)', color: 'var(--color-on-surface)' }}>Default System Language</label>
-                    <select style={{ height: '36px', padding: '0 var(--spacing-sm)', border: '1px solid var(--color-outline-variant)', borderRadius: 'var(--radius-default)', backgroundColor: 'var(--color-surface)', color: 'var(--color-on-surface)', outline: 'none' }}>
-                      <option>English (US)</option>
-                    </select>
-                  </div>
-                </Card>
-
-                <Card padding="lg">
-                  <div style={{ borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: 'var(--spacing-md)', marginBottom: 'var(--spacing-md)' }}>
-                    <h2 style={{ fontFamily: 'var(--font-family-headline-md)', fontSize: 'var(--font-size-headline-md)', margin: 0, color: 'var(--color-on-surface)' }}>Quotations</h2>
-                    <p style={{ fontFamily: 'var(--font-family-body-md)', fontSize: '13px', margin: 'var(--spacing-xs) 0 0 0', color: 'var(--color-on-surface-variant)' }}>Manage quotation workflow settings.</p>
-                  </div>
-                  
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)', cursor: 'pointer' }}>
-                      <input 
-                        type="checkbox" 
-                        checked={requiresQuotationApproval}
-                        onChange={(e) => setRequiresQuotationApproval(e.target.checked)}
-                        disabled={loading || roleName !== 'Business Owner'}
-                        style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary)' }}
-                      />
-                      <span style={{ fontFamily: 'var(--font-family-label-md)', fontSize: 'var(--font-size-label-md)', color: 'var(--color-on-surface)' }}>Require Approval for Quotations</span>
-                    </label>
-                    <p style={{ fontSize: '12px', color: 'var(--color-outline)', margin: 'var(--spacing-xs) 0 0 26px' }}>If enabled, Staff quotations must be approved by a Business Owner before sending.</p>
-                  </div>
-                </Card>
-              </div>
+                <div className={styles.fieldGroup}>
+                  <label className={styles.checkboxLabel}>
+                    <input
+                      type="checkbox"
+                      checked={requiresQuotationApproval}
+                      onChange={(e) => setRequiresQuotationApproval(e.target.checked)}
+                      disabled={loading || roleName !== 'Business Owner'}
+                      className={styles.checkbox}
+                    />
+                    <span className={styles.checkboxText}>Require Approval for Quotations</span>
+                  </label>
+                  <p className={styles.helperText} style={{ marginLeft: '26px' }}>
+                    If enabled, Staff quotations must be approved by a Business Owner before sending.
+                  </p>
+                </div>
+              </Card>
             </div>
           </div>
 
           {/* Page Action Footer */}
-          <div style={{ marginTop: 'var(--spacing-xl)', paddingTop: 'var(--spacing-lg)', borderTop: '1px solid var(--color-outline-variant)', display: 'flex', justifyContent: 'flex-end', gap: 'var(--spacing-md)' }}>
-            <Button variant="outline">Discard Changes</Button>
+          <div className={styles.footer}>
+            <Button variant="outline" onClick={loadSettings} disabled={loading}>Discard Changes</Button>
             <Button variant="primary" onClick={handleSave} isLoading={loading}>Save Changes</Button>
           </div>
-
         </div>
       </SettingsLayout>
     </AppLayout>

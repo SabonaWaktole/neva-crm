@@ -1,4 +1,6 @@
 import { getUserFirstName } from '../../utils/userUtils';
+import { motion } from 'framer-motion';
+import { listContainerVariants, listItemVariants } from '../../lib/motion';
 import styles from './BusinessOwnerDashboard.module.css'; import {    Users,    CalendarCheck,    Clock,    Package,    Plus,   History } from 'lucide-react'; import { Button } from '../../components/ui/Button/Button'; import { KPICard } from '../../components/ui/KPICard'; import { UpcomingAppointmentsWidget } from '../../components/widgets/UpcomingAppointmentsWidget'; import { TimelineItem } from '../../components/ui/TimelineItem'; import { getActivityConfig } from '../../utils/activityMapper'; import { useNavigate, useParams } from 'react-router-dom'; import { useDashboardMetrics, useActivityFeed } from '../../hooks/useDashboard'; import { useAuthStore } from '../../store/useAuthStore';
 
 export const BusinessOwnerDashboard = () => {
@@ -35,20 +37,25 @@ export const BusinessOwnerDashboard = () => {
       </header>
 
       {/* KPI Bento Grid */}
-      <section className={styles.kpiGrid}>
-        <div className={styles.kpiItem}>
+      <motion.section
+        className={styles.kpiGrid}
+        variants={listContainerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div className={styles.kpiItem} variants={listItemVariants}>
           <KPICard
-            title="TOTAL CLIENTS"
+            title="Total clients"
             value={isLoadingMetrics ? '...' : (metrics?.totalClients || 0)}
             icon={<Users size={24} />}
             trendValue={isLoadingMetrics ? '...' : growthPct}
             trendLabel="vs last week"
             trendDirection={isGrowthUp ? 'up' : 'down'}
           />
-        </div>
-        <div className={styles.kpiItem}>
+        </motion.div>
+        <motion.div className={styles.kpiItem} variants={listItemVariants}>
           <KPICard
-            title="APPOINTMENTS"
+            title="Appointments"
             value="8"
             icon={<CalendarCheck size={24} />}
             iconColor="var(--color-secondary)"
@@ -57,27 +64,27 @@ export const BusinessOwnerDashboard = () => {
             trendLabel="from yesterday"
             trendDirection="up"
           />
-        </div>
+        </motion.div>
         {/* Expensive placeholers: opacity-60, ---, coming soon tag */}
-        <div className={`${styles.kpiItem} ${styles.mobileHidden}`}>
+        <motion.div className={`${styles.kpiItem} ${styles.mobileHidden}`} variants={listItemVariants}>
           <KPICard
-            title="OPEN QUOTATIONS"
+            title="Open quotations"
             value="---"
             icon={<Clock size={24} />}
             isPlaceholder={true}
             placeholderText="Coming in Phase 5"
           />
-        </div>
-        <div className={`${styles.kpiItem} ${styles.mobileHidden}`}>
+        </motion.div>
+        <motion.div className={`${styles.kpiItem} ${styles.mobileHidden}`} variants={listItemVariants}>
           <KPICard
-            title="INVENTORY ALERTS"
+            title="Inventory alerts"
             value="---"
             icon={<Package size={24} />}
             isPlaceholder={true}
             placeholderText="Coming in Phase 4"
           />
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
 
       {/* Main Grid Layout */}
       <div className={styles.mainGrid}>

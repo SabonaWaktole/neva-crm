@@ -45,7 +45,7 @@ export const KPICard: React.FC<KPICardProps> = ({
         
         <div className={styles.content}>
           <div className={styles.value}>
-            {isPlaceholder ? '---' : value}
+            {isPlaceholder ? '—' : value}
           </div>
           
           {(trendValue || isPlaceholder) && (

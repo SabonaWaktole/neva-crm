@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 import { User, FileText, Save, Puzzle } from 'lucide-react';
 import { Button } from '../../components/ui/Button/Button';
@@ -10,6 +11,16 @@ import { useCreateClient, useUpdateClient, useClientDetail, useClientSettings } 
 import { ClientStatus } from '../../types/client';
 import styles from './ClientFormContent.module.css';
 
+interface ClientFormValues {
+  name: string;
+  email: string;
+  phone: string;
+  status: string;
+  customFieldValues: Record<string, string>;
+}
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export const ClientFormContent: React.FC = () => {
   const navigate = useNavigate();
   const { tenantSlug, clientId } = useParams();
@@ -20,12 +31,20 @@ export const ClientFormContent: React.FC = () => {
   const { client, fetchClient } = useClientDetail(clientId || '');
   const { customFields, fetchSettings } = useClientSettings();
 
-  // Form state
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [status, setStatus] = useState<string>(ClientStatus.PROSPECT);
-  const [customFieldValues, setCustomFieldValues] = useState<Record<string, string>>({});
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ClientFormValues>({
+    defaultValues: {
+      name: '',
+      email: '',
+      phone: '',
+      status: ClientStatus.PROSPECT,
+      customFieldValues: {},
+    },
+  });
 
   useEffect(() => {
     fetchSettings();
@@ -37,24 +56,24 @@ export const ClientFormContent: React.FC = () => {
   // Populate form when editing
   useEffect(() => {
     if (client && isEdit) {
-      setName(client.name);
-      setEmail(client.contactInfo?.email || '');
-      setPhone(client.contactInfo?.phone || '');
-      setStatus(client.status);
-      setCustomFieldValues(
-        Object.fromEntries(
+      reset({
+        name: client.name,
+        email: client.contactInfo?.email || '',
+        phone: client.contactInfo?.phone || '',
+        status: client.status,
+        customFieldValues: Object.fromEntries(
           Object.entries(client.customFieldValues || {}).map(([k, v]) => [k, String(v)])
-        )
-      );
+        ),
+      });
     }
-  }, [client, isEdit]);
+  }, [client, isEdit, reset]);
 
-  const handleSubmit = async () => {
+  const onSubmit = async (values: ClientFormValues) => {
     const data = {
-      name,
-      contactInfo: { email: email || undefined, phone: phone || undefined },
-      status: status as ClientStatus,
-      customFieldValues,
+      name: values.name,
+      contactInfo: { email: values.email || undefined, phone: values.phone || undefined },
+      status: values.status as ClientStatus,
+      customFieldValues: values.customFieldValues,
     };
 
     try {
@@ -70,15 +89,11 @@ export const ClientFormContent: React.FC = () => {
     }
   };
 
-  const handleCustomFieldChange = (fieldName: string, value: string) => {
-    setCustomFieldValues(prev => ({ ...prev, [fieldName]: value }));
-  };
-
   const error = createError || updateError;
   const isLoading = isCreating || isUpdating;
 
   return (
-    <div className={styles.container}>
+    <form className={styles.container} onSubmit={handleSubmit(onSubmit)}>
       {/* Page Header */}
       <div className={styles.header}>
         <div className={styles.headerText}>
@@ -88,18 +103,16 @@ export const ClientFormContent: React.FC = () => {
           </p>
         </div>
         <div className={styles.actions}>
-          <Button variant="outline" onClick={() => navigate(`/${tenantSlug}/clients`)}>Cancel</Button>
-          <Button variant="primary" icon={<Save size={18} />} onClick={handleSubmit} disabled={isLoading || !name}>
+          <Button variant="outline" type="button" onClick={() => navigate(`/${tenantSlug}/clients`)}>
+            Cancel
+          </Button>
+          <Button variant="primary" type="submit" icon={<Save size={18} />} disabled={isLoading}>
             {isLoading ? 'Saving...' : 'Save Client'}
           </Button>
         </div>
       </div>
 
-      {error && (
-        <div style={{ padding: '12px 16px', background: 'var(--color-error-container, #fdecea)', color: 'var(--color-on-error-container, #b71c1c)', borderRadius: '8px', marginBottom: '16px' }}>
-          {error}
-        </div>
-      )}
+      {error && <div className={styles.errorBanner}>{error}</div>}
 
       <div className={styles.formContainer}>
         {/* Section 1: Basic Information */}
@@ -111,10 +124,29 @@ export const ClientFormContent: React.FC = () => {
             <h2 className={styles.sectionTitle}>Basic Information</h2>
           </div>
           <div className={styles.grid2}>
-            <TextInput label="Client Name" placeholder="e.g. Acme Corp" value={name} onChange={(e) => setName(e.target.value)} />
-            <TextInput label="Email" type="email" placeholder="contact@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
-            <TextInput label="Phone" type="tel" placeholder="(555) 123-4567" value={phone} onChange={(e) => setPhone(e.target.value)} />
-            <SelectInput label="Status" value={status} onChange={(e) => setStatus(e.target.value)}>
+            <TextInput
+              label="Client Name"
+              placeholder="e.g. Acme Corp"
+              error={errors.name?.message}
+              {...register('name', { required: 'Client name is required' })}
+            />
+            <TextInput
+              label="Email"
+              type="email"
+              placeholder="contact@example.com"
+              error={errors.email?.message}
+              {...register('email', {
+                pattern: { value: EMAIL_PATTERN, message: 'Enter a valid email address' },
+              })}
+            />
+            <TextInput
+              label="Phone"
+              type="tel"
+              placeholder="(555) 123-4567"
+              error={errors.phone?.message}
+              {...register('phone')}
+            />
+            <SelectInput label="Status" {...register('status')}>
               <option value={ClientStatus.PROSPECT}>Prospect</option>
               <option value={ClientStatus.ACTIVE}>Active</option>
               <option value={ClientStatus.INACTIVE}>Inactive</option>
@@ -138,8 +170,7 @@ export const ClientFormContent: React.FC = () => {
                   label={field.fieldName}
                   placeholder={`Enter ${field.fieldName}`}
                   type={field.fieldType === 'NUMBER' ? 'number' : 'text'}
-                  value={customFieldValues[field.fieldName] || ''}
-                  onChange={(e) => handleCustomFieldChange(field.fieldName, e.target.value)}
+                  {...register(`customFieldValues.${field.fieldName}`)}
                 />
               ))}
             </div>
@@ -155,14 +186,16 @@ export const ClientFormContent: React.FC = () => {
             <h2 className={styles.sectionTitle}>Internal Notes</h2>
           </div>
           <div className={styles.fullWidth}>
-            <TextareaInput 
-              label="Notes" 
-              placeholder="Add any internal notes about this client here..." 
-              rows={4} 
+            <TextareaInput
+              label="Notes"
+              placeholder="Coming soon: internal notes are not yet saved with the client record."
+              rows={4}
+              disabled
+              helperText="This field isn't wired up to the backend yet, so notes typed here won't be saved."
             />
           </div>
         </Card>
       </div>
-    </div>
+    </form>
   );
 };

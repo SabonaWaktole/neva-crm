@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Download, Edit, CheckCircle, XCircle, Send, ArrowLeft, Archive } from 'lucide-react';
 import { Button } from '../../components/ui/Button/Button';
 import { Card } from '../../components/ui/Card/Card';
+import { Badge } from '../../components/ui/Badge/Badge';
+import type { BadgeProps } from '../../components/ui/Badge/Badge';
 import styles from './QuotationDetailContent.module.css';
 
 import { useQuotations, useQuotationActions } from '../../hooks/useQuotations';
@@ -33,7 +35,7 @@ export const QuotationDetailContent: React.FC = () => {
   }, [id, fetchQuotationDetail]);
 
   if (loading || !data) {
-    return <div className="p-xl text-center">Loading...</div>;
+    return <div className={styles.loadingState}>Loading...</div>;
   }
 
   const { quotation, lineItems, history, permittedActions } = data;
@@ -54,15 +56,15 @@ export const QuotationDetailContent: React.FC = () => {
     }
   };
 
-  const getStatusBadgeStyle = (status: string) => {
+  const getStatusBadgeVariant = (status: string): BadgeProps['variant'] => {
     switch (status) {
-      case 'DRAFT': return { bg: 'bg-outline-variant/10', text: 'text-on-surface-variant', border: 'border-outline-variant/20' };
-      case 'PENDING_APPROVAL': return { bg: 'bg-tertiary-container/10', text: 'text-tertiary-container', border: 'border-tertiary-container/20' };
-      case 'SENT': return { bg: 'bg-primary/10', text: 'text-primary', border: 'border-primary/20' };
-      case 'ACCEPTED': return { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20' };
-      case 'REJECTED': return { bg: 'bg-error/10', text: 'text-error', border: 'border-error/20' };
-      case 'EXPIRED': return { bg: 'bg-surface-bright', text: 'text-on-surface-variant', border: 'border-outline-variant' };
-      default: return { bg: 'bg-outline-variant/10', text: 'text-on-surface-variant', border: 'border-outline-variant/20' };
+      case 'DRAFT': return 'secondary';
+      case 'PENDING_APPROVAL': return 'warning';
+      case 'SENT': return 'primary';
+      case 'ACCEPTED': return 'success';
+      case 'REJECTED': return 'error';
+      case 'EXPIRED': return 'secondary';
+      default: return 'secondary';
     }
   };
 
@@ -73,22 +75,24 @@ export const QuotationDetailContent: React.FC = () => {
     return status.charAt(0) + status.slice(1).toLowerCase();
   };
 
-  const style = getStatusBadgeStyle(quotation.status);
-
   return (
     <div className={styles.container}>
       {/* Header */}
       <div className={styles.header}>
         <div>
-          <div className={styles.breadcrumb} onClick={() => navigate(`/${tenantSlug}/quotations`)} style={{ cursor: 'pointer' }}>
-            <ArrowLeft size={14} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />
+          <button
+            type="button"
+            className={styles.breadcrumb}
+            onClick={() => navigate(`/${tenantSlug}/quotations`)}
+          >
+            <ArrowLeft size={14} />
             CRM &gt; Quotations &gt; {quotation.id.split('-')[0].toUpperCase()}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)' }}>
+          </button>
+          <div className={styles.headerTitleRow}>
             <h1 className={styles.title}>Quotation {quotation.id.split('-')[0].toUpperCase()}</h1>
-            <span className={`px-sm py-1 rounded-full text-[11px] font-bold uppercase tracking-widest border ${style.bg} ${style.text} ${style.border}`}>
+            <Badge variant={getStatusBadgeVariant(quotation.status)}>
               {getStatusLabel(quotation.status)}
-            </span>
+            </Badge>
           </div>
         </div>
         <div className={styles.headerActions}>
@@ -105,10 +109,10 @@ export const QuotationDetailContent: React.FC = () => {
             <Button variant="primary" icon={<CheckCircle size={16} />} onClick={() => handleAction('APPROVE')}>Approve</Button>
           )}
           {permittedActions.includes('MARK_ACCEPTED') && (
-            <Button variant="primary" style={{ backgroundColor: 'var(--color-emerald-600)' }} icon={<CheckCircle size={16} />} onClick={() => handleAction('MARK_ACCEPTED')}>Mark Accepted</Button>
+            <Button variant="success" icon={<CheckCircle size={16} />} onClick={() => handleAction('MARK_ACCEPTED')}>Mark Accepted</Button>
           )}
           {permittedActions.includes('MARK_REJECTED') && (
-            <Button variant="outline" style={{ color: 'var(--color-error)', borderColor: 'var(--color-error)' }} icon={<XCircle size={16} />} onClick={() => handleAction('MARK_REJECTED')}>Mark Rejected</Button>
+            <Button variant="danger" icon={<XCircle size={16} />} onClick={() => handleAction('MARK_REJECTED')}>Mark Rejected</Button>
           )}
           {permittedActions.includes('EXPIRE') && (
             <Button variant="outline" icon={<Archive size={16} />} onClick={() => handleAction('EXPIRE')}>Expire</Button>
@@ -120,7 +124,7 @@ export const QuotationDetailContent: React.FC = () => {
       </div>
       
       {actionError && (
-        <div style={{ padding: '12px 16px', background: 'var(--color-error-container, #fdecea)', color: 'var(--color-on-error-container, #b71c1c)', borderRadius: '8px', marginBottom: '16px' }}>
+        <div className={styles.errorBanner} role="alert">
           {actionError}
         </div>
       )}
@@ -153,34 +157,36 @@ export const QuotationDetailContent: React.FC = () => {
           </Card>
 
           <Card padding="none">
-            <div className="p-lg border-b border-outline-variant">
+            <div className={styles.lineItemsHeader}>
               <h2 className={styles.sectionTitle}>Line Items</h2>
             </div>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th>Quantity</th>
-                  <th>Unit Price</th>
-                  <th style={{ textAlign: 'right' }}>Line Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {lineItems.map((item: any, idx: number) => (
-                  <tr key={idx}>
-                    <td>
-                      <div>{item.productName || item.productId}</div>
-                      <div style={{ fontSize: '12px', color: 'var(--color-on-surface-variant)' }}>Warehouse: {item.warehouseName || item.warehouseId}</div>
-                    </td>
-                    <td>{item.quantity}</td>
-                    <td>${item.unitPrice.toFixed(2)}</td>
-                    <td style={{ textAlign: 'right', fontWeight: 500 }}>
-                      ${(item.quantity * item.unitPrice).toFixed(2)}
-                    </td>
+            <div className="table-scroll">
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th style={{ textAlign: 'right' }}>Line Total</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {lineItems.map((item: any, idx: number) => (
+                    <tr key={idx}>
+                      <td>
+                        <div>{item.productName || item.productId}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--color-on-surface-variant)' }}>Warehouse: {item.warehouseName || item.warehouseId}</div>
+                      </td>
+                      <td>{item.quantity}</td>
+                      <td>${item.unitPrice.toFixed(2)}</td>
+                      <td style={{ textAlign: 'right', fontWeight: 500 }}>
+                        ${(item.quantity * item.unitPrice).toFixed(2)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
             <div className={styles.totalsSection} style={{ padding: 'var(--spacing-lg)' }}>
               <div className={styles.totalsCard}>
                 <div className={styles.totalRow}>

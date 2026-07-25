@@ -109,7 +109,7 @@ export const ClientSettingsContent: React.FC = () => {
                       </td>
                       <td className={styles.td}>{field.isRequired ? 'Yes' : 'No'}</td>
                       <td className={styles.td}>
-                        <button className={styles.actionButton} aria-label="Edit field">
+                        <button className={styles.actionButton} aria-label="Edit field" disabled title="Editing custom fields is coming soon">
                           <Edit2 size={16} />
                         </button>
                       </td>
@@ -150,7 +150,7 @@ export const ClientSettingsContent: React.FC = () => {
                     <tr key={cat.id} className={styles.tr}>
                       <td className={styles.td}>{cat.label}</td>
                       <td className={styles.td}>
-                        <button className={styles.actionButton} aria-label="Edit category">
+                        <button className={styles.actionButton} aria-label="Edit category" disabled title="Editing outcome categories is coming soon">
                           <Edit2 size={16} />
                         </button>
                       </td>

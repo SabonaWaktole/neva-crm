@@ -99,45 +99,10 @@
   }
 }
 
-.tableContainer {
-  overflow-x: auto;
-}
-
+/* The DataTable sits inside .tableCard, so drop its own frame. */
 .table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-}
-
-.table th {
-  padding: var(--spacing-md);
-  font-family: var(--font-family-base);
-  font-size: var(--font-size-label-sm);
-  font-weight: var(--font-weight-label-sm);
-  color: var(--color-on-surface-variant);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--color-outline-variant);
-  background-color: var(--color-surface-container-lowest);
-  white-space: nowrap;
-}
-
-.table td {
-  padding: var(--spacing-md);
-  border-bottom: 1px solid var(--color-outline-variant);
-  vertical-align: middle;
-}
-
-.table tbody tr {
-  transition: background-color 0.2s ease-in-out;
-}
-
-.table tbody tr:hover {
-  background-color: var(--color-surface-container-low);
-}
-
-.table tbody tr:last-child td {
-  border-bottom: none;
+  border: none;
+  border-radius: 0;
 }
 
 .clientCell {
@@ -184,30 +149,28 @@
   color: var(--color-on-surface-variant);
 }
 
-.thAction {
-  width: 48px;
-}
-
-.tdAction {
-  text-align: center;
-}
-
 .actionButton {
   background: transparent;
   border: none;
   cursor: pointer;
   color: var(--color-on-surface-variant);
-  padding: var(--spacing-xs);
-  border-radius: var(--radius-full);
-  display: flex;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-default);
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 
 .actionButton:hover {
-  background-color: var(--color-surface-container-high);
+  background-color: var(--color-surface-container);
   color: var(--color-on-surface);
+}
+
+.actionButton:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
 }
 
 .pagination {

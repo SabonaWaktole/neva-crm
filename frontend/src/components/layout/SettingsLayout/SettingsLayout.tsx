@@ -37,7 +37,7 @@ export const SettingsLayout: React.FC<SettingsLayoutProps> = ({
   
   return (
     <div className={styles.layout}>
-      {/* Left Sidebar for Settings */}
+      {/* Left Sidebar for Settings (tablet and up) */}
       {!isStaff && (
         <aside className={styles.sidebar}>
           <h2 className={styles.title}>Settings</h2>
@@ -63,6 +63,31 @@ export const SettingsLayout: React.FC<SettingsLayoutProps> = ({
             })}
           </nav>
         </aside>
+      )}
+
+      {/* Horizontal scrollable tab bar (mobile only) */}
+      {!isStaff && (
+        <nav className={styles.mobileNav}>
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeNavId === item.id;
+            const itemClasses = [
+              styles.mobileNavItem,
+              isActive ? styles.mobileNavItemActive : ''
+            ].filter(Boolean).join(' ');
+
+            return (
+              <Link
+                key={item.id}
+                to={`/${tenantSlug}/settings${item.id === 'company' ? '' : `/${item.id}`}`}
+                className={itemClasses}
+              >
+                <Icon size={16} />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
       )}
 
       {/* Right Content Area */}

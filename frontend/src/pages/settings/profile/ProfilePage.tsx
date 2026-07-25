@@ -11,6 +11,7 @@ import { Card } from '../../../components/ui/Card/Card';
 import { TextInput } from '../../../components/ui/TextInput/TextInput';
 import { Button } from '../../../components/ui/Button/Button';
 import { ChevronRight } from 'lucide-react';
+import styles from './ProfilePage.module.css';
 
 export const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
@@ -103,80 +104,75 @@ export const ProfilePage: React.FC = () => {
       }
     >
       <SettingsLayout activeNavId="profile">
-        <div style={{ maxWidth: '600px', margin: '0 auto', padding: '32px 16px' }}>
-          <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-            <nav aria-label="Breadcrumb" style={{ display: 'flex', alignItems: 'center', color: 'var(--color-on-surface-variant)', fontSize: 'var(--font-size-label-sm)', marginBottom: 'var(--spacing-xs)' }}>
-              <ol style={{ display: 'flex', alignItems: 'center', listStyle: 'none', padding: 0, margin: 0, gap: '8px' }}>
-                <li><a href="#settings" onClick={(e) => { e.preventDefault(); navigate(`/${tenantSlug}/settings/profile`); }} style={{ color: 'inherit', textDecoration: 'none' }}>Settings</a></li>
+        <div className={styles.container}>
+          <div className={styles.breadcrumbWrapper}>
+            <nav aria-label="Breadcrumb" className={styles.breadcrumb}>
+              <ol className={styles.breadcrumbList}>
+                <li><a href="#settings" onClick={(e) => { e.preventDefault(); navigate(`/${tenantSlug}/settings/profile`); }} className={styles.breadcrumbLink}>Settings</a></li>
                 <li><ChevronRight size={14} /></li>
-                <li aria-current="page" style={{ color: 'var(--color-on-surface)', fontWeight: 600 }}>My Profile</li>
+                <li aria-current="page" className={styles.breadcrumbCurrent}>My Profile</li>
               </ol>
             </nav>
           </div>
-          
-          <h1 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '24px', color: 'var(--color-text)' }}>My Profile</h1>
 
-      
-      <Card padding="lg">
-        {message && (
-          <div style={{ padding: '12px', backgroundColor: 'rgba(34, 197, 94, 0.1)', color: 'var(--color-success)', borderRadius: '4px', marginBottom: '16px', fontSize: '14px' }}>
-            {message}
-          </div>
-        )}
-        {error && (
-          <div style={{ padding: '12px', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--color-danger)', borderRadius: '4px', marginBottom: '16px', fontSize: '14px' }}>
-            {error}
-          </div>
-        )}
+          <h1 className={styles.title}>My Profile</h1>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div style={{ display: 'flex', gap: '16px' }}>
-            <div style={{ flex: 1 }}>
+          <Card padding="lg">
+            {message && (
+              <div className={`${styles.banner} ${styles.successBanner}`}>
+                {message}
+              </div>
+            )}
+            {error && (
+              <div className={`${styles.banner} ${styles.errorBanner}`}>
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className={styles.form}>
+              <div className={styles.nameRow}>
+                <TextInput
+                  label="First Name"
+                  value={firstName}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFirstName(e.target.value)}
+                  placeholder="John"
+                />
+                <TextInput
+                  label="Last Name"
+                  value={lastName}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLastName(e.target.value)}
+                  placeholder="Doe"
+                />
+              </div>
+
               <TextInput
-                label="First Name"
-                value={firstName}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFirstName(e.target.value)}
-                placeholder="John"
+                label="Email Address"
+                type="email"
+                value={email}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                disabled={!isBusinessOwner}
               />
-            </div>
-            <div style={{ flex: 1 }}>
+              {!isBusinessOwner && (
+                <p className={styles.helperText}>
+                  Only Business Owners can change their email address.
+                </p>
+              )}
+
               <TextInput
-                label="Last Name"
-                value={lastName}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLastName(e.target.value)}
-                placeholder="Doe"
+                label="Phone Number"
+                type="tel"
+                value={phone}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhone(e.target.value)}
+                placeholder="+1 234 567 8900"
               />
-            </div>
-          </div>
 
-          <TextInput
-            label="Email Address"
-            type="email"
-            value={email}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-            disabled={!isBusinessOwner}
-          />
-          {!isBusinessOwner && (
-            <p style={{ fontSize: '12px', color: 'var(--color-text-light)', marginTop: '-12px' }}>
-              Only Business Owners can change their email address.
-            </p>
-          )}
-
-          <TextInput
-            label="Phone Number"
-            type="tel"
-            value={phone}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhone(e.target.value)}
-            placeholder="+1 234 567 8900"
-          />
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '12px' }}>
-            <Button type="submit" variant="primary" isLoading={loading}>
-              Save Changes
-            </Button>
-          </div>
-        </form>
-      </Card>
+              <div className={styles.formActions}>
+                <Button type="submit" variant="primary" isLoading={loading}>
+                  Save Changes
+                </Button>
+              </div>
+            </form>
+          </Card>
         </div>
       </SettingsLayout>
     </AppLayout>

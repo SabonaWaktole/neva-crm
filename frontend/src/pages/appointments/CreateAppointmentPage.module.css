@@ -1,42 +1,58 @@
 .pageHeader {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--spacing-xl);
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+@media (min-width: 640px) {
+  .pageHeader {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-xl);
+  }
 }
 
 .pageTitle {
   font-size: 1.75rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--color-on-surface);
 }
 
 .backButton {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-xs);
-  color: var(--text-secondary);
+  color: var(--color-on-surface-variant);
   cursor: pointer;
   background: none;
   border: none;
   font-size: 0.875rem;
   font-weight: 500;
   padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   transition: color 0.2s, background 0.2s;
 }
 
 .backButton:hover {
-  color: var(--text-primary);
-  background: var(--bg-secondary);
+  color: var(--color-on-surface);
+  background: var(--color-surface-container-low);
 }
 
 .formCard {
-  background: var(--bg-primary);
-  border: 1px solid var(--border-primary);
+  background: var(--color-surface-container-lowest);
+  border: 1px solid var(--color-outline-variant);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-xl);
+  padding: var(--spacing-md);
   max-width: 640px;
+}
+
+@media (min-width: 640px) {
+  .formCard {
+    padding: var(--spacing-xl);
+  }
 }
 
 .formGrid {
@@ -59,11 +75,27 @@
 
 .formActions {
   display: flex;
-  justify-content: flex-end;
-  gap: var(--spacing-md);
+  flex-direction: column-reverse;
+  gap: var(--spacing-sm);
   margin-top: var(--spacing-lg);
   padding-top: var(--spacing-lg);
-  border-top: 1px solid var(--border-primary);
+  border-top: 1px solid var(--color-outline-variant);
+}
+
+.formActions > button {
+  width: 100%;
+}
+
+@media (min-width: 480px) {
+  .formActions {
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: var(--spacing-md);
+  }
+
+  .formActions > button {
+    width: auto;
+  }
 }
 
 .errorBanner {
@@ -71,7 +103,7 @@
   border: 1px solid var(--color-error);
   color: var(--color-error);
   padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   font-size: 0.875rem;
 }
 
@@ -80,6 +112,6 @@
   align-items: center;
   justify-content: center;
   padding: var(--spacing-2xl);
-  color: var(--text-secondary);
+  color: var(--color-on-surface-variant);
   font-size: 0.875rem;
 }

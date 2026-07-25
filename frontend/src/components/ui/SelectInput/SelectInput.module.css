@@ -13,6 +13,11 @@
   letter-spacing: var(--font-letter-spacing-label-md);
 }
 
+.required {
+  margin-left: 2px;
+  color: var(--color-error);
+}
+
 .inputWrapper {
   position: relative;
   display: flex;
@@ -104,4 +109,11 @@
 
 .pointerEventsNone {
   pointer-events: none;
+}
+
+@media (max-width: 767px) {
+  .input {
+    height: 44px;
+    font-size: 16px;
+  }
 }

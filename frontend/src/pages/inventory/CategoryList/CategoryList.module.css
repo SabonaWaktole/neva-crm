@@ -1,13 +1,25 @@
 .pageContainer {
-  padding: var(--margin-desktop);
+  padding: var(--spacing-md);
   max-width: 1200px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
 }
 
+@media (min-width: 768px) {
+  .pageContainer {
+    padding: var(--spacing-xl);
+  }
+}
+
 .header {
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--spacing-lg);
+}
+
+@media (min-width: 768px) {
+  .header {
+    margin-bottom: var(--spacing-xl);
+  }
 }
 
 .breadcrumbs {
@@ -26,8 +38,17 @@
 
 .headerTop {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  align-items: flex-start;
+}
+
+@media (min-width: 640px) {
+  .headerTop {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
 }
 
 .pageTitle {
@@ -67,8 +88,14 @@
 
 .grid {
   display: grid;
-  grid-template-columns: 3fr 9fr;
-  gap: var(--spacing-gutter);
+  grid-template-columns: 1fr;
+  gap: var(--spacing-lg);
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: 3fr 9fr;
+  }
 }
 
 /* Sidebar */
@@ -141,7 +168,7 @@
 }
 
 .insightIcon {
-  color: var(--color-tertiary);
+  color: var(--color-secondary);
 }
 
 .insightTitle {
@@ -153,7 +180,7 @@
 
 .insightText {
   font-family: var(--font-family-base);
-  font-size: var(--font-size-caption-xs);
+  font-size: var(--font-size-label-sm);
   color: var(--color-on-surface-variant);
   line-height: 1.5;
   margin: 0;
@@ -169,13 +196,14 @@
   background-color: var(--color-surface-container);
   border: 1px solid var(--color-outline-variant);
   border-radius: var(--radius-xl);
-  overflow: hidden;
+  overflow-x: auto;
 }
 
 .listHeader {
   display: grid;
   grid-template-columns: 6fr 3fr 3fr; /* Adjusted for omitted Tax Logic */
   gap: var(--spacing-md);
+  min-width: 520px;
   padding: var(--spacing-md) var(--spacing-lg);
   background-color: var(--color-surface-container-high);
   border-bottom: 1px solid var(--color-outline-variant);
@@ -200,6 +228,7 @@
   display: grid;
   grid-template-columns: 6fr 3fr 3fr; /* Adjusted */
   gap: var(--spacing-md);
+  min-width: 520px;
   padding: var(--spacing-lg);
   border-bottom: 1px solid var(--color-outline-variant);
   transition: background-color 0.2s;
@@ -224,7 +253,7 @@
 }
 
 .iconPrimary { color: var(--color-primary); }
-.iconTertiary { color: var(--color-tertiary); }
+.iconTertiary { color: var(--color-secondary); }
 .iconSecondary { color: var(--color-secondary); }
 .iconPrimaryFixed { color: var(--color-primary-fixed); }
 
@@ -237,7 +266,7 @@
 
 .catId {
   font-family: var(--font-family-base);
-  font-size: var(--font-size-caption-xs);
+  font-size: var(--font-size-label-sm);
   color: var(--color-on-surface-variant);
 }
 
@@ -257,7 +286,7 @@
 }
 
 .dot-hardware { background-color: var(--color-primary); }
-.dot-description { background-color: var(--color-tertiary); }
+.dot-description { background-color: var(--color-secondary); }
 .dot-manufacturing { background-color: var(--color-secondary); }
 .dot-security { background-color: var(--color-primary-fixed); }
 
@@ -274,40 +303,31 @@
   color: var(--color-primary);
 }
 
+.actionBtn:disabled {
+  color: var(--color-outline);
+  cursor: not-allowed;
+}
+
+.actionBtn:disabled:hover {
+  color: var(--color-outline);
+}
+
 .actionBtnDanger:hover {
   color: var(--color-error);
-}
-
-.listFooter {
-  padding: var(--spacing-md) var(--spacing-lg);
-  background-color: color-mix(in srgb, var(--color-surface-container-low) 50%, transparent);
-  display: flex;
-  justify-content: center;
-}
-
-.loadMoreBtn {
-  background: none;
-  border: none;
-  color: var(--color-primary);
-  font-family: var(--font-family-base);
-  font-size: var(--font-size-label-md);
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  cursor: pointer;
-}
-
-.loadMoreBtn:hover {
-  text-decoration: underline;
 }
 
 /* Secondary Widgets */
 .widgetsGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-gutter);
-  margin-top: var(--spacing-gutter);
+  grid-template-columns: 1fr;
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+}
+
+@media (min-width: 768px) {
+  .widgetsGrid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .widgetCard {
@@ -371,7 +391,7 @@
 
 .progressBarFillTertiary {
   height: 100%;
-  background-color: var(--color-tertiary);
+  background-color: var(--color-secondary);
 }
 
 .widgetTitle {
@@ -407,7 +427,7 @@
 
 .auditSub {
   font-family: var(--font-family-base);
-  font-size: var(--font-size-caption-xs);
+  font-size: var(--font-size-label-sm);
   color: var(--color-on-surface-variant);
 }
 
@@ -416,7 +436,7 @@
   padding: var(--spacing-sm);
   background: none;
   border: 1px solid var(--color-outline-variant);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   color: var(--color-on-surface);
   font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);

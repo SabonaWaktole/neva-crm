@@ -6,6 +6,7 @@ import { InviteMemberModal } from './InviteMemberModal';
 import { EditMemberModal } from './EditMemberModal';
 import { Mail, Shield, Clock, Edit2, Trash2 } from 'lucide-react';
 import { useAuthStore } from '../../../store/useAuthStore';
+import styles from './TeamSettingsContent.module.css';
 
 export const TeamSettingsContent: React.FC = () => {
   const { staff, pendingInvitations, loadingStaff, loadingInvitations, fetchStaff, fetchPendingInvitations, inviteStaff, updateStaffRole, cancelInvitation } = useTeam();
@@ -30,11 +31,11 @@ export const TeamSettingsContent: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div className={styles.container}>
+      <div className={styles.header}>
         <div>
-          <h2 style={{ fontFamily: 'var(--font-family-headline-sm)', fontSize: 'var(--font-size-headline-sm)', color: 'var(--color-on-surface)', margin: 0 }}>Team Members</h2>
-          <p style={{ fontFamily: 'var(--font-family-body-md)', fontSize: 'var(--font-size-body-md)', color: 'var(--color-on-surface-variant)', margin: 'var(--spacing-xs) 0 0 0' }}>
+          <h2 className={styles.headerTitle}>Team Members</h2>
+          <p className={styles.headerSubtitle}>
             Manage your team, their roles, and pending invitations.
           </p>
         </div>
@@ -46,31 +47,31 @@ export const TeamSettingsContent: React.FC = () => {
       </div>
 
       <Card padding="md">
-        <h3 style={{ margin: '0 0 16px 0', fontSize: '18px' }}>Active Members</h3>
+        <h3 className={styles.cardTitle}>Active Members</h3>
         {loadingStaff ? (
-          <p>Loading members...</p>
+          <p className={styles.mutedText}>Loading members...</p>
         ) : staff.length === 0 ? (
-          <p style={{ color: 'var(--color-on-surface-variant)' }}>No active staff members found.</p>
+          <p className={styles.mutedText}>No active staff members found.</p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div className={styles.list}>
             {staff.map((member) => (
-              <div key={member.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', border: '1px solid var(--color-outline-variant)', borderRadius: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--color-primary-container)', color: 'var(--color-on-primary-container)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+              <div key={member.id} className={styles.row}>
+                <div className={styles.rowLeft}>
+                  <div className={styles.avatar}>
                     {member.firstName ? member.firstName[0] : member.email[0].toUpperCase()}
                   </div>
-                  <div>
-                    <div style={{ fontWeight: 600 }}>{member.firstName} {member.lastName}</div>
-                    <div style={{ fontSize: '14px', color: 'var(--color-on-surface-variant)' }}>{member.email}</div>
+                  <div className={styles.memberInfo}>
+                    <div className={styles.memberName}>{member.firstName} {member.lastName}</div>
+                    <div className={styles.memberEmail}>{member.email}</div>
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--color-surface-container-highest)', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 500 }}>
+                <div className={styles.rowRight}>
+                  <div className={styles.roleBadge}>
                     <Shield size={14} />
                     {member.role === 'STAFF' ? 'Sales Rep' : member.role}
                   </div>
                   {isOwner && (
-                    <Button variant="outline" onClick={() => setEditingMember(member)} style={{ padding: '4px 8px' }}>
+                    <Button variant="outline" onClick={() => setEditingMember(member)} className={styles.iconButton}>
                       <Edit2 size={14} />
                     </Button>
                   )}
@@ -83,29 +84,29 @@ export const TeamSettingsContent: React.FC = () => {
 
       {isOwner && (
         <Card padding="md">
-          <h3 style={{ margin: '0 0 16px 0', fontSize: '18px' }}>Pending Invitations</h3>
+          <h3 className={styles.cardTitle}>Pending Invitations</h3>
           {loadingInvitations ? (
-            <p>Loading invitations...</p>
+            <p className={styles.mutedText}>Loading invitations...</p>
           ) : pendingInvitations.length === 0 ? (
-            <p style={{ color: 'var(--color-on-surface-variant)' }}>No pending invitations.</p>
+            <p className={styles.mutedText}>No pending invitations.</p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div className={styles.list}>
               {pendingInvitations.map((inv) => (
-                <div key={inv.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', border: '1px solid var(--color-outline-variant)', borderRadius: '8px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--color-surface-variant)', color: 'var(--color-on-surface-variant)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div key={inv.id} className={styles.row}>
+                  <div className={styles.rowLeft}>
+                    <div className={`${styles.avatar} ${styles.avatarNeutral}`}>
                       <Mail size={20} />
                     </div>
-                    <div>
-                      <div style={{ fontWeight: 600 }}>{inv.email}</div>
-                      <div style={{ fontSize: '12px', color: 'var(--color-on-surface-variant)', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
+                    <div className={styles.memberInfo}>
+                      <div className={styles.memberName}>{inv.email}</div>
+                      <div className={styles.memberExpiry}>
                         <Clock size={12} />
                         Expires {new Date(inv.expiresAt).toLocaleDateString()}
                       </div>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--color-surface-container-highest)', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 500 }}>
+                  <div className={styles.rowRight}>
+                    <div className={styles.roleBadge}>
                       <Shield size={14} />
                       {inv.role === 'STAFF' ? 'Sales Rep' : inv.role}
                     </div>
@@ -113,7 +114,7 @@ export const TeamSettingsContent: React.FC = () => {
                       <Button
                         variant="outline"
                         onClick={() => handleCancelInvitation(inv.id)}
-                        style={{ padding: '4px 8px', color: 'var(--color-error)', borderColor: 'var(--color-error)' }}
+                        className={`${styles.iconButton} ${styles.dangerButton}`}
                         title="Cancel Invitation"
                       >
                         <Trash2 size={14} />
@@ -132,7 +133,7 @@ export const TeamSettingsContent: React.FC = () => {
         onClose={() => setIsInviteModalOpen(false)}
         onInvite={handleInvite}
       />
-      
+
       <EditMemberModal
         member={editingMember}
         onClose={() => setEditingMember(null)}

@@ -51,24 +51,29 @@
   height: 40px;
   background-color: var(--color-primary-container);
   color: var(--color-on-primary-container);
-  border-radius: var(--radius-default);
+  border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .orgInfo {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .orgName {
   font-family: var(--font-family-base);
-  font-size: var(--font-size-headline-md);
-  font-weight: var(--font-weight-headline-md);
-  line-height: var(--font-line-height-headline-md);
-  color: var(--color-primary);
+  font-size: var(--font-size-headline-sm);
+  font-weight: var(--font-weight-headline-sm);
+  line-height: var(--font-line-height-headline-sm);
+  color: var(--color-on-surface);
   margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .orgTier {
@@ -78,6 +83,9 @@
   line-height: var(--font-line-height-label-sm);
   color: var(--color-on-surface-variant);
   margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .actionSection {
@@ -99,21 +107,22 @@
   align-items: center;
   gap: 12px;
   padding: 8px 12px;
+  border-radius: var(--radius-default);
   text-decoration: none;
-  border-left: 2px solid transparent;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.15s ease-out, color 0.15s ease-out;
   color: var(--color-on-surface-variant);
 }
 
 .navItem:hover {
   background-color: var(--color-surface-container-low);
+  color: var(--color-on-surface);
 }
 
-.navItemActive {
-  background-color: var(--color-surface-container-highest);
-  color: var(--color-primary);
-  border-left-color: var(--color-primary);
+.navItemActive,
+.navItemActive:hover {
+  background-color: var(--color-primary-container);
+  color: var(--color-on-primary-container);
 }
 
 .navIcon {
@@ -135,6 +144,7 @@
   gap: 4px;
 }
 
-.logoutItem {
-  color: var(--color-error);
+.logoutItem:hover {
+  background-color: var(--color-error-container);
+  color: var(--color-on-error-container);
 }

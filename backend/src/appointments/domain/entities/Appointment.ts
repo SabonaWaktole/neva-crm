@@ -80,6 +80,15 @@ export class Appointment {
     this.markUpdated();
   }
 
+  updateDetails(props: { clientId?: string; assignedUserId?: string; scheduledAt?: Date; notes?: string }): void {
+    this.assertNotTerminal();
+    if (props.clientId) this._clientId = props.clientId;
+    if (props.assignedUserId) this._assignedUserId = props.assignedUserId;
+    if (props.scheduledAt) this._scheduledAt = props.scheduledAt;
+    if (props.notes !== undefined) this._notes = props.notes;
+    this.markUpdated();
+  }
+
   complete(): void {
     this.assertNotTerminal();
     if (this._status !== AppointmentStatus.CONFIRMED) {
