@@ -1,46 +1,66 @@
+/* ============================================================================
+ * Badge — compact status pills.
+ * Each variant carries a matching translucent ring so the badge stays legible
+ * on both white cards and tinted table rows.
+ * ========================================================================= */
+
 .badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 2px var(--spacing-sm);
-  border-radius: var(--radius-default);
-  
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+
   font-family: var(--font-family-base);
   font-size: var(--font-size-label-sm);
-  font-weight: var(--font-weight-label-sm);
+  font-weight: 600;
   line-height: var(--font-line-height-label-sm);
+  letter-spacing: var(--font-letter-spacing-label-sm);
   white-space: nowrap;
+  transition:
+    background-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.badge > svg {
+  width: 12px;
+  height: 12px;
 }
 
 /* Variants */
 .primary {
   background-color: var(--color-primary-container);
   color: var(--color-on-primary-container);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 18%, transparent);
 }
 
 .secondary {
-  background-color: var(--color-surface-variant);
-  color: var(--color-on-surface-variant);
+  background-color: var(--color-surface-container);
+  color: var(--text-secondary);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
 }
 
 .outline {
   background-color: transparent;
-  color: var(--color-on-surface-variant);
-  border: 1px solid var(--color-outline-variant);
+  color: var(--text-secondary);
+  box-shadow: inset 0 0 0 1px var(--border-subtle);
 }
 
 .error {
   background-color: var(--color-error-container);
   color: var(--color-on-error-container);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-error) 20%, transparent);
 }
 
 .success {
   background-color: var(--color-success-container);
   color: var(--color-on-success-container);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-success) 20%, transparent);
 }
 
 .warning {
   background-color: var(--color-warning-container);
   color: var(--color-on-warning-container);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-warning) 22%, transparent);
 }
-

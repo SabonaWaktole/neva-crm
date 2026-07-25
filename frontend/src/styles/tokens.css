@@ -1,189 +1,416 @@
+/* ============================================================================
+ * Neva CRM — Design Tokens
+ * ----------------------------------------------------------------------------
+ * A single source of truth for colour, type, space, radius, elevation and
+ * motion. Every token name that existed before is preserved so the 60+ CSS
+ * modules that consume them keep working; values are retuned and a richer set
+ * of primitives is layered on top.
+ *
+ * Naming: semantic first (--color-surface-*, --text-*), raw ramps second
+ * (--gray-50 … --gray-950). Prefer the semantic tokens in components so dark
+ * mode is automatic.
+ * ========================================================================= */
+
 :root {
-  /* Colors - Light Theme (calm neutral surface scale + single restrained accent) */
-  --color-primary: #4F46E5;
+  color-scheme: light;
+
+  /* ---------------------------------------------------------------------
+   * Neutral ramp — a slightly cool gray, the way Apple's surfaces read.
+   * ------------------------------------------------------------------ */
+  --gray-0: #ffffff;
+  --gray-25: #fcfcfd;
+  --gray-50: #f7f7f8;
+  --gray-100: #f2f2f4;
+  --gray-150: #ebebee;
+  --gray-200: #e3e3e8;
+  --gray-300: #d3d3da;
+  --gray-400: #b0b0ba;
+  --gray-500: #8a8a94;
+  --gray-600: #6b6b75;
+  --gray-700: #4d4d56;
+  --gray-800: #33333a;
+  --gray-900: #1d1d20;
+  --gray-950: #101012;
+
+  /* ---------------------------------------------------------------------
+   * Accent — a single confident blue, used sparingly.
+   * ------------------------------------------------------------------ */
+  --blue-50: #eff6ff;
+  --blue-100: #dbeafe;
+  --blue-200: #bfdbfe;
+  --blue-400: #60a5fa;
+  --blue-500: #2b7fff;
+  --blue-600: #0071e3;
+  --blue-700: #0059b3;
+  --blue-800: #00408a;
+
+  /* ===================================================================
+   * SEMANTIC — Surfaces
+   * ================================================================ */
+  /* The app canvas sits a touch below pure white so raised cards read as
+     genuinely raised without needing heavy shadows. */
+  --color-background: #f7f7f8;
+  --color-on-background: #1d1d20;
+
+  --color-surface: #ffffff;
+  --color-on-surface: #1d1d20;
+  --color-surface-variant: var(--gray-100);
+  --color-on-surface-variant: #6b6b75;
+
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: var(--gray-50);
+  --color-surface-container: var(--gray-100);
+  --color-surface-container-high: var(--gray-150);
+  --color-surface-container-highest: var(--gray-200);
+
+  /* Text ramp — use these directly for typographic hierarchy. */
+  --text-primary: #1d1d20;
+  --text-secondary: #6b6b75;
+  --text-tertiary: #8a8a94;
+  --text-quaternary: #b0b0ba;
+  --text-on-accent: #ffffff;
+
+  /* ===================================================================
+   * SEMANTIC — Borders
+   * Hairlines are alpha-based so they sit correctly on any surface.
+   * ================================================================ */
+  --color-outline: #b0b0ba;
+  --color-outline-variant: rgba(17, 17, 22, 0.09);
+  --border-hairline: rgba(17, 17, 22, 0.07);
+  --border-subtle: rgba(17, 17, 22, 0.09);
+  --border-strong: rgba(17, 17, 22, 0.16);
+
+  /* ===================================================================
+   * SEMANTIC — Accent / status
+   * ================================================================ */
+  --color-primary: #0071e3;
   --color-on-primary: #ffffff;
-  --color-primary-container: #EEF0FF;
-  --color-on-primary-container: #4338CA;
-  --color-primary-fixed: #EEF0FF;
-  --color-on-primary-fixed: #3730A3;
-  --color-on-primary-fixed-variant: #4338CA;
+  --color-primary-hover: #0077ed;
+  --color-primary-active: #0059b3;
+  --color-primary-container: #eaf3ff;
+  --color-on-primary-container: #0059b3;
+  --color-primary-fixed: #eaf3ff;
+  --color-on-primary-fixed: #00408a;
+  --color-on-primary-fixed-variant: #0059b3;
+  /* Tinted washes for focus rings and soft fills. */
+  --color-primary-a10: rgba(0, 113, 227, 0.1);
+  --color-primary-a20: rgba(0, 113, 227, 0.2);
 
-  --color-secondary: #0891B2;
+  --color-secondary: #6039d0;
   --color-on-secondary: #ffffff;
-  --color-secondary-container: #ECFEFF;
-  --color-on-secondary-container: #0E7490;
-  --color-secondary-fixed: #ECFEFF;
-  --color-on-secondary-fixed: #164E63;
-  --color-on-secondary-fixed-variant: #0E7490;
+  --color-secondary-container: #f1ecff;
+  --color-on-secondary-container: #4c2ca8;
+  --color-secondary-fixed: #f1ecff;
+  --color-on-secondary-fixed: #3a1f85;
+  --color-on-secondary-fixed-variant: #4c2ca8;
 
-  --color-surface: #FAFAFA;
-  --color-on-surface: #18181B;
-  --color-surface-variant: #F4F4F5;
-  --color-on-surface-variant: #71717A;
-  --color-surface-container-lowest: #FFFFFF;
-  --color-surface-container-low: #FAFAFA;
-  --color-surface-container: #F4F4F5;
-  --color-surface-container-high: #E4E4E7;
-  --color-surface-container-highest: #D4D4D8;
-
-  --color-outline: #A1A1AA;
-  --color-outline-variant: #E4E4E7;
-
-  --color-error: #DC2626;
-  --color-on-error: #ffffff;
-  --color-error-container: #FEF2F2;
-  --color-on-error-container: #991B1B;
-
-  --color-success: #16A34A;
+  --color-success: #12864a;
   --color-on-success: #ffffff;
-  --color-success-container: #F0FDF4;
-  --color-on-success-container: #15803D;
+  --color-success-container: #e7f8ee;
+  --color-on-success-container: #0c6338;
 
-  --color-warning: #D97706;
+  --color-warning: #b45309;
   --color-on-warning: #ffffff;
-  --color-warning-container: #FFFBEB;
-  --color-on-warning-container: #B45309;
+  --color-warning-container: #fdf3e3;
+  --color-on-warning-container: #8a3f06;
 
-  --color-background: #FAFAFA;
-  --color-on-background: #18181B;
-  --color-inverse-surface: #27272A;
-  --color-inverse-on-surface: #FAFAFA;
-  --color-inverse-primary: #C7D2FE;
+  --color-error: #d22f2f;
+  --color-on-error: #ffffff;
+  --color-error-container: #fdeded;
+  --color-on-error-container: #a11d1d;
 
-  /* Spacing */
+  --color-inverse-surface: #1d1d20;
+  --color-inverse-on-surface: #f7f7f8;
+  --color-inverse-primary: #9ecbff;
+
+  /* ===================================================================
+   * TYPOGRAPHY
+   * System stack first: renders as SF Pro on Apple hardware, Segoe UI
+   * Variable on Windows 11 — native, crisp, zero network cost.
+   * ================================================================ */
+  --font-family-base:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Inter',
+    'Segoe UI Variable Display', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-family-display: var(--font-family-base);
+  --font-family-mono:
+    ui-monospace, SFMono-Regular, 'SF Mono', 'JetBrains Mono', Menlo, Consolas,
+    'Liberation Mono', monospace;
+  /* Tabular figures — essential for money columns and KPI numbers. */
+  --font-numeric-tabular: 'tnum' 1, 'lnum' 1;
+
+  --font-size-label-sm: 11px;
+  --font-line-height-label-sm: 15px;
+  --font-weight-label-sm: 590;
+  --font-letter-spacing-label-sm: 0.01em;
+
+  --font-size-label-md: 13px;
+  --font-line-height-label-md: 18px;
+  --font-weight-label-md: 510;
+  --font-letter-spacing-label-md: 0;
+
+  --font-size-body-sm: 12px;
+  --font-line-height-body-sm: 17px;
+  --font-weight-body-sm: 400;
+
+  --font-size-body-md: 14px;
+  --font-line-height-body-md: 21px;
+  --font-weight-body-md: 400;
+
+  --font-size-body-lg: 16px;
+  --font-line-height-body-lg: 25px;
+  --font-weight-body-lg: 400;
+
+  --font-size-headline-sm: 15px;
+  --font-line-height-headline-sm: 21px;
+  --font-weight-headline-sm: 600;
+
+  --font-size-headline-md: 19px;
+  --font-line-height-headline-md: 26px;
+  --font-weight-headline-md: 600;
+
+  --font-size-headline-lg-mobile: 24px;
+  --font-line-height-headline-lg-mobile: 30px;
+  --font-weight-headline-lg-mobile: 640;
+  --font-letter-spacing-headline-lg-mobile: -0.018em;
+
+  --font-size-headline-lg: 30px;
+  --font-line-height-headline-lg: 37px;
+  --font-weight-headline-lg: 640;
+  --font-letter-spacing-headline-lg: -0.022em;
+
+  --font-size-display: 44px;
+  --font-line-height-display: 50px;
+  --font-weight-display: 680;
+  --font-letter-spacing-display: -0.03em;
+
+  --font-size-display-xl: 60px;
+  --font-line-height-display-xl: 64px;
+  --font-weight-display-xl: 700;
+  --font-letter-spacing-display-xl: -0.035em;
+
+  /* ===================================================================
+   * SPACING — 4px base grid
+   * ================================================================ */
+  --spacing-2xs: 2px;
   --spacing-xs: 4px;
   --spacing-sm: 8px;
+  --spacing-base: 12px;
   --spacing-md: 16px;
   --spacing-lg: 24px;
   --spacing-xl: 32px;
   --spacing-2xl: 48px;
-  --spacing-sidebar-width: 240px;
-  --spacing-sidebar-collapsed: 64px;
+  --spacing-3xl: 64px;
+  --spacing-4xl: 96px;
 
-  /* Border Radius - premium medium radii, consistent across the system */
-  --radius-default: 0.375rem; /* 6px */
-  --radius-lg: 0.5rem; /* 8px */
-  --radius-xl: 0.75rem; /* 12px */
-  --radius-full: 1rem; /* 16px */
+  --spacing-sidebar-width: 256px;
+  --spacing-sidebar-collapsed: 68px;
+  --header-height: 60px;
+  /* Keeps long-form pages from sprawling on ultrawide displays. */
+  --content-max-width: 1440px;
 
-  /* Typography */
-  --font-family-base: 'Inter', sans-serif;
+  /* ===================================================================
+   * RADIUS
+   * ================================================================ */
+  --radius-sm: 6px;
+  --radius-default: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-2xl: 18px;
+  --radius-3xl: 24px;
+  --radius-full: 999px;
 
-  --font-size-label-sm: 11px;
-  --font-line-height-label-sm: 14px;
-  --font-weight-label-sm: 600;
-  --font-letter-spacing-label-sm: 0.03em;
+  /* ===================================================================
+   * ELEVATION
+   * Layered, low-opacity shadows with a hairline ring — the thing that
+   * separates a premium surface from a Bootstrap box-shadow.
+   * ================================================================ */
+  --shadow-xs: 0 1px 2px rgba(17, 17, 22, 0.04);
+  --shadow-sm:
+    0 1px 2px rgba(17, 17, 22, 0.05),
+    0 1px 3px rgba(17, 17, 22, 0.04);
+  --shadow-md:
+    0 2px 4px rgba(17, 17, 22, 0.04),
+    0 6px 16px rgba(17, 17, 22, 0.07);
+  --shadow-lg:
+    0 4px 8px rgba(17, 17, 22, 0.04),
+    0 16px 32px rgba(17, 17, 22, 0.09);
+  --shadow-xl:
+    0 8px 16px rgba(17, 17, 22, 0.05),
+    0 28px 56px rgba(17, 17, 22, 0.13);
+  --shadow-2xl:
+    0 12px 24px rgba(17, 17, 22, 0.07),
+    0 44px 88px rgba(17, 17, 22, 0.18);
+  /* A tinted lift for accent-coloured buttons. */
+  --shadow-accent: 0 1px 2px rgba(0, 60, 120, 0.24), 0 4px 12px rgba(0, 113, 227, 0.2);
 
-  --font-size-label-md: 12px;
-  --font-line-height-label-md: 16px;
-  --font-weight-label-md: 500;
-  --font-letter-spacing-label-md: 0.02em;
+  /* Back-compat aliases — resting surfaces should use --shadow-xs/sm. */
+  --elevation-1: var(--shadow-xs);
+  --elevation-2: var(--shadow-md);
+  --elevation-3: var(--shadow-xl);
 
-  --font-size-body-sm: 12px;
-  --font-line-height-body-sm: 16px;
-  --font-weight-body-sm: 400;
+  /* ===================================================================
+   * MOTION
+   * Apple's UI curves: mostly-ease-out, never bouncy unless deliberate.
+   * ================================================================ */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-soft: cubic-bezier(0.25, 0.1, 0.25, 1);
 
-  --font-size-body-md: 14px;
-  --font-line-height-body-md: 20px;
-  --font-weight-body-md: 400;
+  --duration-instant: 90ms;
+  --duration-fast: 150ms;
+  --duration-normal: 220ms;
+  --duration-slow: 320ms;
+  --duration-slower: 480ms;
 
-  --font-size-body-lg: 16px;
-  --font-line-height-body-lg: 24px;
-  --font-weight-body-lg: 400;
+  --transition-fast: var(--duration-fast) var(--ease-out);
+  --transition-normal: var(--duration-normal) var(--ease-out);
+  --transition-slow: var(--duration-slow) var(--ease-spring);
+  --transition-bounce: var(--duration-slower) cubic-bezier(0.34, 1.4, 0.64, 1);
 
-  --font-size-headline-sm: 16px;
-  --font-line-height-headline-sm: 22px;
-  --font-weight-headline-sm: 600;
+  /* ===================================================================
+   * GLASS — frosted chrome for headers, sidebars, overlays.
+   * ================================================================ */
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-bg-strong: rgba(255, 255, 255, 0.86);
+  --glass-border: rgba(17, 17, 22, 0.08);
+  --glass-blur: saturate(180%) blur(20px);
 
-  --font-size-headline-md: 18px;
-  --font-line-height-headline-md: 26px;
-  --font-weight-headline-md: 600;
+  /* Scrim behind modals and drawers. */
+  --scrim: rgba(17, 17, 22, 0.32);
 
-  --font-size-headline-lg-mobile: 22px;
-  --font-line-height-headline-lg-mobile: 29px;
-  --font-weight-headline-lg-mobile: 600;
-  --font-letter-spacing-headline-lg-mobile: -0.015em;
+  /* Focus ring — one definition, used everywhere. */
+  --focus-ring: 0 0 0 2px var(--color-surface-container-lowest), 0 0 0 4px var(--color-primary-a20);
+  --focus-ring-tight: 0 0 0 3px var(--color-primary-a20);
 
-  --font-size-headline-lg: 28px;
-  --font-line-height-headline-lg: 36px;
-  --font-weight-headline-lg: 600;
-  --font-letter-spacing-headline-lg: -0.02em;
+  /* Skeleton shimmer base. */
+  --skeleton-base: var(--gray-150);
+  --skeleton-sheen: rgba(255, 255, 255, 0.65);
 
-  --font-size-display: 40px;
-  --font-line-height-display: 48px;
-  --font-weight-display: 700;
-  --font-letter-spacing-display: -0.025em;
+  /* ===================================================================
+   * Z-INDEX — one ladder, no guessing.
+   * ================================================================ */
+  --z-base: 1;
+  --z-sticky: 20;
+  --z-sidebar: 40;
+  --z-header: 50;
+  --z-dropdown: 60;
+  --z-scrim: 70;
+  --z-modal: 80;
+  --z-toast: 90;
+  --z-tooltip: 100;
 
-  /* Elevation - reserved for true overlays (modals/dropdowns/popovers), not resting cards */
-  --elevation-1: 0 1px 2px rgba(24, 24, 27, 0.04);
-  --elevation-2: 0 4px 12px rgba(24, 24, 27, 0.06), 0 1px 3px rgba(24, 24, 27, 0.04);
-  --elevation-3: 0 16px 32px rgba(24, 24, 27, 0.10), 0 4px 12px rgba(24, 24, 27, 0.05);
-
-  /* Transitions */
-  --transition-fast: 0.15s ease-out;
-  --transition-normal: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-bounce: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-
-  /* Glassmorphism */
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.4);
-  --glass-blur: blur(12px);
+  /* -------------------------------------------------------------------
+   * Charts — a fixed categorical order, assigned by slot and never cycled.
+   * These six steps were validated (not eyeballed) for the OKLCH lightness
+   * band, chroma floor, adjacent-pair separation under deuteranopia/
+   * protanopia/tritanopia, the normal-vision floor, and >=3:1 contrast
+   * against BOTH the light and dark chart surfaces — which is why the two
+   * themes share one set. Reordering these slots breaks the CVD guarantee.
+   * ---------------------------------------------------------------- */
+  --chart-1: #0071e3; /* blue    */
+  --chart-2: #0f9aa8; /* teal    */
+  --chart-3: #b45309; /* amber   */
+  --chart-4: #7c3aed; /* purple  */
+  --chart-5: #c2418f; /* magenta */
+  --chart-6: #12864a; /* green   */
+  --chart-grid: rgba(17, 17, 22, 0.07);
+  --chart-axis: #8a8a94;
 }
 
+/* ==========================================================================
+ * DARK — matte black, never pure #000, so shadows and depth still read.
+ * ======================================================================= */
 .dark {
-  --color-background: #101012;
-  --color-on-background: #F4F4F5;
+  color-scheme: dark;
 
-  --color-surface: #101012;
-  --color-on-surface: #F4F4F5;
-  --color-surface-variant: #27272A;
-  --color-on-surface-variant: #A1A1AA;
-  --color-surface-container-lowest: #0A0A0B;
-  --color-surface-container-low: #18181B;
-  --color-surface-container: #1F1F23;
-  --color-surface-container-high: #27272A;
-  --color-surface-container-highest: #313136;
+  --color-background: #0a0a0c;
+  --color-on-background: #f2f2f4;
 
-  --color-outline: #52525B;
-  --color-outline-variant: #27272A;
+  --color-surface: #131316;
+  --color-on-surface: #f2f2f4;
+  --color-surface-variant: #1c1c20;
+  --color-on-surface-variant: #9d9da6;
 
-  --color-primary: #818CF8;
-  --color-on-primary: #1E1B4B;
-  --color-primary-container: #312E81;
-  --color-on-primary-container: #E0E7FF;
-  --color-primary-fixed: #E0E7FF;
-  --color-on-primary-fixed: #1E1B4B;
-  --color-on-primary-fixed-variant: #C7D2FE;
+  --color-surface-container-lowest: #131316;
+  --color-surface-container-low: #17171a;
+  --color-surface-container: #1c1c20;
+  --color-surface-container-high: #232328;
+  --color-surface-container-highest: #2b2b31;
 
-  --color-secondary: #22D3EE;
-  --color-on-secondary: #083344;
-  --color-secondary-container: #164E63;
-  --color-on-secondary-container: #CFFAFE;
+  --text-primary: #f2f2f4;
+  --text-secondary: #9d9da6;
+  --text-tertiary: #7a7a83;
+  --text-quaternary: #5c5c64;
+  --text-on-accent: #ffffff;
 
-  --color-error: #F87171;
-  --color-on-error: #450A0A;
-  --color-error-container: #450A0A;
-  --color-on-error-container: #FECACA;
+  --color-outline: #5c5c64;
+  --color-outline-variant: rgba(255, 255, 255, 0.11);
+  --border-hairline: rgba(255, 255, 255, 0.08);
+  --border-subtle: rgba(255, 255, 255, 0.11);
+  --border-strong: rgba(255, 255, 255, 0.2);
 
-  --color-success: #4ADE80;
-  --color-on-success: #052E16;
-  --color-success-container: #14532D;
-  --color-on-success-container: #BBF7D0;
+  --color-primary: #0a84ff;
+  --color-on-primary: #ffffff;
+  --color-primary-hover: #3d9bff;
+  --color-primary-active: #0071e3;
+  --color-primary-container: #10243d;
+  --color-on-primary-container: #a8d3ff;
+  --color-primary-fixed: #10243d;
+  --color-on-primary-fixed: #cfe6ff;
+  --color-on-primary-fixed-variant: #a8d3ff;
+  --color-primary-a10: rgba(10, 132, 255, 0.14);
+  --color-primary-a20: rgba(10, 132, 255, 0.32);
 
-  --color-warning: #FBBF24;
-  --color-on-warning: #451A03;
-  --color-warning-container: #451A03;
-  --color-on-warning-container: #FDE68A;
+  --color-secondary: #a78bfa;
+  --color-on-secondary: #21103f;
+  --color-secondary-container: #241a45;
+  --color-on-secondary-container: #ddd0ff;
+  --color-secondary-fixed: #241a45;
+  --color-on-secondary-fixed: #ede7ff;
+  --color-on-secondary-fixed-variant: #ddd0ff;
 
-  --color-inverse-surface: #E4E4E7;
-  --color-inverse-on-surface: #18181B;
-  --color-inverse-primary: #4F46E5;
+  --color-success: #30d158;
+  --color-on-success: #04240f;
+  --color-success-container: #0e2c1a;
+  --color-on-success-container: #9ff0b6;
 
-  --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --elevation-2: 0 4px 12px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
-  --elevation-3: 0 16px 32px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  --color-warning: #ff9f0a;
+  --color-on-warning: #2a1802;
+  --color-warning-container: #33230a;
+  --color-on-warning-container: #ffd79a;
 
-  --glass-bg: rgba(16, 16, 18, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.08);
+  --color-error: #ff453a;
+  --color-on-error: #2e0705;
+  --color-error-container: #3a1412;
+  --color-on-error-container: #ffb4ae;
+
+  --color-inverse-surface: #f2f2f4;
+  --color-inverse-on-surface: #1d1d20;
+  --color-inverse-primary: #0071e3;
+
+  /* Dark shadows lean on opacity, not spread — plus a top highlight ring
+     is applied per-component to fake a lit edge. */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.4), 0 6px 16px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.4), 0 16px 32px rgba(0, 0, 0, 0.55);
+  --shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.45), 0 28px 56px rgba(0, 0, 0, 0.6);
+  --shadow-2xl: 0 12px 24px rgba(0, 0, 0, 0.5), 0 44px 88px rgba(0, 0, 0, 0.7);
+  --shadow-accent: 0 1px 2px rgba(0, 0, 0, 0.5), 0 4px 14px rgba(10, 132, 255, 0.35);
+
+  --glass-bg: rgba(19, 19, 22, 0.72);
+  --glass-bg-strong: rgba(19, 19, 22, 0.88);
+  --glass-border: rgba(255, 255, 255, 0.09);
+
+  --scrim: rgba(0, 0, 0, 0.6);
+
+  --skeleton-base: #232328;
+  --skeleton-sheen: rgba(255, 255, 255, 0.07);
+
+  /* Same validated steps as light: they sit inside the dark band (L
+     0.48–0.67) and clear 3:1 against the dark chart surface, so identity
+     stays stable when a user flips themes mid-session. */
+  --chart-grid: rgba(255, 255, 255, 0.08);
+  --chart-axis: #7a7a83;
 }

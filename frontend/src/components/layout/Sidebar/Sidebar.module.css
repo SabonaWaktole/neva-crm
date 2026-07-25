@@ -1,75 +1,115 @@
+/* ============================================================================
+ * Sidebar
+ * Reads as part of the window chrome rather than as page content: it sits on
+ * the app canvas (not white), separated by a single hairline. Nav items use a
+ * soft "pill" selection with an accent rail, the pattern Linear and Notion
+ * both settled on because it survives long label lists without visual noise.
+ * ========================================================================= */
+
 .sidebar {
   position: fixed;
-  left: -240px; /* Hidden off-canvas by default on mobile */
-  top: 64px; /* below header */
-  height: calc(100vh - 64px);
-  z-index: 40;
+  left: calc(var(--spacing-sidebar-width) * -1);
+  top: var(--header-height);
+  height: calc(100vh - var(--header-height));
+  z-index: var(--z-sidebar);
   display: flex;
   flex-direction: column;
-  padding: var(--spacing-md) 0;
-  background-color: var(--color-surface);
-  border-right: 1px solid var(--color-outline-variant);
+  padding: var(--spacing-md) 0 var(--spacing-sm);
+  background-color: var(--color-background);
+  border-right: 1px solid var(--border-hairline);
   width: var(--spacing-sidebar-width);
-  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: left var(--duration-slow) var(--ease-spring);
   flex-shrink: 0;
 }
 
 .sidebarOpen {
   left: 0;
+  box-shadow: var(--shadow-xl);
 }
 
 .backdrop {
   position: fixed;
   inset: 0;
-  top: 64px;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 39;
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
+  top: var(--header-height);
+  background-color: var(--scrim);
+  z-index: calc(var(--z-sidebar) - 1);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  animation: fadeIn var(--duration-fast) var(--ease-out);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* On tablet and up, sidebar is always visible and normal */
 @media (min-width: 768px) {
   .sidebar {
     left: 0;
+    box-shadow: none;
   }
   .backdrop {
     display: none;
   }
 }
 
+/* --------------------------------------------------------------- org card */
+
 .orgSection {
-  padding: 0 var(--spacing-md);
-  margin-bottom: var(--spacing-lg);
+  margin: 0 var(--spacing-base) var(--spacing-base);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  cursor: default;
+  transition: background-color var(--transition-fast);
+}
+
+.orgSection:hover {
+  background-color: var(--color-surface-container);
 }
 
 .orgIcon {
-  width: 40px;
-  height: 40px;
-  background-color: var(--color-primary-container);
-  color: var(--color-on-primary-container);
-  border-radius: var(--radius-lg);
+  width: 34px;
+  height: 34px;
+  /* Accent-tinted gradient tile — the one saturated element in the sidebar. */
+  background-image: linear-gradient(
+    150deg,
+    var(--color-primary),
+    color-mix(in srgb, var(--color-primary) 72%, var(--color-secondary))
+  );
+  color: var(--color-on-primary);
+  border-radius: var(--radius-default);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow:
+    var(--shadow-sm),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.orgIcon > svg {
+  width: 17px;
+  height: 17px;
 }
 
 .orgInfo {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  gap: 1px;
 }
 
 .orgName {
   font-family: var(--font-family-base);
-  font-size: var(--font-size-headline-sm);
-  font-weight: var(--font-weight-headline-sm);
-  line-height: var(--font-line-height-headline-sm);
-  color: var(--color-on-surface);
+  font-size: var(--font-size-label-md);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  color: var(--text-primary);
   margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -79,9 +119,9 @@
 .orgTier {
   font-family: var(--font-family-base);
   font-size: var(--font-size-label-sm);
-  font-weight: var(--font-weight-label-sm);
-  line-height: var(--font-line-height-label-sm);
-  color: var(--color-on-surface-variant);
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--text-tertiary);
   margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -89,62 +129,117 @@
 }
 
 .actionSection {
-  padding: 0 var(--spacing-md);
+  padding: 0 var(--spacing-base);
   margin-bottom: var(--spacing-md);
 }
+
+/* ------------------------------------------------------------------- nav */
 
 .navSection {
   flex: 1;
   overflow-y: auto;
-  padding: 0 var(--spacing-sm);
+  padding: 0 var(--spacing-base);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .navItem {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 12px;
+  gap: 10px;
+  padding: 7px 10px;
   border-radius: var(--radius-default);
   text-decoration: none;
   cursor: pointer;
-  transition: background-color 0.15s ease-out, color 0.15s ease-out;
-  color: var(--color-on-surface-variant);
+  color: var(--text-secondary);
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Accent rail on the leading edge, scaled in from the centre on selection. */
+.navItem::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%) scaleY(0);
+  width: 3px;
+  height: 18px;
+  border-radius: 0 var(--radius-full) var(--radius-full) 0;
+  background-color: var(--color-primary);
+  transition: transform var(--transition-normal);
 }
 
 .navItem:hover {
-  background-color: var(--color-surface-container-low);
-  color: var(--color-on-surface);
+  background-color: var(--color-surface-container);
+  color: var(--text-primary);
+}
+
+.navItem:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
 }
 
 .navItemActive,
 .navItemActive:hover {
-  background-color: var(--color-primary-container);
-  color: var(--color-on-primary-container);
+  background-color: var(--color-surface-container-high);
+  color: var(--text-primary);
+  font-weight: 560;
+}
+
+.navItemActive::before {
+  transform: translateY(-50%) scaleY(1);
 }
 
 .navIcon {
-  font-size: 20px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  stroke-width: 1.75;
+  color: var(--text-tertiary);
+  transition: color var(--transition-fast);
+}
+
+.navItem:hover .navIcon {
+  color: var(--text-secondary);
+}
+
+/* The active item is the only place an icon takes the accent colour. */
+.navItemActive .navIcon {
+  color: var(--color-primary);
+  stroke-width: 2;
 }
 
 .navLabel {
   font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
-  font-weight: var(--font-weight-label-md);
+  font-weight: inherit;
+  letter-spacing: -0.005em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
+/* ---------------------------------------------------------------- bottom */
+
 .bottomSection {
-  padding: 8px var(--spacing-sm) 0 var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-base) 0;
   margin-top: auto;
-  border-top: 1px solid var(--color-outline-variant);
+  border-top: 1px solid var(--border-hairline);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .logoutItem:hover {
   background-color: var(--color-error-container);
   color: var(--color-on-error-container);
+}
+
+.logoutItem:hover .navIcon {
+  color: var(--color-error);
 }

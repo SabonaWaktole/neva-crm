@@ -1,115 +1,169 @@
+/* ============================================================================
+ * KPICard
+ * The number is the hero: large, tightly tracked, tabular. Everything else —
+ * label, icon, trend — is deliberately quiet so a row of KPI cards scans as a
+ * line of figures rather than a row of boxes.
+ * ========================================================================= */
+
 .wrapper {
   height: 100%;
 }
 
 .placeholder {
-  opacity: 0.6;
+  opacity: 0.65;
 }
 
 .card {
+  position: relative;
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: var(--spacing-lg);
   background-color: var(--color-surface-container-lowest);
-  box-shadow: var(--elevation-1);
+  overflow: hidden;
+}
+
+/* A very faint radial bloom behind the icon corner. Adds depth on hover
+   without introducing another colour to the layout. */
+.card::after {
+  content: '';
+  position: absolute;
+  top: -40%;
+  right: -20%;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--color-primary) 8%, transparent) 0%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity var(--transition-slow);
+  pointer-events: none;
+}
+
+.wrapper:hover .card::after {
+  opacity: 1;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: var(--spacing-sm);
   margin-bottom: var(--spacing-md);
 }
 
 .title {
   font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
-  font-weight: 500;
+  font-weight: 520;
   letter-spacing: 0;
-  color: var(--color-on-surface-variant);
+  color: var(--text-secondary);
   margin: 0;
-  padding-right: var(--spacing-md);
+  padding-right: var(--spacing-sm);
 }
 
 .iconWrapper {
-  width: 32px;
-  height: 32px;
+  position: relative;
+  width: 34px;
+  height: 34px;
   border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+  transition: transform var(--transition-normal);
+}
+
+.wrapper:hover .iconWrapper {
+  transform: scale(1.06);
 }
 
 .iconWrapper > * {
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
 }
 
 .content {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: 10px;
 }
 
 .value {
-  font-family: var(--font-family-base);
-  font-size: var(--font-size-headline-lg);
-  font-weight: var(--font-weight-display);
-  letter-spacing: var(--font-letter-spacing-display);
-  color: var(--color-on-surface);
-  line-height: 1.15;
-  font-variant-numeric: tabular-nums;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-display);
+  font-weight: 660;
+  letter-spacing: -0.032em;
+  color: var(--text-primary);
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+@media (max-width: 767px) {
+  .value {
+    font-size: var(--font-size-headline-lg);
+  }
 }
 
 .trendContainer {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
+  flex-wrap: wrap;
 }
 
 .trendBadge {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 6px;
-  border-radius: var(--radius-lg);
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
   font-size: var(--font-size-label-sm);
-  font-weight: var(--font-weight-label-sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .trendUp {
   background-color: var(--color-success-container);
   color: var(--color-on-success-container);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-success) 20%, transparent);
 }
 
 .trendDown {
   background-color: var(--color-error-container);
   color: var(--color-on-error-container);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-error) 20%, transparent);
 }
 
 .trendNeutral {
-  background-color: var(--color-surface-variant);
-  color: var(--color-on-surface-variant);
+  background-color: var(--color-surface-container);
+  color: var(--text-secondary);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
 }
 
 .progressContainer {
   width: 100%;
   background-color: var(--color-surface-container);
-  height: 4px;
+  height: 5px;
   border-radius: var(--radius-full);
   margin-top: var(--spacing-md);
   overflow: hidden;
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
 }
 
 .progressBar {
   height: 100%;
   border-radius: var(--radius-full);
+  /* Animates from empty on mount, and eases between values on update. */
+  transition: width var(--duration-slower) var(--ease-out);
 }
 
 .trendLabel {
-  font-size: var(--font-size-label-sm);
-  color: var(--color-on-surface-variant);
+  font-size: var(--font-size-body-sm);
+  color: var(--text-tertiary);
 }

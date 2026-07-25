@@ -1,0 +1,220 @@
+/* ============================================================================
+ * ReportsPage
+ * Replaces the page's former inline styles. Charts sit on plain white cards
+ * with recessive grids and axes so the data is the only thing with contrast.
+ * ========================================================================= */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  padding-bottom: var(--spacing-lg);
+  flex-shrink: 0;
+}
+
+.headerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-headline-lg);
+  font-weight: var(--font-weight-headline-lg);
+  letter-spacing: var(--font-letter-spacing-headline-lg);
+  line-height: 1.15;
+  color: var(--text-primary);
+}
+
+.subtitle {
+  margin: 0;
+  font-size: var(--font-size-body-md);
+  color: var(--text-secondary);
+}
+
+.main {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: var(--spacing-2xl);
+}
+
+.errorBanner {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background-color: var(--color-error-container);
+  color: var(--color-on-error-container);
+  padding: var(--spacing-base) var(--spacing-md);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-lg);
+  font-size: var(--font-size-body-md);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-error) 20%, transparent);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr));
+  gap: var(--spacing-lg);
+}
+
+.chartCard {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-surface-container-lowest);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-xl);
+  border: none;
+  box-shadow:
+    var(--shadow-xs),
+    inset 0 0 0 1px var(--border-hairline);
+  transition: box-shadow var(--transition-normal);
+}
+
+.chartCard:hover {
+  box-shadow:
+    var(--shadow-md),
+    inset 0 0 0 1px var(--border-subtle);
+}
+
+.chartHeader {
+  margin-bottom: var(--spacing-lg);
+}
+
+.chartTitle {
+  margin: 0 0 2px;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-headline-sm);
+  font-weight: 620;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+}
+
+.chartCaption {
+  margin: 0;
+  font-size: var(--font-size-body-sm);
+  color: var(--text-tertiary);
+}
+
+.chartBody {
+  height: 300px;
+  /* Recharts measures its parent; min-width:0 stops grid blowout. */
+  min-width: 0;
+}
+
+/* Recharts renders axis/legend text as SVG <text>, which does not inherit
+   the cascade the way HTML does — so type is set explicitly here. */
+.chartBody :global(.recharts-cartesian-axis-tick-value),
+.chartBody :global(.recharts-legend-item-text) {
+  font-family: var(--font-family-base);
+  font-size: 12px;
+  fill: var(--text-tertiary) !important;
+}
+
+.chartBody :global(.recharts-cartesian-axis-line),
+.chartBody :global(.recharts-cartesian-axis-tick-line) {
+  stroke: var(--border-subtle);
+}
+
+/* Hovering a bar should not wash the whole plot in grey. */
+.chartBody :global(.recharts-tooltip-cursor) {
+  fill: var(--color-primary-a10);
+}
+
+.emptyChart {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-body-md);
+  border-radius: var(--radius-lg);
+  border: 1px dashed var(--border-subtle);
+}
+
+/* ------------------------------------------------------------- tooltip */
+
+.tooltip {
+  background: var(--glass-bg-strong);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-radius: var(--radius-lg);
+  padding: 10px 12px;
+  box-shadow:
+    var(--shadow-lg),
+    inset 0 0 0 1px var(--border-subtle);
+  font-family: var(--font-family-base);
+  min-width: 140px;
+}
+
+.tooltipLabel {
+  font-size: var(--font-size-label-sm);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 6px;
+}
+
+.tooltipRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-base);
+  font-size: var(--font-size-body-md);
+}
+
+.tooltipName {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+}
+
+/* The swatch carries series identity so the text can stay in ink tokens. */
+.tooltipSwatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.tooltipValue {
+  font-weight: 620;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------- loading state */
+
+.loadingWrap {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.loadingGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr));
+  gap: var(--spacing-lg);
+  width: 100%;
+}
+
+.skeletonCard {
+  height: 380px;
+  border-radius: var(--radius-xl);
+}

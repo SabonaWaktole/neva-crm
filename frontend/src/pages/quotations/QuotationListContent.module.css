@@ -1,3 +1,11 @@
+/* ============================================================================
+ * QuotationListContent
+ * This page hand-rolls its own table rather than using DataTable, so the
+ * header/row/hover treatment here is kept deliberately identical to
+ * DataTable.module.css — a quote list and a client list should not look like
+ * they came from two different products.
+ * ========================================================================= */
+
 .container {
   display: flex;
   flex-direction: column;
@@ -31,16 +39,21 @@
 
 .breadcrumb {
   font-family: var(--font-family-base);
-  font-size: var(--font-size-body-sm);
-  color: var(--color-on-surface-variant);
-  margin-bottom: var(--spacing-xs);
+  font-size: var(--font-size-label-sm);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 5px;
 }
 
 .title {
-  font-family: var(--font-family-base);
+  font-family: var(--font-family-display);
   font-size: var(--font-size-headline-lg);
-  font-weight: 700;
-  color: var(--color-on-surface);
+  font-weight: var(--font-weight-headline-lg);
+  letter-spacing: var(--font-letter-spacing-headline-lg);
+  line-height: 1.15;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -49,20 +62,27 @@
   gap: var(--spacing-sm);
 }
 
+/* ------------------------------------------------------------ table card */
+
 .tableCard {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-outline-variant);
+  background-color: var(--color-surface-container-lowest);
+  border: none;
   border-radius: var(--radius-xl);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  box-shadow:
+    var(--shadow-xs),
+    inset 0 0 0 1px var(--border-hairline);
 }
 
 .tableToolbar {
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-bottom: 1px solid var(--color-outline-variant);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--border-hairline);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--spacing-base);
+  background-color: var(--color-surface-container-low);
 }
 
 @media (min-width: 900px) {
@@ -73,29 +93,67 @@
   }
 }
 
+/* Status filter tabs — same grammar as the Tabs primitive. */
 .tabs {
   display: flex;
-  gap: var(--spacing-md);
+  gap: var(--spacing-base);
   overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .tab {
+  position: relative;
   background: none;
   border: none;
-  padding: var(--spacing-sm) 0;
-  color: var(--color-on-surface-variant);
+  padding: 9px 2px;
+  color: var(--text-secondary);
   font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
-  font-weight: 500;
+  font-weight: 520;
   cursor: pointer;
-  border-bottom: 2px solid transparent;
   white-space: nowrap;
   flex-shrink: 0;
+  transition: color var(--transition-fast);
+}
+
+.tab::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background-color: var(--color-primary);
+  transform: scaleX(0);
+  opacity: 0;
+  transition:
+    transform var(--transition-normal),
+    opacity var(--transition-fast);
+}
+
+.tab:hover {
+  color: var(--text-primary);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+  border-radius: var(--radius-sm);
 }
 
 .tabActive {
-  color: var(--color-primary);
-  border-bottom: 2px solid var(--color-primary);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.tabActive::after {
+  transform: scaleX(1);
+  opacity: 1;
 }
 
 .searchWrapper {
@@ -108,76 +166,113 @@
   }
 }
 
+/* ---------------------------------------------------------------- table */
+
 .tableContainer {
   overflow-x: auto;
 }
 
 .table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-variant-numeric: tabular-nums lining-nums;
 }
 
 .table th {
   text-align: left;
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: 0 var(--spacing-lg);
+  height: 40px;
   font-family: var(--font-family-base);
   font-size: var(--font-size-label-sm);
-  color: var(--color-on-surface-variant);
-  font-weight: 500;
-  border-bottom: 1px solid var(--color-outline-variant);
+  color: var(--text-tertiary);
+  font-weight: 600;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  user-select: none;
+  background-color: var(--color-surface-container-low);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .table td {
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-bottom: 1px solid var(--color-outline-variant);
+  padding: var(--spacing-base) var(--spacing-lg);
+  height: 56px;
+  border-bottom: 1px solid var(--border-hairline);
   vertical-align: middle;
+  transition: background-color var(--duration-instant) var(--ease-out);
 }
 
 .table tr:last-child td {
   border-bottom: none;
 }
 
-.table tr:hover td {
+.table tbody tr:hover td {
   background-color: var(--color-surface-container-low);
+}
+
+/* Accent rail on hover, matching DataTable. */
+.table tbody td:first-child {
+  position: relative;
+}
+
+.table tbody td:first-child::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background-color: var(--color-primary);
+  transform: scaleY(0);
+  transition: transform var(--transition-fast);
+}
+
+.table tbody tr:hover td:first-child::before {
+  transform: scaleY(1);
 }
 
 .clientName {
   font-family: var(--font-family-base);
-  font-size: var(--font-size-label-md);
-  font-weight: 500;
-  color: var(--color-on-surface);
+  font-size: var(--font-size-body-md);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
   display: block;
 }
 
 .quoteIdLink {
-  font-family: var(--font-family-base);
-  font-size: var(--font-size-body-md);
-  color: var(--color-on-surface);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-body-sm);
+  color: var(--text-secondary);
   cursor: pointer;
+  transition: color var(--transition-fast);
 }
 
 .quoteIdLink:hover {
   color: var(--color-primary);
   text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .mutedText {
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
-  color: var(--color-on-surface-variant);
+  color: var(--text-tertiary);
 }
 
 .amountText {
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
-  font-weight: 600;
-  color: var(--color-on-surface);
+  font-weight: 620;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
 }
 
 .clientEmail {
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-sm);
-  color: var(--color-on-surface-variant);
+  color: var(--text-tertiary);
   display: block;
 }
 
@@ -189,24 +284,52 @@
 .actionButton {
   background: none;
   border: none;
-  color: var(--color-on-surface-variant);
+  color: var(--text-tertiary);
   cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    opacity var(--transition-fast);
+}
+
+tr:hover .actionButton,
+.actionButton:focus-visible {
+  opacity: 1;
 }
 
 .actionButton:hover {
   background-color: var(--color-surface-container-high);
-  color: var(--color-on-surface);
+  color: var(--text-primary);
 }
 
+.actionButton:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+@media (hover: none) {
+  .actionButton {
+    opacity: 1;
+  }
+}
+
+/* ------------------------------------------------------------ pagination */
+
 .pagination {
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: var(--spacing-base) var(--spacing-md);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
   align-items: flex-start;
-  border-top: 1px solid var(--color-outline-variant);
+  border-top: 1px solid var(--border-hairline);
+  background-color: var(--color-surface-container-low);
 }
 
 @media (min-width: 640px) {
@@ -220,7 +343,8 @@
 .paginationText {
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-sm);
-  color: var(--color-on-surface-variant);
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
 }
 
 .paginationControls {
@@ -228,32 +352,47 @@
   gap: var(--spacing-sm);
 }
 
+/* ----------------------------------------------------------- empty state */
+
 .emptyState {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 64px 24px;
+  padding: var(--spacing-3xl) var(--spacing-lg);
   text-align: center;
 }
 
 .emptyStateIcon {
-  color: var(--color-on-surface-variant);
-  opacity: 0.5;
-  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  margin-bottom: var(--spacing-base);
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface-container-low);
+  color: var(--text-tertiary);
+  opacity: 1;
+  box-shadow:
+    inset 0 0 0 1px var(--border-hairline),
+    0 0 0 8px color-mix(in srgb, var(--color-surface-container) 45%, transparent);
 }
 
 .emptyStateTitle {
-  font-family: var(--font-family-base);
-  font-size: var(--font-size-headline-sm);
-  color: var(--color-on-surface);
-  margin: 0 0 8px 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-body-lg);
+  font-weight: 620;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+  margin: 0 0 6px 0;
 }
 
 .emptyStateMessage {
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
-  color: var(--color-on-surface-variant);
-  max-width: 400px;
-  margin: 0 0 24px 0;
+  line-height: var(--font-line-height-body-md);
+  color: var(--text-secondary);
+  max-width: 42ch;
+  margin: 0 0 var(--spacing-lg) 0;
 }

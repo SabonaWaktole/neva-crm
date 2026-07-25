@@ -1,4 +1,9 @@
-/* ClientDetailContent.module.css */
+/* ============================================================================
+ * ClientDetailContent — the customer profile.
+ * A 4/8 split: identity and structured facts on the left, activity and
+ * records on the right. Facts use a label/value ledger rather than a form,
+ * because on a detail page they are read far more often than edited.
+ * ========================================================================= */
 
 .container {
   display: flex;
@@ -10,7 +15,8 @@
   width: 100%;
 }
 
-/* Header Area */
+/* ----------------------------------------------------------- header area */
+
 .headerArea {
   display: flex;
   flex-direction: column;
@@ -20,30 +26,31 @@
 .breadcrumbs {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: 6px;
   font-family: var(--font-family-base);
-  font-size: var(--font-size-label-sm);
-  color: var(--color-on-surface-variant);
+  font-size: var(--font-size-body-sm);
+  color: var(--text-tertiary);
 }
 
 .breadcrumbLink {
-  color: var(--color-on-surface-variant);
+  color: var(--text-tertiary);
   cursor: pointer;
   text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast);
 }
 
 .breadcrumbLink:hover {
   color: var(--color-primary);
-  text-decoration: underline;
 }
 
 .breadcrumbSeparator {
-  color: var(--color-outline);
+  color: var(--text-quaternary);
 }
 
 .breadcrumbCurrent {
-  color: var(--color-on-surface);
-  font-weight: 600;
+  color: var(--text-secondary);
+  font-weight: 550;
 }
 
 .headerMain {
@@ -58,69 +65,85 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
+  min-width: 0;
 }
 
+/* The identity tile: the one saturated element on the page. */
 .companyLogo {
-  width: 64px;
-  height: 64px;
-  border-radius: var(--radius-lg);
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-xl);
+  background-image: linear-gradient(
+    140deg,
+    var(--color-primary),
+    color-mix(in srgb, var(--color-primary) 55%, var(--color-secondary))
+  );
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow:
+    var(--shadow-md),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 
 .companyInitials {
-  font-family: var(--font-family-base);
-  font-size: var(--font-size-headline-md);
+  font-family: var(--font-family-display);
+  font-size: 22px;
   color: var(--color-on-primary);
-  font-weight: 700;
+  font-weight: 660;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
 }
 
 .companyInfo {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
+  min-width: 0;
 }
 
 .companyTitleRow {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
+  flex-wrap: wrap;
 }
 
 .companyName {
-  font-family: var(--font-family-base);
+  font-family: var(--font-family-display);
   font-size: var(--font-size-headline-lg);
-  color: var(--color-on-surface);
+  letter-spacing: var(--font-letter-spacing-headline-lg);
+  line-height: 1.15;
+  color: var(--text-primary);
   margin: 0;
-  font-weight: 700;
+  font-weight: var(--font-weight-headline-lg);
 }
 
 .companySubtitle {
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
-  color: var(--color-on-surface-variant);
+  color: var(--text-secondary);
   margin: 0;
 }
 
 .headerActions {
   display: flex;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-sm);
   flex-shrink: 0;
 }
 
 .iconButton {
-  padding: var(--spacing-xs) var(--spacing-sm) !important;
   min-width: unset;
 }
 
-/* Grid Layout */
+/* ----------------------------------------------------------------- grid */
+
 .gridContainer {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--spacing-lg);
+  align-items: start;
 }
 
 @media (min-width: 1024px) {
@@ -129,42 +152,47 @@
   }
 }
 
-.leftColumn {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
-}
-
+.leftColumn,
 .rightColumn {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
+  min-width: 0;
 }
 
-/* Card shared styles */
+/* --------------------------------------------------------- card headings */
+
 .cardTitle {
-  font-family: var(--font-family-base);
-  font-size: var(--font-size-headline-md);
-  color: var(--color-on-surface);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-headline-sm);
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
   margin: 0 0 var(--spacing-md) 0;
-  font-weight: 600;
+  font-weight: 620;
 }
 
 .cardHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--spacing-sm);
   margin-bottom: var(--spacing-md);
 }
 
-/* Key Contact */
+/* The heading inside a .cardHeader already has the row's bottom margin. */
+.cardHeader .cardTitle {
+  margin-bottom: 0;
+}
+
+/* ----------------------------------------------------------- key contact */
+
 .contactDetails {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-base);
   margin-bottom: var(--spacing-md);
   padding-bottom: var(--spacing-md);
-  border-bottom: 1px solid var(--color-outline-variant);
+  border-bottom: 1px solid var(--border-hairline);
 }
 
 .contactAvatar {
@@ -174,28 +202,30 @@
 .contactInfo {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
+  min-width: 0;
 }
 
 .contactName {
   font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
-  color: var(--color-on-surface);
+  color: var(--text-primary);
   margin: 0;
   font-weight: 600;
+  letter-spacing: -0.008em;
 }
 
 .contactTitle {
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-sm);
-  color: var(--color-on-surface-variant);
+  color: var(--text-tertiary);
   margin: 0;
 }
 
 .contactActions {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: 6px;
 }
 
 .contactLink {
@@ -203,18 +233,33 @@
   align-items: center;
   gap: var(--spacing-sm);
   font-family: var(--font-family-base);
-  font-size: var(--font-size-body-sm);
+  font-size: var(--font-size-body-md);
   color: var(--color-primary);
   text-decoration: none;
-  transition: color 0.15s ease;
+  padding: 3px 0;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), opacity var(--transition-fast);
+}
+
+.contactLink > svg {
+  width: 15px;
+  height: 15px;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+  transition: color var(--transition-fast);
 }
 
 .contactLink:hover {
-  color: var(--color-primary);
   text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
-/* Custom Fields */
+.contactLink:hover > svg {
+  color: var(--color-primary);
+}
+
+/* --------------------------------------------------------- custom fields */
+
 .customFieldsCard {
   /* No extra styles needed */
 }
@@ -223,30 +268,41 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-xs);
+  width: 28px;
+  height: 28px;
+  padding: 0;
   border: none;
   background: none;
-  color: var(--color-on-surface-variant);
+  color: var(--text-tertiary);
   cursor: pointer;
-  border-radius: var(--radius-default);
-  transition: background-color 0.15s ease, color 0.15s ease;
+  border-radius: var(--radius-sm);
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .settingsButton:hover {
   background-color: var(--color-surface-container-high);
-  color: var(--color-on-surface);
+  color: var(--text-primary);
+}
+
+.settingsButton:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
 }
 
 .settingsButton:disabled {
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
 .settingsButton:disabled:hover {
   background-color: transparent;
-  color: var(--color-on-surface-variant);
+  color: var(--text-tertiary);
 }
 
+/* Label/value ledger. Dotted leaders would be too much; the hairline row
+   rule plus a right-aligned value is enough to bind label to value. */
 .fieldsList {
   display: flex;
   flex-direction: column;
@@ -255,9 +311,10 @@
 .fieldRow {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: var(--spacing-sm) 0;
-  border-bottom: 1px solid var(--color-outline-variant);
+  align-items: baseline;
+  gap: var(--spacing-md);
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border-hairline);
 }
 
 .fieldRow:last-child {
@@ -266,19 +323,23 @@
 
 .fieldLabel {
   font-family: var(--font-family-base);
-  font-size: var(--font-size-label-sm);
-  color: var(--color-on-surface-variant);
+  font-size: var(--font-size-body-sm);
+  color: var(--text-tertiary);
+  flex-shrink: 0;
 }
 
 .fieldValue {
   font-family: var(--font-family-base);
-  font-size: var(--font-size-body-sm);
-  color: var(--color-on-surface);
-  font-weight: 500;
+  font-size: var(--font-size-body-md);
+  color: var(--text-primary);
+  font-weight: 520;
   text-align: right;
+  font-variant-numeric: tabular-nums;
+  min-width: 0;
 }
 
-/* Timeline Card */
+/* -------------------------------------------------------------- timeline */
+
 .timelineCard {
   /* No extra styles */
 }
@@ -289,7 +350,6 @@
 }
 
 .smallIconButton {
-  padding: var(--spacing-xs) !important;
   min-width: unset;
 }
 
@@ -298,7 +358,7 @@
   gap: var(--spacing-sm);
   margin-bottom: var(--spacing-lg);
   padding-bottom: var(--spacing-lg);
-  border-bottom: 1px solid var(--color-outline-variant);
+  border-bottom: 1px solid var(--border-hairline);
 }
 
 .logActivityButton {
@@ -306,9 +366,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-xs);
-  font-size: var(--font-size-label-sm) !important;
-  padding: var(--spacing-xs) var(--spacing-sm) !important;
+  gap: 6px;
 }
 
 .timelineList {
@@ -318,12 +376,14 @@
   padding-left: var(--spacing-xs);
 }
 
-/* Tabs */
+/* ------------------------------------------------------------------ tabs */
+
 .tabsContainer {
   margin-bottom: var(--spacing-md);
 }
 
-/* Appointments tab */
+/* ---------------------------------------------------------- appointments */
+
 .appointmentList {
   display: flex;
   flex-direction: column;
@@ -337,19 +397,30 @@
   justify-content: space-between;
   gap: var(--spacing-md);
   width: 100%;
-  padding: var(--spacing-md);
+  padding: var(--spacing-base) var(--spacing-md);
   text-align: left;
   background-color: var(--color-surface-container-lowest);
-  border: 1px solid var(--color-outline-variant);
+  border: none;
   border-radius: var(--radius-lg);
   cursor: pointer;
   font-family: var(--font-family-base);
-  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+  box-shadow:
+    var(--shadow-xs),
+    inset 0 0 0 1px var(--border-hairline);
+  transition:
+    box-shadow var(--transition-normal),
+    transform var(--transition-normal);
 }
 
 .appointmentRow:hover {
-  background-color: var(--color-surface-container-low);
-  border-color: var(--color-outline);
+  box-shadow:
+    var(--shadow-sm),
+    inset 0 0 0 1px var(--border-subtle);
+  transform: translateX(2px);
+}
+
+.appointmentRow:active {
+  transform: translateX(2px) scale(0.995);
 }
 
 .appointmentRow:focus-visible {
@@ -360,19 +431,21 @@
 .appointmentInfo {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   min-width: 0;
 }
 
 .appointmentDate {
   font-size: var(--font-size-body-md);
   font-weight: 600;
-  color: var(--color-on-surface);
+  letter-spacing: -0.008em;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
 }
 
 .appointmentNotes {
-  font-size: var(--font-size-body-md);
-  color: var(--color-on-surface-variant);
+  font-size: var(--font-size-body-sm);
+  color: var(--text-tertiary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -381,10 +454,12 @@
 .emptyMessage {
   padding: var(--spacing-xl);
   text-align: center;
-  color: var(--color-on-surface-variant);
+  color: var(--text-tertiary);
+  font-size: var(--font-size-body-md);
 }
 
-/* SlideOver content */
+/* -------------------------------------------------------- slide-over form */
+
 .slideOverForm {
   display: flex;
   flex-direction: column;

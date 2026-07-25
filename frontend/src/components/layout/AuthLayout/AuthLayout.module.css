@@ -1,12 +1,56 @@
+/* ============================================================================
+ * AuthLayout
+ * A single centred card on a quietly graded canvas. The ambient wash gives the
+ * screen depth without competing with the form, which stays the only sharp,
+ * high-contrast object on the page.
+ * ========================================================================= */
+
 .container {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: var(--spacing-md);
+  padding: var(--spacing-lg) var(--spacing-md);
   background-color: var(--color-background);
-  color: var(--color-on-surface);
+  color: var(--text-primary);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* Two soft accent blooms, well below the content in contrast. */
+.container::before,
+.container::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(80px);
+}
+
+.container::before {
+  width: 640px;
+  height: 640px;
+  top: -280px;
+  left: -180px;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--color-primary) 16%, transparent),
+    transparent 70%
+  );
+}
+
+.container::after {
+  width: 560px;
+  height: 560px;
+  bottom: -260px;
+  right: -160px;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--color-secondary) 13%, transparent),
+    transparent 70%
+  );
 }
 
 /* Auth screens are a single centered card, so the toggle sits in the corner. */
@@ -14,14 +58,21 @@
   position: absolute;
   top: var(--spacing-md);
   right: var(--spacing-md);
+  z-index: 1;
 }
 
 .mainCard {
   width: 100%;
-  max-width: 420px;
+  max-width: 400px;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
+  animation: authIn var(--duration-slower) var(--ease-out) both;
+}
+
+@keyframes authIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .header {
@@ -34,16 +85,19 @@
 }
 
 .logoWrapper {
-  width: 64px;
-  height: 64px;
-  border-radius: var(--radius-xl);
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-2xl);
   overflow: hidden;
-  border: 1px solid var(--color-outline-variant);
-  background-color: var(--color-surface-container-low);
+  border: none;
+  background-color: var(--color-surface-container-lowest);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow:
+    var(--shadow-md),
+    inset 0 0 0 1px var(--border-hairline);
 }
 
 .logoImage {
@@ -55,16 +109,16 @@
 .titleWrapper {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: 6px;
 }
 
 .title {
-  font-family: var(--font-family-base);
+  font-family: var(--font-family-display);
   font-size: var(--font-size-headline-lg);
   font-weight: var(--font-weight-headline-lg);
   line-height: var(--font-line-height-headline-lg);
   letter-spacing: var(--font-letter-spacing-headline-lg);
-  color: var(--color-on-surface);
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -73,6 +127,7 @@
   font-size: var(--font-size-body-md);
   font-weight: var(--font-weight-body-md);
   line-height: var(--font-line-height-body-md);
-  color: var(--color-on-surface-variant);
+  color: var(--text-secondary);
   margin: 0;
+  max-width: 34ch;
 }

@@ -1,17 +1,37 @@
+/* ============================================================================
+ * Avatar
+ * Initials sit on a subtly graded surface with an inset ring, so a fallback
+ * avatar reads as deliberate rather than as a missing image.
+ * ========================================================================= */
+
 .avatar {
   border-radius: var(--radius-full);
   object-fit: cover;
+  background-image: linear-gradient(
+    160deg,
+    var(--color-surface-container-high),
+    var(--color-surface-container)
+  );
   background-color: var(--color-surface-container-high);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-on-surface);
+  flex-shrink: 0;
+  color: var(--text-secondary);
   font-family: var(--font-family-base);
-  font-weight: var(--font-weight-label-md);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  user-select: none;
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
 }
 
 .withBorder {
-  border: 2px solid var(--color-surface-container-lowest);
+  /* Ring in the page background so stacked avatars read as separated discs. */
+  box-shadow:
+    0 0 0 2px var(--color-surface-container-lowest),
+    inset 0 0 0 1px var(--border-hairline);
 }
 
 /* Sizes */
@@ -22,13 +42,13 @@
 }
 
 .size-md {
-  width: 48px; /* w-12 */
-  height: 48px; /* h-12 */
-  font-size: 16px;
+  width: 44px;
+  height: 44px;
+  font-size: 15px;
 }
 
 .size-lg {
   width: 64px;
   height: 64px;
-  font-size: 20px;
+  font-size: 21px;
 }

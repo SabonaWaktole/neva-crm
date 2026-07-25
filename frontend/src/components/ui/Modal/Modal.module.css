@@ -1,68 +1,92 @@
+/* ============================================================================
+ * Modal
+ * Desktop: a floating dialog over a blurred scrim.
+ * Mobile: a bottom sheet with a grabber, which is the interaction people
+ * already expect from a phone.
+ * ========================================================================= */
+
 .overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
-  z-index: 100;
+  background-color: var(--scrim);
+  backdrop-filter: saturate(120%) blur(8px);
+  -webkit-backdrop-filter: saturate(120%) blur(8px);
+  z-index: var(--z-modal);
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: var(--spacing-lg);
 }
 
 .modal {
+  position: relative;
   background-color: var(--color-surface-container-lowest);
-  border: 1px solid var(--color-outline-variant);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--elevation-3);
+  border: none;
+  border-radius: var(--radius-2xl);
+  box-shadow:
+    var(--shadow-2xl),
+    inset 0 0 0 1px var(--border-subtle);
   width: 100%;
-  max-height: 90vh;
+  max-height: min(90vh, 860px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-.maxWidth-sm { max-width: 384px; }
-.maxWidth-md { max-width: 512px; }
-.maxWidth-lg { max-width: 768px; }
-.maxWidth-xl { max-width: 1024px; }
+.maxWidth-sm { max-width: 400px; }
+.maxWidth-md { max-width: 540px; }
+.maxWidth-lg { max-width: 780px; }
+.maxWidth-xl { max-width: 1040px; }
 
 .header {
-  padding: var(--spacing-lg);
-  border-bottom: 1px solid var(--color-outline-variant);
+  flex-shrink: 0;
+  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md);
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: var(--spacing-md);
 }
 
 .title {
-  font-family: var(--font-family-base);
+  font-family: var(--font-family-display);
   font-size: var(--font-size-headline-md);
-  font-weight: var(--font-weight-headline-md);
-  color: var(--color-on-surface);
+  font-weight: 640;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
   margin: 0;
 }
 
 .closeButton {
-  background: none;
+  flex-shrink: 0;
+  background: transparent;
   border: none;
-  color: var(--color-on-surface-variant);
+  color: var(--text-tertiary);
   cursor: pointer;
-  padding: var(--spacing-xs);
+  width: 30px;
+  height: 30px;
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s, color 0.2s;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--duration-instant) var(--ease-out);
 }
 
 .closeButton:hover {
-  background-color: var(--color-surface-variant);
-  color: var(--color-on-surface);
+  background-color: var(--color-surface-container);
+  color: var(--text-primary);
+}
+
+.closeButton:active {
+  transform: scale(0.92);
 }
 
 .content {
   overflow-y: auto;
-  padding: var(--spacing-lg);
+  overscroll-behavior: contain;
+  padding: 0 var(--spacing-lg) var(--spacing-lg);
 }
 
 /* Mobile: modal becomes a bottom sheet rather than a centered dialog */
@@ -75,7 +99,26 @@
   .modal {
     max-width: 100%;
     width: 100%;
-    max-height: 88vh;
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    max-height: 90vh;
+    border-radius: var(--radius-3xl) var(--radius-3xl) 0 0;
+    /* Clear the home indicator on modern iPhones. */
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Sheet grabber — signals draggability and separates sheet from scrim. */
+  .modal::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 4px;
+    border-radius: var(--radius-full);
+    background-color: var(--border-strong);
+  }
+
+  .header {
+    padding-top: var(--spacing-lg);
   }
 }

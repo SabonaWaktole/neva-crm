@@ -1,3 +1,8 @@
+/* ============================================================================
+ * DropdownMenu — a Raycast-style floating command surface.
+ * Frosted, tightly padded, with items that highlight edge-to-edge.
+ * ========================================================================= */
+
 .container {
   position: relative;
   display: inline-block;
@@ -12,66 +17,102 @@
 
 .dropdown {
   position: absolute;
-  top: calc(100% + var(--spacing-xs));
-  min-width: 160px;
+  top: calc(100% + 6px);
+  min-width: 200px;
   max-width: calc(100vw - 32px);
-  background-color: var(--color-surface-container-lowest);
-  border: 1px solid var(--color-outline-variant);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--elevation-3, 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06));
-  z-index: 100;
+  background: var(--glass-bg-strong);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: none;
+  border-radius: var(--radius-xl);
+  box-shadow:
+    var(--shadow-xl),
+    inset 0 0 0 1px var(--border-subtle);
+  z-index: var(--z-dropdown);
   display: flex;
   flex-direction: column;
-  padding: var(--spacing-xs);
-  gap: 2px;
+  padding: 5px;
+  gap: 1px;
+  /* Grows from the trigger edge rather than just fading in. */
+  transform-origin: top var(--menu-origin-x, right);
+  animation: menuIn var(--duration-fast) var(--ease-out);
+}
+
+@keyframes menuIn {
+  from { opacity: 0; transform: scale(0.96) translateY(-4px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .alignRight {
   right: 0;
+  --menu-origin-x: right;
 }
 
 .alignLeft {
   left: 0;
+  --menu-origin-x: left;
 }
 
 .header {
-  padding: var(--spacing-sm) 12px calc(var(--spacing-sm) + var(--spacing-xs));
-  margin-bottom: var(--spacing-xs);
-  border-bottom: 1px solid var(--color-outline-variant);
+  padding: 8px 10px 10px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border-hairline);
   font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
   font-weight: 600;
-  color: var(--color-on-surface);
+  color: var(--text-primary);
 }
 
 .item {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: 10px;
   width: 100%;
-  padding: 8px 10px;
+  padding: 7px 10px;
   background: transparent;
   border: none;
-  border-radius: var(--radius-default);
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-family: var(--font-family-base);
-  font-size: var(--font-size-body-md);
-  line-height: var(--font-line-height-body-md);
-  color: var(--color-on-surface);
+  font-size: var(--font-size-label-md);
+  font-weight: 480;
+  line-height: var(--font-line-height-label-md);
+  color: var(--text-primary);
   text-align: left;
-  transition: background-color 0.15s ease-out;
+  transition:
+    background-color var(--duration-instant) var(--ease-out),
+    color var(--duration-instant) var(--ease-out);
 }
 
-.item:hover {
-  background-color: var(--color-surface-container-low);
+.item > svg,
+.itemIcon > svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Full-bleed accent highlight, the way native menus behave. */
+.item:hover:not(.itemDisabled) {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.item:focus-visible {
+  outline: none;
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
 }
 
 .itemDanger {
   color: var(--color-error);
 }
 
+.itemDanger:hover {
+  background-color: var(--color-error);
+  color: var(--color-on-error);
+}
+
 .itemDisabled {
-  color: var(--color-outline);
+  color: var(--text-quaternary);
   cursor: not-allowed;
 }
 
@@ -83,4 +124,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  color: var(--text-tertiary);
+  transition: color var(--duration-instant) var(--ease-out);
+}
+
+/* Icons must follow the row's foreground colour when highlighted. */
+.item:hover .itemIcon,
+.item:focus-visible .itemIcon {
+  color: currentColor;
 }

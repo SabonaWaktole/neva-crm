@@ -1,23 +1,35 @@
+/* ============================================================================
+ * AppLayout
+ * The header is frosted glass over the scrolling content — the single detail
+ * that most makes a web app read as a native one. The sidebar sits on the app
+ * canvas, and the content well is the only white surface, so hierarchy is
+ * established by surface rather than by borders.
+ * ========================================================================= */
+
 .layout {
   display: flex;
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
   background-color: var(--color-background);
-  color: var(--color-on-surface);
+  color: var(--text-primary);
 }
 
 .header {
   position: fixed;
   top: 0;
   width: 100%;
-  z-index: 50;
+  z-index: var(--z-header);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: var(--spacing-md);
   padding: 0 var(--spacing-md);
-  height: 64px;
-  border-bottom: 1px solid var(--color-outline-variant);
+  height: var(--header-height);
+  border-bottom: 1px solid var(--border-hairline);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 @media (min-width: 768px) {
@@ -34,17 +46,17 @@
 }
 
 .logoText {
-  font-family: var(--font-family-base);
+  font-family: var(--font-family-display);
   font-size: var(--font-size-headline-md);
-  font-weight: 700;
-  color: var(--color-primary);
+  font-weight: 660;
+  color: var(--text-primary);
   white-space: nowrap;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.028em;
 }
 
 .headerCenter {
   flex: 1;
-  max-width: 28rem; /* max-w-md */
+  max-width: 30rem;
   margin: 0 var(--spacing-lg);
   display: none; /* hidden on mobile by default */
   align-items: center;
@@ -60,77 +72,131 @@
 
 .searchIcon {
   position: absolute;
-  left: 12px;
-  color: var(--color-outline);
+  left: 11px;
+  display: flex;
+  align-items: center;
+  color: var(--text-tertiary);
+  pointer-events: none;
+  transition: color var(--transition-fast);
 }
 
+.searchIcon > svg {
+  width: 16px;
+  height: 16px;
+}
+
+.headerCenter:focus-within .searchIcon {
+  color: var(--color-primary);
+}
+
+/* Reads as a recessed well at rest, then lifts into a real field on focus —
+   the Raycast/Superhuman search treatment. */
 .searchInput {
   width: 100%;
-  padding: 8px 16px 8px 40px; /* pl-10 pr-4 py-2 */
-  height: 36px;
+  padding: 0 var(--spacing-base) 0 36px;
+  height: 34px;
   background-color: var(--color-surface-container);
   border: 1px solid transparent;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-default);
   font-family: var(--font-family-base);
-  font-size: var(--font-size-body-md);
-  color: var(--color-on-surface);
+  font-size: var(--font-size-label-md);
+  color: var(--text-primary);
   outline: none;
-  transition: background-color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.searchInput::placeholder {
+  color: var(--text-tertiary);
+}
+
+.searchInput:hover:not(:focus) {
+  background-color: var(--color-surface-container-high);
 }
 
 .searchInput:focus {
   background-color: var(--color-surface-container-lowest);
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-primary-container);
+  box-shadow: var(--focus-ring-tight);
 }
 
 .headerRight {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: 2px;
 }
 
 @media (min-width: 768px) {
   .headerRight {
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xs);
   }
 }
 
 .iconBtn {
-  padding: 8px;
+  width: 34px;
+  height: 34px;
+  padding: 0;
   border-radius: var(--radius-full);
-  color: var(--color-on-surface-variant);
+  color: var(--text-secondary);
   background: transparent;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color var(--transition-fast);
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--duration-instant) var(--ease-out);
+}
+
+.iconBtn > svg {
+  width: 17px;
+  height: 17px;
 }
 
 .iconBtn:hover {
-  background-color: var(--color-surface-container-low);
+  background-color: var(--color-surface-container);
+  color: var(--text-primary);
 }
 
 .iconBtn:active {
-  opacity: 0.8;
+  transform: scale(0.92);
+}
+
+.iconBtn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .profileBtn {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 4px;
+  padding: 3px;
+  margin-left: var(--spacing-xs);
   border-radius: var(--radius-full);
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition:
+    background-color var(--transition-fast),
+    transform var(--duration-instant) var(--ease-out);
 }
 
 .profileBtn:hover {
-  background-color: var(--color-surface-container-low);
+  background-color: var(--color-surface-container);
+}
+
+.profileBtn:active {
+  transform: scale(0.96);
+}
+
+.profileBtn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .menuBtn {
@@ -155,15 +221,23 @@
 
 .mobileSearchBar {
   position: fixed;
-  top: 64px;
+  top: var(--header-height);
   left: 0;
   right: 0;
-  z-index: 45;
+  z-index: calc(var(--z-header) - 5);
   display: flex;
   align-items: center;
-  padding: var(--spacing-sm) var(--spacing-lg);
-  background-color: var(--color-surface);
-  border-bottom: 1px solid var(--color-outline-variant);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--glass-bg-strong);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--border-hairline);
+  animation: slideDown var(--duration-normal) var(--ease-out);
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @media (min-width: 768px) {
@@ -175,7 +249,7 @@
 .contentArea {
   display: flex;
   flex: 1;
-  padding-top: 64px; /* offset for header */
+  padding-top: var(--header-height);
   height: 100%;
   width: 100%;
 }
@@ -184,17 +258,34 @@
   flex: 1;
   padding: var(--spacing-md);
   overflow-y: auto;
+  overflow-x: hidden;
   width: 100%;
   height: 100%;
   background-color: var(--color-background);
   display: flex;
   flex-direction: column;
+  /* Fade the first pixels of content under the frosted header. */
+  scroll-padding-top: var(--spacing-md);
 }
 
-/* Adjust padding on larger screens */
-@media (min-width: 1024px) {
+@media (min-width: 768px) {
   .mainContent {
-    padding: var(--spacing-2xl);
+    padding: var(--spacing-lg);
+  }
+}
+
+/* Beyond laptop width, cap the measure and centre it rather than letting
+   content stretch to 2000px on an ultrawide display. */
+@media (min-width: 1280px) {
+  .mainContent {
+    padding: var(--spacing-xl) var(--spacing-xl) var(--spacing-2xl);
+  }
+
+  .mainContent > * {
+    width: 100%;
+    max-width: var(--content-max-width);
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 

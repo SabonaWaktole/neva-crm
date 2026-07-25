@@ -1,3 +1,9 @@
+/* ============================================================================
+ * SettingsLayout — a secondary nav rail beside a content well.
+ * Mirrors the main Sidebar's selection language so navigation feels like one
+ * consistent system at both levels of the hierarchy.
+ * ========================================================================= */
+
 .layout {
   display: flex;
   flex-direction: column;
@@ -14,9 +20,9 @@
 .sidebar {
   display: none;
   flex-direction: column;
-  width: var(--spacing-sidebar-width);
-  border-right: 1px solid var(--color-outline-variant);
-  background-color: var(--color-surface);
+  width: 232px;
+  border-right: 1px solid var(--border-hairline);
+  background-color: transparent;
   flex-shrink: 0;
 }
 
@@ -29,12 +35,19 @@
 /* Horizontal scrollable tab bar, mobile only */
 .mobileNav {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: 6px;
   padding: var(--spacing-sm) var(--spacing-md);
   overflow-x: auto;
   flex-shrink: 0;
-  background-color: var(--color-surface);
-  border-bottom: 1px solid var(--color-outline-variant);
+  background: var(--glass-bg-strong);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--border-hairline);
+  scrollbar-width: none;
+}
+
+.mobileNav::-webkit-scrollbar {
+  display: none;
 }
 
 @media (min-width: 768px) {
@@ -47,73 +60,99 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 14px;
+  padding: 7px 13px;
   border-radius: var(--radius-full);
   white-space: nowrap;
   text-decoration: none;
-  color: var(--color-on-surface-variant);
-  background-color: var(--color-surface-container-low);
+  color: var(--text-secondary);
+  background-color: var(--color-surface-container);
   font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
-  font-weight: var(--font-weight-label-md);
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+  font-weight: 520;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .mobileNavItemActive {
-  background-color: var(--color-primary-container);
-  color: var(--color-on-primary-container);
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+  font-weight: 600;
 }
 
 .title {
   margin: 0;
-  padding: var(--spacing-lg) var(--spacing-md) var(--spacing-md);
+  padding: var(--spacing-lg) var(--spacing-base) var(--spacing-base);
   font-family: var(--font-family-base);
-  font-size: var(--font-size-headline-md);
-  font-weight: var(--font-weight-headline-md);
-  line-height: var(--font-line-height-headline-md);
-  color: var(--color-on-surface);
+  /* Rail heading reads as a section label, not a page title. */
+  font-size: var(--font-size-label-sm);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: var(--font-line-height-label-sm);
+  color: var(--text-tertiary);
 }
 
 .nav {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 0 var(--spacing-sm);
+  gap: 2px;
+  padding: 0 var(--spacing-base);
   margin: 0;
   overflow-y: auto;
 }
 
 .navItem {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 12px;
+  gap: 10px;
+  padding: 7px 10px;
   border-radius: var(--radius-default);
   text-decoration: none;
   cursor: pointer;
-  transition: background-color 0.15s ease-out, color 0.15s ease-out;
-  color: var(--color-on-surface-variant);
+  color: var(--text-secondary);
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .navItem:hover {
-  background-color: var(--color-surface-container-low);
-  color: var(--color-on-surface);
+  background-color: var(--color-surface-container);
+  color: var(--text-primary);
+}
+
+.navItem:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
 }
 
 .navItemActive,
 .navItemActive:hover {
-  background-color: var(--color-primary-container);
-  color: var(--color-on-primary-container);
+  background-color: var(--color-surface-container-high);
+  color: var(--text-primary);
+  font-weight: 560;
 }
 
 .navIcon {
   flex-shrink: 0;
+  width: 17px;
+  height: 17px;
+  stroke-width: 1.75;
+  color: var(--text-tertiary);
+  transition: color var(--transition-fast);
+}
+
+.navItemActive .navIcon {
+  color: var(--color-primary);
+  stroke-width: 2;
 }
 
 .navLabel {
   font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
-  font-weight: var(--font-weight-label-md);
+  font-weight: inherit;
+  letter-spacing: -0.005em;
 }
 
 .content {

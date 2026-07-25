@@ -2,18 +2,32 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
+  width: 34px;
+  height: 34px;
+  padding: 0;
   border: none;
   background: transparent;
   border-radius: var(--radius-full);
-  color: var(--color-on-surface-variant);
+  color: var(--text-secondary);
   cursor: pointer;
-  transition: background-color var(--transition-fast), color var(--transition-fast);
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--duration-instant) var(--ease-out);
+}
+
+.trigger > svg {
+  width: 17px;
+  height: 17px;
 }
 
 .trigger:hover {
-  background-color: var(--color-surface-container-low);
-  color: var(--color-on-surface);
+  background-color: var(--color-surface-container);
+  color: var(--text-primary);
+}
+
+.trigger:active {
+  transform: scale(0.92);
 }
 
 .trigger:focus-visible {
