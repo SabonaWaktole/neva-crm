@@ -49,6 +49,28 @@ const CURRENCY_OPTIONS = [
   { code: 'JPY', label: 'JPY — Japanese Yen (¥)' },
 ];
 
+/**
+ * A shortlist, not all 418 IANA zones — a dropdown of every zone on earth is
+ * unusable. The server validates against the full `Intl.supportedValuesOf`
+ * set, so this list can grow with no server change.
+ */
+const TIMEZONE_OPTIONS = [
+  'UTC',
+  'Europe/Tirane',
+  'Europe/London',
+  'Europe/Berlin',
+  'Africa/Addis_Ababa',
+  'Africa/Nairobi',
+  'Africa/Lagos',
+  'America/New_York',
+  'America/Chicago',
+  'America/Los_Angeles',
+  'Asia/Dubai',
+  'Asia/Kolkata',
+  'Asia/Tokyo',
+  'Australia/Sydney',
+];
+
 const LOCALE_LABELS: Record<(typeof SUPPORTED_LOCALES)[number], string> = {
   'en-US': 'English (United States) — 1,234.56',
   'en-GB': 'English (United Kingdom) — 1,234.56',
@@ -61,6 +83,7 @@ type FormState = Pick<
   | 'name'
   | 'currency'
   | 'locale'
+  | 'timezone'
   | 'defaultLanguage'
   | 'requiresQuotationApproval'
   | 'registrationNumber'
@@ -76,6 +99,7 @@ const EMPTY_FORM: FormState = {
   name: '',
   currency: 'USD',
   locale: 'en-US',
+  timezone: 'UTC',
   defaultLanguage: 'en',
   requiresQuotationApproval: true,
   registrationNumber: '',
@@ -91,6 +115,7 @@ const toFormState = (settings: TenantSettings): FormState => ({
   name: settings.name ?? '',
   currency: settings.currency,
   locale: settings.locale,
+  timezone: settings.timezone,
   defaultLanguage: settings.defaultLanguage,
   requiresQuotationApproval: settings.requiresQuotationApproval,
   // Null means "never set". The inputs are controlled, so it becomes '' here
@@ -154,7 +179,13 @@ export const AccountSettingsPage = () => {
       // The money formatter reads currency and locale from the auth store, so
       // it has to learn about the change without waiting for a page reload.
       if (user) {
-        setUser({ ...user, tenantCurrency: updated.currency, tenantLocale: updated.locale });
+        setUser({
+          ...user,
+          tenantCurrency: updated.currency,
+          tenantLocale: updated.locale,
+          tenantTimezone: updated.timezone,
+          tenantDateFormat: updated.dateFormat,
+        });
       }
       toast.success(tc('feedback.saved'));
     } catch {
@@ -384,18 +415,37 @@ export const AccountSettingsPage = () => {
                   </div>
 
                   {/*
-                    Timezone and Date Format are stored but not yet read by
-                    anything — every date in the app still renders with the
-                    browser's own formatting. They stay disabled rather than
-                    letting someone pick a value the app would then ignore, which
-                    would be a new version of exactly the problem this page was
-                    built to fix. Enabled when the date-consumption pass lands.
+                    Timezone is now genuinely consumed — it decides which day an
+                    instant belongs to on both the dashboard KPI and the calendar
+                    — so the control is live.
+
+                    Date Format is still NOT consumed: date ordering comes from
+                    the locale via Intl, and layering an explicit pattern on top
+                    would let the two disagree. It stays disabled with copy that
+                    says so, rather than becoming a setting that quietly does
+                    nothing. See TD-012.
                   */}
                   <div className={styles.fieldGroup}>
-                    <label className={styles.fieldLabel}>{t('company.localization.timezoneLabel')}</label>
-                    <select className={styles.nativeSelect} disabled value={saved?.timezone ?? 'UTC'}>
-                      <option value={saved?.timezone ?? 'UTC'}>{saved?.timezone ?? 'UTC'}</option>
+                    <label className={styles.fieldLabel} htmlFor="timezoneSelect">
+                      {t('company.localization.timezoneLabel')}
+                    </label>
+                    <select
+                      id="timezoneSelect"
+                      className={styles.nativeSelect}
+                      value={form.timezone}
+                      onChange={(e) => setField('timezone', e.target.value)}
+                      disabled={!isBusinessOwner}
+                    >
+                      {/* A tenant already on a zone outside the shortlist keeps
+                          its own value rather than being switched on next save. */}
+                      {!TIMEZONE_OPTIONS.includes(form.timezone) && (
+                        <option value={form.timezone}>{form.timezone}</option>
+                      )}
+                      {TIMEZONE_OPTIONS.map((zone) => (
+                        <option key={zone} value={zone}>{zone}</option>
+                      ))}
                     </select>
+                    <p className={styles.helperText}>{t('company.localization.timezoneHint')}</p>
                   </div>
 
                   <div className={styles.fieldGroup}>
@@ -403,7 +453,7 @@ export const AccountSettingsPage = () => {
                     <select className={styles.nativeSelect} disabled value={saved?.dateFormat ?? 'MM/DD/YYYY'}>
                       <option value={saved?.dateFormat ?? 'MM/DD/YYYY'}>{saved?.dateFormat ?? 'MM/DD/YYYY'}</option>
                     </select>
-                    <p className={styles.helperText}>{t('company.localization.datesNotAppliedYet')}</p>
+                    <p className={styles.helperText}>{t('company.localization.dateFormatNotUsed')}</p>
                   </div>
                 </div>
               </Card>

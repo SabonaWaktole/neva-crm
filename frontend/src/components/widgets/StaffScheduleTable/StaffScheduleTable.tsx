@@ -5,6 +5,7 @@ import { CalendarDays, MoreVertical, Phone, MapPin, Check } from 'lucide-react';
 import { Badge } from '../../ui/Badge/Badge';
 import { Button } from '../../ui/Button/Button';
 import type { Appointment } from '../../../types/appointment';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 
 interface StaffScheduleTableProps {
   appointments: Appointment[];
@@ -12,6 +13,7 @@ interface StaffScheduleTableProps {
 }
 
 export const StaffScheduleTable: React.FC<StaffScheduleTableProps> = ({ appointments, isLoading }) => {
+  const dates = useDateFormat();
   const { t } = useTranslation('dashboard');
   return (
     <div className={styles.tableContainer}>
@@ -44,7 +46,7 @@ export const StaffScheduleTable: React.FC<StaffScheduleTableProps> = ({ appointm
               appointments.map((apt) => (
                 <tr key={apt.id}>
                   <td className={styles.timeCell}>
-                    {new Date(apt.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {dates.time(apt.scheduledAt)}
                   </td>
                   <td>
                     <div className={styles.clientName}>{apt.clientName || 'Unknown Client'}</div>
@@ -89,7 +91,7 @@ export const StaffScheduleTable: React.FC<StaffScheduleTableProps> = ({ appointm
             <div key={apt.id} className={styles.mobileCard}>
               <div className={styles.mobileHeader}>
                 <span className={styles.timeCell}>
-                  {new Date(apt.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {dates.time(apt.scheduledAt)}
                 </span>
                 <span className={styles.statusText}>{apt.status}</span>
               </div>

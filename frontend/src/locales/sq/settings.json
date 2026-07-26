@@ -37,7 +37,8 @@
       "conventionsLabel": "Konventat e numrave dhe datave",
       "timezoneLabel": "Zona kohore",
       "dateFormatLabel": "Formati i datës",
-      "datesNotAppliedYet": "Zona kohore dhe formati i datës nuk zbatohen ende në datat e shfaqura."
+      "timezoneHint": "Përcakton se cilës ditë i përket një takim ose shifër. Paneli dhe kalendari e përdorin të njëjtin, kështu që gjithmonë përputhen.",
+      "dateFormatNotUsed": "Renditja e datave aktualisht ndjek cilësimin Konventat e numrave dhe datave më sipër. Një model i qartë nuk zbatohet ende."
     },
     "language": {
       "title": "Gjuha",
@@ -162,5 +163,15 @@
       "residualAccess": "Nëse janë të kyçur tani, sesioni i tyre përfundon herën tjetër që aplikacioni ringarkohet, dhe brenda një ore më së voni."
     },
     "breadcrumb": "Cilësimet e ekipit"
+  },
+  "integrations": {
+    "breadcrumb": "Integrimet",
+    "title": "Integrimet",
+    "subtitle": "Menaxhoni lidhjet me shërbime të palëve të treta.",
+    "connectedSince": "E lidhur që nga {{date}}",
+    "connecting": "Duke u lidhur...",
+    "connect": "Lidh {{name}}",
+    "disconnecting": "Duke shkëputur...",
+    "disconnect": "Shkëput"
   }
 }

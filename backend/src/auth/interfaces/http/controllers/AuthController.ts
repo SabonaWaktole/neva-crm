@@ -128,6 +128,7 @@ export class AuthController {
               select: {
                 logoUrl: true, coverImageUrl: true, name: true,
                 currency: true, locale: true, defaultLanguage: true,
+                timezone: true, dateFormat: true,
               },
             })
           : Promise.resolve(null),
@@ -153,6 +154,8 @@ export class AuthController {
           // these columns NOT NULL, so a tenanted user always gets real values.
           tenantCurrency: tenantBranding?.currency ?? null,
           tenantLocale: tenantBranding?.locale ?? null,
+          tenantTimezone: tenantBranding?.timezone ?? null,
+          tenantDateFormat: tenantBranding?.dateFormat ?? null,
           // Interface language, kept separate from the formatting fields above.
           // `userLanguage` is null when the user follows the workspace default;
           // the client needs the raw value, not just the resolved one, so the

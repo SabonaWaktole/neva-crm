@@ -3,8 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { listContainerVariants, listItemVariants } from '../../lib/motion';
 import styles from './BusinessOwnerDashboard.module.css'; import {    Users,    CalendarCheck,    Clock,    Package,    Plus,   History } from 'lucide-react'; import { Button } from '../../components/ui/Button/Button'; import { KPICard } from '../../components/ui/KPICard'; import { UpcomingAppointmentsWidget } from '../../components/widgets/UpcomingAppointmentsWidget'; import { TimelineItem } from '../../components/ui/TimelineItem'; import { getActivityConfig } from '../../utils/activityMapper'; import { useNavigate, useParams } from 'react-router-dom'; import { useDashboardMetrics, useActivityFeed } from '../../hooks/useDashboard'; import { useAuthStore } from '../../store/useAuthStore';
+import { useDateFormat } from '../../hooks/useDateFormat';
 
 export const BusinessOwnerDashboard = () => {
+  const dates = useDateFormat();
   const { t } = useTranslation('dashboard');
   const { tenantSlug } = useParams();
   const navigate = useNavigate();
@@ -162,7 +164,7 @@ export const BusinessOwnerDashboard = () => {
                     <TimelineItem
                       key={activity.id}
                       title={activity.type.replace(/_/g, ' ')}
-                      subtitle={new Date(activity.timestamp).toLocaleString()}
+                      subtitle={dates.dateTime(activity.timestamp)}
                       content={`${activity.actor.name}: ${activity.description}`}
                       icon={config.icon}
                       iconTextColor={config.color}

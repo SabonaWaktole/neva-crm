@@ -31,6 +31,12 @@ export interface User {
   tenantCurrency?: string | null;
   tenantLocale?: string | null;
   /**
+   * Timezone decides which DAY an instant falls on — a correctness setting,
+   * not a formatting one. See useDateFormat and utils/tenantDay.
+   */
+  tenantTimezone?: string | null;
+  tenantDateFormat?: string | null;
+  /**
    * Interface language, kept strictly separate from the formatting fields
    * above. `userLanguage` is null when the user has expressed no preference,
    * which means "follow the workspace default" — distinct from having chosen

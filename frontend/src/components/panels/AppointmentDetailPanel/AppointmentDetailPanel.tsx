@@ -18,6 +18,7 @@ import { TextInput } from '../../ui/TextInput/TextInput';
 import styles from './AppointmentDetailPanel.module.css';
 import type { Appointment } from '../../../types/appointment';
 import { useCancelAppointment, useUpdateAppointmentStatus } from '../../../hooks/useAppointments';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 
 export interface AppointmentDetailPanelProps {
   isOpen: boolean;
@@ -46,6 +47,7 @@ export const AppointmentDetailPanel: React.FC<AppointmentDetailPanelProps> = ({
   onEdit,
   onReschedule,
 }) => {
+  const dates = useDateFormat();
   const { t } = useTranslation('appointments');
   const { cancelAppointment, isLoading: isCancelling } = useCancelAppointment();
   const { updateStatus, isLoading: isUpdating } = useUpdateAppointmentStatus();
@@ -171,14 +173,14 @@ export const AppointmentDetailPanel: React.FC<AppointmentDetailPanelProps> = ({
             <label className={styles.sectionLabel}>{t('detail.date')}</label>
             <div className={styles.infoRow}>
               <Calendar size={18} className={styles.infoIcon} />
-              <span className={styles.infoText}>{new Date(appointment.scheduledAt).toLocaleDateString()}</span>
+              <span className={styles.infoText}>{dates.date(appointment.scheduledAt)}</span>
             </div>
           </div>
           <div className={styles.section}>
             <label className={styles.sectionLabel}>{t('detail.time')}</label>
             <div className={styles.infoRow}>
               <Clock size={18} className={styles.infoIcon} />
-              <span className={styles.infoText}>{new Date(appointment.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+              <span className={styles.infoText}>{dates.time(appointment.scheduledAt)}</span>
             </div>
           </div>
         </div>

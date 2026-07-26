@@ -52,11 +52,17 @@ export const StockAdjustmentPanel: React.FC<StockAdjustmentPanelProps> = ({
   const [transferDestinationId, setTransferDestinationId] = useState('');
   const [transferQuantity, setTransferQuantity] = useState('');
 
-  // Auto-select first warehouse when stockLevels load
+  /*
+   * Seeds a default selection once stock levels arrive. Both ids are in the
+   * dependency array because the effect reads them: with only [stockLevels] it
+   * closed over stale values, so a user who cleared a selection could not get
+   * the default back until the levels themselves changed. Each guard is
+   * self-limiting (`!id`), so re-running cannot overwrite a real choice.
+   */
   React.useEffect(() => {
     if (stockLevels.length > 0 && !adjustWarehouseId) setAdjustWarehouseId(stockLevels[0].warehouseId);
     if (stockLevels.length > 0 && !transferOriginId) setTransferOriginId(stockLevels[0].warehouseId);
-  }, [stockLevels]);
+  }, [stockLevels, adjustWarehouseId, transferOriginId]);
 
   const handleConfirm = async () => {
     if (activeTab === 'adjust') {

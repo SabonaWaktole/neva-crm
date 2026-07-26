@@ -9,8 +9,10 @@ import { EditMemberModal } from './EditMemberModal';
 import { Mail, Shield, Clock, Edit2, Trash2, UserMinus } from 'lucide-react';
 import { useAuthStore } from '../../../store/useAuthStore';
 import styles from './TeamSettingsContent.module.css';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 
 export const TeamSettingsContent: React.FC = () => {
+  const dates = useDateFormat();
   const { t } = useTranslation('settings');
   const { staff, pendingInvitations, loadingStaff, loadingInvitations, fetchStaff, fetchPendingInvitations, inviteStaff, updateStaffRole, cancelInvitation, fetchDeactivationImpact, deactivateStaff } = useTeam();
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
@@ -129,7 +131,7 @@ export const TeamSettingsContent: React.FC = () => {
                       <div className={styles.memberName}>{inv.email}</div>
                       <div className={styles.memberExpiry}>
                         <Clock size={12} />
-                        {t('team.expires', { date: new Date(inv.expiresAt).toLocaleDateString() })}
+                        {t('team.expires', { date: dates.date(inv.expiresAt) })}
                       </div>
                     </div>
                   </div>

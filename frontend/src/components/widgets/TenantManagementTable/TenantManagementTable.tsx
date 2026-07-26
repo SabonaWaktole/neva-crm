@@ -4,6 +4,7 @@ import styles from './TenantManagementTable.module.css';
 import { Building2, MoreVertical } from 'lucide-react';
 import { DataTable } from '../../ui/DataTable';
 import type { DataTableColumn } from '../../ui/DataTable';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 
 export interface Tenant {
   id: string;
@@ -18,6 +19,7 @@ interface TenantManagementTableProps {
 }
 
 export const TenantManagementTable: React.FC<TenantManagementTableProps> = ({ tenants, isLoading }) => {
+  const dates = useDateFormat();
   const { t } = useTranslation('dashboard');
   const { t: tc } = useTranslation('common');
   const columns: DataTableColumn<Tenant>[] = [
@@ -57,7 +59,7 @@ export const TenantManagementTable: React.FC<TenantManagementTableProps> = ({ te
       nowrap: true,
       render: (tenant) => (
         <span className={styles.dateCell}>
-          {new Date(tenant.createdAt).toLocaleDateString(undefined, {
+          {dates.custom(tenant.createdAt, {
             year: 'numeric',
             month: 'short',
             day: 'numeric',

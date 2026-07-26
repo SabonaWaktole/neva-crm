@@ -14,8 +14,10 @@ import styles from './UpcomingAppointmentsWidget.module.css';
 
 
 import { useNavigate, useParams } from 'react-router-dom';
+import { useDateFormat } from '../../hooks/useDateFormat';
 
 export const UpcomingAppointmentsWidget: React.FC = () => {
+  const dates = useDateFormat();
   const { t } = useTranslation('dashboard');
   const { tenantSlug } = useParams();
   const navigate = useNavigate();
@@ -33,8 +35,7 @@ export const UpcomingAppointmentsWidget: React.FC = () => {
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + 
-           date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return dates.dateTime(date);
   };
 
   return (

@@ -37,7 +37,8 @@
       "conventionsLabel": "Number & Date Conventions",
       "timezoneLabel": "Timezone",
       "dateFormatLabel": "Date Format",
-      "datesNotAppliedYet": "Timezone and date format are not applied to displayed dates yet."
+      "timezoneHint": "Decides which day an appointment or figure belongs to. The dashboard and the calendar both use it, so they always agree.",
+      "dateFormatNotUsed": "Date ordering currently follows the Number & Date Conventions setting above. An explicit pattern is not applied yet."
     },
     "language": {
       "title": "Language",
@@ -162,5 +163,15 @@
       "residualAccess": "If they are signed in right now, their session ends the next time the app reloads, and within an hour at the latest."
     },
     "breadcrumb": "Team Settings"
+  },
+  "integrations": {
+    "breadcrumb": "Integrations",
+    "title": "Integrations",
+    "subtitle": "Manage connections to third-party services.",
+    "connectedSince": "Connected since {{date}}",
+    "connecting": "Connecting...",
+    "connect": "Connect {{name}}",
+    "disconnecting": "Disconnecting...",
+    "disconnect": "Disconnect"
   }
 }

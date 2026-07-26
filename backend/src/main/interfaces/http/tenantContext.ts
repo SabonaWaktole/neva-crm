@@ -19,7 +19,9 @@ import { Request } from 'express';
  * which is a wiring bug that should surface loudly as a 500 in the logs rather
  * than silently pass `undefined` into a database query as a tenant filter.
  */
-export function requireTenant(req: Request): { id: string; urlSlug: string } {
+export function requireTenant(
+  req: Request
+): { id: string; urlSlug: string; timezone: string } {
   const tenant = req.tenant;
   if (!tenant?.id) {
     throw new Error(

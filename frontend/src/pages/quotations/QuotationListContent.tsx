@@ -22,8 +22,10 @@ import { useDebounce } from '../../hooks/useDebounce';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useMoneyFormat } from '../../hooks/useMoneyFormat';
 import { useStatusLabel } from '../../hooks/useStatusLabel';
+import { useDateFormat } from '../../hooks/useDateFormat';
 
 export const QuotationListContent: React.FC = () => {
+  const dates = useDateFormat();
   const { t } = useTranslation('quotations');
   const { t: tc } = useTranslation('common');
   const { format: formatMoney } = useMoneyFormat();
@@ -198,7 +200,7 @@ export const QuotationListContent: React.FC = () => {
                       </td>
                       <td>
                         <span className={styles.mutedText}>
-                          {new Date(quotation.createdAt).toLocaleDateString()}
+                          {dates.date(quotation.createdAt)}
                         </span>
                       </td>
                       <td>

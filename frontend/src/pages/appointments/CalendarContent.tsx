@@ -19,8 +19,9 @@ import { Avatar } from '../../components/ui/Avatar/Avatar';
 import styles from './CalendarContent.module.css';
 
 import { useAppointmentsByDateRange, useRescheduleAppointment } from '../../hooks/useAppointments';
-import { isSameDayLocal } from '../../utils/dateUtils';
+import { isSameDayInZone } from '../../utils/tenantDay';
 import type { Appointment } from '../../types/appointment';
+import { useDateFormat } from '../../hooks/useDateFormat';
 
 // Helper to map backend status to UI color tokens
 const getStatusToken = (status: string) => {
@@ -40,6 +41,7 @@ const CalendarDesktopView = ({
   appointments: Appointment[],
   onAppointmentClick: (app: Appointment) => void 
 }) => {
+  const { timeZone } = useDateFormat();
   const { t } = useTranslation('appointments');
   const { tenantSlug } = useParams();
   const navigate = useNavigate();
@@ -72,7 +74,9 @@ const CalendarDesktopView = ({
 
   // Derive today's queue from the month's appointments (real logic: today relative to user's real today)
   const realToday = new Date();
-  const queueAppointments = (appointments || []).filter(app => isSameDayLocal(app.scheduledAt, realToday));
+  const queueAppointments = (appointments || []).filter(app =>
+    isSameDayInZone(app.scheduledAt, realToday, timeZone)
+  );
   
   const monthYearString = currentDate.toLocaleDateString([], { month: 'long', year: 'numeric' });
   
@@ -150,10 +154,12 @@ const CalendarDesktopView = ({
                 }
                 
                 const dayNumber = cellDate.getDate();
-                const dayAppointments = appointments.filter(app => {
-                  const date = new Date(app.scheduledAt);
-                  return date.getDate() === dayNumber && date.getMonth() === cellDate.getMonth() && date.getFullYear() === cellDate.getFullYear();
-                });
+                // Was a hand-copied re-implementation of isSameDayLocal
+                // comparing browser-local date parts. Both it and the queue
+                // above now go through the one tenant-zone definition.
+                const dayAppointments = appointments.filter(app =>
+                  isSameDayInZone(app.scheduledAt, cellDate, timeZone)
+                );
                 
                 return (
                   <div key={cellDate.toISOString()} className={styles.cell}>
@@ -243,10 +249,13 @@ const CalendarMobileAgenda = ({
   appointments: Appointment[],
   onAppointmentClick: (app: Appointment) => void
 }) => {
+  const { timeZone } = useDateFormat();
   const { t } = useTranslation('appointments');
   const today = new Date();
   const [selectedDate, setSelectedDate] = useState(today);
-  const agendaAppointments = appointments.filter(app => isSameDayLocal(app.scheduledAt, selectedDate));
+  const agendaAppointments = appointments.filter(app =>
+    isSameDayInZone(app.scheduledAt, selectedDate, timeZone)
+  );
 
   // Show a 7-day window centered on "today" so the strip always reflects real dates
   const weekDays = Array.from({ length: 7 }).map((_, i) => {

@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { drawerVariants, overlayVariants } from '../../../lib/motion';
@@ -19,6 +20,7 @@ export const SlideOver: React.FC<SlideOverProps> = ({
   children,
   footer,
 }) => {
+  const { t } = useTranslation('common');
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -65,7 +67,7 @@ export const SlideOver: React.FC<SlideOverProps> = ({
               <button
                 className={styles.closeButton}
                 onClick={onClose}
-                aria-label="Close panel"
+                aria-label={t('a11y.closePanel')}
               >
                 <X size={20} />
               </button>

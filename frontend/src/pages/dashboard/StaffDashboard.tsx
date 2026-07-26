@@ -10,8 +10,10 @@ import { getActivityConfig } from '../../utils/activityMapper';
 import { useDashboardMetrics, useActivityFeed } from '../../hooks/useDashboard'; 
 import { useAppointmentsByDateRange } from '../../hooks/useAppointments';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useDateFormat } from '../../hooks/useDateFormat';
 
 export const StaffDashboard = () => {
+  const dates = useDateFormat();
   const { t } = useTranslation('dashboard');
   const { user } = useAuthStore();
   const { metrics, isLoading: isLoadingMetrics } = useDashboardMetrics();
@@ -192,7 +194,7 @@ export const StaffDashboard = () => {
                     <TimelineItem 
                       key={activity.id}
                       title={activity.type.replace(/_/g, ' ')}
-                      subtitle={new Date(activity.timestamp).toLocaleString()}
+                      subtitle={dates.dateTime(activity.timestamp)}
                       content={`${activity.actor.name}: ${activity.description}`}
                       icon={config.icon}
                       iconTextColor={config.color}

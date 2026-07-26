@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Download, Edit, CheckCircle, XCircle, Send, ArrowLeft, Archive } from 'lucide-react';
@@ -11,8 +11,10 @@ import styles from './QuotationDetailContent.module.css';
 import { useQuotations, useQuotationActions } from '../../hooks/useQuotations';
 import { useMoneyFormat } from '../../hooks/useMoneyFormat';
 import { useStatusLabel } from '../../hooks/useStatusLabel';
+import { useDateFormat } from '../../hooks/useDateFormat';
 
 export const QuotationDetailContent: React.FC = () => {
+  const dates = useDateFormat();
   const { t } = useTranslation('quotations');
   const { format: formatMoney } = useMoneyFormat();
   const statusLabel = useStatusLabel();
@@ -25,7 +27,14 @@ export const QuotationDetailContent: React.FC = () => {
   const [data, setData] = useState<any>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const loadData = async () => {
+  /*
+   * useCallback is load-bearing, not decoration. `loadData` is used by the
+   * effect below and by handleAction; listing it as a dependency without
+   * memoising it would give the effect a new function identity every render and
+   * refetch forever. Memoised on its own inputs, the effect runs exactly when
+   * the quotation being viewed changes.
+   */
+  const loadData = useCallback(async () => {
     if (id) {
       try {
         const detail = await fetchQuotationDetail(id);
@@ -34,11 +43,11 @@ export const QuotationDetailContent: React.FC = () => {
         console.error(err);
       }
     }
-  };
+  }, [id, fetchQuotationDetail]);
 
   useEffect(() => {
     loadData();
-  }, [id, fetchQuotationDetail]);
+  }, [loadData]);
 
   if (loading || !data) {
     return <div className={styles.loadingState}>{t('detail.loading')}</div>;
@@ -143,7 +152,7 @@ export const QuotationDetailContent: React.FC = () => {
               </div>
               <div>
                 <div className={styles.summaryLabel}>{t('detail.dateCreated')}</div>
-                <div className={styles.summaryValue}>{new Date(quotation.createdAt).toLocaleDateString()}</div>
+                <div className={styles.summaryValue}>{dates.date(quotation.createdAt)}</div>
               </div>
               <div>
                 <div className={styles.summaryLabel}>{t('detail.createdBy')}</div>
@@ -218,7 +227,7 @@ export const QuotationDetailContent: React.FC = () => {
                   <div className={styles.timelineDot} />
                   <div className={styles.timelineContent}>
                     <span className={styles.timelineStatus}>{statusLabel.quotation(event.status)}</span>
-                    <span className={styles.timelineDate}>{new Date(event.changedAt).toLocaleString()}</span>
+                    <span className={styles.timelineDate}>{dates.dateTime(event.changedAt)}</span>
                     <span className={styles.timelineUser}>
                       {t('detail.byUser', { user: event.changedByUserId.substring(0, 8) })}
                     </span>

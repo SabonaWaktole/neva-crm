@@ -16,7 +16,9 @@
     "search": "Search",
     "refresh": "Refresh",
     "retry": "Try again",
-    "viewAll": "View all"
+    "viewAll": "View all",
+    "logOut": "Log Out",
+    "support": "Support"
   },
   "state": {
     "loading": "Loading…",
@@ -40,6 +42,39 @@
   },
   "pagination": {
     "page": "Page {{page}}",
-    "showing": "Showing {{from}}–{{to}} of {{total}}"
+    "showing": "Showing {{from}}–{{to}} of {{total}}",
+    "range": "{{first}}–{{last}} of {{total}} {{itemLabel}}",
+    "empty": "No {{itemLabel}}",
+    "rows": "Rows",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "label": "Pagination",
+    "items": "items"
+  },
+  "table": {
+    "selectAllRows": "Select all rows",
+    "selectAll": "Select all",
+    "selected": "{{count}} selected",
+    "selectRow": "Select row"
+  },
+  "dialog": {
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  },
+  "a11y": {
+    "notifications": "Notifications",
+    "dismissNotification": "Dismiss notification",
+    "closePanel": "Close panel",
+    "closeModal": "Close modal",
+    "breadcrumb": "Breadcrumb"
+  },
+  "input": {
+    "selectAnOption": "Select an option"
+  },
+  "stock": {
+    "units": "{{count}} Units"
+  },
+  "cropper": {
+    "hint": "Drag to reposition · scroll or use the slider to zoom"
   }
 }

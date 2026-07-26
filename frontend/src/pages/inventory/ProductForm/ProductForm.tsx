@@ -34,6 +34,7 @@ import { useStatusLabel } from '../../../hooks/useStatusLabel';
 import type { ProductStatus } from '../../../types/inventory';
 
 import styles from './ProductForm.module.css';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 
 interface FormState {
   name: string;
@@ -105,6 +106,7 @@ const validate = (form: FormState): FieldErrors => {
 };
 
 const ProductFormContent: React.FC = () => {
+  const dates = useDateFormat();
   const { t } = useTranslation('inventory');
   const { format: formatMoney } = useMoneyFormat();
   const statusLabel = useStatusLabel();
@@ -511,13 +513,13 @@ const ProductFormContent: React.FC = () => {
                       <div className={styles.metadataItem}>
                         <span className={styles.metadataLabel}>{t('form.created')}</span>
                         <span className={styles.metadataValue}>
-                          {new Date(product.createdAt).toLocaleDateString()}
+                          {dates.date(product.createdAt)}
                         </span>
                       </div>
                       <div className={styles.metadataItem}>
                         <span className={styles.metadataLabel}>{t('form.lastEdited')}</span>
                         <span className={styles.metadataValue}>
-                          {new Date(product.updatedAt).toLocaleDateString()}
+                          {dates.date(product.updatedAt)}
                         </span>
                       </div>
                       <div className={styles.metadataItem}>

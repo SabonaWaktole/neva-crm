@@ -23,6 +23,7 @@ import { useTeam } from '../../hooks/useTeam';
 import { findPersonById, getStaffDisplayName, getStaffInitials } from '../../utils/userUtils';
 import { useStatusLabel } from '../../hooks/useStatusLabel';
 import styles from './ClientDetailContent.module.css';
+import { useDateFormat } from '../../hooks/useDateFormat';
 
 /**
  * Custom field values are stored as JSONB and can be any JSON scalar, so they
@@ -58,6 +59,7 @@ const getAppointmentStatusVariant = (status: Appointment['status']) => {
 };
 
 export const ClientDetailContent: React.FC = () => {
+  const dates = useDateFormat();
   const { t } = useTranslation('clients');
   const { t: tc } = useTranslation('common');
   const statusLabel = useStatusLabel();
@@ -304,7 +306,7 @@ export const ClientDetailContent: React.FC = () => {
                     key={item.id}
                     title={title}
                     subtitle={t('detail.timelineSubtitle', {
-                      timestamp: new Date(item.timestamp).toLocaleString(),
+                      timestamp: dates.dateTime(item.timestamp),
                       actor: item.actor,
                     })}
                     content={item.details?.content}
@@ -344,7 +346,7 @@ export const ClientDetailContent: React.FC = () => {
                   >
                     <div className={styles.appointmentInfo}>
                       <span className={styles.appointmentDate}>
-                        {new Date(app.scheduledAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+                        {dates.dateTime(app.scheduledAt)}
                       </span>
                       <span className={styles.appointmentNotes}>{app.notes || t('detail.noNotes')}</span>
                     </div>

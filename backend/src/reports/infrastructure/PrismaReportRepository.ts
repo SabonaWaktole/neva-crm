@@ -25,7 +25,23 @@ export class PrismaReportRepository implements IReportRepository {
     const monthlyMap: Record<string, number> = {};
 
     for (const q of quotations) {
-      const monthStr = q.createdAt.toISOString().slice(0, 7); // YYYY-MM
+      /*
+       * DELIBERATELY UTC — do not "fix" this to the tenant's timezone.
+       *
+       * A financial reporting period must have a boundary that is fixed once
+       * the period exists. If months were bucketed in `tenant.timezone`, then
+       * changing that setting would retroactively move revenue between months:
+       * a quotation created at 23:30 UTC on 31 January would silently become
+       * February revenue the moment someone moved the workspace east, and a
+       * previously published figure would no longer reconcile.
+       *
+       * This is a permanent guarantee, not a shortcut taken for expedience.
+       * The DAILY buckets on the dashboard DO follow the tenant zone (see
+       * shared/domain/time/tenantDay.ts) because "appointments today" is a
+       * question about the user's current day; "revenue in January" is a
+       * question about a closed accounting period. The two differ on purpose.
+       */
+      const monthStr = q.createdAt.toISOString().slice(0, 7); // YYYY-MM, UTC
       if (!monthlyMap[monthStr]) {
         monthlyMap[monthStr] = 0;
       }
