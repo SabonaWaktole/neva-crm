@@ -7,13 +7,10 @@ export const apiClient = axios.create({
   withCredentials: true, // This ensures httpOnly cookies are sent with every request
 });
 
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// No request interceptor attaching a Bearer token: the JWT lives only in the
+// httpOnly cookie, which withCredentials above sends automatically. Mirroring it
+// into localStorage would make it readable by any injected script and would
+// defeat the point of httpOnly.
 
 // We can add interceptors here to globally handle 401s (e.g. redirect to login)
 apiClient.interceptors.response.use(
@@ -24,3 +21,4 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+

@@ -224,6 +224,16 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        // Same component as 'new'; the presence of :productId switches it into
+        // edit mode, so create and edit can never drift apart.
+        path: 'inventory/:productId/edit',
+        element: (
+          <ProtectedRoute>
+            <ProductForm />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: 'settings/warehouses',
         element: (
           <ProtectedRoute>

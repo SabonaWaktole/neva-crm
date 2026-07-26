@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { requireTenantId } from "@main/interfaces/http/tenantContext";
 import { GetIntegrationsUseCase } from '../../application/use-cases/GetIntegrationsUseCase';
 import { ConnectIntegrationUseCase } from '../../application/use-cases/ConnectIntegrationUseCase';
 import { DisconnectIntegrationUseCase } from '../../application/use-cases/DisconnectIntegrationUseCase';
@@ -14,7 +15,7 @@ export class IntegrationsController {
   getIntegrations = async (req: Request, res: Response) => {
     try {
       const integrations = await this.getIntegrationsUseCase.execute({
-        tenantId: req.user!.tenantId!
+        tenantId: requireTenantId(req)
       });
       res.status(200).json({ integrations: integrations.map(i => i.toJSON()) });
     } catch (error: any) {
@@ -26,7 +27,7 @@ export class IntegrationsController {
   connectIntegration = async (req: Request, res: Response) => {
     try {
       await this.connectIntegrationUseCase.execute({
-        tenantId: req.user!.tenantId!,
+        tenantId: requireTenantId(req),
         authorRole: req.user!.role as UserRole,
         provider: req.body.provider,
         config: req.body.config
@@ -45,7 +46,7 @@ export class IntegrationsController {
   disconnectIntegration = async (req: Request, res: Response) => {
     try {
       await this.disconnectIntegrationUseCase.execute({
-        tenantId: req.user!.tenantId!,
+        tenantId: requireTenantId(req),
         authorRole: req.user!.role as UserRole,
         provider: req.body.provider
       });

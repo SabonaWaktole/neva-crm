@@ -64,7 +64,7 @@ export const StockAdjustmentPanel: React.FC<StockAdjustmentPanelProps> = ({
       
       await adjustStock(productId, {
         warehouseId: adjustWarehouseId,
-        quantity: finalQuantity,
+        quantityChange: finalQuantity,
         reason: [reason, notes].filter(Boolean).join(' - ')
       });
     } else {

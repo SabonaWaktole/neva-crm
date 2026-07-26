@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
+import { errorHandler } from '@main/interfaces/http/middlewares/errorHandler';
 // Removed createAuthRoutes import
 import { AuthController } from '@auth/interfaces/http/controllers/AuthController';
 import { RegisterBusinessOwnerUseCase } from '@auth/application/use-cases/RegisterBusinessOwnerUseCase';
@@ -49,6 +51,10 @@ export interface AppDependencies {
 
 export const createApp = (overrides?: Partial<AppDependencies>) => {
   const app = express();
+  // Sensible security headers (HSTS, X-Content-Type-Options, frame denial, and
+  // referrer policy among others). This is a JSON API, so the default CSP is
+  // not load-bearing here; the frontend is served separately.
+  app.use(helmet());
   app.use(cors({
     origin: (origin, callback) => {
       const allowedOrigins = [
@@ -157,6 +163,8 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
 
   // Inventory Routes
   const { PrismaProductRepository } = require('../inventory/infrastructure/repositories/PrismaProductRepository');
+  const { PrismaProductImageRepository } = require('../inventory/infrastructure/repositories/PrismaProductImageRepository');
+  const { MediaProductImageStorage } = require('../inventory/infrastructure/storage/MediaProductImageStorage');
   const { PrismaWarehouseRepository } = require('../inventory/infrastructure/repositories/PrismaWarehouseRepository');
   const { PrismaCategoryRepository } = require('../inventory/infrastructure/repositories/PrismaCategoryRepository');
   const { PrismaStockLevelRepository } = require('../inventory/infrastructure/repositories/PrismaStockLevelRepository');
@@ -165,6 +173,11 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   
   const { CreateProductUseCase } = require('../inventory/application/use-cases/CreateProductUseCase');
   const { UpdateProductUseCase } = require('../inventory/application/use-cases/UpdateProductUseCase');
+  const { GetProductUseCase } = require('../inventory/application/use-cases/GetProductUseCase');
+  const { DeleteProductUseCase } = require('../inventory/application/use-cases/DeleteProductUseCase');
+  const { BulkUpdateProductsUseCase } = require('../inventory/application/use-cases/BulkUpdateProductsUseCase');
+  const { GetProductFacetsUseCase } = require('../inventory/application/use-cases/GetProductFacetsUseCase');
+  const { ManageProductImagesUseCase } = require('../inventory/application/use-cases/ManageProductImagesUseCase');
   const { AdjustStockUseCase } = require('../inventory/application/use-cases/AdjustStockUseCase');
   const { TransferStockUseCase } = require('../inventory/application/use-cases/TransferStockUseCase');
   const { SearchProductsUseCase } = require('../inventory/application/use-cases/SearchProductsUseCase');
@@ -183,29 +196,48 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const { createInventoryRouter } = require('../inventory/interfaces/http/inventoryRoutes');
 
   const productRepo = new PrismaProductRepository(prisma);
+  const productImageRepo = new PrismaProductImageRepository(prisma);
+  const productImageStorage = new MediaProductImageStorage();
   const warehouseRepo = new PrismaWarehouseRepository(prisma);
   const categoryRepo = new PrismaCategoryRepository(prisma);
   const stockLevelRepo = new PrismaStockLevelRepository(prisma);
   const stockMovementRepo = new PrismaStockMovementRepository(prisma);
   const stockTxManager = new PrismaStockTransactionManager(prisma);
 
-  const inventoryController = new InventoryController(
-    new CreateProductUseCase(productRepo, warehouseRepo, stockTxManager),
-    new UpdateProductUseCase(productRepo),
-    new AdjustStockUseCase(stockLevelRepo, stockMovementRepo),
-    new TransferStockUseCase(stockLevelRepo, stockTxManager),
-    new SearchProductsUseCase(productRepo),
-    new GetProductStockBreakdownUseCase(productRepo, stockLevelRepo),
-    new CreateWarehouseUseCase(warehouseRepo),
-    new UpdateWarehouseUseCase(warehouseRepo),
-    new DeleteWarehouseUseCase(warehouseRepo, stockLevelRepo),
-    new GetWarehousesUseCase(warehouseRepo),
-    new CreateCategoryUseCase(categoryRepo),
-    new UpdateCategoryUseCase(categoryRepo),
-    new DeleteCategoryUseCase(categoryRepo, productRepo),
-    new GetCategoriesUseCase(categoryRepo),
-    new ArchiveUnusedCategoriesUseCase(categoryRepo)
+  // Bulk delete reuses the single delete, so it gets the same instance rather
+  // than a second copy with its own idea of what deleting means.
+  const deleteProductUseCase = new DeleteProductUseCase(
+    productRepo,
+    productImageRepo,
+    productImageStorage
   );
+
+  const inventoryController = new InventoryController({
+    createProductUseCase: new CreateProductUseCase(productRepo, warehouseRepo, stockTxManager),
+    updateProductUseCase: new UpdateProductUseCase(productRepo),
+    getProductUseCase: new GetProductUseCase(productRepo),
+    deleteProductUseCase,
+    bulkUpdateProductsUseCase: new BulkUpdateProductsUseCase(productRepo, deleteProductUseCase),
+    getProductFacetsUseCase: new GetProductFacetsUseCase(productRepo),
+    manageProductImagesUseCase: new ManageProductImagesUseCase(
+      productRepo,
+      productImageRepo,
+      productImageStorage
+    ),
+    adjustStockUseCase: new AdjustStockUseCase(stockLevelRepo, stockMovementRepo),
+    transferStockUseCase: new TransferStockUseCase(stockLevelRepo, stockTxManager),
+    searchProductsUseCase: new SearchProductsUseCase(productRepo),
+    getProductStockBreakdownUseCase: new GetProductStockBreakdownUseCase(productRepo, stockLevelRepo),
+    createWarehouseUseCase: new CreateWarehouseUseCase(warehouseRepo),
+    updateWarehouseUseCase: new UpdateWarehouseUseCase(warehouseRepo),
+    deleteWarehouseUseCase: new DeleteWarehouseUseCase(warehouseRepo, stockLevelRepo),
+    getWarehousesUseCase: new GetWarehousesUseCase(warehouseRepo),
+    createCategoryUseCase: new CreateCategoryUseCase(categoryRepo),
+    updateCategoryUseCase: new UpdateCategoryUseCase(categoryRepo),
+    deleteCategoryUseCase: new DeleteCategoryUseCase(categoryRepo, productRepo),
+    getCategoriesUseCase: new GetCategoriesUseCase(categoryRepo),
+    archiveUnusedCategoriesUseCase: new ArchiveUnusedCategoriesUseCase(categoryRepo),
+  });
 
   const inventoryRoutes = createInventoryRouter(inventoryController, tokenService, tenantRepository);
   app.use('/api/:tenantSlug/inventory', inventoryRoutes);
@@ -324,10 +356,7 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const reportRoutes = createReportRouter(reportsController, tokenService, tenantRepository);
   app.use('/api/:tenantSlug/reports', reportRoutes);
 
-  app.use((err: any, req: any, res: any, next: any) => {
-    console.error("GLOBAL ERROR:", err);
-    res.status(500).json({ error: err.message, stack: err.stack });
-  });
+  app.use(errorHandler);
 
   return app;
 };

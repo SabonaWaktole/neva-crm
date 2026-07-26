@@ -21,6 +21,8 @@
   padding: 0 var(--spacing-lg);
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
@@ -34,6 +36,29 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
+}
+
+/* The first crumb navigates, so it is a real button — styled flat to read as
+   part of the trail rather than as a control. */
+.breadcrumbLink {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  color: var(--text-tertiary);
+  transition: color var(--transition-fast);
+}
+
+.breadcrumbLink:hover {
+  color: var(--color-primary);
+}
+
+.breadcrumbActive {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .breadcrumbMuted {
@@ -124,6 +149,54 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--spacing-md);
+}
+
+/* auto-fit rather than a fixed count: three money fields sit in a row on a
+   laptop and stack cleanly on a phone without a second breakpoint. */
+.threeColGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.marginNote {
+  margin: 0;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-sm);
+  color: var(--text-secondary);
+}
+
+.marginNote strong {
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.emptyNote {
+  margin: 0;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-sm);
+  line-height: 1.45;
+  color: var(--text-tertiary);
+}
+
+.dangerActions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.centeredState {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-xl);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-md);
+  color: var(--text-secondary);
+  text-align: center;
 }
 
 /* -------------------------------------------------------------- metadata */

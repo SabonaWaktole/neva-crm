@@ -114,7 +114,7 @@ describe('Inventory Module Integration Tests', () => {
           price: 100,
           initialStock: [{ warehouseId, quantity: 50 }]
         });
-      productId = prodRes.body.product.id;
+      productId = prodRes.body.id;
 
       expect(catRes.status).toBe(201);
       expect(whRes.status).toBe(201);
@@ -174,7 +174,7 @@ describe('Inventory Module Integration Tests', () => {
             { warehouseId: destWhId, quantity: 10 }
           ]
         });
-        productId = p.body.product.id;
+        productId = p.body.id;
 
         // Give the staff access to the source warehouse
         tokenTenant1Staff = tokenService.sign({ userId: t1StaffId, role: UserRole.STAFF, tenantId: t1Id, tenantSlug: 't1-inv', warehouseId: sourceWhId });
@@ -299,7 +299,7 @@ describe('Inventory Module Integration Tests', () => {
           initialStock: []
         });
       expect(pZero.status).toBe(201);
-      expect(pZero.body.stockLevels).toHaveLength(0);
+      expect(pZero.body.stockBreakdown).toHaveLength(0);
 
       // Multiple locations
       const pMulti = await request(app).post('/api/t1-inv/inventory/products')
@@ -314,9 +314,9 @@ describe('Inventory Module Integration Tests', () => {
           ]
         });
       expect(pMulti.status).toBe(201);
-      expect(pMulti.body.stockLevels).toHaveLength(2);
-      expect(pMulti.body.stockLevels.find((s: any) => s.warehouseId === testWh1Id).quantity).toBe(50);
-      expect(pMulti.body.stockLevels.find((s: any) => s.warehouseId === testWh2Id).quantity).toBe(100);
+      expect(pMulti.body.stockBreakdown).toHaveLength(2);
+      expect(pMulti.body.stockBreakdown.find((s: any) => s.warehouseId === testWh1Id).quantity).toBe(50);
+      expect(pMulti.body.stockBreakdown.find((s: any) => s.warehouseId === testWh2Id).quantity).toBe(100);
     });
 
     it('Adjust stock endpoint explicitly modifies stock and logs movement', async () => {
@@ -324,7 +324,7 @@ describe('Inventory Module Integration Tests', () => {
         .set('Authorization', `Bearer ${tokenTenant1Owner}`)
         .send({ name: 'Adjustable', description: 'Desc', price: 10, initialStock: [{ warehouseId: testWh1Id, quantity: 50 }]});
       
-      const res = await request(app).post(`/api/t1-inv/inventory/products/${p.body.product.id}/adjust`)
+      const res = await request(app).post(`/api/t1-inv/inventory/products/${p.body.id}/adjust`)
         .set('Authorization', `Bearer ${tokenTenant1Staff}`) // Staff can adjust
         .send({ warehouseId: testWh1Id, quantityChange: -20, reason: 'Shrinkage' });
       
@@ -332,28 +332,35 @@ describe('Inventory Module Integration Tests', () => {
       expect(res.body.stockLevel.quantity).toBe(30);
 
       const dbMovement = await prisma.stockMovement.findFirst({
-        where: { tenantId: t1Id, productId: p.body.product.id, type: 'ADJUSTMENT' }
+        where: { tenantId: t1Id, productId: p.body.id, type: 'ADJUSTMENT' }
       });
       expect(dbMovement?.quantity).toBe(-20);
       expect(dbMovement?.warehouseId).toBe(testWh1Id); // Proves the bug is fixed!
     });
 
     it('Product search with the 3 threshold boundaries (LOW_STOCK, IN_STOCK, OUT_OF_STOCK)', async () => {
+      // Staff searches are scoped to their own warehouse, so the token has to
+      // name a real one for the stock totals to mean anything.
+      const scopedStaffToken = tokenService.sign({
+        userId: t1StaffId, role: UserRole.STAFF, tenantId: t1Id,
+        tenantSlug: 't1-inv', warehouseId: testWh1Id,
+      });
+
       const p1 = await request(app).post('/api/t1-inv/inventory/products').set('Authorization', `Bearer ${tokenTenant1Owner}`).send({ name: 'Search Out', description: 'D', price: 10, initialStock: [] });
       const p2 = await request(app).post('/api/t1-inv/inventory/products').set('Authorization', `Bearer ${tokenTenant1Owner}`).send({ name: 'Search Low', description: 'D', lowStockThreshold: 10, price: 10, initialStock: [{ warehouseId: testWh1Id, quantity: 5 }] });
       const p3 = await request(app).post('/api/t1-inv/inventory/products').set('Authorization', `Bearer ${tokenTenant1Owner}`).send({ name: 'Search In', description: 'D', lowStockThreshold: 10, price: 10, initialStock: [{ warehouseId: testWh1Id, quantity: 50 }] });
       
-      const outRes = await request(app).get('/api/t1-inv/inventory/products?availability=OUT_OF_STOCK').set('Authorization', `Bearer ${tokenTenant1Staff}`);
-      expect(outRes.body.some((p: any) => p.product.id === p1.body.product.id)).toBe(true);
-      expect(outRes.body.some((p: any) => p.product.id === p2.body.product.id)).toBe(false);
+      const outRes = await request(app).get('/api/t1-inv/inventory/products?availability=OUT_OF_STOCK').set('Authorization', `Bearer ${scopedStaffToken}`);
+      expect(outRes.body.items.some((p: any) => p.id === p1.body.id)).toBe(true);
+      expect(outRes.body.items.some((p: any) => p.id === p2.body.id)).toBe(false);
 
-      const lowRes = await request(app).get('/api/t1-inv/inventory/products?availability=LOW_STOCK').set('Authorization', `Bearer ${tokenTenant1Staff}`);
-      expect(lowRes.body.some((p: any) => p.product.id === p2.body.product.id)).toBe(true);
-      expect(lowRes.body.some((p: any) => p.product.id === p3.body.product.id)).toBe(false);
+      const lowRes = await request(app).get('/api/t1-inv/inventory/products?availability=LOW_STOCK').set('Authorization', `Bearer ${scopedStaffToken}`);
+      expect(lowRes.body.items.some((p: any) => p.id === p2.body.id)).toBe(true);
+      expect(lowRes.body.items.some((p: any) => p.id === p3.body.id)).toBe(false);
 
-      const inRes = await request(app).get('/api/t1-inv/inventory/products?availability=IN_STOCK').set('Authorization', `Bearer ${tokenTenant1Staff}`);
-      expect(inRes.body.some((p: any) => p.product.id === p3.body.product.id)).toBe(true);
-      expect(inRes.body.some((p: any) => p.product.id === p1.body.product.id)).toBe(false);
+      const inRes = await request(app).get('/api/t1-inv/inventory/products?availability=IN_STOCK').set('Authorization', `Bearer ${scopedStaffToken}`);
+      expect(inRes.body.items.some((p: any) => p.id === p3.body.id)).toBe(true);
+      expect(inRes.body.items.some((p: any) => p.id === p1.body.id)).toBe(false);
     });
 
     it('Role-gating proving 403 at the API level', async () => {
@@ -372,7 +379,7 @@ describe('Inventory Module Integration Tests', () => {
       
       const tokenSuperAdmin = tokenService.sign({ userId: 'u_super', role: UserRole.SUPER_ADMIN as any, tenantId: t1Id, tenantSlug: 't1-inv', warehouseId: null });
       
-      const adjustRes = await request(app).post(`/api/t1-inv/inventory/products/${p.body.product.id}/adjust`)
+      const adjustRes = await request(app).post(`/api/t1-inv/inventory/products/${p.body.id}/adjust`)
         .set('Authorization', `Bearer ${tokenSuperAdmin}`) // SUPER_ADMIN attempting to adjust tenant stock
         .send({ warehouseId: testWh1Id, quantityChange: 10 });
       expect(adjustRes.status).toBe(403);

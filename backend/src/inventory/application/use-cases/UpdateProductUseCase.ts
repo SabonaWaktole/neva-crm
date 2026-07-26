@@ -1,5 +1,6 @@
 import { IProductRepository } from '../../domain/repositories';
 import { Product } from '../../domain/Product';
+import { DuplicateSkuError } from '../../domain/inUseErrors';
 import { UserRole } from '../../../auth/domain/enums/UserRole';
 
 export interface UpdateProductDTO {
@@ -7,9 +8,14 @@ export interface UpdateProductDTO {
   id: string;
   name?: string;
   description?: string;
+  sku?: string | null;
+  brand?: string | null;
   categoryId?: string | null;
   price?: number;
+  cost?: number | null;
+  tags?: string[];
   lowStockThreshold?: number;
+  isArchived?: boolean;
   authorRole: UserRole;
   authorWarehouseId?: string | null;
 }
@@ -31,12 +37,25 @@ export class UpdateProductUseCase {
       throw new Error(`Product ${dto.id} not found`);
     }
 
+    // Only worth a lookup when the SKU is actually changing — re-saving a
+    // product with its own SKU must not conflict with itself.
+    const sku = dto.sku?.trim();
+    if (sku && sku !== product.sku) {
+      const existing = await this.productRepo.findBySku(dto.tenantId, sku);
+      if (existing && existing.id !== product.id) throw new DuplicateSkuError(sku);
+    }
+
     product.update({
       name: dto.name,
       description: dto.description,
+      sku: dto.sku,
+      brand: dto.brand,
       categoryId: dto.categoryId,
       price: dto.price,
-      lowStockThreshold: dto.lowStockThreshold
+      cost: dto.cost,
+      tags: dto.tags,
+      lowStockThreshold: dto.lowStockThreshold,
+      isArchived: dto.isArchived
     });
 
     await this.productRepo.save(product);

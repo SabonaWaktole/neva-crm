@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { requireTenantId } from "@main/interfaces/http/tenantContext";
 import { CreateAppointmentUseCase } from '../../../application/use-cases/CreateAppointmentUseCase';
 import { RescheduleAppointmentUseCase } from '../../../application/use-cases/RescheduleAppointmentUseCase';
 import { CancelAppointmentUseCase } from '../../../application/use-cases/CancelAppointmentUseCase';
@@ -47,7 +48,7 @@ export class AppointmentController {
   public createAppointment = async (req: Request, res: Response) => {
     try {
       const validatedData = createAppointmentSchema.parse(req.body);
-      const tenantId = req.tenant!.id;
+      const tenantId = requireTenantId(req);
 
       const appointment = await this.createAppointmentUseCase.execute({
         tenantId,
@@ -69,7 +70,7 @@ export class AppointmentController {
   public updateAppointment = async (req: Request, res: Response) => {
     try {
       const validatedData = updateAppointmentSchema.parse(req.body);
-      const tenantId = req.tenant!.id;
+      const tenantId = requireTenantId(req);
       const id = req.params.appointmentId as string;
 
       const appointment = await this.updateAppointmentUseCase.execute({
@@ -93,7 +94,7 @@ export class AppointmentController {
   public rescheduleAppointment = async (req: Request, res: Response) => {
     try {
       const validatedData = rescheduleAppointmentSchema.parse(req.body);
-      const tenantId = req.tenant!.id;
+      const tenantId = requireTenantId(req);
       const id = req.params.appointmentId as string;
       const changedByUserId = req.user!.userId;
 
@@ -120,7 +121,7 @@ export class AppointmentController {
   public cancelAppointment = async (req: Request, res: Response) => {
     try {
       const validatedData = cancelAppointmentSchema.parse(req.body);
-      const tenantId = req.tenant!.id;
+      const tenantId = requireTenantId(req);
       const id = req.params.appointmentId as string;
       const changedByUserId = req.user!.userId;
 
@@ -146,7 +147,7 @@ export class AppointmentController {
   public updateAppointmentStatus = async (req: Request, res: Response) => {
     try {
       const validatedData = updateAppointmentStatusSchema.parse(req.body);
-      const tenantId = req.tenant!.id;
+      const tenantId = requireTenantId(req);
       const id = req.params.appointmentId as string;
 
       const appointment = await this.updateAppointmentStatusUseCase.execute({
@@ -170,7 +171,7 @@ export class AppointmentController {
   public searchAppointments = async (req: Request, res: Response) => {
     try {
       const validatedData = searchAppointmentsSchema.parse(req.query);
-      const tenantId = req.tenant!.id;
+      const tenantId = requireTenantId(req);
 
       const results = await this.searchAppointmentsUseCase.execute({
         tenantId,
@@ -192,7 +193,7 @@ export class AppointmentController {
   public getUpcomingAppointments = async (req: Request, res: Response) => {
     try {
       const validatedData = getUpcomingAppointmentsSchema.parse(req.query);
-      const tenantId = req.tenant!.id;
+      const tenantId = requireTenantId(req);
       const userId = req.user!.userId;
       const role = req.user!.role;
 
@@ -211,7 +212,7 @@ export class AppointmentController {
 
   public getAppointmentHistory = async (req: Request, res: Response) => {
     try {
-      const tenantId = req.tenant!.id;
+      const tenantId = requireTenantId(req);
       const id = req.params.appointmentId as string;
 
       const history = await this.getAppointmentHistoryUseCase.execute({

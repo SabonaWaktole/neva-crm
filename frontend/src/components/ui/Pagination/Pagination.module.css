@@ -1,0 +1,112 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  padding: var(--spacing-sm) 0;
+}
+
+.summary {
+  margin: 0;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-sm);
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.summary strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.pageSize {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.pageSizeLabel {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-sm);
+  color: var(--text-tertiary);
+}
+
+.pageSizeSelect {
+  height: 30px;
+  padding: 0 var(--spacing-xs);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-default);
+  background-color: var(--color-surface-container-lowest);
+  color: var(--text-primary);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-sm);
+  cursor: pointer;
+}
+
+.pages {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.page,
+.arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 6px;
+  border: none;
+  border-radius: var(--radius-default);
+  background: none;
+  color: var(--text-secondary);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-sm);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.page:hover:not(.pageActive),
+.arrow:hover:not(:disabled) {
+  background-color: var(--color-surface-container);
+  color: var(--text-primary);
+}
+
+.pageActive {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary, #fff);
+}
+
+.arrow:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.gap {
+  min-width: 20px;
+  text-align: center;
+  color: var(--text-quaternary);
+  font-size: var(--font-size-body-sm);
+}
+
+/* On a phone the row-count picker is noise; the summary and arrows carry it. */
+@media (max-width: 560px) {
+  .container {
+    justify-content: center;
+  }
+
+  .pageSize {
+    display: none;
+  }
+}

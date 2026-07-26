@@ -1,0 +1,147 @@
+/* ============================================================================
+ * Toast
+ * Desktop: a stack in the bottom-right, clear of the sidebar and content.
+ * Mobile: full-width at the bottom, above the thumb zone but below nothing.
+ * ========================================================================= */
+
+.viewport {
+  position: fixed;
+  bottom: var(--spacing-lg);
+  right: var(--spacing-lg);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  width: min(400px, calc(100vw - var(--spacing-lg) * 2));
+  /* The viewport spans a large area but is empty most of the time; without
+     this it would swallow clicks on whatever is underneath. */
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-base) var(--spacing-md);
+  border-radius: var(--radius-xl);
+  background-color: var(--color-surface-container-lowest);
+  box-shadow:
+    var(--shadow-xl),
+    inset 0 0 0 1px var(--border-subtle);
+}
+
+/* A colour bar rather than a tinted background: the message stays as legible
+   as body text while the status is still readable at a glance. */
+.toast::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: var(--radius-full);
+}
+
+.toast {
+  position: relative;
+  overflow: hidden;
+}
+
+.success::before { background-color: var(--color-success); }
+.error::before { background-color: var(--color-error); }
+.warning::before { background-color: var(--color-warning); }
+.info::before { background-color: var(--color-primary); }
+
+.icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+
+.success .icon { color: var(--color-success); }
+.error .icon { color: var(--color-error); }
+.warning .icon { color: var(--color-warning); }
+.info .icon { color: var(--color-primary); }
+
+.body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.message {
+  margin: 0;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-sm);
+  line-height: 1.45;
+  color: var(--text-secondary);
+  /* Long server messages wrap instead of stretching the toast off-screen. */
+  overflow-wrap: anywhere;
+}
+
+.action {
+  align-self: flex-start;
+  margin-top: var(--spacing-xs);
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-sm);
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.action:hover {
+  text-decoration: underline;
+}
+
+.close {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin: -2px -4px 0 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-default);
+  background: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.close:hover {
+  background-color: var(--color-surface-container);
+  color: var(--text-primary);
+}
+
+@media (max-width: 640px) {
+  .viewport {
+    left: var(--spacing-sm);
+    right: var(--spacing-sm);
+    bottom: var(--spacing-sm);
+    width: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    transition: none;
+  }
+}

@@ -9,6 +9,7 @@ import { resolveTenant } from '@main/interfaces/http/middlewares/resolveTenant';
 import { UserRole } from '@auth/domain/enums/UserRole';
 import { ITokenService } from '@auth/application/ports/ITokenService';
 import { ITenantRepository } from '@tenant/domain/repositories/ITenantRepository';
+import { createAuthRateLimiter } from '@main/interfaces/http/middlewares/authRateLimit';
 
 export const createGlobalAuthRoutes = (
   authController: AuthController,
@@ -17,9 +18,10 @@ export const createGlobalAuthRoutes = (
   const router = Router();
   const authMw = authenticate(tokenService);
   const optionalAuthMw = optionalAuthenticate(tokenService);
+  const authLimiter = createAuthRateLimiter();
 
-  router.post('/register', validateRequest(authSchemas.register), authController.register);
-  router.post('/login', validateRequest(authSchemas.login), authController.loginGlobal);
+  router.post('/register', authLimiter, validateRequest(authSchemas.register), authController.register);
+  router.post('/login', authLimiter, validateRequest(authSchemas.login), authController.loginGlobal);
   router.post('/logout', authController.logout);
   
   router.post('/invitations/accept', validateRequest(authSchemas.acceptInvitation), authController.acceptInvitation);
@@ -40,9 +42,10 @@ export const createTenantAuthRoutes = (
   const router = Router({ mergeParams: true });
   const authMw = authenticate(tokenService);
   const resolveTenantMw = resolveTenant(tenantRepository);
+  const authLimiter = createAuthRateLimiter();
 
-  router.post('/login', resolveTenantMw, validateRequest(authSchemas.login), authController.loginTenant);
-  router.post('/password-reset/request', resolveTenantMw, validateRequest(authSchemas.requestPasswordReset), authController.requestPasswordReset);
+  router.post('/login', authLimiter, resolveTenantMw, validateRequest(authSchemas.login), authController.loginTenant);
+  router.post('/password-reset/request', authLimiter, resolveTenantMw, validateRequest(authSchemas.requestPasswordReset), authController.requestPasswordReset);
 
   router.post(
     '/invitations',

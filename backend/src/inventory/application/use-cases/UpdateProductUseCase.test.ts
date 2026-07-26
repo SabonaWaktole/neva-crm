@@ -10,9 +10,18 @@ describe('UpdateProductUseCase', () => {
   beforeEach(() => {
     productRepo = {
       findById: jest.fn(),
+      findBySku: jest.fn(),
+      findManyByIds: jest.fn(),
+      findWithStock: jest.fn(),
       save: jest.fn(),
+      saveMany: jest.fn(),
+      delete: jest.fn(),
       search: jest.fn(),
+      summarise: jest.fn(),
       countByCategoryId: jest.fn(),
+      countQuotationReferences: jest.fn(),
+      listBrands: jest.fn(),
+      listTags: jest.fn(),
     };
     useCase = new UpdateProductUseCase(productRepo);
   });

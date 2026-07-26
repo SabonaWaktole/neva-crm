@@ -27,6 +27,7 @@ describe('Inventory End-to-End User Flow', () => {
     await prisma.quotationLineItem.deleteMany();
     await prisma.quotation.deleteMany();
     await prisma.stockMovement.deleteMany();
+    await prisma.productImage.deleteMany();
     await prisma.stockLevel.deleteMany();
     await prisma.product.deleteMany();
     await prisma.warehouse.deleteMany();
@@ -36,6 +37,9 @@ describe('Inventory End-to-End User Flow', () => {
     await prisma.client.deleteMany();
     await prisma.invitation.deleteMany();
     await prisma.user.deleteMany();
+    // Integrations hold a RESTRICT reference to Tenant; without clearing them
+    // first the tenant delete aborts and every test in this file fails setup.
+    await prisma.integration.deleteMany();
     await prisma.tenant.deleteMany();
 
     tenantId = uuidv4();
@@ -124,7 +128,7 @@ describe('Inventory End-to-End User Flow', () => {
       });
 
     expect(res.status).toBe(201);
-    productId = res.body.product.id;
+    productId = res.body.id;
   });
 
   it('5. Adjust stock (add 50) in Warehouse 1', async () => {
@@ -143,7 +147,7 @@ describe('Inventory End-to-End User Flow', () => {
     const prodRes = await request(app)
       .get(`/api/e2e-tenant/inventory/products?name=Smart`)
       .set('Authorization', `Bearer ${ownerToken}`);
-    expect(prodRes.body[0].totalStock).toBe(150);
+    expect(prodRes.body.items[0].totalUnits).toBe(150);
   });
 
   it('6. Transfer stock (75) from Warehouse 1 to Warehouse 2', async () => {

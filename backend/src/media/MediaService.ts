@@ -19,12 +19,16 @@ import sharp, { type Metadata } from 'sharp';
 
 export type MediaKind = 'logo' | 'company-cover' | 'avatar' | 'user-cover';
 
-interface MediaSpec {
+/** Output geometry for a rendition pair. */
+export interface RenditionSpec {
   /** Longest edge of the @1x variant, in CSS pixels. */
   width: number;
   height: number;
   /** `cover` crops to fill; `contain` letterboxes onto transparency. */
   fit: 'cover' | 'contain';
+}
+
+interface MediaSpec extends RenditionSpec {
   /** Which entity the resulting URL is written to. */
   owner: 'tenant' | 'user';
 }
@@ -82,13 +86,27 @@ export class MediaService {
    * Throws if the buffer is not a decodable image.
    */
   async store(kind: MediaKind, tenantId: string, buffer: Buffer): Promise<StoredMedia> {
-    const spec = MEDIA_SPECS[kind];
+    return this.storeImage(MEDIA_SPECS[kind], kind, tenantId, buffer);
+  }
+
+  /**
+   * The rendition pipeline itself, independent of the four profile/branding
+   * kinds. Callers outside this module — product galleries, for instance —
+   * bring their own geometry and filename prefix and get the same EXIF
+   * stripping, format neutralisation and WebP compression.
+   */
+  async storeImage(
+    spec: RenditionSpec,
+    prefix: string,
+    tenantId: string,
+    buffer: Buffer
+  ): Promise<StoredMedia> {
     const dir = path.join(UPLOADS_DIR, tenantId);
     await fs.mkdir(dir, { recursive: true });
 
     // A random basename means a replaced image never collides with a cached
     // copy of the old one, so no cache-busting query string is needed.
-    const base = `${kind}-${crypto.randomUUID()}`;
+    const base = `${prefix}-${crypto.randomUUID()}`;
 
     // Validate by decoding rather than by trusting the declared MIME type.
     let meta: Metadata;

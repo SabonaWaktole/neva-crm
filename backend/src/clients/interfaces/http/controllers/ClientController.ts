@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { requireTenantId } from "@main/interfaces/http/tenantContext";
 import { CreateClientUseCase } from '../../../application/use-cases/CreateClientUseCase';
 import { UpdateClientUseCase } from '../../../application/use-cases/UpdateClientUseCase';
 import { SearchClientsUseCase } from '../../../application/use-cases/SearchClientsUseCase';
@@ -36,7 +37,7 @@ export class ClientController {
   public createClient = async (req: Request, res: Response) => {
     try {
       const validatedData = createClientSchema.parse(req.body);
-      const tenantId = req.tenant!.id;
+      const tenantId = requireTenantId(req);
       const authorUserId = req.user!.userId;
 
       const client = await this.createClientUseCase.execute({
@@ -53,7 +54,7 @@ export class ClientController {
 
   public getClient = async (req: Request, res: Response) => {
     try {
-      const tenantId = req.tenant!.id;
+      const tenantId = requireTenantId(req);
       const updatingUserId = req.user!.userId;
       const clientId = req.params.clientId as string;
       const client = await this.getClientUseCase.execute(tenantId, clientId);
@@ -80,7 +81,7 @@ export class ClientController {
   public updateClient = async (req: Request, res: Response) => {
     try {
       const validatedData = updateClientSchema.parse(req.body);
-      const tenantId = req.tenant!.id;
+      const tenantId = requireTenantId(req);
       const updatingUserId = req.user!.userId;
       const clientId = req.params.clientId as string;
 
@@ -104,7 +105,7 @@ export class ClientController {
   public searchClients = async (req: Request, res: Response) => {
     try {
       const validatedData = searchClientsSchema.parse(req.query);
-      const tenantId = req.tenant!.id;
+      const tenantId = requireTenantId(req);
 
       const result = await this.searchClientsUseCase.execute({
         tenantId,
@@ -126,7 +127,7 @@ export class ClientController {
 
   public getHistory = async (req: Request, res: Response) => {
     try {
-      const tenantId = req.tenant!.id;
+      const tenantId = requireTenantId(req);
       const clientId = req.params.clientId as string;
 
       const result = await this.getClientHistoryUseCase.execute({ tenantId, clientId });
@@ -139,7 +140,7 @@ export class ClientController {
   public addInteraction = async (req: Request, res: Response) => {
     try {
       const validatedData = addInteractionSchema.parse(req.body);
-      const tenantId = req.tenant!.id;
+      const tenantId = requireTenantId(req);
       const clientId = req.params.clientId as string;
       const authorUserId = req.user!.userId;
 
@@ -163,7 +164,7 @@ export class ClientController {
   public defineCustomField = async (req: Request, res: Response) => {
     try {
       const validatedData = defineCustomFieldSchema.parse(req.body);
-      const tenantId = req.tenant!.id;
+      const tenantId = requireTenantId(req);
       const requestingUserRole = req.user!.role;
 
       const definition = await this.defineCustomFieldUseCase.execute({
@@ -185,7 +186,7 @@ export class ClientController {
   public defineOutcomeCategory = async (req: Request, res: Response) => {
     try {
       const validatedData = defineOutcomeCategorySchema.parse(req.body);
-      const tenantId = req.tenant!.id;
+      const tenantId = requireTenantId(req);
       const requestingUserRole = req.user!.role;
 
       const category = await this.defineOutcomeCategoryUseCase.execute({
@@ -206,7 +207,7 @@ export class ClientController {
 
   getCustomFields = async (req: Request, res: Response) => {
     try {
-      const tenantId = req.tenant!.id;
+      const tenantId = requireTenantId(req);
       const fields = await this.getCustomFieldsUseCase.execute(tenantId);
       res.status(200).json(fields);
     } catch (error: any) {
@@ -216,7 +217,7 @@ export class ClientController {
 
   getOutcomeCategories = async (req: Request, res: Response) => {
     try {
-      const tenantId = req.tenant!.id;
+      const tenantId = requireTenantId(req);
       const categories = await this.getOutcomeCategoriesUseCase.execute(tenantId);
       res.status(200).json(categories);
     } catch (error: any) {

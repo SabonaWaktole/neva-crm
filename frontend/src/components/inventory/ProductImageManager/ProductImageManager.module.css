@@ -1,0 +1,340 @@
+/* ============================================================================
+ * ProductImageManager
+ * A reorderable gallery plus a dropzone. The grid is intrinsically responsive
+ * via auto-fill, so it goes from one column on a phone to four on a wide
+ * sidebar with no breakpoints of its own.
+ * ========================================================================= */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-2xl);
+  background-color: var(--color-surface-container-lowest);
+  box-shadow:
+    var(--shadow-xs),
+    inset 0 0 0 1px var(--border-subtle);
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-title-md);
+  font-weight: 620;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.counter {
+  font-family: var(--font-family-mono, var(--font-family-base));
+  font-size: var(--font-size-body-sm);
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: var(--spacing-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tile {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background-color: var(--color-surface-container);
+  box-shadow: inset 0 0 0 1px var(--border-subtle);
+  cursor: grab;
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    opacity var(--transition-fast);
+}
+
+.tile:active {
+  cursor: grabbing;
+}
+
+.tileDragging {
+  opacity: 0.4;
+}
+
+/* A ring rather than a gap: the tile grid keeps its geometry while dragging,
+   so nothing jumps around under the cursor. */
+.tileDropTarget {
+  box-shadow:
+    inset 0 0 0 2px var(--color-primary),
+    var(--shadow-md);
+  transform: scale(1.03);
+}
+
+.tileError {
+  box-shadow: inset 0 0 0 2px var(--color-error);
+}
+
+.thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background-color: var(--color-surface-container-low);
+}
+
+.primaryBadge {
+  position: absolute;
+  top: var(--spacing-xs);
+  left: var(--spacing-xs);
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary);
+  color: var(--color-on-primary, #fff);
+  font-family: var(--font-family-base);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* ---- Upload progress ---------------------------------------------------- */
+
+.progressOverlay,
+.errorOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
+  background-color: var(--scrim);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  text-align: center;
+}
+
+.spinner {
+  color: #fff;
+  animation: imageSpin 1s linear infinite;
+}
+
+@keyframes imageSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.progressTrack {
+  width: 76%;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background-color: rgba(255, 255, 255, 0.28);
+  overflow: hidden;
+}
+
+.progressBar {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background-color: #fff;
+  transition: width var(--transition-fast);
+}
+
+.progressText {
+  font-family: var(--font-family-base);
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+.errorOverlay {
+  color: #fff;
+}
+
+.errorText {
+  font-family: var(--font-family-base);
+  font-size: 11px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+/* ---- Tile chrome -------------------------------------------------------- */
+
+.tileFooter {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px var(--spacing-xs);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.62), transparent);
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.dragHandle {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.caption {
+  font-family: var(--font-family-base);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tileActions {
+  position: absolute;
+  top: var(--spacing-xs);
+  right: var(--spacing-xs);
+  display: flex;
+  gap: 3px;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.tile:hover .tileActions,
+.tile:focus-within .tileActions {
+  opacity: 1;
+}
+
+/* Touch devices have no hover, so the controls have to be permanently
+   visible or they are simply unreachable. */
+@media (hover: none) {
+  .tileActions {
+    opacity: 1;
+  }
+}
+
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background-color: rgba(20, 20, 24, 0.72);
+  color: #fff;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), opacity var(--transition-fast);
+}
+
+.iconButton:hover:not(:disabled) {
+  background-color: rgba(20, 20, 24, 0.92);
+}
+
+.iconButton:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.removeButton:hover:not(:disabled) {
+  background-color: var(--color-error);
+}
+
+/* ---- Dropzone ----------------------------------------------------------- */
+
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 128px;
+  padding: var(--spacing-md);
+  border: 1.5px dashed var(--border-default);
+  border-radius: var(--radius-xl);
+  background-color: var(--color-surface-container-low);
+  cursor: pointer;
+  text-align: center;
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.dropzone:hover,
+.dropzone:focus-visible {
+  border-color: var(--color-primary);
+  background-color: var(--color-surface-container);
+}
+
+.dropzoneActive {
+  border-color: var(--color-primary);
+  border-style: solid;
+  background-color: var(--color-primary-container);
+}
+
+.dropzone[aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.dropzoneIcon {
+  color: var(--text-tertiary);
+}
+
+.dropzoneLabel {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.dropzoneLink {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.dropzoneHint {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-xs, 12px);
+  color: var(--text-tertiary);
+  line-height: 1.4;
+}
+
+.fileInput {
+  display: none;
+}
+
+.footnote {
+  margin: 0;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-xs, 12px);
+  line-height: 1.45;
+  color: var(--text-tertiary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile,
+  .progressBar,
+  .tileActions {
+    transition: none;
+  }
+
+  .spinner {
+    animation: none;
+  }
+}

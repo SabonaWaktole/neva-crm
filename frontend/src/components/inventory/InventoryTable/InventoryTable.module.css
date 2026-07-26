@@ -53,3 +53,106 @@ tr:hover .actionButton,
     opacity: 1;
   }
 }
+
+/* ------------------------------------------------------------ product cell */
+
+.productCell {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  min-width: 0;
+}
+
+.thumb,
+.thumbPlaceholder {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-default);
+  background-color: var(--color-surface-container-low);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+}
+
+.thumb {
+  object-fit: contain;
+}
+
+.thumbPlaceholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-quaternary);
+}
+
+.productText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+/* Long product names truncate rather than forcing the table wider than the
+   viewport — the full name is one click away on the edit page. */
+.productName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.productBrand {
+  font-size: var(--font-size-body-sm);
+  color: var(--text-tertiary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mono {
+  font-family: var(--font-family-mono, var(--font-family-base));
+  font-size: var(--font-size-body-sm);
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.money {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+/* ------------------------------------------------------------------- tags */
+
+.tagList {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tag,
+.tagMore {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface-container);
+  color: var(--text-secondary);
+  font-size: var(--font-size-label-sm, 12px);
+  font-weight: 500;
+  white-space: nowrap;
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tagMore {
+  color: var(--text-tertiary);
+  cursor: help;
+}
+
+/* In the mobile card layout the product cell is the title row, so the
+   thumbnail grows to match the heavier type beside it. */
+.cardValue .thumb,
+.cardValue .thumbPlaceholder {
+  width: 44px;
+  height: 44px;
+}
