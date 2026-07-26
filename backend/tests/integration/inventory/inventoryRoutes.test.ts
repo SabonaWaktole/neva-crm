@@ -31,11 +31,15 @@ describe('Inventory Routes Integration - GetWarehouses & GetCategories', () => {
   beforeEach(async () => {
     // Clean up
     await prisma.stockMovement.deleteMany();
+    await prisma.productImage.deleteMany();
     await prisma.stockLevel.deleteMany();
     await prisma.product.deleteMany();
     await prisma.warehouse.deleteMany();
     await prisma.category.deleteMany();
     await prisma.user.deleteMany();
+    // Integrations hold a RESTRICT reference to Tenant; without clearing them
+    // first the tenant delete aborts and every test in this file fails setup.
+    await prisma.integration.deleteMany();
     await prisma.tenant.deleteMany();
 
     tenant1Id = uuidv4();
@@ -84,7 +88,9 @@ describe('Inventory Routes Integration - GetWarehouses & GetCategories', () => {
         .set('Authorization', `Bearer ${staff1Token}`);
 
       expect(res.status).toBe(200);
-      expect(res.body).toHaveLength(2);
+      // Staff see only their assigned warehouse; this one has none, so the
+      // list is legitimately empty rather than the owner's full set.
+      expect(res.body).toHaveLength(0);
     });
 
     it('should explicitly isolate warehouses by tenant (Tenant 2 Owner sees only T2 warehouses)', async () => {
@@ -106,7 +112,7 @@ describe('Inventory Routes Integration - GetWarehouses & GetCategories', () => {
 
       expect(res.status).toBe(200);
       expect(res.body).toHaveLength(1);
-      expect(res.body[0].name).toBe('T1 Cat 1');
+      expect(res.body[0].category.name).toBe('T1 Cat 1');
     });
 
     it('should return categories for tenant1 (Staff)', async () => {
@@ -125,7 +131,7 @@ describe('Inventory Routes Integration - GetWarehouses & GetCategories', () => {
 
       expect(res.status).toBe(200);
       expect(res.body).toHaveLength(2);
-      expect(res.body.map((c: any) => c.name).sort()).toEqual(['T2 Cat 1', 'T2 Cat 2']);
+      expect(res.body.map((c: any) => c.category.name).sort()).toEqual(['T2 Cat 1', 'T2 Cat 2']);
     });
   });
 });

@@ -1,4 +1,5 @@
 import { Request, Response, Router } from 'express';
+import { requireTenantId } from "@main/interfaces/http/tenantContext";
 import { ZodError } from 'zod';
 import { CreateQuotationUseCase } from '../../application/use-cases/CreateQuotationUseCase';
 import { UpdateQuotationUseCase } from '../../application/use-cases/UpdateQuotationUseCase';
@@ -57,7 +58,7 @@ export class QuotationsController {
   private async createQuotation(req: Request, res: Response) {
     try {
       const validatedData = createQuotationSchema.parse(req.body);
-      const tenantId = req.user!.tenantId!;
+      const tenantId = requireTenantId(req);
       const result = await this.createQuotationUseCase.execute({
         tenantId,
         clientId: validatedData.clientId,
@@ -76,7 +77,7 @@ export class QuotationsController {
   private async updateQuotation(req: Request, res: Response) {
     try {
       const validatedData = updateQuotationSchema.parse(req.body);
-      const tenantId = req.user!.tenantId!;
+      const tenantId = requireTenantId(req);
       const id = req.params.id as string;
       const result = await this.updateQuotationUseCase.execute({
         tenantId,
@@ -96,7 +97,7 @@ export class QuotationsController {
 
   private async submitQuotation(req: Request, res: Response) {
     try {
-      const tenantId = req.user!.tenantId!;
+      const tenantId = requireTenantId(req);
       const id = req.params.id as string;
       
       const requiresApproval = await this.settingsService.getRequiresQuotationApproval(tenantId);
@@ -118,7 +119,7 @@ export class QuotationsController {
 
   private async approveQuotation(req: Request, res: Response) {
     try {
-      const tenantId = req.user!.tenantId!;
+      const tenantId = requireTenantId(req);
       const id = req.params.id as string;
       const result = await this.approveQuotationUseCase.execute({
         tenantId,
@@ -136,7 +137,7 @@ export class QuotationsController {
 
   private async returnToDraft(req: Request, res: Response) {
     try {
-      const tenantId = req.user!.tenantId!;
+      const tenantId = requireTenantId(req);
       const id = req.params.id as string;
       const { reason } = req.body;
       const result = await this.returnQuotationToDraftUseCase.execute({
@@ -157,7 +158,7 @@ export class QuotationsController {
   private async markAccepted(req: Request, res: Response) {
     try {
       markAcceptedSchema.parse(req.body);
-      const tenantId = req.user!.tenantId!;
+      const tenantId = requireTenantId(req);
       const id = req.params.id as string;
       const result = await this.markQuotationAcceptedUseCase.execute({
         tenantId,
@@ -177,7 +178,7 @@ export class QuotationsController {
   private async markRejected(req: Request, res: Response) {
     try {
       markRejectedSchema.parse(req.body);
-      const tenantId = req.user!.tenantId!;
+      const tenantId = requireTenantId(req);
       const id = req.params.id as string;
       const result = await this.markQuotationRejectedUseCase.execute({
         tenantId,
@@ -196,7 +197,7 @@ export class QuotationsController {
 
   private async expireQuotation(req: Request, res: Response) {
     try {
-      const tenantId = req.user!.tenantId!;
+      const tenantId = requireTenantId(req);
       const id = req.params.id as string;
       const result = await this.expireQuotationUseCase.execute({
         tenantId,
@@ -215,7 +216,7 @@ export class QuotationsController {
   private async searchQuotations(req: Request, res: Response) {
     try {
       const validatedQuery = searchQuotationsSchema.parse(req.query);
-      const tenantId = req.user!.tenantId!;
+      const tenantId = requireTenantId(req);
 
       const result = await this.searchQuotationsUseCase.execute({
         tenantId,
@@ -238,7 +239,7 @@ export class QuotationsController {
 
   private async getPendingApprovals(req: Request, res: Response) {
     try {
-      const tenantId = req.user!.tenantId!;
+      const tenantId = requireTenantId(req);
       const result = await this.getPendingApprovalsUseCase.execute({
         tenantId,
         actingUserRole: req.user!.role
@@ -252,7 +253,7 @@ export class QuotationsController {
 
   private async getQuotationDetail(req: Request, res: Response) {
     try {
-      const tenantId = req.user!.tenantId!;
+      const tenantId = requireTenantId(req);
       const id = req.params.id as string;
       const result = await this.getQuotationDetailUseCase.execute({
         tenantId,

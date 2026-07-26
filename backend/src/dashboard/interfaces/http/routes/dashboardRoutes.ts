@@ -4,6 +4,7 @@ import { GetTenantActivityFeedUseCase } from '../../../application/use-cases/Get
 import { authenticate } from '../../../../main/interfaces/http/middlewares/authenticate';
 import { authorize } from '../../../../main/interfaces/http/middlewares/authorize';
 import { resolveTenant } from '../../../../main/interfaces/http/middlewares/resolveTenant';
+import { requireTenantId } from '../../../../main/interfaces/http/tenantContext';
 import { UserRole } from '../../../../auth/domain/enums/UserRole';
 import { ITokenService } from '../../../../auth/application/ports/ITokenService';
 import { ITenantRepository } from '../../../../tenant/domain/repositories/ITenantRepository';
@@ -25,8 +26,11 @@ export function createDashboardRouter(
     authorize([UserRole.BUSINESS_OWNER, UserRole.STAFF]),
     async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const tenantId = (req as any).tenant.id;
-        const result = await metricsUseCase.execute(tenantId);
+        const result = await metricsUseCase.execute({
+          tenantId: requireTenantId(req),
+          userId: req.user!.userId,
+          role: req.user!.role,
+        });
         res.json(result);
       } catch (error) {
         next(error);
@@ -39,13 +43,16 @@ export function createDashboardRouter(
     authorize([UserRole.BUSINESS_OWNER, UserRole.STAFF]),
     async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const tenantId = (req as any).tenant.id;
         const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : undefined;
-        // Staff see only their activity feed? The use case doesn't take userId, it's global for the tenant, 
-        // but maybe we can just pass it. For now, we leave it. Wait, the use case accepts `userId`?
-        // Ah, let's check the usecase. The feed usecase takes `tenantId`, `limit`. No userId.
-        
-        const result = await feedUseCase.execute({ tenantId, limit });
+
+        // Both identity and role are passed through; the use case decides what
+        // each role may see, so the policy stays in one place.
+        const result = await feedUseCase.execute({
+          tenantId: requireTenantId(req),
+          userId: req.user!.userId,
+          role: req.user!.role,
+          limit,
+        });
         res.json(result);
       } catch (error) {
         next(error);

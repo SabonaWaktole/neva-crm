@@ -21,7 +21,12 @@ describe('CreateQuotationUseCase', () => {
     lineItemRepo = { findByQuotationId: jest.fn(), save: jest.fn(), saveMany: jest.fn(), deleteManyByQuotationId: jest.fn() };
     historyRepo = { findByQuotationId: jest.fn(), save: jest.fn() };
     clientRepo = { findById: jest.fn(), search: jest.fn(), countByTenant: jest.fn(), findRecentByTenant: jest.fn(), save: jest.fn(), update: jest.fn() } as any;
-    productRepo = { findById: jest.fn(), save: jest.fn(), search: jest.fn(), countByCategoryId: jest.fn() };
+    productRepo = {
+      findById: jest.fn(), findBySku: jest.fn(), findManyByIds: jest.fn(), findWithStock: jest.fn(),
+      save: jest.fn(), saveMany: jest.fn(), delete: jest.fn(), search: jest.fn(), summarise: jest.fn(),
+      countByCategoryId: jest.fn(), countQuotationReferences: jest.fn(),
+      listBrands: jest.fn(), listTags: jest.fn(),
+    };
     warehouseRepo = { findById: jest.fn(), findAllByTenantId: jest.fn(), save: jest.fn(), update: jest.fn(), delete: jest.fn() };
 
     useCase = new CreateQuotationUseCase(quotationRepo, lineItemRepo, historyRepo, clientRepo, productRepo, warehouseRepo);

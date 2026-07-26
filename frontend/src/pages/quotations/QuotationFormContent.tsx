@@ -34,7 +34,9 @@ export const QuotationFormContent: React.FC<QuotationFormProps> = ({ mode }) => 
   
   const { createQuotation, updateQuotation, fetchQuotationDetail, loading: isSaving } = useQuotations();
   const { clients, fetchClients } = useClients();
-  const { products, fetchProducts } = useProducts();
+  // The line-item picker needs the whole catalogue in one list, not a page of
+  // it, and archived products cannot be quoted.
+  const { products } = useProducts({ pageSize: 100, sortBy: 'name' });
   const { warehouses, fetchWarehouses } = useWarehouses();
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -59,9 +61,8 @@ export const QuotationFormContent: React.FC<QuotationFormProps> = ({ mode }) => 
 
   useEffect(() => {
     fetchClients();
-    fetchProducts();
     fetchWarehouses();
-  }, [fetchClients, fetchProducts, fetchWarehouses]);
+  }, [fetchClients, fetchWarehouses]);
 
   useEffect(() => {
     if (mode === 'edit' && id) {
@@ -97,7 +98,11 @@ export const QuotationFormContent: React.FC<QuotationFormProps> = ({ mode }) => 
   };
 
   const clientOptions = clients.map(c => ({ value: c.id, label: c.name }));
-  const productOptions = products.map(p => ({ value: p.id, label: `${p.sku} - ${p.name}` }));
+  // SKU is optional, so it only prefixes the label when there is one.
+  const productOptions = products.map(p => ({
+    value: p.id,
+    label: p.sku ? `${p.sku} - ${p.name}` : p.name,
+  }));
   const warehouseOptions = warehouses.map(w => ({ value: w.id, label: w.name }));
 
   return (

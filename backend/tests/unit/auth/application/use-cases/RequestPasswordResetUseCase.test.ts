@@ -27,8 +27,10 @@ describe('RequestPasswordResetUseCase', () => {
       markUsed: jest.fn(),
     };
     emailSender = {
-      sendInvitationEmail: jest.fn(),
-      sendPasswordResetEmail: jest.fn(),
+      // Both return Promise<void> per IEmailSender; the use case fires them
+      // without awaiting and attaches .catch(), so the doubles must resolve.
+      sendInvitationEmail: jest.fn().mockResolvedValue(undefined),
+      sendPasswordResetEmail: jest.fn().mockResolvedValue(undefined),
     };
 
     useCase = new RequestPasswordResetUseCase(userRepository, prtRepository, emailSender);

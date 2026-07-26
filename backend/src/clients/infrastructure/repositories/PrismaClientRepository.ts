@@ -38,13 +38,30 @@ export class PrismaClientRepository implements IClientRepository {
       // Use raw query for custom field containment
       const customFieldsJson = JSON.stringify(filters.customFields);
       
-      const nameFilter = filters.name ? Prisma.sql`AND name ILIKE ${'%' + filters.name + '%'}` : Prisma.empty;
+      // NOTE: these conditions must stay in step with the Prisma branch below.
+      // The two paths diverge only on custom-field containment, so a filter
+      // added to one and not the other silently changes search behaviour
+      // depending on whether a custom-field filter happens to be active.
+      const like = (value: string) => `%${value}%`;
+
+      // A NULL email/phone yields NULL from ILIKE rather than false, so a client
+      // with no email simply does not match on that column — while still
+      // matching on name via the OR.
+      const searchFilter = filters.search
+        ? Prisma.sql`AND (name ILIKE ${like(filters.search)} OR email ILIKE ${like(filters.search)} OR phone ILIKE ${like(filters.search)})`
+        : Prisma.empty;
+      const nameFilter = filters.name ? Prisma.sql`AND name ILIKE ${like(filters.name)}` : Prisma.empty;
+      const emailFilter = filters.email ? Prisma.sql`AND email ILIKE ${like(filters.email)}` : Prisma.empty;
+      const phoneFilter = filters.phone ? Prisma.sql`AND phone ILIKE ${like(filters.phone)}` : Prisma.empty;
       const statusFilter = filters.status ? Prisma.sql`AND status = ${filters.status}` : Prisma.empty;
       const assignedUserFilter = filters.assignedUserId ? Prisma.sql`AND "assignedUserId" = ${filters.assignedUserId}` : Prisma.empty;
 
       const whereClause = Prisma.sql`
         WHERE "tenantId" = ${tenantId}
+        ${searchFilter}
         ${nameFilter}
+        ${emailFilter}
+        ${phoneFilter}
         ${statusFilter}
         ${assignedUserFilter}
         AND "customFieldValues" @> ${customFieldsJson}::jsonb
@@ -74,8 +91,18 @@ export class PrismaClientRepository implements IClientRepository {
     } else {
       // Use standard Prisma findMany if no customFields are filtered
       const where: Prisma.ClientWhereInput = { tenantId };
-      
+
+      // Mirrors the raw-SQL branch above — keep both in step.
+      if (filters.search) {
+        where.OR = [
+          { name: { contains: filters.search, mode: 'insensitive' } },
+          { email: { contains: filters.search, mode: 'insensitive' } },
+          { phone: { contains: filters.search, mode: 'insensitive' } },
+        ];
+      }
       if (filters.name) where.name = { contains: filters.name, mode: 'insensitive' };
+      if (filters.email) where.email = { contains: filters.email, mode: 'insensitive' };
+      if (filters.phone) where.phone = { contains: filters.phone, mode: 'insensitive' };
       if (filters.status) where.status = filters.status;
       if (filters.assignedUserId) where.assignedUserId = filters.assignedUserId;
 

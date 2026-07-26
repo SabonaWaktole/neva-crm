@@ -24,7 +24,11 @@ export const updateClientSchema = z.object({
 export const searchClientsSchema = z.object({
   skip: z.coerce.number().min(0).default(0),
   take: z.coerce.number().min(1).max(100).default(50),
+  /** Combined term matched against name, email and phone. */
+  search: z.string().optional(),
   name: z.string().optional(),
+  email: z.string().optional(),
+  phone: z.string().optional(),
   status: z.nativeEnum(ClientStatus).optional(),
   assignedUserId: z.string().uuid().optional(),
   customFields: z.string().optional().transform((val) => {

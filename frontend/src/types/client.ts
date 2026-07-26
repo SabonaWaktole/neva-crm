@@ -25,9 +25,15 @@ export interface CustomFieldDefinition {
   id: string;
   tenantId: string;
   fieldName: string;
-  fieldType: 'TEXT' | 'NUMBER' | 'DATE' | 'BOOLEAN';
+  // Mirrors backend src/clients/domain/enums/FieldType.ts. Keep in sync: the
+  // settings dropdown previously offered BOOLEAN while the backend enum did not
+  // accept it, so every such submission 400'd.
+  fieldType: CustomFieldType;
+  options?: string[];
   isRequired: boolean;
 }
+
+export type CustomFieldType = 'TEXT' | 'NUMBER' | 'DATE' | 'BOOLEAN' | 'SINGLE_SELECT';
 
 export interface OutcomeCategory {
   id: string;
@@ -58,7 +64,11 @@ export interface ClientHistory {
 }
 
 export interface SearchClientsParams {
+  /** Combined term matched against name, email and phone (SRS §6.2). */
+  search?: string;
   name?: string;
+  email?: string;
+  phone?: string;
   status?: ClientStatus;
   assignedUserId?: string;
   customFields?: Record<string, any>;

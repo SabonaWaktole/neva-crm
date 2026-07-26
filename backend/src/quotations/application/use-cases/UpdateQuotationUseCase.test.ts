@@ -16,7 +16,12 @@ describe('UpdateQuotationUseCase', () => {
   beforeEach(() => {
     quotationRepo = { findById: jest.fn(), findPendingApprovals: jest.fn(), search: jest.fn(), save: jest.fn() };
     lineItemRepo = { findByQuotationId: jest.fn(), save: jest.fn(), saveMany: jest.fn(), deleteManyByQuotationId: jest.fn() };
-    productRepo = { findById: jest.fn(), save: jest.fn(), search: jest.fn(), countByCategoryId: jest.fn() };
+    productRepo = {
+      findById: jest.fn(), findBySku: jest.fn(), findManyByIds: jest.fn(), findWithStock: jest.fn(),
+      save: jest.fn(), saveMany: jest.fn(), delete: jest.fn(), search: jest.fn(), summarise: jest.fn(),
+      countByCategoryId: jest.fn(), countQuotationReferences: jest.fn(),
+      listBrands: jest.fn(), listTags: jest.fn(),
+    };
     warehouseRepo = { findById: jest.fn(), findAllByTenantId: jest.fn(), save: jest.fn(), update: jest.fn(), delete: jest.fn() };
 
     useCase = new UpdateQuotationUseCase(quotationRepo, lineItemRepo, productRepo, warehouseRepo);

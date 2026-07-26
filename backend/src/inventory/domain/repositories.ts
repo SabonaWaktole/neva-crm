@@ -43,6 +43,8 @@ export interface ProductWithStock {
   /** ARCHIVED when the product is archived, otherwise `availability`. */
   status: ProductStatus;
   images: ProductImage[];
+  /** Denormalised for display; null when the product is uncategorised. */
+  categoryName: string | null;
   stockBreakdown?: Array<{ warehouseId: string; warehouseName: string; quantity: number }>;
 }
 

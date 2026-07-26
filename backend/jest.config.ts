@@ -5,6 +5,10 @@ const config: Config = {
   testEnvironment: 'node',
   roots: ['<rootDir>/tests', '<rootDir>/src'],
   testMatch: ['**/*.test.ts'],
+  // Give each Jest worker its own Postgres schema so integration suites cannot
+  // clobber each other's fixtures. See tests/setup/perWorkerDb.ts.
+  globalSetup: '<rootDir>/tests/setup/globalSetup.ts',
+  setupFiles: ['<rootDir>/tests/setup/perWorkerDb.ts', '<rootDir>/tests/setup/testEnv.ts'],
   moduleNameMapper: {
     '^@auth/(.*)$': '<rootDir>/src/auth/$1',
     '^@tenant/(.*)$': '<rootDir>/src/tenant/$1',

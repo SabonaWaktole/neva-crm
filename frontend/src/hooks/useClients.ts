@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { clientService } from '../services/clientService';
 import { useParams } from 'react-router-dom';
 import type { Client, SearchClientsParams, CustomFieldDefinition, OutcomeCategory, ClientHistory } from '../types/client';
+import { extractApiErrorMessage } from '../utils/apiError';
 
 export const useClients = () => {
   const { tenantSlug } = useParams();
@@ -183,8 +184,10 @@ export const useDefineCustomField = () => {
     try {
       return await clientService.defineCustomField(tenantSlug, data);
     } catch (err: any) {
-      const msg = err.response?.data?.error || 'Failed to define custom field';
-      setError(msg);
+      // Validation failures arrive as `{ issues: [...] }`, not `{ error }`, so
+      // reading only `.error` fell through to the generic fallback and the user
+      // was told nothing about what was actually wrong.
+      setError(extractApiErrorMessage(err, 'Failed to define custom field'));
       throw err;
     } finally {
       setIsLoading(false);

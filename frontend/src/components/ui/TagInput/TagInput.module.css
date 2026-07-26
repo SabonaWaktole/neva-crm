@@ -1,0 +1,135 @@
+/* ============================================================================
+ * TagInput
+ * Styled to match TextInput's focus language: the border sharpens to the
+ * accent colour and a ring blooms outward, but applied to the whole chip
+ * field rather than a bare input.
+ * ========================================================================= */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-label-md);
+  font-weight: 540;
+  line-height: var(--font-line-height-label-md);
+  color: var(--text-primary);
+  letter-spacing: var(--font-letter-spacing-label-md);
+}
+
+.field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  min-height: 38px;
+  padding: 5px var(--spacing-sm);
+  background-color: var(--color-surface-container-lowest);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-default);
+  box-shadow: var(--shadow-xs);
+  cursor: text;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.field:hover:not(:focus-within) {
+  border-color: var(--border-strong);
+}
+
+.field:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: var(--focus-ring-tight);
+}
+
+.fieldError {
+  border-color: var(--color-error);
+}
+
+.fieldError:focus-within {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-error) 20%, transparent);
+}
+
+.fieldDisabled {
+  background-color: var(--color-surface-container);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 4px 2px 8px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface-container-high, var(--color-surface-container));
+  color: var(--text-primary);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-label-sm, 12px);
+  font-weight: 500;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.tagRemove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.tagRemove:hover:not(:disabled) {
+  background-color: var(--color-error-container);
+  color: var(--color-error);
+}
+
+.tagRemove:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.input {
+  flex: 1;
+  /* Small enough that the input wraps to a new line rather than forcing the
+     field wider than its column. */
+  min-width: 110px;
+  border: none;
+  outline: none;
+  background: none;
+  padding: 2px 0;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-md);
+  color: var(--text-primary);
+}
+
+.input::placeholder {
+  color: var(--text-quaternary);
+}
+
+.input:disabled {
+  cursor: not-allowed;
+}
+
+.helperText {
+  margin: 0;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-sm);
+  color: var(--text-tertiary);
+}
+
+.helperTextError {
+  color: var(--color-error);
+}

@@ -4,6 +4,21 @@ import { UserRole } from '../../../../src/auth/domain/enums/UserRole';
 describe('JwtTokenService', () => {
   let tokenService: JwtTokenService;
 
+  // process.env is shared by every suite in this Jest worker. Restore the real
+  // values rather than deleting them: JwtTokenService now throws when
+  // JWT_SECRET is absent, so leaving it deleted would break any suite that runs
+  // later in the same worker and constructs one.
+  const originalSecret = process.env.JWT_SECRET;
+  const originalExpiresIn = process.env.JWT_EXPIRES_IN;
+
+  const restore = (name: string, value: string | undefined) => {
+    if (value === undefined) {
+      delete process.env[name];
+    } else {
+      process.env[name] = value;
+    }
+  };
+
   beforeEach(() => {
     // Set a consistent test secret
     process.env.JWT_SECRET = 'test-secret';
@@ -12,8 +27,8 @@ describe('JwtTokenService', () => {
   });
 
   afterEach(() => {
-    delete process.env.JWT_SECRET;
-    delete process.env.JWT_EXPIRES_IN;
+    restore('JWT_SECRET', originalSecret);
+    restore('JWT_EXPIRES_IN', originalExpiresIn);
   });
 
   it('signs and verifies a valid payload', () => {

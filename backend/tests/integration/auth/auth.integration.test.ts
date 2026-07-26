@@ -79,6 +79,24 @@ class InMemoryUserRepository implements IUserRepository {
       });
     }
   }
+  async updateRoleAndWarehouse(userId: string, role: string, warehouseId: string | null): Promise<void> {
+    const user = this.users.find(u => u.id === userId);
+    if (user) {
+      const idx = this.users.indexOf(user);
+      this.users[idx] = User.create({
+        id: user.id,
+        email: user.email,
+        hashedPassword: user.hashedPassword,
+        role: role as UserRole,
+        tenantId: user.tenantId,
+        createdAt: user.createdAt,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: user.phone,
+        warehouseId,
+      });
+    }
+  }
 
   // Test helper
   getAll(): User[] { return [...this.users]; }
@@ -146,6 +164,10 @@ class InMemoryInvitationRepository implements IInvitationRepository {
         acceptedAt,
       });
     }
+  }
+
+  async delete(id: string): Promise<void> {
+    this.invitations = this.invitations.filter(i => i.id !== id);
   }
 
   getAll(): Invitation[] { return [...this.invitations]; }
@@ -707,7 +729,9 @@ describe('Auth Integration Tests', () => {
         .expect(403);
     });
 
-    it('should allow SUPER_ADMIN to access any tenant', async () => {
+    // SUPER_ADMIN is platform-level only: it administers tenants themselves, not
+    // any individual business's data. It gets no exemption from tenant scoping.
+    it('should return 403 when SUPER_ADMIN tries to act on a tenant-scoped route', async () => {
       // Manually add a SUPER_ADMIN
       const sa = User.create({
         id: 'sa-id',
@@ -727,14 +751,14 @@ describe('Auth Integration Tests', () => {
         warehouseId: null,
       });
 
-      // SUPER_ADMIN can invite on Tenant A
       const res = await request(app)
         .post('/api/tenant-a/auth/invitations')
         .set('Authorization', `Bearer ${saToken}`)
         .send({ email: 'new-staff@a.com', role: 'STAFF' })
-        .expect(200);
+        .expect(403);
 
-      expect(res.body.message).toBe('Invitation sent');
+      // Denied by the tenant guard, not crashed on a null tenantId.
+      expect(res.body).toEqual({ error: 'Cross-tenant access forbidden' });
     });
   });
 

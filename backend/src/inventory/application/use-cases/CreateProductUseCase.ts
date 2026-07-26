@@ -3,6 +3,7 @@ import { Product } from '../../domain/Product';
 import { StockLevel } from '../../domain/StockLevel';
 import { randomUUID } from 'crypto';
 import { CrossTenantIsolationError } from '../../domain/errors';
+import { DuplicateSkuError } from '../../domain/inUseErrors';
 
 import { UserRole } from '../../../auth/domain/enums/UserRole';
 
@@ -15,8 +16,12 @@ export interface CreateProductDTO {
   tenantId: string;
   name: string;
   description: string;
+  sku?: string | null;
+  brand?: string | null;
   categoryId: string | null;
   price: number;
+  cost?: number | null;
+  tags?: string[];
   lowStockThreshold?: number;
   initialStock: InitialStock[];
   authorRole: UserRole;
@@ -42,6 +47,14 @@ export class CreateProductUseCase {
     // 1. Verify warehouses belong to the same tenant and staff permissions
     const stockLevels: StockLevel[] = [];
     const productId = randomUUID();
+
+    // Checked up front so the caller gets a clear conflict rather than a raw
+    // unique-constraint violation out of the database.
+    const sku = dto.sku?.trim();
+    if (sku) {
+      const existing = await this.productRepo.findBySku(dto.tenantId, sku);
+      if (existing) throw new DuplicateSkuError(sku);
+    }
 
     for (const stock of dto.initialStock) {
       if (dto.authorRole === UserRole.STAFF && dto.authorWarehouseId !== stock.warehouseId) {
@@ -73,8 +86,12 @@ export class CreateProductUseCase {
       tenantId: dto.tenantId,
       name: dto.name,
       description: dto.description,
+      sku: sku || null,
+      brand: dto.brand,
       categoryId: dto.categoryId,
       price: dto.price,
+      cost: dto.cost,
+      tags: dto.tags,
       lowStockThreshold: dto.lowStockThreshold
     });
 

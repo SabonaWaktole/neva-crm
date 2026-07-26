@@ -12,9 +12,8 @@ export const useLogin = () => {
     setError(null);
     try {
       const result = await authService.login(email, password, tenantSlug);
-      if (result.token) {
-        localStorage.setItem('token', result.token);
-      }
+      // The token is not stored client-side: the backend sets it as an httpOnly
+      // cookie, which the browser sends on subsequent requests automatically.
       const user = await authService.getMe();
       setUser(user);
       return result.tenantSlug;

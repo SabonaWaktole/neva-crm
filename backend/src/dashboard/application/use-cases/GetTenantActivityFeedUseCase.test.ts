@@ -45,6 +45,37 @@ describe('GetTenantActivityFeedUseCase', () => {
     expect(mockAppointmentRepo.findRecentByTenant).toHaveBeenCalledWith('tenant-a', 10, undefined);
   });
 
+  describe('role-based scoping', () => {
+    beforeEach(() => {
+      mockClientRepo.findRecentByTenant.mockResolvedValue([]);
+      mockInteractionRepo.findRecentByTenant.mockResolvedValue([]);
+      mockAppointmentRepo.findRecentByTenant.mockResolvedValue([]);
+    });
+
+    it('scopes every repository call to the requesting user when role is STAFF', async () => {
+      await useCase.execute({ tenantId: 'tenant-a', userId: 'staff-1', role: 'STAFF', limit: 10 });
+
+      expect(mockClientRepo.findRecentByTenant).toHaveBeenCalledWith('tenant-a', 10, 'staff-1');
+      expect(mockInteractionRepo.findRecentByTenant).toHaveBeenCalledWith('tenant-a', 10, 'staff-1');
+      expect(mockAppointmentRepo.findRecentByTenant).toHaveBeenCalledWith('tenant-a', 10, 'staff-1');
+    });
+
+    it('does NOT scope for BUSINESS_OWNER, who sees the whole tenant', async () => {
+      await useCase.execute({ tenantId: 'tenant-a', userId: 'owner-1', role: 'BUSINESS_OWNER', limit: 10 });
+
+      expect(mockClientRepo.findRecentByTenant).toHaveBeenCalledWith('tenant-a', 10, undefined);
+      expect(mockInteractionRepo.findRecentByTenant).toHaveBeenCalledWith('tenant-a', 10, undefined);
+      expect(mockAppointmentRepo.findRecentByTenant).toHaveBeenCalledWith('tenant-a', 10, undefined);
+    });
+
+    it('ignores a supplied userId when the role is not STAFF', async () => {
+      // Guards against a caller accidentally narrowing an owner's view.
+      await useCase.execute({ tenantId: 'tenant-a', userId: 'owner-1', role: 'BUSINESS_OWNER', limit: 5 });
+
+      expect(mockClientRepo.findRecentByTenant).toHaveBeenCalledWith('tenant-a', 5, undefined);
+    });
+  });
+
   it('should apply limit correctly even with skewed distributions', async () => {
     // Generate 15 recent interactions, 2 recent clients, 1 recent appointment
     const baseDate = new Date('2023-10-01T12:00:00Z');

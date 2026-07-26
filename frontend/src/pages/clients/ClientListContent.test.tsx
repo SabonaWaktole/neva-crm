@@ -4,10 +4,15 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { ClientListContent } from './ClientListContent';
 import { MemoryRouter } from 'react-router-dom';
 import * as useClientsModule from '../../hooks/useClients';
+import * as useTeamModule from '../../hooks/useTeam';
 
 // Mock the hook
 vi.mock('../../hooks/useClients', () => ({
   useClients: vi.fn(),
+}));
+
+vi.mock('../../hooks/useTeam', () => ({
+  useTeam: vi.fn(),
 }));
 
 describe('ClientListContent', () => {
@@ -23,6 +28,18 @@ describe('ClientListContent', () => {
       isLoading: false,
       error: null,
       fetchClients: mockFetchClients,
+    });
+
+    vi.mocked(useTeamModule.useTeam).mockReturnValue({
+      staff: [
+        { id: 'u1', email: 'ada@example.com', firstName: 'Ada', lastName: 'Lovelace', role: 'STAFF' },
+      ],
+      pendingInvitations: [],
+      loadingStaff: false,
+      loadingInvitations: false,
+      fetchStaff: vi.fn(),
+      fetchPendingInvitations: vi.fn(),
+      inviteStaff: vi.fn(),
     });
   });
 
@@ -96,13 +113,14 @@ describe('ClientListContent', () => {
     
     renderComponent();
     
-    // Initial fetch from useEffect on mount (fetchClients({ name: '' }))
+    // Initial fetch from useEffect on mount. The param is `search`, not
+    // `name`: one box now matches name, email and phone (SRS 6.2).
     expect(mockFetchClients).toHaveBeenCalledTimes(1);
-    expect(mockFetchClients).toHaveBeenCalledWith({ name: '' });
+    expect(mockFetchClients).toHaveBeenCalledWith({ search: '' });
     
     mockFetchClients.mockClear();
 
-    const searchInput = screen.getByPlaceholderText('Search clients...');
+    const searchInput = screen.getByPlaceholderText(/Search by name, email or phone/i);
     
     // Type rapidly
     fireEvent.change(searchInput, { target: { value: 'A' } });
@@ -126,9 +144,41 @@ describe('ClientListContent', () => {
 
     // NOW it should have fetched, and exactly once for the final value
     expect(mockFetchClients).toHaveBeenCalledTimes(1);
-    expect(mockFetchClients).toHaveBeenCalledWith({ name: 'Acme' });
+    expect(mockFetchClients).toHaveBeenCalledWith({ search: 'Acme' });
 
     vi.useRealTimers();
+  });
+
+  describe('assignee column', () => {
+    const withClient = (assignedUserId) => {
+      vi.mocked(useClientsModule.useClients).mockReturnValue({
+        clients: [
+          { id: 'c1', name: 'Acme Corp', status: 'ACTIVE', contactInfo: { email: 'hi@acme.com' }, assignedUserId },
+        ],
+        total: 1,
+        isLoading: false,
+        error: null,
+        fetchClients: mockFetchClients,
+      });
+      renderComponent();
+    };
+
+    it('renders the assignee name, never the raw UUID', () => {
+      withClient('u1');
+      expect(screen.getByText('Ada Lovelace')).toBeDefined();
+      expect(screen.queryByText('u1')).toBeNull();
+    });
+
+    it('renders Unassigned when no one is assigned', () => {
+      withClient(null);
+      expect(screen.getByText('Unassigned')).toBeDefined();
+    });
+
+    it('degrades to Unassigned when the assignee is no longer in the staff list', () => {
+      withClient('u-not-in-list');
+      expect(screen.getByText('Unassigned')).toBeDefined();
+      expect(screen.queryByText('u-not-in-list')).toBeNull();
+    });
   });
 });
 // @ts-nocheck

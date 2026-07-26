@@ -48,6 +48,11 @@ model User {
   lastName       String?
   phone          String?
   role           String // 'SUPER_ADMIN', 'BUSINESS_OWNER', 'STAFF'
+  // Soft off-boarding. A hard delete is impossible: seven non-nullable columns
+  // reference User (Quotation.createdByUserId, Appointment.assignedUserId,
+  // Client.lastUpdatedByUserId, ...), so RESTRICT blocks it and cascading would
+  // destroy financial and audit history. Same reasoning as ProductInUseError.
+  isActive       Boolean  @default(true)
   // Profile media. Store the public URL of the canonical (1x) asset; the
   // responsive variants are derived from it by convention (see MediaService).
   avatarUrl      String?
@@ -121,7 +126,10 @@ model CustomFieldDefinition {
   id        String   @id
   tenantId  String
   fieldName String
-  fieldType String // 'TEXT', 'NUMBER', 'DATE', 'SINGLE_SELECT'
+  // Stored as a plain String rather than a Postgres enum, so the authoritative
+  // list is src/clients/domain/enums/FieldType.ts and adding a value needs no
+  // migration. Currently: TEXT, NUMBER, DATE, BOOLEAN, SINGLE_SELECT.
+  fieldType String
   options   String[] // for SINGLE_SELECT
 
   tenant Tenant @relation(fields: [tenantId], references: [id])

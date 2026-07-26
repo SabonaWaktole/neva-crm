@@ -1,6 +1,7 @@
 import { Request, Response, Router } from 'express';
 import multer from 'multer';
 import { prisma } from '../../../shared/infrastructure/prisma/client';
+import { requireTenantId } from '../../../main/interfaces/http/tenantContext';
 import { UserRole } from '../../../auth/domain/enums/UserRole';
 import {
   ACCEPTED_MIME,
@@ -114,7 +115,7 @@ export class MediaController {
       }
 
       const user = req.user!;
-      const tenantId = user.tenantId!;
+      const tenantId = requireTenantId(req);
       const spec = MEDIA_SPECS[kind];
       const column = COLUMN[kind];
 
@@ -161,7 +162,7 @@ export class MediaController {
       if (!kind) return;
 
       const user = req.user!;
-      const tenantId = user.tenantId!;
+      const tenantId = requireTenantId(req);
       const spec = MEDIA_SPECS[kind];
       const column = COLUMN[kind];
 

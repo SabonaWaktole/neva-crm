@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { requireTenantId } from "@main/interfaces/http/tenantContext";
 import { GetRevenueReportUseCase } from '../../application/use-cases/GetRevenueReportUseCase';
 import { GetClientReportUseCase } from '../../application/use-cases/GetClientReportUseCase';
 import { GetInventoryReportUseCase } from '../../application/use-cases/GetInventoryReportUseCase';
@@ -11,7 +12,7 @@ export class ReportsController {
 
   getRevenue = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const tenantId = req.tenant!.id;
+      const tenantId = requireTenantId(req);
       const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 12;
       
       const data = await this.getRevenueReport.execute(tenantId, limit);
@@ -23,7 +24,7 @@ export class ReportsController {
 
   getClients = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const tenantId = req.tenant!.id;
+      const tenantId = requireTenantId(req);
       const data = await this.getClientReport.execute(tenantId);
       res.status(200).json({ clients: data });
     } catch (error) {
@@ -33,7 +34,7 @@ export class ReportsController {
 
   getInventory = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const tenantId = req.tenant!.id;
+      const tenantId = requireTenantId(req);
       const data = await this.getInventoryReport.execute(tenantId);
       res.status(200).json({ inventory: data });
     } catch (error) {

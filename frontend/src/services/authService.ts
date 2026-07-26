@@ -18,7 +18,7 @@ export const authService = {
   },
 
   logout: async () => {
-    localStorage.removeItem('token');
+    // Nothing to clear client-side; the backend clears the httpOnly cookie.
     await apiClient.post('/auth/logout');
   },
 

@@ -18,7 +18,24 @@ import { AppointmentDetailPanel } from '../../components/panels/AppointmentDetai
 import { AppointmentForm } from '../../components/forms/AppointmentForm/AppointmentForm';
 import { useAddInteraction } from '../../hooks/useClients';
 import type { Appointment } from '../../types/appointment';
+import { useTeam } from '../../hooks/useTeam';
+import { findPersonById, getStaffDisplayName, getStaffInitials } from '../../utils/userUtils';
 import styles from './ClientDetailContent.module.css';
+
+/**
+ * Custom field values are stored as JSONB and can be any JSON scalar, so they
+ * cannot be rendered directly.
+ *
+ * `{value || '-'}` was wrong for booleans in both directions: React renders a
+ * bare `true` as nothing at all (so a ticked field looked blank), while `false`
+ * is falsy and fell through to the em dash used for "not set" — making "No"
+ * indistinguishable from "never filled in".
+ */
+const formatCustomFieldValue = (value: unknown): string => {
+  if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+  if (value === null || value === undefined || value === '') return '-';
+  return String(value);
+};
 
 const getAppointmentStatusVariant = (status: Appointment['status']) => {
   switch (status) {
@@ -43,6 +60,9 @@ export const ClientDetailContent: React.FC = () => {
   const { customFields, outcomeCategories, fetchSettings } = useClientSettings();
   const { addInteraction, isLoading: isAddingInteraction } = useAddInteraction();
   const { appointments, isLoading: isAppointmentsLoading, updateAppointmentLocally, fetchClientAppointments } = useClientAppointments(clientId || '');
+  // Staff list resolves assignedUserId to a name. Only fetchStaff is called;
+  // pending invitations are a Business-Owner-only endpoint.
+  const { staff, fetchStaff } = useTeam();
 
   const [activeTab, setActiveTab] = useState<'timeline' | 'appointments'>('timeline');
   const [isInteractionSlideOverOpen, setIsInteractionSlideOverOpen] = useState(false);
@@ -76,7 +96,8 @@ export const ClientDetailContent: React.FC = () => {
     fetchClient();
     fetchHistory();
     fetchSettings();
-  }, [fetchClient, fetchHistory, fetchSettings]);
+    fetchStaff();
+  }, [fetchClient, fetchHistory, fetchSettings, fetchStaff]);
 
   if (isClientLoading) return <div className={styles.container}>Loading client...</div>;
   if (!client) return <div className={styles.container}>Client not found.</div>;
@@ -155,11 +176,13 @@ export const ClientDetailContent: React.FC = () => {
             <div className={styles.contactDetails}>
               <Avatar
                 size="lg"
-                fallback={client.assignedUserId?.substring(0, 2).toUpperCase() || 'UN'}
+                fallback={getStaffInitials(findPersonById(staff, client.assignedUserId))}
                 className={styles.contactAvatar}
               />
               <div className={styles.contactInfo}>
-                <h3 className={styles.contactName}>{client.assignedUserId || 'Unassigned'}</h3>
+                <h3 className={styles.contactName}>
+                  {getStaffDisplayName(findPersonById(staff, client.assignedUserId))}
+                </h3>
                 <p className={styles.contactTitle}>Assigned User</p>
               </div>
             </div>
@@ -194,7 +217,9 @@ export const ClientDetailContent: React.FC = () => {
               {customFields.map((field) => (
                 <div key={field.id} className={styles.fieldRow}>
                   <span className={styles.fieldLabel}>{field.fieldName}</span>
-                  <span className={styles.fieldValue}>{client.customFieldValues?.[field.fieldName] || '-'}</span>
+                  <span className={styles.fieldValue}>
+                    {formatCustomFieldValue(client.customFieldValues?.[field.fieldName])}
+                  </span>
                 </div>
               ))}
               {customFields.length === 0 && (

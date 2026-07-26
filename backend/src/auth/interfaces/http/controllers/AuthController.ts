@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { requireTenant, requireTenantId } from "@main/interfaces/http/tenantContext";
 import { RegisterBusinessOwnerUseCase } from '@auth/application/use-cases/RegisterBusinessOwnerUseCase';
 import { LoginUseCase } from '@auth/application/use-cases/LoginUseCase';
 import { InviteStaffUseCase } from '@auth/application/use-cases/InviteStaffUseCase';
@@ -45,7 +46,7 @@ export class AuthController {
 
   loginTenant = async (req: Request, res: Response) => {
     try {
-      const result = await this.loginUseCase.execute({ ...req.body, tenantSlug: req.tenant!.urlSlug });
+      const result = await this.loginUseCase.execute({ ...req.body, tenantSlug: requireTenant(req).urlSlug });
       res.cookie('jwt', result.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -128,17 +129,19 @@ export class AuthController {
         }
       });
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      // Log internally; never return the raw message to the client.
+      console.error('GET /auth/me failed:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
   };
 
   inviteStaff = async (req: Request, res: Response) => {
     try {
-      const tenant = await this.tenantRepository.findById(req.tenant!.id);
+      const tenant = await this.tenantRepository.findById(requireTenantId(req));
       const result = await this.inviteStaffUseCase.execute({
         invitingUserId: req.user!.userId,
         invitingUserRole: req.user!.role,
-        tenantId: req.tenant!.id,
+        tenantId: requireTenantId(req),
         inviteeEmail: req.body.email,
         role: req.body.role,
         warehouseId: req.body.warehouseId,
@@ -154,7 +157,7 @@ export class AuthController {
     try {
       await this.updateUserRoleUseCase.execute({
         invitingUserRole: req.user!.role as any,
-        tenantId: req.tenant!.id,
+        tenantId: requireTenantId(req),
         userIdToUpdate: req.params.id as string,
         newRole: req.body.role,
         newWarehouseId: req.body.warehouseId,
@@ -179,7 +182,7 @@ export class AuthController {
     try {
       await this.requestPasswordResetUseCase.execute({
         email: req.body.email,
-        tenantId: req.tenant!.id,
+        tenantId: requireTenantId(req),
       });
       res.status(200).json({ message: 'If the email exists, a reset link has been sent.' });
     } catch (error: any) {
@@ -198,7 +201,7 @@ export class AuthController {
 
   getTenantStaff = async (req: Request, res: Response, next: Function) => {
     try {
-      const result = await this.getTenantStaffUseCase.execute({ tenantId: req.tenant!.id });
+      const result = await this.getTenantStaffUseCase.execute({ tenantId: requireTenantId(req) });
       res.json(result);
     } catch (error: any) {
       next(error);
@@ -208,7 +211,7 @@ export class AuthController {
   getPendingInvitations = async (req: Request, res: Response, next: Function) => {
     try {
       const result = await this.getPendingInvitationsUseCase.execute({
-        tenantId: req.tenant!.id,
+        tenantId: requireTenantId(req),
         requestingUserRole: req.user!.role as UserRole,
       });
       res.json(result);

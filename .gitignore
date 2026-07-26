@@ -1,5 +1,8 @@
+# Repo-root env files. The patterns below require a directory prefix, so a bare
+# root-level .env would otherwise be tracked.
+.env
+.env.*
 */.env
 */.env.*
 frontend/design/
 .agentrules
-CRMSaaSSRD.txt

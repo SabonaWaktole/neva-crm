@@ -21,6 +21,7 @@ describe('AcceptInvitationUseCase', () => {
       findByToken: jest.fn(),
       findByTenantId: jest.fn(),
       markAccepted: jest.fn(),
+      delete: jest.fn(),
     };
     userRepository = {
       create: jest.fn(),

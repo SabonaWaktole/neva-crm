@@ -15,7 +15,14 @@ export class GetTenantStaffUseCase {
       items: users.map(u => ({
         id: u.id,
         email: u.email,
+        // Names are needed to render a person anywhere a userId is stored —
+        // the assignee selector, and the Team Settings list, which was already
+        // rendering `firstName lastName` into a blank line because this
+        // projection dropped them.
+        firstName: u.firstName,
+        lastName: u.lastName,
         role: u.role,
+        warehouseId: u.warehouseId,
       }))
     };
   }

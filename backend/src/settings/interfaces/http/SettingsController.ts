@@ -1,4 +1,5 @@
 import { Request, Response, Router } from 'express';
+import { requireTenantId } from "@main/interfaces/http/tenantContext";
 import { ITenantRepository } from '../../../tenant/domain/repositories/ITenantRepository';
 import { UserRole } from '../../../auth/domain/enums/UserRole';
 
@@ -16,7 +17,7 @@ export class SettingsController {
 
   private async getSettings(req: Request, res: Response) {
     try {
-      const tenantId = req.user!.tenantId!;
+      const tenantId = requireTenantId(req);
       const tenant = await this.tenantRepository.findById(tenantId);
       if (!tenant) {
         return res.status(404).json({ error: 'Tenant not found' });
@@ -42,7 +43,7 @@ export class SettingsController {
 
   private async updateSettings(req: Request, res: Response) {
     try {
-      const tenantId = req.user!.tenantId!;
+      const tenantId = requireTenantId(req);
       const user = req.user!;
       
       // Role-gate settings update to Business Owner only

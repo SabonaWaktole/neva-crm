@@ -122,4 +122,55 @@ describe('ClientDetailContent Timeline', () => {
     // Assert that the explicit status label renders
     expect(screen.getByText('Cancelled')).toBeInTheDocument();
   });
+
+  // BOOLEAN custom fields are stored as real JSON booleans. Rendering them with
+  // `{value || '-'}` was wrong in both directions: React renders a bare `true`
+  // as nothing, and `false` is falsy so it fell through to the "not set" dash.
+  describe('BOOLEAN custom field display', () => {
+    const renderWithCustomField = (value: unknown) => {
+      vi.mocked(clientsHooks.useClientSettings).mockReturnValue({
+        customFields: [{ id: 'cf-1', fieldName: 'isVip', fieldType: 'BOOLEAN', isRequired: false }],
+        outcomeCategories: [],
+        isLoading: false,
+        fetchSettings: vi.fn(),
+      } as any);
+
+      vi.mocked(clientsHooks.useClientDetail).mockReturnValue({
+        client: {
+          id: 'client-1',
+          name: 'Test Client',
+          status: 'ACTIVE',
+          contactInfo: {},
+          customFieldValues: { isVip: value },
+        },
+        isLoading: false,
+        fetchClient: vi.fn(),
+      } as any);
+
+      vi.mocked(clientsHooks.useClientHistory).mockReturnValue({
+        history: { timeline: [] },
+        isLoading: false,
+        fetchHistory: vi.fn(),
+      } as any);
+
+      render(<ClientDetailContent />);
+    };
+
+    it('renders a true boolean as "Yes" rather than blank', () => {
+      renderWithCustomField(true);
+      expect(screen.getByText('Yes')).toBeInTheDocument();
+    });
+
+    it('renders a false boolean as "No", distinct from the not-set dash', () => {
+      renderWithCustomField(false);
+      expect(screen.getByText('No')).toBeInTheDocument();
+      // The decisive assertion: "off" must not be indistinguishable from "never set".
+      expect(screen.queryByText('-')).toBeNull();
+    });
+
+    it('still renders the dash when the field has never been set', () => {
+      renderWithCustomField(undefined);
+      expect(screen.getByText('-')).toBeInTheDocument();
+    });
+  });
 });
