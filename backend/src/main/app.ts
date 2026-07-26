@@ -255,6 +255,30 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const quotationRoutes = createQuotationRouter(quotationsController, tokenService, tenantRepository);
   app.use('/api/:tenantSlug/quotations', quotationRoutes);
 
+  // Media Routes (profile photos + workspace branding)
+  const { MediaController } = require('../media/interfaces/http/MediaController');
+  const { createMediaRouter } = require('../media/interfaces/http/mediaRoutes');
+  const { UPLOADS_DIR } = require('../media/MediaService');
+
+  const mediaController = new MediaController();
+  const mediaRoutes = createMediaRouter(mediaController, tokenService, tenantRepository);
+  app.use('/api/:tenantSlug/media', mediaRoutes);
+
+  // Serve stored images. Filenames contain a UUID and are never reused, so a
+  // long immutable cache is safe — replacing an image yields a new URL.
+  app.use(
+    '/uploads',
+    express.static(UPLOADS_DIR, {
+      maxAge: '1y',
+      immutable: true,
+      // These are user-supplied files; never let the browser sniff a
+      // different content type out of one.
+      setHeaders: (res: any) => {
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+      },
+    })
+  );
+
   // Settings Routes
   const { SettingsController } = require('../settings/interfaces/http/SettingsController');
   const { createSettingsRouter } = require('../settings/interfaces/http/settingsRoutes');

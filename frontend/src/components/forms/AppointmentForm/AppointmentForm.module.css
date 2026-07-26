@@ -1,3 +1,10 @@
+/* ============================================================================
+ * AppointmentForm
+ * One component, two hosts: a bento grid when it owns the page, and a plain
+ * vertical flow when it's inside a SlideOver (where the panel already
+ * supplies the card, so the section cards must flatten).
+ * ========================================================================= */
+
 .formContainer {
   display: flex;
   flex-direction: column;
@@ -24,7 +31,7 @@
 .sectionCard {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-md);
 }
 
 .contextLayout .sectionCard {
@@ -38,19 +45,21 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  color: var(--color-primary);
-  margin-bottom: var(--spacing-xs);
+  color: var(--text-primary);
+  margin-bottom: 2px;
 }
 
 .sectionHeader h2 {
-  font-family: var(--font-family-base);
+  font-family: var(--font-family-display);
   font-size: var(--font-size-headline-sm);
-  font-weight: 600;
+  font-weight: 620;
+  letter-spacing: -0.015em;
   margin: 0;
 }
 
 .headerIcon {
   color: var(--color-primary);
+  flex-shrink: 0;
 }
 
 .formGroup {
@@ -65,79 +74,98 @@
   gap: var(--spacing-md);
 }
 
-/* Locked Client Field */
+@media (max-width: 480px) {
+  .rowGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ------------------------------------------------------ locked client field */
+
 .lockedLabel {
   font-family: var(--font-family-base);
-  font-size: 11px;
+  font-size: var(--font-size-label-sm);
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--color-on-surface-variant);
-  margin-bottom: var(--spacing-xs);
+  letter-spacing: 0.07em;
+  color: var(--text-tertiary);
+  margin-bottom: 6px;
 }
 
 .lockedClientField {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-md);
-  background-color: var(--color-surface-container-low);
-  border: 1px solid var(--color-outline-variant);
+  gap: var(--spacing-base);
+  padding: var(--spacing-base) var(--spacing-md);
+  background-color: var(--color-surface-container);
+  border: none;
   border-radius: var(--radius-lg);
-  opacity: 0.75;
   cursor: not-allowed;
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
 }
 
 .lockedClientName {
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
   font-weight: 600;
-  color: var(--color-on-surface);
+  color: var(--text-secondary);
 }
 
 .lockIcon {
   margin-left: auto;
-  color: var(--color-outline);
+  color: var(--text-quaternary);
+  flex-shrink: 0;
 }
 
-/* Priority Toggle */
+/* ---------------------------------------------------------- priority toggle */
+
 .priorityToggleContainer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-md);
-  background-color: var(--color-surface-container);
-  border: 1px solid var(--color-outline-variant);
+  gap: var(--spacing-md);
+  padding: var(--spacing-base) var(--spacing-md);
+  background-color: var(--color-surface-container-low);
+  border: none;
   border-radius: var(--radius-lg);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
 }
 
 .priorityToggleInfo {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-base);
+  min-width: 0;
 }
 
 .priorityIcon {
-  color: var(--color-secondary);
+  color: var(--color-warning);
+  flex-shrink: 0;
 }
 
 .priorityTitle {
   font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
-  font-weight: 500;
-  color: var(--color-on-surface);
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .priorityDesc {
-  font-size: 12px;
-  color: var(--color-on-surface-variant);
+  font-size: var(--font-size-body-sm);
+  color: var(--text-tertiary);
 }
 
-/* Custom CSS Toggle Switch */
+/* --------------------------------------------------------------- switch ---
+ * Hand-built iOS switch: the knob eases across the track and the track
+ * fills with accent. Both animate, so the state change is legible.
+ * ------------------------------------------------------------------------ */
+
 .toggleSwitch {
   position: relative;
   display: inline-flex;
   align-items: center;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .toggleInput {
@@ -149,11 +177,12 @@
 
 .toggleTrack {
   width: 44px;
-  height: 24px;
+  height: 26px;
   background-color: var(--color-surface-container-highest);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   position: relative;
-  transition: background-color 0.2s;
+  transition: background-color var(--transition-normal);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
 }
 
 .toggleTrack::after {
@@ -161,12 +190,15 @@
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 20px;
-  height: 20px;
-  background-color: var(--color-surface-container-lowest);
-  border: 1px solid var(--color-outline-variant);
+  width: 22px;
+  height: 22px;
+  background-color: #ffffff;
+  border: none;
   border-radius: 50%;
-  transition: transform var(--transition-fast);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(0, 0, 0, 0.04);
+  transition: transform var(--duration-normal) var(--ease-spring);
 }
 
 .toggleInput:checked + .toggleTrack {
@@ -192,20 +224,22 @@
 }
 
 .toggleInput:checked + .toggleTrack::after {
-  transform: translateX(20px);
-  border-color: var(--color-primary);
+  transform: translateX(18px);
 }
+
+/* ----------------------------------------------------------------- actions */
 
 .formActions {
   display: flex;
   justify-content: flex-end;
-  gap: var(--spacing-md);
-  margin-top: var(--spacing-xl);
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-lg);
 }
 
 .contextLayout .formActions {
-  padding-top: var(--spacing-xl);
-  border-top: 1px solid var(--color-outline-variant);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border-hairline);
+  margin-top: 0;
 }
 
 .standaloneLayout .formActions {

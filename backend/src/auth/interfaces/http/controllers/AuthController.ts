@@ -87,6 +87,28 @@ export class AuthController {
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
+
+      // Media URLs are read straight from Prisma rather than through the User
+      // entity: they are presentation-only strings with no domain behaviour,
+      // and threading them through the entity would mean touching its
+      // constructor and every repository mapping for no benefit.
+      //
+      // The tenant's branding is returned on the same call so the sidebar and
+      // header can render the workspace logo without a second round trip.
+      const { prisma } = require('../../../../shared/infrastructure/prisma/client');
+      const [media, tenantBranding] = await Promise.all([
+        prisma.user.findUnique({
+          where: { id: user.id },
+          select: { avatarUrl: true, coverImageUrl: true },
+        }),
+        user.tenantId
+          ? prisma.tenant.findUnique({
+              where: { id: user.tenantId },
+              select: { logoUrl: true, coverImageUrl: true, name: true },
+            })
+          : Promise.resolve(null),
+      ]);
+
       res.status(200).json({
         user: {
           userId: user.id,
@@ -98,6 +120,11 @@ export class AuthController {
           tenantId: user.tenantId,
           tenantSlug: req.user.tenantSlug,
           warehouseId: user.warehouseId,
+          avatarUrl: media?.avatarUrl ?? null,
+          coverImageUrl: media?.coverImageUrl ?? null,
+          tenantName: tenantBranding?.name ?? null,
+          tenantLogoUrl: tenantBranding?.logoUrl ?? null,
+          tenantCoverImageUrl: tenantBranding?.coverImageUrl ?? null,
         }
       });
     } catch (error: any) {

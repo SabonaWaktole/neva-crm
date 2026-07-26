@@ -1,3 +1,7 @@
+/* ============================================================================
+ * MemberModal — invite / edit a team member.
+ * ========================================================================= */
+
 .form {
   display: flex;
   flex-direction: column;
@@ -5,17 +9,21 @@
 }
 
 .subtitle {
-  margin: 0 0 var(--spacing-md) 0;
+  margin: 0 0 var(--spacing-xs) 0;
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
-  color: var(--color-on-surface-variant);
+  line-height: var(--font-line-height-body-md);
+  color: var(--text-secondary);
+  text-wrap: pretty;
 }
 
 .actions {
   display: flex;
   flex-direction: column-reverse;
   gap: var(--spacing-sm);
-  margin-top: var(--spacing-sm);
+  margin-top: var(--spacing-xs);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border-hairline);
 }
 
 .actions > button {

@@ -10,6 +10,7 @@ import { SettingsLayout } from '../../components/layout/SettingsLayout/SettingsL
 import { useAuthStore } from '../../store/useAuthStore';
 import { useLogout } from '../../hooks/useLogout';
 import { useTenantSettings } from '../../hooks/useTenantSettings';
+import { ImagePicker } from '../../components/ui/ImagePicker';
 import { useEffect, useState } from 'react';
 import styles from './AccountSettingsPage.module.css';
 
@@ -26,8 +27,9 @@ const mockNavItems: NavItem[] = [
 export const AccountSettingsPage = () => {
   const navigate = useNavigate();
   const { tenantSlug } = useParams();
-  const { user } = useAuthStore();
+  const { user, setUser } = useAuthStore();
   const { logout } = useLogout();
+  const isBusinessOwner = user?.role === 'BUSINESS_OWNER';
   const { fetchSettings, updateSettings, loading } = useTenantSettings();
 
   const [requiresQuotationApproval, setRequiresQuotationApproval] = useState(true);
@@ -69,7 +71,6 @@ export const AccountSettingsPage = () => {
       userName={userName}
       onLogout={handleLogout}
       onSettingsClick={() => navigate(`/${tenantSlug}/settings/profile`)}
-      userAvatarSrc="https://lh3.googleusercontent.com/aida-public/AB6AXuCUVO_U904UXtp4jWW0TlbxmzPuBGIREJnS7rJvUtLWgv77vYvS4vxvhNtsn7uCPM4v19ncCYsTNjqR9gmBTthGZKxWksFTi3WHzwUACJE3fdYz43ve1_UcjRrGN0DsSAnzWy8bcm_ue3gBSicCHOQXi3nTG59avgqC7yDJvl_xzAPCtNRbIGrfduLtU3kRkzKkv4b6G4JpGzlfYerk5A74tOh2EEID2ccvMJyWClcbv_w3W2yL1Gy2hiSvmpCVC63iIga-3SmPV8Nj"
       sidebar={
         <Sidebar
           orgName={tenantSlug || 'Workspace'}
@@ -98,22 +99,52 @@ export const AccountSettingsPage = () => {
           </div>
 
           <div className={styles.sectionsColumn}>
+            {/*
+              Branding is API-backed and saves on upload, so it is its own
+              enabled card — separate from the Company Profile fields below,
+              which are still awaiting an endpoint.
+            */}
+            <Card padding="lg" className={styles.card}>
+              <div className={styles.cardHeader}>
+                <div className={styles.cardHeaderWithIcon}>
+                  <ImagePlus size={17} />
+                  <h2 className={styles.cardTitle}>Branding</h2>
+                </div>
+              </div>
+
+              <ImagePicker
+                kind="logo"
+                tenantSlug={tenantSlug || ''}
+                value={user?.tenantLogoUrl ?? null}
+                onChange={(url) => user && setUser({ ...user, tenantLogoUrl: url })}
+                label="Company logo"
+                hint="Square image, at least 256×256. Shown in the sidebar and on customer-facing documents."
+                disabled={!isBusinessOwner}
+              />
+
+              <ImagePicker
+                kind="company-cover"
+                tenantSlug={tenantSlug || ''}
+                value={user?.tenantCoverImageUrl ?? null}
+                onChange={(url) => user && setUser({ ...user, tenantCoverImageUrl: url })}
+                variant="banner"
+                label="Company banner"
+                hint="Wide image, ideally 1600×400 or larger."
+                disabled={!isBusinessOwner}
+              />
+
+              {!isBusinessOwner && (
+                <p className={styles.helperText}>
+                  Only Business Owners can change workspace branding.
+                </p>
+              )}
+            </Card>
+
             {/* Company Profile Section — not yet backed by the API, shown disabled */}
             <Card padding="lg" className={`${styles.card} ${styles.disabledSection}`}>
               <div className={styles.cardHeader}>
                 <h2 className={styles.cardTitle}>Company Profile</h2>
                 <span className={styles.comingSoonBadge}>Coming soon</span>
-              </div>
-
-              <div className={styles.logoRow}>
-                <div className={styles.logoBox}>
-                  <ImagePlus color="var(--color-outline-variant)" />
-                </div>
-                <div>
-                  <h3 className={styles.logoInfoTitle}>Company Logo</h3>
-                  <p className={styles.logoInfoText}>Upload a square logo. JPG, PNG, or SVG. Maximum file size 5MB.</p>
-                  <button className={styles.linkButton} disabled>Upload Image</button>
-                </div>
               </div>
 
               <div className={styles.twoColGrid}>

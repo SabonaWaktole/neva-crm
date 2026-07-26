@@ -5,6 +5,8 @@ import { Avatar } from '../../ui/Avatar/Avatar';
 import { ThemeToggle } from '../../ui/ThemeToggle';
 import { DropdownMenu } from '../../ui/DropdownMenu/DropdownMenu';
 import type { DropdownMenuItemType } from '../../ui/DropdownMenu/DropdownMenu';
+import { useAuthStore } from '../../../store/useAuthStore';
+import { resolveMediaUrl, srcSetFor } from '../../../services/mediaService';
 import styles from './AppLayout.module.css';
 
 export interface AppLayoutProps {
@@ -28,6 +30,14 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
 }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+
+  // The header avatar comes from the signed-in user unless a caller passes an
+  // explicit override. Reading it here rather than in each page means the
+  // photo updates everywhere the moment it is changed in settings — and it is
+  // why no page needs to pass `userAvatarSrc` at all.
+  const currentUser = useAuthStore((state) => state.user);
+  const avatarSrc = userAvatarSrc ?? resolveMediaUrl(currentUser?.avatarUrl);
+  const avatarSrcSet = userAvatarSrc ? undefined : srcSetFor(currentUser?.avatarUrl);
 
   const profileItems: DropdownMenuItemType[] = [
     ...(onSettingsClick
@@ -82,7 +92,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             trigger={
               <button className={styles.profileBtn} aria-label="User Profile">
                 <Avatar
-                  src={userAvatarSrc}
+                  src={avatarSrc}
+                  srcSet={avatarSrcSet}
                   fallback={userName.charAt(0).toUpperCase()}
                   size="sm"
                   alt={`${userName}'s profile`}

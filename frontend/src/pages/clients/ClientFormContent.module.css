@@ -1,3 +1,9 @@
+/* ============================================================================
+ * ClientFormContent — create/edit a client.
+ * Each section is a card with an icon-led heading, so a long form breaks into
+ * a few obviously-separate jobs.
+ * ========================================================================= */
+
 .container {
   display: flex;
   flex-direction: column;
@@ -7,7 +13,7 @@
 
 .header {
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
   justify-content: space-between;
   gap: var(--spacing-md);
   flex-wrap: wrap;
@@ -16,15 +22,15 @@
 .headerText {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: 5px;
 }
 
 .title {
-  font-family: var(--font-family-base);
+  font-family: var(--font-family-display);
   font-size: var(--font-size-headline-lg);
   font-weight: var(--font-weight-headline-lg);
-  line-height: var(--font-line-height-headline-lg);
-  color: var(--color-on-background);
+  line-height: 1.15;
+  color: var(--text-primary);
   letter-spacing: var(--font-letter-spacing-headline-lg);
   margin: 0;
 }
@@ -34,7 +40,7 @@
   font-size: var(--font-size-body-md);
   font-weight: var(--font-weight-body-md);
   line-height: var(--font-line-height-body-md);
-  color: var(--color-on-surface-variant);
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -45,12 +51,16 @@
 }
 
 .errorBanner {
-  padding: var(--spacing-sm) var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 10px var(--spacing-base);
   background-color: var(--color-error-container);
   color: var(--color-on-error-container);
   border-radius: var(--radius-lg);
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-error) 20%, transparent);
 }
 
 .formContainer {
@@ -62,27 +72,33 @@
 .sectionCard {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-md);
   position: relative;
   overflow: hidden;
 }
 
+/* Accent rule across the top of the custom-fields card, marking it as the
+   tenant-configured section rather than a fixed one. */
 .dynamicCard::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--color-primary),
+    color-mix(in srgb, var(--color-primary) 50%, var(--color-secondary))
+  );
 }
 
 .sectionHeader {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  padding-bottom: var(--spacing-md);
-  border-bottom: 1px solid var(--color-outline-variant);
+  padding-bottom: var(--spacing-base);
+  border-bottom: 1px solid var(--border-hairline);
 }
 
 .iconWrapper {
@@ -91,24 +107,32 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  border-radius: var(--radius-full);
-  background-color: var(--color-surface-container-highest);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-primary-container);
   color: var(--color-primary);
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 14%, transparent);
+}
+
+.iconWrapper > svg {
+  width: 16px;
+  height: 16px;
 }
 
 .sectionTitle {
-  font-family: var(--font-family-base);
-  font-size: var(--font-size-headline-md);
-  font-weight: var(--font-weight-headline-md);
-  line-height: var(--font-line-height-headline-md);
-  color: var(--color-on-surface);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-headline-sm);
+  font-weight: 620;
+  letter-spacing: -0.015em;
+  line-height: var(--font-line-height-headline-sm);
+  color: var(--text-primary);
   margin: 0;
 }
 
 .grid2 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: var(--spacing-lg);
+  gap: var(--spacing-md);
 }
 
 .fullWidth {

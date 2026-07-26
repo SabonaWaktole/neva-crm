@@ -1,18 +1,27 @@
+/* ============================================================================
+ * WarehouseStockAllocation — split a product's stock across warehouses.
+ * The dashed footer holds the running total, which is the number the user is
+ * actually steering toward.
+ * ========================================================================= */
+
 .container {
-  background-color: var(--color-surface-container);
+  background-color: var(--color-surface-container-lowest);
   border-radius: var(--radius-xl);
   padding: var(--spacing-lg);
-  box-shadow: var(--elevation-2);
-  border: 1px solid var(--color-outline-variant);
+  border: none;
+  box-shadow:
+    var(--shadow-xs),
+    inset 0 0 0 1px var(--border-hairline);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-md);
 }
 
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--spacing-sm);
 }
 
 .headerLeft {
@@ -22,45 +31,51 @@
 }
 
 .title {
-  font-family: var(--font-family-base);
-  font-size: var(--font-size-headline-md);
-  color: var(--color-on-surface);
-  font-weight: var(--font-weight-headline-md);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-headline-sm);
+  color: var(--text-primary);
+  font-weight: 620;
+  letter-spacing: -0.015em;
   margin: 0;
 }
 
 .icon {
   color: var(--color-primary);
+  flex-shrink: 0;
 }
 
 .body {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-md);
 }
 
+/* Dashed to read as a running subtotal rather than another input row. */
 .footer {
-  border: 1px dashed var(--color-outline-variant);
+  border: 1px dashed var(--border-strong);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-md);
+  padding: var(--spacing-base) var(--spacing-md);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: var(--color-surface-container-lowest);
+  gap: var(--spacing-md);
+  background-color: var(--color-surface-container-low);
 }
 
 .summaryText {
   font-family: var(--font-family-base);
-  font-size: var(--font-size-body-md);
-  color: var(--color-on-surface-variant);
-  font-weight: var(--font-weight-body-md);
+  font-size: var(--font-size-body-sm);
+  color: var(--text-tertiary);
+  font-weight: 500;
   margin: 0;
 }
 
 .totalValue {
-  font-family: var(--font-family-base);
+  font-family: var(--font-family-display);
   font-size: var(--font-size-headline-md);
-  color: var(--color-primary);
-  font-weight: var(--font-weight-headline-md);
+  color: var(--text-primary);
+  font-weight: 660;
+  letter-spacing: -0.022em;
+  font-variant-numeric: tabular-nums;
   margin: 0;
 }

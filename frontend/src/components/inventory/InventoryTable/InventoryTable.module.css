@@ -1,32 +1,55 @@
+/* ============================================================================
+ * InventoryTable — cell renderers for the shared DataTable.
+ * ========================================================================= */
+
 .productName {
-  font-weight: 500;
-  color: var(--color-on-surface);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
 }
 
 .secondaryText {
-  color: var(--color-on-surface-variant);
+  color: var(--text-tertiary);
+  font-size: var(--font-size-body-sm);
 }
 
+/* Row actions stay hidden until the row is hovered, matching the client and
+   quotation lists. */
 .actionButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-default);
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
   border: none;
   background: transparent;
-  color: var(--color-on-surface-variant);
+  color: var(--text-tertiary);
   cursor: pointer;
-  transition: background-color var(--transition-fast), color var(--transition-fast);
+  opacity: 0;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    opacity var(--transition-fast);
+}
+
+tr:hover .actionButton,
+.actionButton:focus-visible {
+  opacity: 1;
 }
 
 .actionButton:hover {
-  background-color: var(--color-surface-container);
-  color: var(--color-on-surface);
+  background-color: var(--color-surface-container-high);
+  color: var(--text-primary);
 }
 
 .actionButton:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 1px;
+}
+
+@media (hover: none) {
+  .actionButton {
+    opacity: 1;
+  }
 }

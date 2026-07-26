@@ -10,6 +10,8 @@ import { SettingsLayout } from '../../../components/layout/SettingsLayout/Settin
 import { Card } from '../../../components/ui/Card/Card';
 import { TextInput } from '../../../components/ui/TextInput/TextInput';
 import { Button } from '../../../components/ui/Button/Button';
+import { ImagePicker } from '../../../components/ui/ImagePicker';
+import { resolveMediaUrl } from '../../../services/mediaService';
 import { ChevronRight } from 'lucide-react';
 import styles from './ProfilePage.module.css';
 
@@ -92,7 +94,7 @@ export const ProfilePage: React.FC = () => {
       userName={userName}
       onLogout={handleLogout}
       onSettingsClick={() => navigate(`/${tenantSlug}/settings/profile`)}
-      userAvatarSrc="https://lh3.googleusercontent.com/aida-public/AB6AXuCUVO_U904UXtp4jWW0TlbxmzPuBGIREJnS7rJvUtLWgv77vYvS4vxvhNtsn7uCPM4v19ncCYsTNjqR9gmBTthGZKxWksFTi3WHzwUACJE3fdYz43ve1_UcjRrGN0DsSAnzWy8bcm_ue3gBSicCHOQXi3nTG59avgqC7yDJvl_xzAPCtNRbIGrfduLtU3kRkzKkv4b6G4JpGzlfYerk5A74tOh2EEID2ccvMJyWClcbv_w3W2yL1Gy2hiSvmpCVC63iIga-3SmPV8Nj"
+      userAvatarSrc={resolveMediaUrl(user?.avatarUrl)}
       sidebar={
         <Sidebar 
           orgName={tenantSlug || 'Workspace'} 
@@ -116,6 +118,40 @@ export const ProfilePage: React.FC = () => {
           </div>
 
           <h1 className={styles.title}>My Profile</h1>
+
+          {/*
+            Media lives in its own card and saves immediately on upload — it
+            deliberately does not participate in the form below, because an
+            image the user has already cropped and confirmed should not be
+            waiting behind a "Save Changes" click.
+          */}
+          <Card padding="lg" className={styles.mediaCard}>
+            <div className={styles.mediaHeader}>
+              <h2 className={styles.mediaTitle}>Photos</h2>
+              <p className={styles.mediaSubtitle}>
+                Your profile photo appears next to your name across the workspace.
+              </p>
+            </div>
+
+            <ImagePicker
+              kind="avatar"
+              tenantSlug={tenantSlug || ''}
+              value={user?.avatarUrl ?? null}
+              onChange={(url) => user && setUser({ ...user, avatarUrl: url })}
+              label="Profile photo"
+              hint="Square image, at least 256×256. JPEG, PNG, WebP, GIF or AVIF up to 8 MB."
+            />
+
+            <ImagePicker
+              kind="user-cover"
+              tenantSlug={tenantSlug || ''}
+              value={user?.coverImageUrl ?? null}
+              onChange={(url) => user && setUser({ ...user, coverImageUrl: url })}
+              variant="banner"
+              label="Cover photo"
+              hint="Wide image, ideally 1600×400 or larger."
+            />
+          </Card>
 
           <Card padding="lg">
             {message && (

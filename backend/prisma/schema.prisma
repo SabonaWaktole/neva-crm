@@ -12,6 +12,9 @@ model Tenant {
   name                      String
   urlSlug                   String   @unique
   requiresQuotationApproval Boolean  @default(true)
+  // Workspace branding, surfaced in the sidebar, settings and customer-facing pages.
+  logoUrl                   String?
+  coverImageUrl             String?
   createdAt                 DateTime @default(now())
 
   users                  User[]
@@ -44,6 +47,10 @@ model User {
   lastName       String?
   phone          String?
   role           String // 'SUPER_ADMIN', 'BUSINESS_OWNER', 'STAFF'
+  // Profile media. Store the public URL of the canonical (1x) asset; the
+  // responsive variants are derived from it by convention (see MediaService).
+  avatarUrl      String?
+  coverImageUrl  String?
   tenantId       String?
   createdAt      DateTime @default(now())
 

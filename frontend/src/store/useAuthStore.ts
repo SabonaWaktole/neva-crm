@@ -12,6 +12,16 @@ export interface User {
   tenantId: string | null;
   tenantSlug: string | null;
   warehouseId?: string | null;
+  /**
+   * Profile and workspace media, returned by GET /auth/me. Held on the auth
+   * user so the sidebar and header can render branding without their own
+   * fetch. All optional — an account may simply have no image set.
+   */
+  avatarUrl?: string | null;
+  coverImageUrl?: string | null;
+  tenantName?: string | null;
+  tenantLogoUrl?: string | null;
+  tenantCoverImageUrl?: string | null;
 }
 
 interface AuthState {

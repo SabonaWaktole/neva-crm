@@ -5,6 +5,8 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { Button } from '../../ui/Button/Button';
+import { useAuthStore } from '../../../store/useAuthStore';
+import { resolveMediaUrl, srcSetFor } from '../../../services/mediaService';
 import styles from './Sidebar.module.css';
 
 // Map material-symbols icon names to Lucide components
@@ -52,6 +54,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onNewEntryClick,
   onLogoutClick,
 }) => {
+  const tenantLogoUrl = useAuthStore((state) => state.user?.tenantLogoUrl);
+  const logoSrc = resolveMediaUrl(tenantLogoUrl);
+
   return (
     <>
       {/* Mobile Backdrop */}
@@ -60,8 +65,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
       )}
       <nav className={`${styles.sidebar} ${isOpen ? styles.sidebarOpen : ''}`}>
       <div className={styles.orgSection}>
+        {/*
+          The workspace logo replaces the generic building glyph once one has
+          been uploaded. Read from the auth store so it appears on every screen
+          without each page having to pass it down.
+        */}
         <div className={styles.orgIcon}>
-          <Building size={20} />
+          {logoSrc ? (
+            <img
+              className={styles.orgLogo}
+              src={logoSrc}
+              srcSet={srcSetFor(tenantLogoUrl)}
+              alt=""
+              onError={(event) => {
+                // Fall back to the glyph if the stored file has gone.
+                event.currentTarget.style.display = 'none';
+              }}
+            />
+          ) : (
+            <Building size={20} />
+          )}
         </div>
         <div className={styles.orgInfo}>
           <h2 className={styles.orgName}>{orgName}</h2>

@@ -14,6 +14,13 @@
 
 /* -------------------------------------------------------------------- nav */
 
+/*
+ * At the top of the page the nav is effectively invisible — no fill, no rule.
+ * Once the page scrolls it condenses into frosted glass with a hairline and a
+ * soft lift. The switch is a class toggled at a scroll threshold in JS, and
+ * the easing lives here in CSS: animating backdrop-filter per frame is
+ * expensive, so only cheap properties cross-fade.
+ */
 .nav {
   position: sticky;
   top: 0;
@@ -24,10 +31,37 @@
   flex-wrap: wrap;
   gap: var(--spacing-sm);
   padding: var(--spacing-base) var(--spacing-md);
-  background: var(--glass-bg);
+  background: transparent;
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  border-bottom: 1px solid var(--border-hairline);
+  border-bottom: 1px solid transparent;
+  transition:
+    background-color var(--duration-slow) var(--ease-out),
+    border-color var(--duration-slow) var(--ease-out),
+    box-shadow var(--duration-slow) var(--ease-out);
+}
+
+.navScrolled {
+  background-color: var(--glass-bg);
+  border-bottom-color: var(--border-hairline);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Reading progress, pinned to the nav's lower edge. Scaled from the left on
+   a single transform, so it costs nothing to animate. */
+.scrollProgress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  transform-origin: 0 50%;
+  background: linear-gradient(
+    90deg,
+    var(--color-primary),
+    color-mix(in srgb, var(--color-primary) 55%, var(--color-secondary))
+  );
+  will-change: transform;
 }
 
 @media (min-width: 768px) {
@@ -40,6 +74,15 @@
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.brandMark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* Framer Motion drives rotate/scale here; keeping it its own element means
+     the text beside it never inherits the transform. */
+  transform-origin: center;
 }
 
 .brandText {
@@ -70,16 +113,22 @@
   isolation: isolate;
 }
 
-/* A single wide accent bloom behind the headline. */
-.hero::before {
-  content: '';
+/*
+ * A single wide accent bloom behind the headline. This was a ::before, but a
+ * pseudo-element can't be driven by Framer Motion — it's a real element now so
+ * it can parallax against the scroll. The blur is baked in and never animated;
+ * only translateY/scale/opacity change.
+ */
+.heroGlow {
   position: absolute;
   z-index: -1;
   top: -220px;
   left: 50%;
-  transform: translateX(-50%);
   width: min(1000px, 130%);
   height: 620px;
+  /* Horizontal centring is done with Framer Motion's `x: '-50%'` rather than a
+     CSS translateX, because Motion writes the whole `transform` property and
+     would otherwise clobber it when animating y. */
   border-radius: 50%;
   filter: blur(90px);
   background: radial-gradient(
@@ -88,6 +137,17 @@
     transparent 68%
   );
   pointer-events: none;
+  will-change: transform;
+}
+
+/* Wraps everything that parallaxes as one layer, so the hero moves as a
+   single compositor surface instead of four independently-animated nodes. */
+.heroContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  will-change: transform;
 }
 
 @media (min-width: 768px) {
@@ -113,9 +173,11 @@
   box-shadow:
     var(--shadow-sm),
     inset 0 0 0 1px var(--border-subtle);
-  animation: heroIn var(--duration-slower) var(--ease-out) both;
 }
 
+/* Entrance for .badge/.title/.subtitle/.ctaRow is owned by Framer Motion in
+   LandingPage.tsx (see heroContainerVariants). The former CSS `heroIn`
+   keyframes were removed so the two systems can't animate the same element. */
 .title {
   max-width: 16ch;
   font-family: var(--font-family-display);
@@ -126,7 +188,21 @@
   margin: 0 0 var(--spacing-md) 0;
   letter-spacing: -0.035em;
   text-wrap: balance;
-  animation: heroIn var(--duration-slower) var(--ease-out) 60ms both;
+}
+
+/*
+ * The headline is split into per-word spans for the staggered reveal. The
+ * outer span holds the inter-word space (the split drops real spaces) and
+ * stays a normal inline-block so the line still wraps naturally; the inner
+ * span is what actually translates.
+ */
+.word {
+  display: inline-block;
+}
+
+.wordInner {
+  display: inline-block;
+  will-change: transform;
 }
 
 @media (min-width: 640px) {
@@ -150,7 +226,6 @@
   margin: 0 0 var(--spacing-xl) 0;
   line-height: 1.55;
   text-wrap: pretty;
-  animation: heroIn var(--duration-slower) var(--ease-out) 120ms both;
 }
 
 @media (min-width: 640px) {
@@ -166,7 +241,14 @@
   justify-content: center;
   gap: var(--spacing-base);
   align-items: center;
-  animation: heroIn var(--duration-slower) var(--ease-out) 180ms both;
+}
+
+/* Motion wrapper around the Button. Scaling this instead of the button itself
+   leaves the Button primitive's own :active press intact. */
+.ctaWrap {
+  display: inline-flex;
+  border-radius: var(--radius-full);
+  will-change: transform;
 }
 
 .ctaButton {
@@ -174,11 +256,6 @@
   padding: 0 var(--spacing-xl) !important;
   font-size: var(--font-size-body-md) !important;
   border-radius: var(--radius-full) !important;
-}
-
-@keyframes heroIn {
-  from { opacity: 0; transform: translateY(14px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 /* --------------------------------------------------------------- features */
@@ -209,16 +286,20 @@
   box-shadow:
     var(--shadow-xs),
     inset 0 0 0 1px var(--border-hairline);
-  transition:
-    box-shadow var(--transition-normal),
-    transform var(--transition-normal);
+  /* transform is deliberately absent — Framer Motion owns it. */
+  transition: box-shadow var(--transition-normal);
+  will-change: transform;
 }
 
+/*
+ * Only the shadow is animated here. The lift itself is Framer Motion's
+ * `whileHover={{ y: -6 }}` — if CSS also set a transform on hover the two
+ * would overwrite each other's `transform` and the card would jump.
+ */
 .featureCard:hover {
   box-shadow:
     var(--shadow-lg),
     inset 0 0 0 1px var(--border-subtle);
-  transform: translateY(-3px);
 }
 
 @media (min-width: 640px) {
@@ -236,6 +317,7 @@
   justify-content: center;
   margin-bottom: var(--spacing-md);
   box-shadow: inset 0 0 0 1px var(--border-hairline);
+  will-change: transform;
 }
 
 .featureTitle {

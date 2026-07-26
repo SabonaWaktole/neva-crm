@@ -1,3 +1,9 @@
+/* ============================================================================
+ * QuotationDetailContent
+ * A document view: line items read like an invoice, totals are right-aligned
+ * and tabular, and the grand total is the only figure allowed to be large.
+ * ========================================================================= */
+
 .container {
   display: flex;
   flex-direction: column;
@@ -26,73 +32,82 @@
 .headerTitleRow {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-base);
   flex-wrap: wrap;
 }
 
 .loadingState {
-  padding: var(--spacing-xl);
+  padding: var(--spacing-2xl);
   text-align: center;
-  color: var(--color-on-surface-variant);
+  color: var(--text-tertiary);
   font-family: var(--font-family-base);
 }
 
 .lineItemsHeader {
-  padding: var(--spacing-lg);
-  border-bottom: 1px solid var(--color-outline-variant);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--border-hairline);
 }
 
 .breadcrumb {
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: 5px;
   padding: 0;
   background: none;
   border: none;
   cursor: pointer;
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-sm);
-  color: var(--color-on-surface-variant);
-  margin-bottom: var(--spacing-xs);
+  font-weight: 500;
+  color: var(--text-tertiary);
+  margin-bottom: 5px;
   transition: color var(--transition-fast);
 }
 
 .breadcrumb:hover {
-  color: var(--color-on-surface);
+  color: var(--color-primary);
 }
 
 .breadcrumb:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
-  border-radius: var(--radius-default);
+  border-radius: var(--radius-sm);
 }
 
 .errorBanner {
-  padding: var(--spacing-sm) var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 10px var(--spacing-base);
   background-color: var(--color-error-container);
   color: var(--color-on-error-container);
   border-radius: var(--radius-lg);
   margin-bottom: var(--spacing-md);
   font-size: var(--font-size-body-md);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-error) 20%, transparent);
 }
 
 .title {
-  font-family: var(--font-family-base);
+  font-family: var(--font-family-display);
   font-size: var(--font-size-headline-lg);
-  font-weight: 700;
-  color: var(--color-on-surface);
+  font-weight: var(--font-weight-headline-lg);
+  letter-spacing: var(--font-letter-spacing-headline-lg);
+  line-height: 1.15;
+  color: var(--text-primary);
   margin: 0;
 }
 
 .headerActions {
   display: flex;
   gap: var(--spacing-sm);
+  flex-wrap: wrap;
 }
 
 .grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--spacing-lg);
+  align-items: start;
 }
 
 @media (min-width: 1024px) {
@@ -101,17 +116,15 @@
   }
 }
 
-.mainCol {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
-}
-
+.mainCol,
 .sidebarCol {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
+  min-width: 0;
 }
+
+/* ------------------------------------------------------------- summary */
 
 .summaryGrid {
   display: grid;
@@ -129,62 +142,84 @@
 .summaryLabel {
   font-family: var(--font-family-base);
   font-size: var(--font-size-label-sm);
-  color: var(--color-on-surface-variant);
-  margin-bottom: 4px;
+  font-weight: 600;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 3px;
 }
 
 .summaryValue {
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
-  color: var(--color-on-surface);
-  font-weight: 500;
+  color: var(--text-primary);
+  font-weight: 550;
+  font-variant-numeric: tabular-nums;
 }
 
 .sectionHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: var(--spacing-sm);
   margin-bottom: var(--spacing-md);
-  border-bottom: 1px solid var(--color-outline-variant);
+  border-bottom: 1px solid var(--border-hairline);
   padding-bottom: var(--spacing-sm);
 }
 
 .sectionTitle {
-  font-family: var(--font-family-base);
-  font-size: var(--font-size-headline-md);
-  font-weight: 600;
-  color: var(--color-on-surface);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-headline-sm);
+  font-weight: 620;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
   margin: 0;
 }
 
+/* ---------------------------------------------------------- line items */
+
 .table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-variant-numeric: tabular-nums lining-nums;
 }
 
 .table th {
   text-align: left;
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: 0 var(--spacing-lg);
+  height: 38px;
   font-family: var(--font-family-base);
   font-size: var(--font-size-label-sm);
-  color: var(--color-on-surface-variant);
-  font-weight: 500;
-  border-bottom: 1px solid var(--color-outline-variant);
-  background-color: var(--color-surface-container-lowest);
+  color: var(--text-tertiary);
+  font-weight: 600;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border-subtle);
+  background-color: var(--color-surface-container-low);
 }
 
 .table td {
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-bottom: 1px solid var(--color-outline-variant);
+  padding: var(--spacing-base) var(--spacing-lg);
+  border-bottom: 1px solid var(--border-hairline);
   vertical-align: middle;
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
-  color: var(--color-on-surface);
+  color: var(--text-primary);
 }
 
 .table tr:last-child td {
   border-bottom: none;
 }
+
+/* Numeric columns are right-aligned so decimal points line up down the page. */
+.table th:not(:first-child),
+.table td:not(:first-child) {
+  text-align: right;
+}
+
+/* ---------------------------------------------------------------- totals */
 
 .totalsSection {
   display: flex;
@@ -193,38 +228,46 @@
 }
 
 .totalsCard {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-outline-variant);
+  background-color: var(--color-surface-container-low);
+  border: none;
   border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
   width: 100%;
   max-width: 320px;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: 7px;
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
 }
 
 .totalRow {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: baseline;
+  gap: var(--spacing-md);
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
-  color: var(--color-on-surface-variant);
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
 }
 
 .grandTotalRow {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  font-family: var(--font-family-base);
+  align-items: baseline;
+  gap: var(--spacing-md);
+  font-family: var(--font-family-display);
   font-size: var(--font-size-headline-md);
-  font-weight: 700;
-  color: var(--color-on-surface);
+  font-weight: 660;
+  letter-spacing: -0.022em;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
   padding-top: var(--spacing-sm);
-  border-top: 1px solid var(--color-outline-variant);
+  border-top: 1px solid var(--border-subtle);
   margin-top: var(--spacing-xs);
 }
+
+/* -------------------------------------------------------------- timeline */
 
 .timeline {
   display: flex;
@@ -233,40 +276,60 @@
   margin-top: var(--spacing-md);
 }
 
+/* The rail is drawn on the row so it connects dots without extra markup. */
 .timelineItem {
+  position: relative;
   display: flex;
-  gap: var(--spacing-md);
+  gap: var(--spacing-base);
+}
+
+.timelineItem:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 16px;
+  bottom: calc(-1 * var(--spacing-md));
+  width: 2px;
+  border-radius: var(--radius-full);
+  background-color: var(--border-subtle);
 }
 
 .timelineDot {
+  position: relative;
+  z-index: 1;
   width: 12px;
   height: 12px;
   border-radius: 50%;
   background-color: var(--color-primary);
   margin-top: 4px;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px var(--color-surface-container-lowest);
 }
 
 .timelineContent {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 1px;
+  min-width: 0;
 }
 
 .timelineStatus {
   font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
   font-weight: 600;
-  color: var(--color-on-surface);
+  letter-spacing: -0.008em;
+  color: var(--text-primary);
 }
 
 .timelineDate {
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-sm);
-  color: var(--color-on-surface-variant);
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
 }
 
 .timelineUser {
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-sm);
-  color: var(--color-on-surface-variant);
+  color: var(--text-tertiary);
 }

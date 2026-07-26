@@ -1,7 +1,12 @@
+/* ============================================================================
+ * CustomFieldInput — the checkbox variant of a tenant-defined field.
+ * Text/select/textarea variants delegate to the shared input primitives.
+ * ========================================================================= */
+
 .checkboxContainer {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: 6px;
 }
 
 .checkboxLabel {
@@ -9,26 +14,34 @@
   align-items: center;
   gap: var(--spacing-sm);
   cursor: pointer;
+  padding: 3px 0;
 }
 
 .checkboxInput {
-  width: 16px;
-  height: 16px;
+  width: 17px;
+  height: 17px;
   margin: 0;
   accent-color: var(--color-primary);
   cursor: pointer;
+  flex-shrink: 0;
+}
+
+.checkboxInput:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }
 
 .checkboxText {
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
-  color: var(--color-on-surface);
+  color: var(--text-primary);
 }
 
 .helperTextError {
   margin-top: 0;
   font-family: var(--font-family-base);
-  font-size: var(--font-size-label-sm);
-  line-height: var(--font-line-height-label-sm);
+  font-size: var(--font-size-body-sm);
+  line-height: var(--font-line-height-body-sm);
   color: var(--color-error);
 }
