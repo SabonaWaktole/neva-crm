@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {} from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Network } from 'lucide-react';
@@ -10,6 +11,7 @@ import { useLogin } from '../../hooks/useLogin';
 import styles from './LoginPage.module.css';
 
 export const LoginPage = () => {
+  const { t } = useTranslation('auth');
   const { tenantSlug } = useParams();
   const navigate = useNavigate();
   const { login, isLoading, error } = useLogin();
@@ -32,8 +34,8 @@ export const LoginPage = () => {
 
   return (
     <AuthLayout
-      title="Welcome back"
-      subtitle="Sign in to your Neva CRM account"
+      title={t('login.title')}
+      subtitle={t('login.subtitle')}
       logoIcon={<Network size={32} color="var(--color-primary)" />}
     >
       <form className={styles.form} onSubmit={handleSubmit}>
@@ -43,8 +45,8 @@ export const LoginPage = () => {
           </div>
         )}
         <TextInput
-          label="Email Address" 
-          placeholder="name@company.com" 
+          label={t('login.email')} 
+          placeholder={t('emailPlaceholder')} 
           type="email"
           id="email"
           value={email}
@@ -54,8 +56,8 @@ export const LoginPage = () => {
         
         <div className={styles.passwordGroup}>
           <PasswordInput
-            label="Password"
-            placeholder="••••••••"
+            label={t('login.password')}
+            placeholder={t('passwordPlaceholder')}
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -63,20 +65,20 @@ export const LoginPage = () => {
           />
           <div className={styles.metaRow}>
             <span className={styles.metaText}>
-              Don't have an account?{' '}
+              {t('login.dontHaveAccount')}{' '}
               <Link to="/register-business" className={styles.link}>
-                Sign up
+                {t('login.signUp')}
               </Link>
             </span>
             <Link to={`/${tenantSlug || 'admin'}/forgot-password`} className={styles.link}>
-              Forgot password?
+              {t('login.forgotPassword')}
             </Link>
           </div>
         </div>
 
         <div className={styles.submitRow}>
           <Button fullWidth variant="primary" type="submit" isLoading={isLoading}>
-            Sign In
+            {t('login.submit')}
           </Button>
         </div>
       </form>

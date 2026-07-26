@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { Plus, Trash2 } from 'lucide-react';
@@ -30,6 +31,8 @@ interface QuotationFormData {
 }
 
 export const QuotationFormContent: React.FC<QuotationFormProps> = ({ mode }) => {
+  const { t } = useTranslation('quotations');
+  const { t: tc } = useTranslation('common');
   const { format: formatMoney } = useMoneyFormat();
   const navigate = useNavigate();
   const { tenantSlug, id } = useParams();
@@ -112,12 +115,16 @@ export const QuotationFormContent: React.FC<QuotationFormProps> = ({ mode }) => 
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className={styles.header}>
           <div>
-            <div className={styles.breadcrumb}>CRM &gt; Quotations &gt; {mode === 'create' ? 'New' : 'Edit'}</div>
+            <div className={styles.breadcrumb}>
+            {t('breadcrumb')}
+            {' > '}
+            {mode === 'create' ? t('form.breadcrumbNew') : t('form.breadcrumbEdit')}
+          </div>
             <h1 className={styles.title}>{mode === 'create' ? 'Create Quotation' : 'Edit Quotation'}</h1>
           </div>
           <div className={styles.headerActions}>
-            <Button variant="outline" type="button" onClick={() => navigate(-1)}>Cancel</Button>
-            <Button variant="primary" type="submit" isLoading={isSaving}>Save Quotation</Button>
+            <Button variant="outline" type="button" onClick={() => navigate(-1)}>{tc('actions.cancel')}</Button>
+            <Button variant="primary" type="submit" isLoading={isSaving}>{t('form.save')}</Button>
           </div>
         </div>
 
@@ -130,7 +137,7 @@ export const QuotationFormContent: React.FC<QuotationFormProps> = ({ mode }) => 
         <div className={styles.sectionsWrapper}>
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
-              <h2 className={styles.sectionTitle}>1. Client Details</h2>
+              <h2 className={styles.sectionTitle}>{t('form.clientDetails')}</h2>
             </div>
             <Card padding="lg">
               <div className={styles.formGrid}>
@@ -168,9 +175,9 @@ export const QuotationFormContent: React.FC<QuotationFormProps> = ({ mode }) => 
 
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
-              <h2 className={styles.sectionTitle}>2. Line Items</h2>
+              <h2 className={styles.sectionTitle}>{t('form.lineItems')}</h2>
               <Button type="button" variant="outline" icon={<Plus size={16} />} onClick={() => append({ productId: '', warehouseId: '', quantity: 1, unitPrice: 0 })}>
-                Add Row
+                {t('form.addRow')}
               </Button>
             </div>
 
@@ -178,11 +185,11 @@ export const QuotationFormContent: React.FC<QuotationFormProps> = ({ mode }) => 
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th style={{ width: '35%' }}>Product</th>
-                    <th style={{ width: '25%' }}>Warehouse</th>
-                    <th style={{ width: '12%' }}>Quantity</th>
-                    <th style={{ width: '15%' }}>Unit Price</th>
-                    <th style={{ width: '10%', textAlign: 'right' }}>Line Total</th>
+                    <th style={{ width: '35%' }}>{t('form.columnProduct')}</th>
+                    <th style={{ width: '25%' }}>{t('form.columnWarehouse')}</th>
+                    <th style={{ width: '12%' }}>{t('form.columnQuantity')}</th>
+                    <th style={{ width: '15%' }}>{t('form.columnUnitPrice')}</th>
+                    <th style={{ width: '10%', textAlign: 'right' }}>{t('form.columnLineTotal')}</th>
                     <th className={styles.tdAction}></th>
                   </tr>
                 </thead>
@@ -296,11 +303,11 @@ export const QuotationFormContent: React.FC<QuotationFormProps> = ({ mode }) => 
             <div className={styles.totalsSection}>
               <div className={styles.totalsCard}>
                 <div className={styles.totalRow}>
-                  <span>Subtotal</span>
+                  <span>{t('form.subtotal')}</span>
                   <span>{formatMoney(subtotal)}</span>
                 </div>
                 <div className={styles.grandTotalRow}>
-                  <span>Grand Total</span>
+                  <span>{t('form.grandTotal')}</span>
                   <span>{formatMoney(subtotal)}</span>
                 </div>
               </div>

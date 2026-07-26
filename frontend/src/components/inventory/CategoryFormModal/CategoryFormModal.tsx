@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useState, useEffect } from 'react';
 import { Modal } from '../../ui/Modal';
 import { TextInput } from '../../ui/TextInput';
@@ -23,6 +24,8 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
   onSave,
   initialData,
 }) => {
+  const { t } = useTranslation('inventory');
+  const { t: tc } = useTranslation('common');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
 
@@ -48,8 +51,8 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
       <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.formGroup}>
           <TextInput
-            label="Category Name"
-            placeholder="e.g. Electronics"
+            label={t('categories.formNameLabel')}
+            placeholder={t('categories.formNamePlaceholder')}
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
@@ -57,8 +60,8 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
         </div>
         <div className={styles.formGroup}>
           <TextareaInput
-            label="Description"
-            placeholder="Optional description of this category..."
+            label={t('categories.formDescriptionLabel')}
+            placeholder={t('categories.formDescriptionPlaceholder')}
             rows={3}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -67,10 +70,10 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
         
         <div className={styles.actions}>
           <Button variant="outline" type="button" onClick={onClose} fullWidth>
-            Cancel
+            {tc('actions.cancel')}
           </Button>
           <Button variant="primary" type="submit" fullWidth>
-            Save Category
+            {t('categories.saveCategory')}
           </Button>
         </div>
       </form>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Download, Edit, CheckCircle, XCircle, Send, ArrowLeft, Archive } from 'lucide-react';
 import { Button } from '../../components/ui/Button/Button';
@@ -12,6 +13,7 @@ import { useMoneyFormat } from '../../hooks/useMoneyFormat';
 import { useStatusLabel } from '../../hooks/useStatusLabel';
 
 export const QuotationDetailContent: React.FC = () => {
+  const { t } = useTranslation('quotations');
   const { format: formatMoney } = useMoneyFormat();
   const statusLabel = useStatusLabel();
   const navigate = useNavigate();
@@ -39,7 +41,7 @@ export const QuotationDetailContent: React.FC = () => {
   }, [id, fetchQuotationDetail]);
 
   if (loading || !data) {
-    return <div className={styles.loadingState}>Loading...</div>;
+    return <div className={styles.loadingState}>{t('detail.loading')}</div>;
   }
 
   const { quotation, lineItems, history, permittedActions } = data;
@@ -50,7 +52,7 @@ export const QuotationDetailContent: React.FC = () => {
     try {
       if (action === 'SUBMIT') await actionHooks.submitQuotation(id);
       if (action === 'APPROVE') await actionHooks.approveQuotation(id);
-      if (action === 'RETURN_TO_DRAFT') await actionHooks.returnQuotationToDraft(id, 'Returned to draft by owner');
+      if (action === 'RETURN_TO_DRAFT') await actionHooks.returnQuotationToDraft(id, t('detail.returnReason'));
       if (action === 'MARK_ACCEPTED') await actionHooks.markQuotationAccepted(id);
       if (action === 'MARK_REJECTED') await actionHooks.markQuotationRejected(id);
       if (action === 'EXPIRE') await actionHooks.expireQuotation(id);
@@ -84,10 +86,12 @@ export const QuotationDetailContent: React.FC = () => {
             onClick={() => navigate(`/${tenantSlug}/quotations`)}
           >
             <ArrowLeft size={14} />
-            CRM &gt; Quotations &gt; {quotation.id.split('-')[0].toUpperCase()}
+            {t('detail.breadcrumb', { reference: quotation.id.split('-')[0].toUpperCase() })}
           </button>
           <div className={styles.headerTitleRow}>
-            <h1 className={styles.title}>Quotation {quotation.id.split('-')[0].toUpperCase()}</h1>
+            <h1 className={styles.title}>
+            {t('detail.title', { reference: quotation.id.split('-')[0].toUpperCase() })}
+          </h1>
             <Badge variant={getStatusBadgeVariant(quotation.status)}>
               {statusLabel.quotation(quotation.status)}
             </Badge>
@@ -95,29 +99,29 @@ export const QuotationDetailContent: React.FC = () => {
         </div>
         <div className={styles.headerActions}>
           {permittedActions.includes('EDIT') && (
-            <Button variant="outline" icon={<Edit size={16} />} onClick={() => navigate(`/${tenantSlug}/quotations/${id}/edit`)}>Edit</Button>
+            <Button variant="outline" icon={<Edit size={16} />} onClick={() => navigate(`/${tenantSlug}/quotations/${id}/edit`)}>{t('detail.edit')}</Button>
           )}
           {permittedActions.includes('RETURN_TO_DRAFT') && (
-            <Button variant="outline" icon={<ArrowLeft size={16} />} onClick={() => handleAction('RETURN_TO_DRAFT')}>Return to Draft</Button>
+            <Button variant="outline" icon={<ArrowLeft size={16} />} onClick={() => handleAction('RETURN_TO_DRAFT')}>{t('detail.returnToDraft')}</Button>
           )}
           {permittedActions.includes('SUBMIT') && (
-            <Button variant="primary" icon={<Send size={16} />} onClick={() => handleAction('SUBMIT')}>Submit</Button>
+            <Button variant="primary" icon={<Send size={16} />} onClick={() => handleAction('SUBMIT')}>{t('detail.submit')}</Button>
           )}
           {permittedActions.includes('APPROVE') && (
-            <Button variant="primary" icon={<CheckCircle size={16} />} onClick={() => handleAction('APPROVE')}>Approve</Button>
+            <Button variant="primary" icon={<CheckCircle size={16} />} onClick={() => handleAction('APPROVE')}>{t('detail.approve')}</Button>
           )}
           {permittedActions.includes('MARK_ACCEPTED') && (
-            <Button variant="success" icon={<CheckCircle size={16} />} onClick={() => handleAction('MARK_ACCEPTED')}>Mark Accepted</Button>
+            <Button variant="success" icon={<CheckCircle size={16} />} onClick={() => handleAction('MARK_ACCEPTED')}>{t('detail.markAccepted')}</Button>
           )}
           {permittedActions.includes('MARK_REJECTED') && (
-            <Button variant="danger" icon={<XCircle size={16} />} onClick={() => handleAction('MARK_REJECTED')}>Mark Rejected</Button>
+            <Button variant="danger" icon={<XCircle size={16} />} onClick={() => handleAction('MARK_REJECTED')}>{t('detail.markRejected')}</Button>
           )}
           {permittedActions.includes('EXPIRE') && (
-            <Button variant="outline" icon={<Archive size={16} />} onClick={() => handleAction('EXPIRE')}>Expire</Button>
+            <Button variant="outline" icon={<Archive size={16} />} onClick={() => handleAction('EXPIRE')}>{t('detail.expire')}</Button>
           )}
           
           {/* Always show Download PDF as a placeholder */}
-          <Button variant="outline" icon={<Download size={16} />} onClick={() => alert('PDF generation coming soon')}>Download PDF</Button>
+          <Button variant="outline" icon={<Download size={16} />} onClick={() => alert(t('detail.pdfComingSoon'))}>{t('detail.downloadPdf')}</Button>
         </div>
       </div>
       
@@ -131,18 +135,18 @@ export const QuotationDetailContent: React.FC = () => {
         {/* Main Content */}
         <div className={styles.mainCol}>
           <Card padding="lg">
-            <h2 className={styles.sectionTitle}>Quotation Details</h2>
+            <h2 className={styles.sectionTitle}>{t('detail.detailsHeading')}</h2>
             <div className={styles.summaryGrid}>
               <div>
-                <div className={styles.summaryLabel}>Client</div>
+                <div className={styles.summaryLabel}>{t('detail.client')}</div>
                 <div className={styles.summaryValue}>{quotation.clientName || 'Unknown'}</div>
               </div>
               <div>
-                <div className={styles.summaryLabel}>Date Created</div>
+                <div className={styles.summaryLabel}>{t('detail.dateCreated')}</div>
                 <div className={styles.summaryValue}>{new Date(quotation.createdAt).toLocaleDateString()}</div>
               </div>
               <div>
-                <div className={styles.summaryLabel}>Created By</div>
+                <div className={styles.summaryLabel}>{t('detail.createdBy')}</div>
                 <div className={styles.summaryValue}>{quotation.createdByUserId}</div>
               </div>
             </div>
@@ -156,16 +160,16 @@ export const QuotationDetailContent: React.FC = () => {
 
           <Card padding="none">
             <div className={styles.lineItemsHeader}>
-              <h2 className={styles.sectionTitle}>Line Items</h2>
+              <h2 className={styles.sectionTitle}>{t('detail.lineItems')}</h2>
             </div>
             <div className="table-scroll">
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th>Product</th>
-                    <th>Quantity</th>
-                    <th>Unit Price</th>
-                    <th style={{ textAlign: 'right' }}>Line Total</th>
+                    <th>{t('detail.columnProduct')}</th>
+                    <th>{t('detail.columnQuantity')}</th>
+                    <th>{t('detail.columnUnitPrice')}</th>
+                    <th style={{ textAlign: 'right' }}>{t('detail.columnLineTotal')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -173,7 +177,9 @@ export const QuotationDetailContent: React.FC = () => {
                     <tr key={idx}>
                       <td>
                         <div>{item.productName || item.productId}</div>
-                        <div style={{ fontSize: '12px', color: 'var(--color-on-surface-variant)' }}>Warehouse: {item.warehouseName || item.warehouseId}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--color-on-surface-variant)' }}>
+                          {t('detail.warehouse', { warehouse: item.warehouseName || item.warehouseId })}
+                        </div>
                       </td>
                       <td>{item.quantity}</td>
                       <td>{formatMoney(item.unitPrice)}</td>
@@ -188,11 +194,11 @@ export const QuotationDetailContent: React.FC = () => {
             <div className={styles.totalsSection} style={{ padding: 'var(--spacing-lg)' }}>
               <div className={styles.totalsCard}>
                 <div className={styles.totalRow}>
-                  <span>Subtotal</span>
+                  <span>{t('detail.subtotal')}</span>
                   <span>{formatMoney(quotation.grandTotal ?? 0)}</span>
                 </div>
                 <div className={styles.grandTotalRow}>
-                  <span>Grand Total</span>
+                  <span>{t('detail.grandTotal')}</span>
                   <span>{formatMoney(quotation.grandTotal ?? 0)}</span>
                 </div>
               </div>
@@ -204,7 +210,7 @@ export const QuotationDetailContent: React.FC = () => {
         <div className={styles.sidebarCol}>
           <Card padding="lg">
             <div className={styles.sectionHeader}>
-              <h2 className={styles.sectionTitle}>Status History</h2>
+              <h2 className={styles.sectionTitle}>{t('detail.statusHistory')}</h2>
             </div>
             <div className={styles.timeline}>
               {history.map((event: any, idx: number) => (
@@ -213,8 +219,12 @@ export const QuotationDetailContent: React.FC = () => {
                   <div className={styles.timelineContent}>
                     <span className={styles.timelineStatus}>{statusLabel.quotation(event.status)}</span>
                     <span className={styles.timelineDate}>{new Date(event.changedAt).toLocaleString()}</span>
-                    <span className={styles.timelineUser}>By User: {event.changedByUserId.substring(0, 8)}</span>
-                    {event.reason && <span style={{ fontSize: '12px', fontStyle: 'italic', color: 'var(--color-on-surface-variant)' }}>Reason: {event.reason}</span>}
+                    <span className={styles.timelineUser}>
+                      {t('detail.byUser', { user: event.changedByUserId.substring(0, 8) })}
+                    </span>
+                    {event.reason && <span style={{ fontSize: '12px', fontStyle: 'italic', color: 'var(--color-on-surface-variant)' }}>
+                        {t('detail.reason', { reason: event.reason })}
+                      </span>}
                   </div>
                 </div>
               ))}

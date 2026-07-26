@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {} from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Handshake, CheckCircle2 } from 'lucide-react';
@@ -8,6 +9,7 @@ import { Button } from '../../components/ui/Button/Button';
 import { useAcceptInvitation } from '../../hooks/useAcceptInvitation';
 
 export const StaffInvitationPage = () => {
+  const { t } = useTranslation('auth');
   const { token } = useParams();
   const { acceptInvitation, isLoading, error, isSuccess } = useAcceptInvitation();
   const [newPassword, setNewPassword] = useState('');
@@ -19,7 +21,7 @@ export const StaffInvitationPage = () => {
     setLocalError(null);
 
     if (newPassword !== confirmPassword) {
-      setLocalError('Passwords do not match.');
+      setLocalError(t('resetPassword.mismatch'));
       return;
     }
 
@@ -35,8 +37,8 @@ export const StaffInvitationPage = () => {
 
   return (
     <AuthLayout
-      title="Join Workspace"
-      subtitle="You've been invited to join a workspace on Neva CRM. Create a password to get started."
+      title={t('staffInvitation.title')}
+      subtitle={t('staffInvitation.subtitle')}
       logoIcon={<Handshake size={32} color="var(--color-primary)" />}
     >
       {isSuccess ? (
@@ -54,7 +56,7 @@ export const StaffInvitationPage = () => {
               textDecoration: 'none'
             }}
           >
-            Go to Login
+            {t('goToLogin')}
           </Link>
         </div>
       ) : (
@@ -66,17 +68,17 @@ export const StaffInvitationPage = () => {
           )}
 
           <PasswordInput
-            label="Create Password"
+            label={t('acceptInvitation.createPassword')}
             placeholder="••••••••"
             id="new-password"
-            helperText="Min 8 chars, 1 uppercase, 1 lowercase, 1 digit."
+            helperText={t('staffInvitation.helper')}
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             required
           />
 
           <PasswordInput
-            label="Confirm Password"
+            label={t('acceptInvitation.confirmPassword')}
             placeholder="••••••••"
             id="confirm-password"
             value={confirmPassword}
@@ -86,7 +88,7 @@ export const StaffInvitationPage = () => {
 
           <div style={{ paddingTop: 'var(--spacing-sm)' }}>
             <Button fullWidth variant="primary" type="submit" isLoading={isLoading}>
-              Accept Invitation
+              {t('acceptInvitation.submit')}
             </Button>
           </div>
         </form>

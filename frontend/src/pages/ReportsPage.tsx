@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line
@@ -71,6 +72,7 @@ const axisProps = {
 } as const;
 
 export const ReportsPage: React.FC = () => {
+  const { t } = useTranslation('dashboard');
   const user = useAuthStore(state => state.user);
   const tenantSlug = user?.tenantSlug;
   const roleName = user?.role;
@@ -112,12 +114,12 @@ export const ReportsPage: React.FC = () => {
         <div className={styles.page}>
           <div className={styles.header}>
             <div className={styles.headerContent}>
-              <h1 className={styles.title}>Reports &amp; Analytics</h1>
-              <p className={styles.subtitle}>Loading your latest figures…</p>
+              <h1 className={styles.title}>{t('reports.title')}</h1>
+              <p className={styles.subtitle}>{t('reports.loading')}</p>
             </div>
           </div>
           {/* Skeletons in the final layout, so nothing jumps when data lands. */}
-          <div className={styles.loadingGrid} aria-busy="true" aria-label="Loading reports">
+          <div className={styles.loadingGrid} aria-busy="true" aria-label={t('reports.loadingAria')}>
             <div className={`${styles.skeletonCard} skeleton`} />
             <div className={`${styles.skeletonCard} skeleton`} />
           </div>
@@ -136,11 +138,11 @@ export const ReportsPage: React.FC = () => {
       <div className={styles.page}>
         <header className={styles.header}>
           <div className={styles.headerContent}>
-            <h1 className={styles.title}>Reports &amp; Analytics</h1>
-            <p className={styles.subtitle}>Revenue, client mix and inventory at a glance.</p>
+            <h1 className={styles.title}>{t('reports.title')}</h1>
+            <p className={styles.subtitle}>{t('reports.subtitle')}</p>
           </div>
           <Button variant="outline" onClick={refresh}>
-            Refresh data
+            {t('reports.refresh')}
           </Button>
         </header>
 
@@ -156,8 +158,8 @@ export const ReportsPage: React.FC = () => {
             {/* Revenue Chart */}
             <div className={styles.chartCard}>
               <div className={styles.chartHeader}>
-                <h2 className={styles.chartTitle}>Monthly revenue</h2>
-                <p className={styles.chartCaption}>Total invoiced value per month</p>
+                <h2 className={styles.chartTitle}>{t('reports.monthlyRevenue')}</h2>
+                <p className={styles.chartCaption}>{t('reports.monthlyRevenueCaption')}</p>
               </div>
               <div className={styles.chartBody}>
                 {revenue.length > 0 ? (
@@ -183,7 +185,7 @@ export const ReportsPage: React.FC = () => {
                     </LineChart>
                   </ResponsiveContainer>
                 ) : (
-                  <EmptyChart message="No revenue data yet" />
+                  <EmptyChart message={t('reports.noRevenue')} />
                 )}
               </div>
             </div>
@@ -191,8 +193,8 @@ export const ReportsPage: React.FC = () => {
             {/* Client Status Chart */}
             <div className={styles.chartCard}>
               <div className={styles.chartHeader}>
-                <h2 className={styles.chartTitle}>Client distribution</h2>
-                <p className={styles.chartCaption}>Share of clients by status</p>
+                <h2 className={styles.chartTitle}>{t('reports.clientDistribution')}</h2>
+                <p className={styles.chartCaption}>{t('reports.clientDistributionCaption')}</p>
               </div>
               <div className={styles.chartBody}>
                 {clients.length > 0 ? (
@@ -223,7 +225,7 @@ export const ReportsPage: React.FC = () => {
                     </PieChart>
                   </ResponsiveContainer>
                 ) : (
-                  <EmptyChart message="No client data yet" />
+                  <EmptyChart message={t('reports.noClients')} />
                 )}
               </div>
             </div>
@@ -236,8 +238,8 @@ export const ReportsPage: React.FC = () => {
             */}
             <div className={styles.chartCard}>
               <div className={styles.chartHeader}>
-                <h2 className={styles.chartTitle}>Inventory value by warehouse</h2>
-                <p className={styles.chartCaption}>Total stock value held at each location</p>
+                <h2 className={styles.chartTitle}>{t('reports.inventoryValue')}</h2>
+                <p className={styles.chartCaption}>{t('reports.inventoryValueCaption')}</p>
               </div>
               <div className={styles.chartBody}>
                 {inventory.length > 0 ? (
@@ -267,8 +269,8 @@ export const ReportsPage: React.FC = () => {
 
             <div className={styles.chartCard}>
               <div className={styles.chartHeader}>
-                <h2 className={styles.chartTitle}>Items held by warehouse</h2>
-                <p className={styles.chartCaption}>Unit count at each location</p>
+                <h2 className={styles.chartTitle}>{t('reports.itemsHeld')}</h2>
+                <p className={styles.chartCaption}>{t('reports.itemsHeldCaption')}</p>
               </div>
               <div className={styles.chartBody}>
                 {inventory.length > 0 ? (

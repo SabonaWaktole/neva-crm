@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from './TenantManagementTable.module.css';
 import { Building2, MoreVertical } from 'lucide-react';
 import { DataTable } from '../../ui/DataTable';
@@ -17,6 +18,8 @@ interface TenantManagementTableProps {
 }
 
 export const TenantManagementTable: React.FC<TenantManagementTableProps> = ({ tenants, isLoading }) => {
+  const { t } = useTranslation('dashboard');
+  const { t: tc } = useTranslation('common');
   const columns: DataTableColumn<Tenant>[] = [
     {
       id: 'organization',
@@ -36,13 +39,17 @@ export const TenantManagementTable: React.FC<TenantManagementTableProps> = ({ te
       id: 'plan',
       header: 'Plan',
       /* Honest placeholder for Plan since the backend doesn't track this yet */
-      render: () => <span className={styles.placeholderText}>—</span>,
+      // Permanently a dash: these two columns have never been wired to data.
+  // See TD-020.
+  render: () => <span className={styles.placeholderText}>{tc('state.notSet')}</span>,
     },
     {
       id: 'status',
       header: 'Status',
       /* Honest placeholder for Status since the backend doesn't track this yet */
-      render: () => <span className={styles.placeholderText}>—</span>,
+      // Permanently a dash: these two columns have never been wired to data.
+  // See TD-020.
+  render: () => <span className={styles.placeholderText}>{tc('state.notSet')}</span>,
     },
     {
       id: 'joined',
@@ -80,8 +87,8 @@ export const TenantManagementTable: React.FC<TenantManagementTableProps> = ({ te
   return (
     <div className={styles.tableContainer}>
       <div className={styles.header}>
-        <h2 className={styles.title}>Tenant Management</h2>
-        <button className={styles.viewAllButton} disabled title="Tenant detail view coming soon">View all tenants</button>
+        <h2 className={styles.title}>{t('superAdmin.tenantManagement')}</h2>
+        <button className={styles.viewAllButton} disabled title={t('superAdmin.tenantDetailSoon')}>View all tenants</button>
       </div>
 
       <DataTable
@@ -99,7 +106,7 @@ export const TenantManagementTable: React.FC<TenantManagementTableProps> = ({ te
       />
 
       <div className={styles.footer}>
-        <span className={styles.footerText}>Showing {tenants.length} tenants</span>
+        <span className={styles.footerText}>{t('superAdmin.showingTenants', { count: tenants.length })}</span>
       </div>
     </div>
   );

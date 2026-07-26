@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Archive, ArchiveRestore, DollarSign, Info, Trash2 } from 'lucide-react';
 
@@ -104,6 +105,7 @@ const validate = (form: FormState): FieldErrors => {
 };
 
 const ProductFormContent: React.FC = () => {
+  const { t } = useTranslation('inventory');
   const { format: formatMoney } = useMoneyFormat();
   const statusLabel = useStatusLabel();
   const navigate = useNavigate();
@@ -294,7 +296,7 @@ const ProductFormContent: React.FC = () => {
   if (isEdit && isLoading) {
     return (
       <div className={styles.pageContainer}>
-        <div className={styles.centeredState}>Loading product…</div>
+        <div className={styles.centeredState}>{t('form.loading')}</div>
       </div>
     );
   }
@@ -305,7 +307,7 @@ const ProductFormContent: React.FC = () => {
         <div className={styles.centeredState}>
           <p>{loadError}</p>
           <Button variant="outline" onClick={() => navigate(`/${tenantSlug}/inventory`)}>
-            Back to inventory
+            {t('form.backToInventory')}
           </Button>
         </div>
       </div>
@@ -321,11 +323,11 @@ const ProductFormContent: React.FC = () => {
             className={styles.breadcrumbLink}
             onClick={() => navigate(`/${tenantSlug}/inventory`)}
           >
-            Inventory Management
+            {t('form.breadcrumbInventory')}
           </button>
           <span className={styles.breadcrumbSeparator}>/</span>
           <span className={styles.breadcrumbActive}>
-            {isEdit ? product?.name ?? 'Edit Product' : 'Add New Product'}
+            {isEdit ? product?.name ?? t('form.editProduct') : t('form.addProduct')}
           </span>
         </div>
 
@@ -342,11 +344,11 @@ const ProductFormContent: React.FC = () => {
             {/* ---- Left column ---- */}
             <div className={styles.leftCol}>
               <section className={styles.card}>
-                <h2 className={styles.cardTitle}>Product Information</h2>
+                <h2 className={styles.cardTitle}>{t('form.productInformation')}</h2>
 
                 <TextInput
-                  label="Product Name"
-                  placeholder="e.g. Ergonomic Office Chair"
+                  label={t('form.nameLabel')}
+                  placeholder={t('form.namePlaceholder')}
                   value={form.name}
                   onChange={(e) => setField('name', e.target.value)}
                   error={errors.name}
@@ -360,7 +362,7 @@ const ProductFormContent: React.FC = () => {
                     value={form.sku}
                     onChange={(e) => setField('sku', e.target.value)}
                     error={errors.sku}
-                    helperText="Unique across your catalogue. Leave blank if you don't use SKUs."
+                    helperText={t('form.skuHelper')}
                   />
                   <TextInput
                     label="Brand"
@@ -385,11 +387,11 @@ const ProductFormContent: React.FC = () => {
                 />
 
                 <SelectInput
-                  label="Category"
+                  label={t('form.categoryLabel')}
                   value={form.categoryId}
                   onChange={(e) => setField('categoryId', e.target.value)}
                 >
-                  <option value="">Uncategorised</option>
+                  <option value="">{t('form.uncategorised')}</option>
                   {categories.map((entry) => (
                     <option key={entry.category.id} value={entry.category.id}>
                       {entry.category.name}
@@ -402,16 +404,16 @@ const ProductFormContent: React.FC = () => {
                   value={form.tags}
                   onChange={(tags) => setField('tags', tags)}
                   suggestions={facets.tags}
-                  helperText="Press Enter or comma to add. Tags are searchable and filterable."
+                  helperText={t('form.tagsHelper')}
                 />
               </section>
 
               <section className={styles.card}>
-                <h2 className={styles.cardTitle}>Pricing &amp; Stock</h2>
+                <h2 className={styles.cardTitle}>{t('form.pricingAndStock')}</h2>
 
                 <div className={styles.threeColGrid}>
                   <TextInput
-                    label="Selling Price"
+                    label={t('form.priceLabel')}
                     type="number"
                     inputMode="decimal"
                     min="0"
@@ -434,7 +436,7 @@ const ProductFormContent: React.FC = () => {
                     value={form.cost}
                     onChange={(e) => setField('cost', e.target.value)}
                     error={errors.cost}
-                    helperText="Optional. Used for margin and inventory cost."
+                    helperText={t('form.costHelper')}
                   />
                   <TextInput
                     label="Low Stock Threshold"
@@ -445,7 +447,7 @@ const ProductFormContent: React.FC = () => {
                     value={form.lowStockThreshold}
                     onChange={(e) => setField('lowStockThreshold', e.target.value)}
                     error={errors.lowStockThreshold}
-                    helperText="Flags the product as Low Stock at or below this."
+                    helperText={t('form.thresholdHelper')}
                   />
                 </div>
 
@@ -482,7 +484,7 @@ const ProductFormContent: React.FC = () => {
               {isEdit && product && (
                 <>
                   <section className={styles.card}>
-                    <h2 className={styles.cardTitle}>Stock on Hand</h2>
+                    <h2 className={styles.cardTitle}>{t('form.stockOnHand')}</h2>
                     {product.stockBreakdown.length === 0 ? (
                       <p className={styles.emptyNote}>
                         No stock recorded. Use Adjust Stock from the inventory list to add some.
@@ -496,7 +498,7 @@ const ProductFormContent: React.FC = () => {
                           </div>
                         ))}
                         <div className={styles.metadataItem}>
-                          <span className={styles.metadataLabel}>Total</span>
+                          <span className={styles.metadataLabel}>{t('form.total')}</span>
                           <span className={styles.metadataValue}>{product.totalUnits}</span>
                         </div>
                       </div>
@@ -504,22 +506,22 @@ const ProductFormContent: React.FC = () => {
                   </section>
 
                   <section className={styles.card}>
-                    <h2 className={styles.cardTitle}>Details</h2>
+                    <h2 className={styles.cardTitle}>{t('form.details')}</h2>
                     <div className={styles.metadataList}>
                       <div className={styles.metadataItem}>
-                        <span className={styles.metadataLabel}>Created</span>
+                        <span className={styles.metadataLabel}>{t('form.created')}</span>
                         <span className={styles.metadataValue}>
                           {new Date(product.createdAt).toLocaleDateString()}
                         </span>
                       </div>
                       <div className={styles.metadataItem}>
-                        <span className={styles.metadataLabel}>Last edited</span>
+                        <span className={styles.metadataLabel}>{t('form.lastEdited')}</span>
                         <span className={styles.metadataValue}>
                           {new Date(product.updatedAt).toLocaleDateString()}
                         </span>
                       </div>
                       <div className={styles.metadataItem}>
-                        <span className={styles.metadataLabel}>Inventory value</span>
+                        <span className={styles.metadataLabel}>{t('form.inventoryValue')}</span>
                         <span className={styles.metadataValue}>
                           {formatMoney(product.price * product.totalUnits)}
                         </span>
@@ -528,7 +530,7 @@ const ProductFormContent: React.FC = () => {
                   </section>
 
                   <section className={styles.card}>
-                    <h2 className={styles.cardTitle}>Danger Zone</h2>
+                    <h2 className={styles.cardTitle}>{t('form.dangerZone')}</h2>
                     <p className={styles.emptyNote}>
                       Archiving hides the product from the catalogue but keeps its history.
                       Deleting is permanent and only possible if no quotation references it.
@@ -544,7 +546,7 @@ const ProductFormContent: React.FC = () => {
                         onClick={handleToggleArchive}
                         disabled={isSaving}
                       >
-                        {product.isArchived ? 'Restore product' : 'Archive product'}
+                        {product.isArchived ? t('form.restoreProduct') : t('form.archiveProduct')}
                       </Button>
                       <Button
                         variant="danger"
@@ -554,7 +556,7 @@ const ProductFormContent: React.FC = () => {
                         onClick={() => setConfirmDelete(true)}
                         disabled={isSaving}
                       >
-                        Delete product
+                        {t('form.deleteProduct')}
                       </Button>
                     </div>
                   </section>
@@ -571,14 +573,14 @@ const ProductFormContent: React.FC = () => {
           <span className={styles.infoText}>
             {isEdit
               ? isDirty
-                ? 'You have unsaved changes.'
-                : 'All changes saved. Images save as soon as they upload.'
-              : 'Nothing is saved until you commit this product.'}
+                ? t('form.unsavedChanges')
+                : t('form.allSaved')
+              : t('form.nothingSaved')}
           </span>
         </div>
         <div className={styles.footerRight}>
           <Button variant="ghost" type="button" onClick={handleDiscard} disabled={isSaving}>
-            {isEdit ? 'Close' : 'Discard'}
+            {isEdit ? t('form.close') : t('form.discard')}
           </Button>
           <Button
             variant="primary"
@@ -587,7 +589,7 @@ const ProductFormContent: React.FC = () => {
             isLoading={isSaving}
             disabled={gallery.isUploading}
           >
-            {isEdit ? 'Save Changes' : 'Commit Product'}
+            {isEdit ? t('form.saveChanges') : t('form.commitProduct')}
           </Button>
         </div>
       </footer>
@@ -596,9 +598,9 @@ const ProductFormContent: React.FC = () => {
         isOpen={confirmDelete}
         onClose={() => setConfirmDelete(false)}
         onConfirm={handleDelete}
-        title="Delete this product?"
-        confirmLabel="Delete permanently"
-        cancelLabel="Keep product"
+        title={t('form.deleteTitle')}
+        confirmLabel={t('form.deleteConfirm')}
+        cancelLabel={t('form.keepProduct')}
         message={
           <>
             <strong>{product?.name}</strong> and its images, stock levels and movement history will

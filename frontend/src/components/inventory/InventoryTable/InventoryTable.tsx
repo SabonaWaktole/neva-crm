@@ -10,6 +10,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import styles from './InventoryTable.module.css';
+import { useTranslation } from 'react-i18next';
 import { useMoneyFormat } from '../../../hooks/useMoneyFormat';
 import { Badge } from '../../ui/Badge';
 import { DataTable } from '../../ui/DataTable';
@@ -54,6 +55,8 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   emptyAction,
   isFiltered = false,
 }) => {
+  const { t } = useTranslation('inventory');
+  const { t: tc } = useTranslation('common');
   const { format: formatMoney } = useMoneyFormat();
   const statusLabel = useStatusLabel();
 
@@ -61,12 +64,12 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
     const items: DropdownMenuItemType[] = [];
 
     if (onEdit) {
-      items.push({ id: 'edit', label: 'Edit', onClick: () => onEdit(product), icon: <Edit size={16} /> });
+      items.push({ id: 'edit', label: tc('actions.edit'), onClick: () => onEdit(product), icon: <Edit size={16} /> });
     }
     if (onAdjustStock) {
       items.push({
         id: 'adjust',
-        label: 'Adjust Stock',
+        label: t('list.adjustStock'),
         onClick: () => onAdjustStock(product),
         icon: <SlidersHorizontal size={16} />,
       });
@@ -74,7 +77,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
     if (onToggleArchive) {
       items.push({
         id: 'archive',
-        label: product.isArchived ? 'Restore' : 'Archive',
+        label: product.isArchived ? t('list.restore') : t('list.archive'),
         onClick: () => onToggleArchive(product),
         icon: product.isArchived ? <ArchiveRestore size={16} /> : <Archive size={16} />,
       });
@@ -82,7 +85,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
     if (onDelete) {
       items.push({
         id: 'delete',
-        label: 'Delete',
+        label: tc('actions.delete'),
         onClick: () => onDelete(product),
         icon: <Trash2 size={16} />,
         danger: true,
@@ -95,7 +98,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   const columns: DataTableColumn<Product>[] = [
     {
       id: 'name',
-      header: 'Product',
+      header: t('list.columnProduct'),
       sortable: true,
       cardLabel: null,
       render: (product) => {
@@ -125,7 +128,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
     },
     {
       id: 'sku',
-      header: 'SKU',
+      header: t('list.columnSku'),
       nowrap: true,
       sortable: true,
       render: (product) => (
@@ -134,14 +137,14 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
     },
     {
       id: 'category',
-      header: 'Category',
+      header: t('list.columnCategory'),
       render: (product) => (
-        <span className={styles.secondaryText}>{product.categoryName ?? 'Uncategorised'}</span>
+        <span className={styles.secondaryText}>{product.categoryName ?? t('list.uncategorised')}</span>
       ),
     },
     {
       id: 'tags',
-      header: 'Tags',
+      header: t('list.columnTags'),
       hideOnCard: true,
       render: (product) =>
         product.tags.length === 0 ? (
@@ -165,7 +168,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
     },
     {
       id: 'status',
-      header: 'Status',
+      header: t('list.columnStatus'),
       render: (product) => (
         <Badge variant={STATUS_VARIANT[product.status]}>
           {statusLabel.product(product.status)}
@@ -174,7 +177,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
     },
     {
       id: 'stock',
-      header: 'Stock Level',
+      header: t('list.columnStock'),
       sortable: true,
       render: (product) => (
         <MultiLocationStockIndicator
@@ -188,7 +191,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
     },
     {
       id: 'price',
-      header: 'Price',
+      header: t('list.columnPrice'),
       align: 'right',
       nowrap: true,
       sortable: true,
@@ -196,7 +199,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
     },
     {
       id: 'cost',
-      header: 'Cost',
+      header: t('list.columnCost'),
       align: 'right',
       nowrap: true,
       sortable: true,
@@ -217,7 +220,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
             trigger={
               <button
                 className={styles.actionButton}
-                aria-label={`Actions for ${product.name}`}
+                aria-label={t('list.actionsFor', { name: product.name })}
                 onClick={(event) => event.stopPropagation()}
               >
                 <MoreHorizontal size={16} />
@@ -239,13 +242,13 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
       isLoading={isLoading}
       sort={sort}
       selection={selection}
-      caption="Products and stock levels"
+      caption={t('list.tableCaption')}
       empty={{
         icon: <PackageOpen size={20} />,
-        title: isFiltered ? 'No products match these filters' : 'No products yet',
+        title: isFiltered ? t('list.emptyFiltered') : t('list.empty'),
         description: isFiltered
-          ? 'Try clearing a filter or searching for something else.'
-          : 'Products you add to your catalogue will appear here.',
+          ? t('list.emptyFilteredDescription')
+          : t('list.emptyDescription'),
         action: emptyAction,
       }}
     />

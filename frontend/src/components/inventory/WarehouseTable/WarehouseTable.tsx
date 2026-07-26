@@ -1,5 +1,6 @@
 import React from 'react';
 import { Edit2, Trash2, Warehouse, Factory, Landmark, Filter, Download } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { DataTable } from '../../ui/DataTable';
 import type { DataTableColumn } from '../../ui/DataTable';
 import styles from './WarehouseTable.module.css';
@@ -29,6 +30,8 @@ export const WarehouseTable: React.FC<WarehouseTableProps> = ({
   readOnly = false,
   isLoading,
 }) => {
+  const { t } = useTranslation('inventory');
+
   const columns: DataTableColumn<WarehouseRowData>[] = [
     {
       id: 'name',
@@ -44,7 +47,7 @@ export const WarehouseTable: React.FC<WarehouseTableProps> = ({
             </div>
             <div>
               <div className={styles.whName}>{wh.name}</div>
-              <div className={styles.whId}>WH-ID: {wh.id.substring(0, 6).toUpperCase()}</div>
+              <div className={styles.whId}>{t('warehouses.whId', { id: wh.id.substring(0, 6).toUpperCase() })}</div>
             </div>
           </div>
         );
@@ -72,7 +75,7 @@ export const WarehouseTable: React.FC<WarehouseTableProps> = ({
                     e.stopPropagation();
                     onEdit(wh);
                   }}
-                  aria-label={`Edit ${wh.name}`}
+                  aria-label={t('warehouses.editAria', { name: wh.name })}
                 >
                   <Edit2 size={18} />
                 </button>
@@ -82,7 +85,7 @@ export const WarehouseTable: React.FC<WarehouseTableProps> = ({
                     e.stopPropagation();
                     onDelete(wh);
                   }}
-                  aria-label={`Delete ${wh.name}`}
+                  aria-label={t('warehouses.deleteAria', { name: wh.name })}
                 >
                   <Trash2 size={18} />
                 </button>
@@ -95,12 +98,12 @@ export const WarehouseTable: React.FC<WarehouseTableProps> = ({
   return (
     <div className={styles.tableContainer}>
       <div className={styles.header}>
-        <h3 className={styles.headerTitle}>Global Facilities List</h3>
+        <h3 className={styles.headerTitle}>{t('warehouses.listTitle')}</h3>
         <div className={styles.headerActions}>
-          <button className={styles.iconButton} aria-label="Filter" disabled title="Filtering coming soon">
+          <button className={styles.iconButton} aria-label={t('warehouses.filterAria')} disabled title={t('warehouses.filterSoon')}>
             <Filter size={18} />
           </button>
-          <button className={styles.iconButton} aria-label="Download" disabled title="Export coming soon">
+          <button className={styles.iconButton} aria-label={t('warehouses.downloadAria')} disabled title={t('warehouses.exportSoon')}>
             <Download size={18} />
           </button>
         </div>
@@ -111,7 +114,7 @@ export const WarehouseTable: React.FC<WarehouseTableProps> = ({
         rows={warehouses}
         rowKey={(wh) => wh.id}
         isLoading={isLoading}
-        caption="Warehouse facilities"
+        caption={t('warehouses.caption')}
         className={styles.table}
         empty={{
           icon: <Warehouse size={20} />,
@@ -121,7 +124,7 @@ export const WarehouseTable: React.FC<WarehouseTableProps> = ({
       />
 
       <div className={styles.footer}>
-        <span>Showing {warehouses.length} facilities</span>
+        <span>{t('warehouses.showingFacilities', { count: warehouses.length })}</span>
       </div>
     </div>
   );

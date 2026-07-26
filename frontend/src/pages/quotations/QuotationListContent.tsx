@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
   Plus, 
@@ -23,6 +24,8 @@ import { useMoneyFormat } from '../../hooks/useMoneyFormat';
 import { useStatusLabel } from '../../hooks/useStatusLabel';
 
 export const QuotationListContent: React.FC = () => {
+  const { t } = useTranslation('quotations');
+  const { t: tc } = useTranslation('common');
   const { format: formatMoney } = useMoneyFormat();
   const statusLabel = useStatusLabel();
   const [searchTerm, setSearchTerm] = useState('');
@@ -91,12 +94,12 @@ export const QuotationListContent: React.FC = () => {
       {/* Header */}
       <div className={styles.header}>
         <div>
-          <div className={styles.breadcrumb}>CRM &gt; Quotations</div>
-          <h1 className={styles.title}>Quotations</h1>
+          <div className={styles.breadcrumb}>{t('breadcrumb')}</div>
+          <h1 className={styles.title}>{t('list.title')}</h1>
         </div>
         <div className={styles.headerActions}>
           <Button variant="primary" icon={<Plus size={18} />} onClick={() => navigate(`/${tenantSlug}/quotations/new`)}>
-            Create Quotation
+            {t('list.createQuotation')}
           </Button>
         </div>
       </div>
@@ -110,38 +113,38 @@ export const QuotationListContent: React.FC = () => {
               className={`${styles.tab} ${activeTab === 'ALL' ? styles.tabActive : ''}`}
               onClick={() => setActiveTab('ALL')}
             >
-              All Quotations
+              {t('list.tabAll')}
             </button>
             <button 
               className={`${styles.tab} ${activeTab === 'DRAFT' ? styles.tabActive : ''}`}
               onClick={() => setActiveTab('DRAFT')}
             >
-              Draft
+              {t('list.tabDraft')}
             </button>
             {isOwner && (
               <button 
                 className={`${styles.tab} ${activeTab === 'PENDING_APPROVAL' ? styles.tabActive : ''}`}
                 onClick={() => setActiveTab('PENDING_APPROVAL')}
               >
-                Pending Approvals
+                {t('list.tabPending')}
               </button>
             )}
             <button 
               className={`${styles.tab} ${activeTab === 'SENT' ? styles.tabActive : ''}`}
               onClick={() => setActiveTab('SENT')}
             >
-              Sent
+              {t('list.tabSent')}
             </button>
             <button 
               className={`${styles.tab} ${activeTab === 'COMPLETED' ? styles.tabActive : ''}`}
               onClick={() => setActiveTab('COMPLETED')}
             >
-              Completed
+              {t('list.tabCompleted')}
             </button>
           </div>
           <div className={styles.searchWrapper}>
             <TextInput 
-              placeholder="Filter by client or quote ID..." 
+              placeholder={t('list.searchPlaceholder')} 
               iconLeft={<Search size={18} />}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -155,16 +158,16 @@ export const QuotationListContent: React.FC = () => {
             <div className={styles.emptyState}>
               <FileText className={styles.emptyStateIcon} size={48} />
               <h3 className={styles.emptyStateTitle}>
-                {searchTerm ? 'No search results' : 'No quotations yet'}
+                {searchTerm ? t('list.emptySearch') : t('list.empty')}
               </h3>
               <p className={styles.emptyStateMessage}>
-                {searchTerm 
-                  ? 'Try adjusting your search filters to find what you are looking for.' 
-                  : 'Create your first quotation to start sending proposals to clients.'}
+                {searchTerm
+                  ? t('list.emptySearchMessage')
+                  : t('list.emptyMessage')}
               </p>
               {!searchTerm && (
                 <Button variant="primary" icon={<Plus size={18} />} onClick={() => navigate(`/${tenantSlug}/quotations/new`)}>
-                  Create Quotation
+                  {t('list.createQuotation')}
                 </Button>
               )}
             </div>
@@ -172,16 +175,16 @@ export const QuotationListContent: React.FC = () => {
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th>Quotation ID</th>
-                  <th>Client</th>
-                  <th>Date Created</th>
-                  <th>Total Amount</th>
-                  <th>Status</th>
+                  <th>{t('list.columnId')}</th>
+                  <th>{t('list.columnClient')}</th>
+                  <th>{t('list.columnCreated')}</th>
+                  <th>{t('list.columnTotal')}</th>
+                  <th>{t('list.columnStatus')}</th>
                   <th className={styles.tdAction}></th>
                 </tr>
               </thead>
               <tbody>
-                {isLoading && <tr><td colSpan={6} style={{textAlign:'center', padding:'20px'}}>Loading...</td></tr>}
+                {isLoading && <tr><td colSpan={6} style={{textAlign:'center', padding:'20px'}}>{tc('state.loading')}</td></tr>}
                 {!isLoading && quotations.map((quotation) => {
                   return (
                     <tr key={quotation.id}>
@@ -191,7 +194,7 @@ export const QuotationListContent: React.FC = () => {
                         </span>
                       </td>
                       <td>
-                        <span className={styles.clientName}>{quotation.clientName || 'Unknown Client'}</span>
+                        <span className={styles.clientName}>{quotation.clientName || t('list.unknownClient')}</span>
                       </td>
                       <td>
                         <span className={styles.mutedText}>
@@ -216,8 +219,8 @@ export const QuotationListContent: React.FC = () => {
                             </button>
                           }
                           items={[
-                            { id: 'view', label: 'View Details', icon: <FileText size={16} />, onClick: () => navigate(`/${tenantSlug}/quotations/${quotation.id}`) },
-                            { id: 'edit', label: 'Edit', icon: <Edit size={16} />, onClick: () => navigate(`/${tenantSlug}/quotations/${quotation.id}/edit`) },
+                            { id: 'view', label: t('list.viewDetails'), icon: <FileText size={16} />, onClick: () => navigate(`/${tenantSlug}/quotations/${quotation.id}`) },
+                            { id: 'edit', label: tc('actions.edit'), icon: <Edit size={16} />, onClick: () => navigate(`/${tenantSlug}/quotations/${quotation.id}/edit`) },
                           ]}
                         />
                       </td>
@@ -232,7 +235,9 @@ export const QuotationListContent: React.FC = () => {
         {/* Pagination Footer */}
         {quotations.length > 0 && (
           <div className={styles.pagination}>
-            <span className={styles.paginationText}>Showing {quotations.length} of {total} entries</span>
+            <span className={styles.paginationText}>
+              {t('list.showing', { shown: quotations.length, total })}
+            </span>
             <div className={styles.paginationControls}>
               <Button variant="outline" disabled icon={<ChevronLeft size={18} />}>
                 Prev

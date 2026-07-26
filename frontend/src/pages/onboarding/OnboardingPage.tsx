@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {} from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { CheckCircle2, Link as LinkIcon, UploadCloud, ArrowLeft, ArrowRight } from 'lucide-react';
@@ -22,6 +23,7 @@ const steps = [
 ];
 
 export const OnboardingPage = () => {
+  const { t } = useTranslation('auth');
   const navigate = useNavigate();
   const { register, isLoading, error, isSuccess, tenantSlug } = useRegisterBusiness();
   const [currentStep, setCurrentStep] = useState(1);
@@ -65,18 +67,20 @@ export const OnboardingPage = () => {
       <div className={styles.container}>
         <main className={styles.mainWrapper}>
           <div className={styles.header}>
-            <h1 className={styles.title}>Neva CRM</h1>
+            <h1 className={styles.title}>{t('appName')}</h1>
           </div>
           <Card padding="none" className={styles.cardContainer}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--spacing-lg)', padding: 'var(--spacing-2xl)' }}>
               <CheckCircle2 size={64} color="#059669" />
-              <h2 className={styles.stepTitle}>Workspace Created!</h2>
-              <p className={styles.stepSubtitle}>Your workspace is ready at <strong>neva.crm/{tenantSlug}</strong></p>
+              <h2 className={styles.stepTitle}>{t('onboarding.created')}</h2>
+              <p className={styles.stepSubtitle}>
+                {t('onboarding.readyAtFull')} <strong>neva.crm/{tenantSlug}</strong>
+              </p>
               <Button
                 variant="primary"
                 onClick={() => navigate('/login')}
               >
-                Go to Login
+                {t('goToLogin')}
               </Button>
             </div>
           </Card>
@@ -89,8 +93,8 @@ export const OnboardingPage = () => {
     <div className={styles.container}>
       <main className={styles.mainWrapper}>
         <div className={styles.header}>
-          <h1 className={styles.title}>Neva CRM</h1>
-          <p className={styles.subtitle}>Let's set up your workspace.</p>
+          <h1 className={styles.title}>{t('appName')}</h1>
+          <p className={styles.subtitle}>{t('onboarding.subtitle')}</p>
         </div>
 
         <Card padding="none" className={styles.cardContainer}>
@@ -101,8 +105,8 @@ export const OnboardingPage = () => {
           <div className={styles.contentArea}>
             {/* Step 1: Organization */}
             <div className={`${styles.stepContent} ${currentStep === 1 ? styles.stepContentActive : currentStep > 1 ? styles.stepContentHiddenLeft : styles.stepContentHiddenRight}`}>
-              <h2 className={styles.stepTitle}>What's your company name?</h2>
-              <p className={styles.stepSubtitle}>This will be used to generate your dedicated workspace URL.</p>
+              <h2 className={styles.stepTitle}>{t('onboarding.companyQuestion')}</h2>
+              <p className={styles.stepSubtitle}>{t('onboarding.slugHint')}</p>
               
               <div className={`${styles.formContent} ${styles.formContentMaxW}`}>
                 {error && (
@@ -111,15 +115,15 @@ export const OnboardingPage = () => {
                   </div>
                 )}
                 <TextInput 
-                  label="Company Name" 
-                  placeholder="e.g. Acme Corp" 
+                  label={t('onboarding.companyLabel')} 
+                  placeholder={t('onboarding.companyPlaceholder')} 
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
                 />
 
                 <TextInput
-                  label="Your Email"
-                  placeholder="you@company.com"
+                  label={t('onboarding.emailLabel')}
+                  placeholder={t('onboarding.emailPlaceholder')}
                   type="email"
                   value={ownerEmail}
                   onChange={(e) => setOwnerEmail(e.target.value)}
@@ -127,9 +131,9 @@ export const OnboardingPage = () => {
                 />
 
                 <PasswordInput
-                  label="Create Password"
-                  placeholder="••••••••"
-                  helperText="Min 8 chars, 1 uppercase, 1 lowercase, 1 digit."
+                  label={t('onboarding.passwordLabel')}
+                  placeholder={t('passwordPlaceholder')}
+                  helperText={t('onboarding.passwordHelper')}
                   value={ownerPassword}
                   onChange={(e) => setOwnerPassword(e.target.value)}
                   required
@@ -146,17 +150,17 @@ export const OnboardingPage = () => {
 
             {/* Step 2: Branding */}
             <div className={`${styles.stepContent} ${currentStep === 2 ? styles.stepContentActive : currentStep > 2 ? styles.stepContentHiddenLeft : styles.stepContentHiddenRight}`}>
-              <h2 className={styles.stepTitle}>Upload your logo</h2>
-              <p className={styles.stepSubtitle}>Personalize your workspace for your team and clients.</p>
+              <h2 className={styles.stepTitle}>{t('onboarding.uploadTitle')}</h2>
+              <p className={styles.stepSubtitle}>{t('onboarding.uploadSubtitle')}</p>
               
               <div className={`${styles.formContent} ${styles.formContentMaxW}`}>
                 <div className={styles.uploadBox}>
                   <div className={styles.uploadIconBox}>
                     <UploadCloud className={styles.uploadIcon} />
                   </div>
-                  <span className={styles.uploadTitle}>Click to upload</span>
-                  <span className={styles.uploadSubtitle}>or drag and drop</span>
-                  <span className={styles.uploadHelp}>SVG, PNG, JPG (max. 5MB)</span>
+                  <span className={styles.uploadTitle}>{t('onboarding.uploadClick')}</span>
+                  <span className={styles.uploadSubtitle}>{t('onboarding.uploadDrag')}</span>
+                  <span className={styles.uploadHelp}>{t('onboarding.uploadHelp')}</span>
                 </div>
               </div>
             </div>
@@ -168,15 +172,15 @@ export const OnboardingPage = () => {
                 of the tab order. */}
             {currentStep === 1 ? (
               <span className={styles.signInPrompt}>
-                Already have an account?{' '}
+                {t('onboarding.alreadyHaveAccount')}{' '}
                 <Link to="/login" className={styles.signInLink}>
-                  Sign in
+                  {t('onboarding.signIn')}
                 </Link>
               </span>
             ) : (
               <button type="button" className={styles.btnBack} onClick={prevStep}>
                 <ArrowLeft size={18} />
-                Back
+                {t('onboarding.back')}
               </button>
             )}
 
@@ -187,7 +191,7 @@ export const OnboardingPage = () => {
                 iconPosition="right"
                 onClick={nextStep}
               >
-                Continue
+                {t('onboarding.continue')}
               </Button>
             ) : (
               <Button 
@@ -197,7 +201,7 @@ export const OnboardingPage = () => {
                 onClick={handleComplete}
                 isLoading={isLoading}
               >
-                Complete Setup
+                {t('onboarding.completeSetup')}
               </Button>
             )}
           </div>

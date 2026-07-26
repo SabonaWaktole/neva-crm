@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { AppLayout } from '../../components/layout/AppLayout/AppLayout';
@@ -16,6 +17,7 @@ import { useCreateAppointment } from '../../hooks/useAppointments';
 import styles from './CreateAppointmentPage.module.css';
 
 const CreateAppointmentContent: React.FC = () => {
+  const { t } = useTranslation('appointments');
   const navigate = useNavigate();
   const { tenantSlug } = useParams();
   const { user } = useAuthStore();
@@ -68,13 +70,13 @@ const CreateAppointmentContent: React.FC = () => {
   return (
     <div>
       <div className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>New Appointment</h1>
+        <h1 className={styles.pageTitle}>{t('form.createTitle')}</h1>
         <button
           className={styles.backButton}
           onClick={() => navigate(`/${tenantSlug}/appointments`)}
         >
           <ArrowLeft size={16} />
-          Back to Calendar
+          {t('form.backToCalendar')}
         </button>
       </div>
 

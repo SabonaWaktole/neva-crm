@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useState, useEffect } from 'react';
 import { Modal } from '../../ui/Modal';
 import { TextInput } from '../../ui/TextInput';
@@ -23,6 +24,8 @@ export const WarehouseFormModal: React.FC<WarehouseFormModalProps> = ({
   onSave,
   initialData,
 }) => {
+  const { t } = useTranslation('inventory');
+  const { t: tc } = useTranslation('common');
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
 
@@ -48,8 +51,8 @@ export const WarehouseFormModal: React.FC<WarehouseFormModalProps> = ({
       <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.formGroup}>
           <TextInput
-            label="Facility Name"
-            placeholder="e.g. London Global Hub"
+            label={t('warehouses.formNameLabel')}
+            placeholder={t('warehouses.formNamePlaceholder')}
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
@@ -57,8 +60,8 @@ export const WarehouseFormModal: React.FC<WarehouseFormModalProps> = ({
         </div>
         <div className={styles.formGroup}>
           <TextareaInput
-            label="Street Address"
-            placeholder="Enter full facility address..."
+            label={t('warehouses.formAddressLabel')}
+            placeholder={t('warehouses.formAddressPlaceholder')}
             rows={3}
             value={address}
             onChange={(e) => setAddress(e.target.value)}
@@ -68,10 +71,10 @@ export const WarehouseFormModal: React.FC<WarehouseFormModalProps> = ({
         
         <div className={styles.actions}>
           <Button variant="outline" type="button" onClick={onClose} fullWidth>
-            Cancel
+            {tc('actions.cancel')}
           </Button>
           <Button variant="primary" type="submit" fullWidth>
-            Save Facility
+            {t('warehouses.saveFacility')}
           </Button>
         </div>
       </form>

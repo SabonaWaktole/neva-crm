@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { AppLayout } from '../../components/layout/AppLayout/AppLayout';
@@ -17,6 +18,7 @@ import { appointmentService } from '../../services/appointmentService';
 import styles from './CreateAppointmentPage.module.css';
 
 const EditAppointmentContent: React.FC = () => {
+  const { t } = useTranslation('appointments');
   const navigate = useNavigate();
   const { tenantSlug, appointmentId } = useParams();
 
@@ -91,13 +93,13 @@ const EditAppointmentContent: React.FC = () => {
   return (
     <div>
       <div className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>Edit Appointment</h1>
+        <h1 className={styles.pageTitle}>{t('form.editTitle')}</h1>
         <button
           className={styles.backButton}
           onClick={() => navigate(`/${tenantSlug}/appointments`)}
         >
           <ArrowLeft size={16} />
-          Back to Calendar
+          {t('form.backToCalendar')}
         </button>
       </div>
 
@@ -113,14 +115,14 @@ const EditAppointmentContent: React.FC = () => {
             We couldn't find this appointment. It may have been deleted or the link may be incorrect.
           </p>
           <Button variant="outline" onClick={() => navigate(`/${tenantSlug}/appointments`)}>
-            Back to Calendar
+            {t('form.backToCalendar')}
           </Button>
         </div>
       ) : fetchError ? (
         <div className={styles.formCard} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)', alignItems: 'flex-start' }}>
           <p className={styles.errorBanner}>{fetchError}</p>
           <Button variant="outline" onClick={() => navigate(`/${tenantSlug}/appointments`)}>
-            Back to Calendar
+            {t('form.backToCalendar')}
           </Button>
         </div>
       ) : (

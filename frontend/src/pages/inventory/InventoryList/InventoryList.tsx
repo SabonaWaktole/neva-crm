@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   AlertCircle,
@@ -44,6 +45,7 @@ import type { BulkProductAction, Product, ProductStatus } from '../../../types/i
 const STATUS_OPTIONS: ProductStatus[] = ['IN_STOCK', 'LOW_STOCK', 'OUT_OF_STOCK', 'ARCHIVED'];
 
 const InventoryListContent: React.FC = () => {
+  const { t } = useTranslation('inventory');
   const { formatWhole: formatMoney } = useMoneyFormat();
   const statusLabel = useStatusLabel();
   const navigate = useNavigate();
@@ -172,18 +174,18 @@ const InventoryListContent: React.FC = () => {
 
   const bulkCopy: Record<BulkProductAction, { title: string; confirm: string; message: string }> = {
     delete: {
-      title: `Delete ${selectedIds.length} product${selectedIds.length === 1 ? '' : 's'}?`,
+      title: t('list.bulkDeleteTitle', { count: selectedIds.length }),
       confirm: 'Delete permanently',
       message:
         'Their images, stock levels and movement history will be permanently removed. Products referenced by a quotation will be skipped.',
     },
     archive: {
-      title: `Archive ${selectedIds.length} product${selectedIds.length === 1 ? '' : 's'}?`,
+      title: t('list.bulkArchiveTitle', { count: selectedIds.length }),
       confirm: 'Archive',
       message: 'Archived products drop out of the catalogue but keep all of their history.',
     },
     unarchive: {
-      title: `Restore ${selectedIds.length} product${selectedIds.length === 1 ? '' : 's'}?`,
+      title: t('list.bulkRestoreTitle', { count: selectedIds.length }),
       confirm: 'Restore',
       message: 'They will reappear in the catalogue with their stock status recalculated.',
     },
@@ -192,59 +194,57 @@ const InventoryListContent: React.FC = () => {
   const kpis = useMemo(
     () => [
       {
-        title: 'Active Products',
+        title: t('list.kpiActiveProducts'),
         value: summary.totalProducts.toString(),
         icon: <Package size={20} />,
-        trendValue: `${summary.totalUnits.toLocaleString()} units on hand`,
+        trendValue: t('list.kpiUnitsOnHand', { count: summary.totalUnits }),
       },
       {
-        title: 'Needs Attention',
+        title: t('list.kpiNeedsAttention'),
         value: (summary.outOfStock + summary.lowStock).toString(),
         icon: <AlertCircle size={20} />,
         iconColor: 'var(--color-error)',
         iconBgColor: 'var(--color-error-container)',
-        trendValue: `${summary.outOfStock} out of stock · ${summary.lowStock} low`,
+        trendValue: t('list.kpiStockSummary', { outOfStock: summary.outOfStock, lowStock: summary.lowStock }),
       },
       {
-        title: 'Inventory Value',
+        title: t('list.kpiInventoryValue'),
         value: formatMoney(summary.inventoryValue),
         icon: <DollarSign size={20} />,
         iconColor: 'var(--color-secondary)',
         iconBgColor: 'var(--color-secondary-container)',
         trendValue:
           summary.inventoryCost > 0
-            ? `${formatMoney(summary.inventoryCost)} at cost`
-            : 'Add unit costs to see margin',
+            ? t('list.kpiAtCost', { value: formatMoney(summary.inventoryCost) })
+            : t('list.kpiAddCosts'),
       },
       {
-        title: 'Archived',
+        title: t('list.kpiArchived'),
         value: summary.archived.toString(),
         icon: <Archive size={20} />,
-        trendValue: 'Hidden from the catalogue',
+        trendValue: t('list.kpiHidden'),
       },
     ],
     // formatMoney is memoised on the tenant's currency and locale, so listing it
     // here is what makes the Inventory Value tile re-render when the workspace
     // currency changes. Without it the tile kept its old symbol until something
     // else happened to change `summary`.
-    [summary, formatMoney]
+    [summary, formatMoney, t]
   );
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <div className={styles.titleContainer}>
-          <h1 className={styles.title}>Inventory Management</h1>
-          <p className={styles.subtitle}>
-            Manage your products, stock levels, and warehouse allocations.
-          </p>
+          <h1 className={styles.title}>{t('list.title')}</h1>
+          <p className={styles.subtitle}>{t('list.subtitle')}</p>
         </div>
         <Button
           variant="primary"
           icon={<PlusSquare size={20} />}
           onClick={() => navigate(`/${tenantSlug}/inventory/new`)}
         >
-          Add Product
+          {t('list.addProduct')}
         </Button>
       </div>
 
@@ -258,21 +258,21 @@ const InventoryListContent: React.FC = () => {
       <div className={styles.filtersBar}>
         <div className={styles.filtersLeft}>
           <TextInput
-            placeholder="Search name, SKU or brand…"
+            placeholder={t('list.searchPlaceholder')}
             iconLeft={<Search size={18} />}
             className={styles.searchInput}
             value={filters.query ?? ''}
             onChange={(event) => setFilters({ query: event.target.value })}
-            aria-label="Search products"
+            aria-label={t('list.searchAria')}
           />
 
           <SelectInput
             className={styles.selectInput}
             value={filters.categoryId ?? ''}
             onChange={(event) => setFilters({ categoryId: event.target.value || undefined })}
-            aria-label="Filter by category"
+            aria-label={t('list.filterCategoryAria')}
           >
-            <option value="">All Categories</option>
+            <option value="">{t('list.allCategories')}</option>
             {categories.map((entry) => (
               <option key={entry.category.id} value={entry.category.id}>
                 {entry.category.name}
@@ -284,9 +284,9 @@ const InventoryListContent: React.FC = () => {
             className={styles.selectInput}
             value={filters.warehouseId ?? ''}
             onChange={(event) => setFilters({ warehouseId: event.target.value || undefined })}
-            aria-label="Filter by warehouse"
+            aria-label={t('list.filterWarehouseAria')}
           >
-            <option value="">All Warehouses</option>
+            <option value="">{t('list.allWarehouses')}</option>
             {warehouses.map((warehouse) => (
               <option key={warehouse.id} value={warehouse.id}>
                 {warehouse.name}
@@ -300,9 +300,9 @@ const InventoryListContent: React.FC = () => {
             onChange={(event) =>
               setFilters({ status: (event.target.value || undefined) as ProductStatus | undefined })
             }
-            aria-label="Filter by status"
+            aria-label={t('list.filterStatusAria')}
           >
-            <option value="">All Statuses</option>
+            <option value="">{t('list.allStatuses')}</option>
             {STATUS_OPTIONS.map((status) => (
               <option key={status} value={status}>
                 {statusLabel.product(status)}
@@ -315,9 +315,9 @@ const InventoryListContent: React.FC = () => {
               className={styles.selectInput}
               value={filters.brand ?? ''}
               onChange={(event) => setFilters({ brand: event.target.value || undefined })}
-              aria-label="Filter by brand"
+              aria-label={t('list.filterBrandAria')}
             >
-              <option value="">All Brands</option>
+              <option value="">{t('list.allBrands')}</option>
               {facets.brands.map((brand) => (
                 <option key={brand} value={brand}>
                   {brand}
@@ -440,7 +440,7 @@ const InventoryListContent: React.FC = () => {
               </Button>
             ) : (
               <Button variant="outline" onClick={clearFilters}>
-                Clear filters
+                {t('list.clearFilters')}
               </Button>
             )
           }

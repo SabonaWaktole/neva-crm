@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {} from 'react';
 import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { Key, CheckCircle2 } from 'lucide-react';
@@ -8,6 +9,7 @@ import { Button } from '../../components/ui/Button/Button';
 import { useResetPassword } from '../../hooks/useResetPassword';
 
 export const ResetPasswordPage = () => {
+  const { t } = useTranslation('auth');
   const { tenantSlug } = useParams();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token') || '';
@@ -21,7 +23,7 @@ export const ResetPasswordPage = () => {
     setLocalError(null);
 
     if (newPassword !== confirmPassword) {
-      setLocalError('Passwords do not match.');
+      setLocalError(t('resetPassword.mismatch'));
       return;
     }
 
@@ -34,15 +36,15 @@ export const ResetPasswordPage = () => {
 
   return (
     <AuthLayout
-      title="Create new password"
-      subtitle="Your new password must be different from previously used passwords."
+      title={t('resetPassword.title')}
+      subtitle={t('resetPassword.subtitle')}
       logoIcon={<Key size={32} color="var(--color-primary)" />}
     >
       {isSuccess ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)', alignItems: 'center', textAlign: 'center' }}>
           <CheckCircle2 size={48} color="var(--color-success)" />
           <p style={{ fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-body-md)', color: 'var(--color-on-surface)' }}>
-            Your password has been reset successfully.
+            {t('resetPassword.success')}
           </p>
           <Link 
             to={`/${tenantSlug || 'admin'}/login`}
@@ -53,7 +55,7 @@ export const ResetPasswordPage = () => {
               textDecoration: 'none'
             }}
           >
-            Go to Login
+            {t('goToLogin')}
           </Link>
         </div>
       ) : (
@@ -64,17 +66,17 @@ export const ResetPasswordPage = () => {
             </div>
           )}
           <PasswordInput 
-            label="New Password" 
+            label={t('resetPassword.newPassword')} 
             placeholder="••••••••" 
             id="new-password"
-            helperText="Must be at least 12 characters with a mix of letters, numbers & symbols."
+            helperText={t('resetPassword.helper')}
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             required
           />
           
           <PasswordInput 
-            label="Confirm Password" 
+            label={t('resetPassword.confirmPassword')} 
             placeholder="••••••••" 
             id="confirm-password"
             value={confirmPassword}
@@ -84,7 +86,7 @@ export const ResetPasswordPage = () => {
           
           <div style={{ paddingTop: 'var(--spacing-sm)' }}>
             <Button fullWidth variant="primary" type="submit" isLoading={isLoading}>
-              Reset Password
+              {t('resetPassword.submit')}
             </Button>
           </div>
         </form>

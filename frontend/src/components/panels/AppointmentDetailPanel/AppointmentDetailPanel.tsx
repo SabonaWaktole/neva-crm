@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   Calendar, 
   Clock, 
@@ -45,6 +46,7 @@ export const AppointmentDetailPanel: React.FC<AppointmentDetailPanelProps> = ({
   onEdit,
   onReschedule,
 }) => {
+  const { t } = useTranslation('appointments');
   const { cancelAppointment, isLoading: isCancelling } = useCancelAppointment();
   const { updateStatus, isLoading: isUpdating } = useUpdateAppointmentStatus();
   const [cancelReason, setCancelReason] = useState('');
@@ -79,21 +81,21 @@ export const AppointmentDetailPanel: React.FC<AppointmentDetailPanelProps> = ({
     <SlideOver
       isOpen={isOpen}
       onClose={onClose}
-      title="Appointment Detail"
+      title={t('detail.title')}
       footer={
         <div className={styles.footerActions}>
           {isPromptingCancel ? (
             <div className={styles.cancelPrompt}>
               <TextInput 
-                placeholder="Reason for cancellation..." 
+                placeholder={t('detail.cancelReasonPlaceholder')} 
                 value={cancelReason}
                 onChange={(e) => setCancelReason(e.target.value)}
                 autoFocus
               />
               <div className={styles.cancelPromptButtons}>
-                <Button variant="outline" onClick={() => setIsPromptingCancel(false)}>Back</Button>
+                <Button variant="outline" onClick={() => setIsPromptingCancel(false)}>{t('detail.back')}</Button>
                 <Button variant="primary" className={styles.cancelConfirmBtn} onClick={handleCancel} disabled={!cancelReason || isCancelling}>
-                  {isCancelling ? 'Cancelling...' : 'Confirm Cancel'}
+                  {isCancelling ? t('detail.cancelling') : t('detail.confirmCancel')}
                 </Button>
               </div>
             </div>
@@ -101,23 +103,23 @@ export const AppointmentDetailPanel: React.FC<AppointmentDetailPanelProps> = ({
             <>
               {appointment.status === 'SCHEDULED' && (
                 <Button variant="primary" icon={<Check size={18} />} fullWidth onClick={() => handleUpdateStatus('CONFIRMED')} disabled={isUpdating}>
-                  Mark as Confirmed
+                  {t('detail.markConfirmed')}
                 </Button>
               )}
               {appointment.status === 'CONFIRMED' && (
                 <Button variant="primary" icon={<CheckCircle2 size={18} />} fullWidth onClick={() => handleUpdateStatus('COMPLETED')} disabled={isUpdating}>
-                  Mark as Completed
+                  {t('detail.markCompleted')}
                 </Button>
               )}
               <div className={styles.footerSecondary}>
                 <Button variant="outline" icon={<Edit size={16} />} onClick={onEdit} disabled={isTerminal}>
-                  Edit
+                  {t('detail.edit')}
                 </Button>
                 <Button variant="outline" icon={<RefreshCw size={16} />} onClick={onReschedule} disabled={isTerminal}>
-                  Reschedule
+                  {t('detail.reschedule')}
                 </Button>
                 <Button variant="outline" icon={<XCircle size={16} />} className={styles.cancelButton} onClick={() => setIsPromptingCancel(true)} disabled={isTerminal}>
-                  Cancel
+                  {t('detail.cancel')}
                 </Button>
               </div>
             </>
@@ -132,19 +134,21 @@ export const AppointmentDetailPanel: React.FC<AppointmentDetailPanelProps> = ({
             <span className={styles.pulseDot}></span>
             {appointment.status}
           </Badge>
-          <span className={styles.refCode}>Ref: #{appointment.id.split('-')[0]}</span>
+          <span className={styles.refCode}>
+            {t('detail.reference', { reference: appointment.id.split('-')[0] })}
+          </span>
         </div>
 
         {/* Client Section */}
         <div className={styles.section}>
-          <label className={styles.sectionLabel}>Client</label>
+          <label className={styles.sectionLabel}>{t('detail.client')}</label>
           <div className={styles.personCard}>
             <Avatar fallback={appointment.clientName?.charAt(0) || 'C'} size="lg" />
             <div className={styles.personInfo}>
               <h4 className={styles.personName}>{appointment.clientName || 'Unknown'}</h4>
               <div className={styles.personEmail}>
                 <Mail size={14} />
-                <span>No email provided</span>
+                <span>{t('detail.noEmail')}</span>
               </div>
             </div>
           </div>
@@ -152,11 +156,11 @@ export const AppointmentDetailPanel: React.FC<AppointmentDetailPanelProps> = ({
 
         {/* Staff Section */}
         <div className={styles.section}>
-          <label className={styles.sectionLabel}>Staff Member</label>
+          <label className={styles.sectionLabel}>{t('detail.staffMember')}</label>
           <div className={styles.staffRow}>
             <Avatar fallback={appointment.staffName?.charAt(0) || 'S'} size="md" />
             <div>
-              <p className={styles.staffName}>{appointment.staffName || 'Unassigned'}</p>
+              <p className={styles.staffName}>{appointment.staffName || t('detail.unassigned')}</p>
             </div>
           </div>
         </div>
@@ -164,14 +168,14 @@ export const AppointmentDetailPanel: React.FC<AppointmentDetailPanelProps> = ({
         {/* Date & Time */}
         <div className={styles.dateTimeGrid}>
           <div className={styles.section}>
-            <label className={styles.sectionLabel}>Date</label>
+            <label className={styles.sectionLabel}>{t('detail.date')}</label>
             <div className={styles.infoRow}>
               <Calendar size={18} className={styles.infoIcon} />
               <span className={styles.infoText}>{new Date(appointment.scheduledAt).toLocaleDateString()}</span>
             </div>
           </div>
           <div className={styles.section}>
-            <label className={styles.sectionLabel}>Time</label>
+            <label className={styles.sectionLabel}>{t('detail.time')}</label>
             <div className={styles.infoRow}>
               <Clock size={18} className={styles.infoIcon} />
               <span className={styles.infoText}>{new Date(appointment.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
@@ -181,7 +185,7 @@ export const AppointmentDetailPanel: React.FC<AppointmentDetailPanelProps> = ({
 
         {/* Purpose */}
         <div className={styles.section}>
-          <label className={styles.sectionLabel}>Notes / Purpose</label>
+          <label className={styles.sectionLabel}>{t('detail.notes')}</label>
           <div className={styles.purposeCard}>
             <p className={styles.purposeDesc}>{appointment.notes || 'No notes provided.'}</p>
           </div>

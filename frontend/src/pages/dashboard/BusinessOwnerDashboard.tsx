@@ -1,9 +1,11 @@
 import { getUserFirstName } from '../../utils/userUtils';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { listContainerVariants, listItemVariants } from '../../lib/motion';
 import styles from './BusinessOwnerDashboard.module.css'; import {    Users,    CalendarCheck,    Clock,    Package,    Plus,   History } from 'lucide-react'; import { Button } from '../../components/ui/Button/Button'; import { KPICard } from '../../components/ui/KPICard'; import { UpcomingAppointmentsWidget } from '../../components/widgets/UpcomingAppointmentsWidget'; import { TimelineItem } from '../../components/ui/TimelineItem'; import { getActivityConfig } from '../../utils/activityMapper'; import { useNavigate, useParams } from 'react-router-dom'; import { useDashboardMetrics, useActivityFeed } from '../../hooks/useDashboard'; import { useAuthStore } from '../../store/useAuthStore';
 
 export const BusinessOwnerDashboard = () => {
+  const { t } = useTranslation('dashboard');
   const { tenantSlug } = useParams();
   const navigate = useNavigate();
   const { user } = useAuthStore();
@@ -37,15 +39,15 @@ export const BusinessOwnerDashboard = () => {
     <div className={styles.dashboardContainer}>
       <header className={styles.header}>
         <div className={styles.headerContent}>
-          <h1 className={styles.title}>Welcome back, {getUserFirstName(user)}.</h1>
-          <p className={styles.subtitle}>Here's a summary of your workspace for today.</p>
+          <h1 className={styles.title}>{t('greetingOwner', { name: getUserFirstName(user) })}</h1>
+          <p className={styles.subtitle}>{t('subtitleOwner')}</p>
         </div>
         <div className={styles.headerActions}>
           <Button variant="outline" icon={<CalendarCheck size={18} />} onClick={() => navigate(`/${tenantSlug}/appointments`)}>
-            View Schedule
+            {t('viewSchedule')}
           </Button>
           <Button variant="primary" icon={<Plus size={18} />} onClick={() => navigate(`/${tenantSlug}/appointments/new`)}>
-            New Appointment
+            {t('newAppointmentFull')}
           </Button>
         </div>
       </header>
@@ -127,13 +129,13 @@ export const BusinessOwnerDashboard = () => {
           <div className={styles.placeholdersGrid}>
              <div className={styles.dashedPlaceholder}>
                 <Clock size={32} className={styles.placeholderIcon} />
-                <h3>Future Quotation Insights</h3>
-                <p>Track pending approvals and pipeline value.</p>
+                <h3>{t('futureQuotationInsights')}</h3>
+                <p>{t('futureQuotationInsightsDesc')}</p>
              </div>
              <div className={styles.dashedPlaceholder}>
                 <Package size={32} className={styles.placeholderIcon} />
-                <h3>Inventory Forecasting</h3>
-                <p>Predict stock shortages based on upcoming appointments.</p>
+                <h3>{t('inventoryForecasting')}</h3>
+                <p>{t('inventoryForecastingDesc')}</p>
              </div>
           </div>
         </div>
@@ -144,7 +146,7 @@ export const BusinessOwnerDashboard = () => {
             <div className={styles.feedHeader}>
               <div className={styles.feedTitleGroup}>
                 <History size={20} color="var(--color-on-surface-variant)" />
-                <h2>Recent Activity</h2>
+                <h2>{t('recentActivity')}</h2>
               </div>
             </div>
             
@@ -173,7 +175,7 @@ export const BusinessOwnerDashboard = () => {
             </div>
             
             <div className={styles.feedFooter}>
-              <Button variant="ghost" fullWidth onClick={() => navigate(`/${tenantSlug}/clients`)}>View All Activity</Button>
+              <Button variant="ghost" fullWidth onClick={() => navigate(`/${tenantSlug}/clients`)}>{t('viewAllActivity')}</Button>
             </div>
           </div>
         </div>

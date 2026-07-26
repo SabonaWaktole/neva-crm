@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useUpcomingAppointments } from '../../hooks/useAppointments';
 import { Calendar, MoreVertical, Clock, User } from 'lucide-react';
 import { Card } from '../ui/Card/Card';
@@ -15,6 +16,7 @@ import styles from './UpcomingAppointmentsWidget.module.css';
 import { useNavigate, useParams } from 'react-router-dom';
 
 export const UpcomingAppointmentsWidget: React.FC = () => {
+  const { t } = useTranslation('dashboard');
   const { tenantSlug } = useParams();
   const navigate = useNavigate();
   const { appointments, isLoading, error } = useUpcomingAppointments(5);
@@ -42,10 +44,10 @@ export const UpcomingAppointmentsWidget: React.FC = () => {
           <div className={styles.iconWrapper}>
             <Calendar size={20} />
           </div>
-          <h2 className={styles.title}>Upcoming Appointments</h2>
+          <h2 className={styles.title}>{t('upcomingAppointments')}</h2>
         </div>
         <Button variant="outline" className={styles.viewAllButton} onClick={() => navigate(`/${tenantSlug}/appointments`)}>
-          View Calendar
+          {t('viewCalendar')}
         </Button>
       </div>
 
