@@ -1,0 +1,268 @@
+/* ============================================================================
+ * ImagePicker
+ * ========================================================================= */
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.label {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-label-md);
+  font-weight: 540;
+  color: var(--text-primary);
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+/* ---------------------------------------------------------------- dropzone */
+
+.dropzone {
+  position: relative;
+  flex-shrink: 0;
+  overflow: hidden;
+  background-color: var(--color-surface-container-low);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-xl);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    border-color var(--transition-normal),
+    background-color var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+
+.dropzoneTile {
+  width: 96px;
+  height: 96px;
+}
+
+.dropzoneBanner {
+  width: 100%;
+  max-width: 520px;
+  aspect-ratio: 4 / 1;
+}
+
+.dropzoneRound {
+  border-radius: var(--radius-full);
+}
+
+.dropzone:hover:not(.dropzoneDisabled) {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-a10);
+}
+
+.dropzone:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* While a file is over the target, commit fully to the accent state. */
+.dropzoneDragging {
+  border-style: solid;
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-a10);
+  box-shadow: var(--focus-ring-tight);
+}
+
+.dropzoneDisabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* A logo is art-directed, so show all of it rather than cropping to fill. */
+.dropzone:not(.dropzoneRound).dropzoneTile .preview {
+  object-fit: contain;
+  padding: 6px;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--text-quaternary);
+  font-size: var(--font-size-body-sm);
+  text-align: center;
+  padding: var(--spacing-sm);
+  transition: color var(--transition-normal);
+}
+
+.dropzone:hover:not(.dropzoneDisabled) .empty {
+  color: var(--color-primary);
+}
+
+/* Hover scrim with the action verb. Hidden on touch, where there is no hover
+   and tapping the tile already opens the picker. */
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background-color: rgba(17, 17, 22, 0.55);
+  color: #fff;
+  font-size: var(--font-size-label-sm);
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+  pointer-events: none;
+}
+
+.dropzone:hover .overlay,
+.dropzone:focus-visible .overlay {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .overlay {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------- progress */
+
+.progressOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 var(--spacing-base);
+  background-color: rgba(17, 17, 22, 0.62);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.progressTrack {
+  width: 100%;
+  max-width: 120px;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background-color: rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+}
+
+/* Scaled rather than width-animated: transform stays on the compositor. */
+.progressFill {
+  height: 100%;
+  width: 100%;
+  transform-origin: 0 50%;
+  border-radius: var(--radius-full);
+  background-color: #fff;
+}
+
+.progressLabel {
+  font-size: var(--font-size-label-sm);
+  font-weight: 600;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+.savedBadge {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-success);
+  color: var(--color-on-success);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+}
+
+/* -------------------------------------------------------------------- side */
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
+.hint {
+  margin: 0;
+  font-size: var(--font-size-body-sm);
+  line-height: var(--font-line-height-body-sm);
+  color: var(--text-tertiary);
+  max-width: 44ch;
+}
+
+.sideActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-base);
+}
+
+.linkButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  background: none;
+  border: none;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-sm);
+  font-weight: 600;
+  color: var(--color-primary);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: opacity var(--transition-fast);
+}
+
+.linkButton:hover:not(:disabled) {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.linkButton:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.linkButton:disabled {
+  color: var(--text-quaternary);
+  cursor: not-allowed;
+}
+
+.linkDanger {
+  color: var(--color-error);
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: var(--font-size-body-sm);
+  color: var(--color-error);
+}
+
+.fileInput {
+  display: none;
+}

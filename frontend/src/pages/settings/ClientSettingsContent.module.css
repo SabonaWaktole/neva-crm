@@ -1,3 +1,7 @@
+/* ============================================================================
+ * ClientSettingsContent — custom-field configuration for client records.
+ * ========================================================================= */
+
 .container {
   display: flex;
   flex-direction: column;
@@ -15,56 +19,90 @@
 .header {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
 }
 
 .breadcrumbs {
   font-family: var(--font-family-base);
-  font-size: var(--font-size-body-md);
-  color: var(--color-on-surface-variant);
+  font-size: var(--font-size-body-sm);
+  color: var(--text-tertiary);
 }
 
 .breadcrumbLink {
-  color: var(--color-primary);
+  color: var(--text-tertiary);
   text-decoration: none;
+  transition: color var(--transition-fast);
 }
 
 .breadcrumbLink:hover {
-  text-decoration: underline;
+  color: var(--color-primary);
 }
 
 .title {
-  font-family: var(--font-family-base);
+  font-family: var(--font-family-display);
   font-size: var(--font-size-headline-lg);
   font-weight: var(--font-weight-headline-lg);
-  line-height: var(--font-line-height-headline-lg);
+  line-height: 1.15;
   letter-spacing: var(--font-letter-spacing-headline-lg);
-  color: var(--color-on-surface);
+  color: var(--text-primary);
   margin: 0;
 }
 
+/* Tabs — same underline grammar as the Tabs primitive. */
 .tabs {
   display: flex;
-  border-bottom: 1px solid var(--color-outline-variant);
-  gap: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-hairline);
+  gap: var(--spacing-md);
 }
 
 .tab {
-  padding: var(--spacing-sm) 0;
+  position: relative;
+  padding: 9px 2px 11px;
   font-family: var(--font-family-base);
-  font-size: var(--font-size-body-md);
-  font-weight: var(--font-weight-body-md);
-  color: var(--color-on-surface-variant);
+  font-size: var(--font-size-label-md);
+  font-weight: 520;
+  color: var(--text-secondary);
   background: none;
   border: none;
-  border-bottom: 2px solid transparent;
   cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--transition-fast);
+}
+
+.tab::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background-color: var(--color-primary);
+  transform: scaleX(0);
+  opacity: 0;
+  transition:
+    transform var(--transition-normal),
+    opacity var(--transition-fast);
+}
+
+.tab:hover {
+  color: var(--text-primary);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+  border-radius: var(--radius-sm);
 }
 
 .tabActive {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
-  font-weight: 500;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.tabActive::after {
+  transform: scaleX(1);
+  opacity: 1;
 }
 
 .section {
@@ -82,86 +120,117 @@
 }
 
 .sectionTitle {
-  font-family: var(--font-family-base);
-  font-size: var(--font-size-headline-md);
-  font-weight: var(--font-weight-headline-md);
-  color: var(--color-on-surface);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-headline-sm);
+  font-weight: 620;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
   margin: 0;
 }
 
+/* --------------------------------------------------------------- table */
+
 .tableContainer {
   background-color: var(--color-surface-container-lowest);
-  border: 1px solid var(--color-outline-variant);
-  border-radius: var(--radius-lg);
+  border: none;
+  border-radius: var(--radius-xl);
   overflow-x: auto;
+  box-shadow:
+    var(--shadow-xs),
+    inset 0 0 0 1px var(--border-hairline);
 }
 
 .table {
   width: 100%;
   min-width: 480px;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   text-align: left;
 }
 
 .th {
-  padding: var(--spacing-md);
+  padding: 0 var(--spacing-md);
+  height: 40px;
   font-family: var(--font-family-base);
-  font-size: var(--font-size-label-md);
-  font-weight: var(--font-weight-label-md);
-  color: var(--color-on-surface-variant);
-  border-bottom: 1px solid var(--color-outline-variant);
+  font-size: var(--font-size-label-sm);
+  font-weight: 600;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  user-select: none;
+  border-bottom: 1px solid var(--border-subtle);
   background-color: var(--color-surface-container-low);
 }
 
 .td {
-  padding: var(--spacing-md);
+  padding: var(--spacing-base) var(--spacing-md);
+  height: 52px;
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
-  color: var(--color-on-surface);
-  border-bottom: 1px solid var(--color-outline-variant);
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-hairline);
+  transition: background-color var(--duration-instant) var(--ease-out);
 }
 
 .tr:last-child .td {
   border-bottom: none;
 }
 
+.tr:hover .td {
+  background-color: var(--color-surface-container-low);
+}
+
 .typeBadge {
   display: inline-flex;
   align-items: center;
-  padding: 2px var(--spacing-sm);
+  padding: 3px 9px;
   background-color: var(--color-surface-container);
-  color: var(--color-on-surface);
+  color: var(--text-secondary);
   border-radius: var(--radius-full);
-  font-size: var(--font-size-label-md);
+  font-size: var(--font-size-label-sm);
+  font-weight: 600;
   font-family: var(--font-family-base);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
 }
 
 .actionButton {
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--color-on-surface-variant);
-  padding: var(--spacing-xs);
-  border-radius: var(--radius-default);
+  color: var(--text-tertiary);
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .actionButton:hover {
-  background-color: var(--color-surface-container);
+  background-color: var(--color-surface-container-high);
   color: var(--color-primary);
 }
 
+.actionButton:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
 .actionButton:disabled {
-  color: var(--color-outline);
+  color: var(--text-quaternary);
   cursor: not-allowed;
 }
 
 .actionButton:disabled:hover {
   background-color: transparent;
-  color: var(--color-outline);
+  color: var(--text-quaternary);
 }
+
+/* ---------------------------------------------------------- slide-over */
 
 .slideOverForm {
   display: flex;
@@ -173,25 +242,27 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  margin-top: var(--spacing-sm);
+  margin-top: var(--spacing-xs);
 }
 
 .checkbox {
-  width: 16px;
-  height: 16px;
+  width: 17px;
+  height: 17px;
   accent-color: var(--color-primary);
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
 .checkboxLabel {
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
-  color: var(--color-on-surface);
+  color: var(--text-primary);
   cursor: pointer;
 }
 
 .slideOverFooter {
   display: flex;
   justify-content: flex-end;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
   width: 100%;
 }

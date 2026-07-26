@@ -1,3 +1,7 @@
+/* ============================================================================
+ * InventoryList — KPI strip, filter bar, then the table.
+ * ========================================================================= */
+
 .container {
   display: flex;
   flex-direction: column;
@@ -10,22 +14,24 @@
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: flex-end;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
 }
 
 .titleContainer {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: 5px;
 }
 
 .title {
-  font-family: var(--font-family-base);
+  font-family: var(--font-family-display);
   font-size: var(--font-size-headline-lg);
   font-weight: var(--font-weight-headline-lg);
-  line-height: var(--font-line-height-headline-lg);
+  line-height: 1.15;
   letter-spacing: var(--font-letter-spacing-headline-lg);
-  color: var(--color-on-surface);
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -33,7 +39,7 @@
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
   line-height: var(--font-line-height-body-md);
-  color: var(--color-on-surface-variant);
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -43,28 +49,32 @@
   gap: var(--spacing-md);
 }
 
+/* Filters sit in one row above the table — never stacked into a panel, so
+   the current filter state is always visible alongside its results. */
 .filtersBar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-base);
   flex-wrap: wrap;
 }
 
 .filtersLeft {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
   flex: 1;
   flex-wrap: wrap;
 }
 
 .searchInput {
-  min-width: 250px;
+  min-width: 260px;
+  flex: 1;
+  max-width: 360px;
 }
 
 .selectInput {
-  min-width: 150px;
+  min-width: 160px;
 }
 
 .content {
@@ -72,4 +82,5 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  min-height: 0;
 }

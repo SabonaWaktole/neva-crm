@@ -1,3 +1,7 @@
+/* ============================================================================
+ * WarehouseList — KPI strip above the warehouse table.
+ * ========================================================================= */
+
 .pageContainer {
   padding: var(--spacing-md);
   max-width: 1200px;
@@ -5,12 +9,12 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
+  width: 100%;
 }
 
 @media (min-width: 768px) {
   .pageContainer {
-    padding: var(--spacing-xl);
-    gap: var(--spacing-xl);
+    padding: var(--spacing-lg) 0;
   }
 }
 
@@ -30,39 +34,60 @@
 }
 
 .pageTitle {
-  font-family: var(--font-family-base);
+  font-family: var(--font-family-display);
   font-size: var(--font-size-headline-lg);
-  font-weight: bold;
-  color: var(--color-on-surface);
+  font-weight: var(--font-weight-headline-lg);
+  letter-spacing: var(--font-letter-spacing-headline-lg);
+  line-height: 1.15;
+  color: var(--text-primary);
   margin: 0;
 }
 
 .pageSubtitle {
   font-family: var(--font-family-base);
-  font-size: var(--font-size-body-sm);
-  color: var(--color-on-surface-variant);
-  margin: var(--spacing-xs) 0 0 0;
+  font-size: var(--font-size-body-md);
+  color: var(--text-secondary);
+  margin: 5px 0 0 0;
 }
 
+/* Matches the Button primitive's primary variant. */
 .addButton {
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--spacing-sm);
+  height: 36px;
   background-color: var(--color-primary);
   color: var(--color-on-primary);
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-radius: var(--radius-lg);
+  padding: 0 var(--spacing-md);
+  border-radius: var(--radius-default);
   font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
-  font-weight: bold;
+  font-weight: 560;
+  letter-spacing: -0.005em;
   border: none;
   cursor: pointer;
-  transition: opacity 0.2s;
-  box-shadow: var(--elevation-1);
+  white-space: nowrap;
+  box-shadow:
+    var(--shadow-accent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  transition:
+    background-color var(--transition-fast),
+    transform var(--duration-instant) var(--ease-out);
 }
 
 .addButton:hover {
-  opacity: 0.9;
+  background-color: var(--color-primary-hover);
+}
+
+.addButton:active {
+  transform: scale(0.97);
+  background-color: var(--color-primary-active);
+}
+
+.addButton:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .kpiGrid {
@@ -74,6 +99,5 @@
 @media (min-width: 640px) {
   .kpiGrid {
     grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-lg);
   }
 }

@@ -19,6 +19,20 @@ export const BusinessOwnerDashboard = () => {
   const growthPct = metrics ? calculateGrowth(metrics.totalClients, metrics.totalClientsLastWeek) : '0%';
   const isGrowthUp = metrics && metrics.totalClients >= metrics.totalClientsLastWeek;
 
+  // Appointments: a signed day-over-day delta rather than a percentage, since
+  // these are small whole numbers where "+2" reads better than "+40%".
+  const appointmentDelta = metrics
+    ? metrics.appointmentsToday - metrics.appointmentsYesterday
+    : 0;
+  const appointmentTrend =
+    appointmentDelta > 0 ? `+${appointmentDelta}` : `${appointmentDelta}`;
+
+  // Quotations and stock are "lower is better", so an increase is not good
+  // news — the trend direction is inverted compared to the clients card.
+  const awaitingApproval = metrics?.quotationsAwaitingApproval ?? 0;
+  const outOfStock = metrics?.outOfStockProducts ?? 0;
+  const lowStock = metrics?.lowStockProducts ?? 0;
+
   return (
     <div className={styles.dashboardContainer}>
       <header className={styles.header}>
@@ -55,33 +69,48 @@ export const BusinessOwnerDashboard = () => {
         </motion.div>
         <motion.div className={styles.kpiItem} variants={listItemVariants}>
           <KPICard
-            title="Appointments"
-            value="8"
+            title="Appointments today"
+            value={isLoadingMetrics ? '...' : (metrics?.appointmentsToday ?? 0)}
             icon={<CalendarCheck size={24} />}
             iconColor="var(--color-secondary)"
             iconBgColor="var(--color-secondary-container)"
-            trendValue="+2"
+            trendValue={isLoadingMetrics ? '...' : appointmentTrend}
             trendLabel="from yesterday"
-            trendDirection="up"
+            trendDirection={
+              appointmentDelta > 0 ? 'up' : appointmentDelta < 0 ? 'down' : 'neutral'
+            }
           />
         </motion.div>
-        {/* Expensive placeholers: opacity-60, ---, coming soon tag */}
         <motion.div className={`${styles.kpiItem} ${styles.mobileHidden}`} variants={listItemVariants}>
           <KPICard
             title="Open quotations"
-            value="---"
+            value={isLoadingMetrics ? '...' : (metrics?.openQuotations ?? 0)}
             icon={<Clock size={24} />}
-            isPlaceholder={true}
-            placeholderText="Coming in Phase 5"
+            iconColor="var(--color-warning)"
+            iconBgColor="var(--color-warning-container)"
+            trendValue={
+              isLoadingMetrics ? '...' : awaitingApproval > 0 ? `${awaitingApproval}` : 'None'
+            }
+            trendLabel="awaiting approval"
+            /* Work piling up is not an improvement, so pending items read as
+               a warning rather than as positive growth. */
+            trendDirection={awaitingApproval > 0 ? 'down' : 'neutral'}
           />
         </motion.div>
         <motion.div className={`${styles.kpiItem} ${styles.mobileHidden}`} variants={listItemVariants}>
           <KPICard
             title="Inventory alerts"
-            value="---"
+            value={isLoadingMetrics ? '...' : lowStock}
             icon={<Package size={24} />}
-            isPlaceholder={true}
-            placeholderText="Coming in Phase 4"
+            iconColor={lowStock > 0 ? 'var(--color-error)' : 'var(--color-success)'}
+            iconBgColor={
+              lowStock > 0 ? 'var(--color-error-container)' : 'var(--color-success-container)'
+            }
+            trendValue={
+              isLoadingMetrics ? '...' : outOfStock > 0 ? `${outOfStock}` : 'All stocked'
+            }
+            trendLabel={outOfStock > 0 ? 'out of stock' : ''}
+            trendDirection={outOfStock > 0 ? 'down' : 'neutral'}
           />
         </motion.div>
       </motion.section>

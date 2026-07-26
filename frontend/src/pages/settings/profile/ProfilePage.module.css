@@ -1,7 +1,12 @@
+/* ============================================================================
+ * ProfilePage — a short, single-column settings form.
+ * ========================================================================= */
+
 .container {
   max-width: 600px;
   margin: 0 auto;
   padding: var(--spacing-lg) var(--spacing-md);
+  width: 100%;
 }
 
 .breadcrumbWrapper {
@@ -11,9 +16,9 @@
 .breadcrumb {
   display: flex;
   align-items: center;
-  color: var(--color-on-surface-variant);
-  font-size: var(--font-size-label-sm);
-  margin-bottom: var(--spacing-xs);
+  color: var(--text-tertiary);
+  font-size: var(--font-size-body-sm);
+  margin-bottom: 5px;
 }
 
 .breadcrumbList {
@@ -22,25 +27,32 @@
   list-style: none;
   padding: 0;
   margin: 0;
-  gap: 8px;
+  gap: 6px;
 }
 
 .breadcrumbLink {
   color: inherit;
   text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.breadcrumbLink:hover {
+  color: var(--color-primary);
 }
 
 .breadcrumbCurrent {
-  color: var(--color-on-surface);
-  font-weight: 600;
+  color: var(--text-secondary);
+  font-weight: 550;
 }
 
 .title {
-  font-family: var(--font-family-base);
+  font-family: var(--font-family-display);
   font-size: var(--font-size-headline-lg-mobile);
-  font-weight: bold;
-  margin-bottom: var(--spacing-lg);
-  color: var(--color-on-surface);
+  font-weight: var(--font-weight-headline-lg);
+  letter-spacing: var(--font-letter-spacing-headline-lg);
+  line-height: 1.15;
+  margin: 0 0 var(--spacing-lg);
+  color: var(--text-primary);
 }
 
 @media (min-width: 768px) {
@@ -50,27 +62,70 @@
 }
 
 .banner {
-  padding: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 10px var(--spacing-base);
   border-radius: var(--radius-lg);
   margin-bottom: var(--spacing-md);
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
+  animation: bannerIn var(--duration-normal) var(--ease-out);
+}
+
+@keyframes bannerIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .successBanner {
   background-color: var(--color-success-container);
   color: var(--color-on-success-container);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-success) 20%, transparent);
 }
 
 .errorBanner {
   background-color: var(--color-error-container);
   color: var(--color-on-error-container);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-error) 20%, transparent);
+}
+
+/* -------------------------------------------------------------- media card */
+
+.mediaCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+}
+
+.mediaHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: var(--spacing-base);
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.mediaTitle {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-headline-sm);
+  font-weight: 620;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+}
+
+.mediaSubtitle {
+  margin: 0;
+  font-size: var(--font-size-body-sm);
+  color: var(--text-tertiary);
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-md);
 }
 
 .nameRow {
@@ -89,9 +144,11 @@
   flex: 1;
 }
 
+/* Pulls up under the field it annotates, since the form's own gap would
+   otherwise read as separation from that field. */
 .helperText {
-  font-size: var(--font-size-label-sm);
-  color: var(--color-on-surface-variant);
+  font-size: var(--font-size-body-sm);
+  color: var(--text-tertiary);
   margin-top: calc(-1 * var(--spacing-sm));
 }
 

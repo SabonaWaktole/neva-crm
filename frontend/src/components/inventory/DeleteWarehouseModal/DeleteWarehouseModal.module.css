@@ -1,19 +1,29 @@
+/* ============================================================================
+ * DeleteWarehouseModal — destructive confirmation.
+ * Centred icon-led layout, with the destructive action explicitly filled and
+ * Cancel given equal visual weight so the dialog isn't a trap.
+ * ========================================================================= */
+
 .content {
   text-align: center;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--spacing-base);
 }
 
+/* Concentric error rings, matching the empty-state icon treatment. */
 .iconWrapper {
-  width: 64px;
-  height: 64px;
-  background-color: color-mix(in srgb, var(--color-error-container) 20%, transparent);
+  width: 60px;
+  height: 60px;
+  background-color: var(--color-error-container);
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto;
+  margin: 0 auto var(--spacing-xs);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--color-error) 16%, transparent),
+    0 0 0 10px color-mix(in srgb, var(--color-error) 6%, transparent);
 }
 
 .icon {
@@ -22,56 +32,91 @@
 
 .message {
   font-family: var(--font-family-base);
-  font-size: var(--font-size-body-sm);
-  color: var(--color-on-surface-variant);
+  font-size: var(--font-size-body-md);
+  color: var(--text-secondary);
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.55;
+  text-wrap: pretty;
 }
 
 .highlight {
-  font-weight: bold;
-  color: var(--color-on-surface);
+  font-weight: 640;
+  color: var(--text-primary);
 }
 
 .actions {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
-  margin-top: var(--spacing-md);
+  margin-top: var(--spacing-sm);
 }
 
+/* Mirrors the Button primitive so this dialog matches the rest of the app. */
 .dangerButton {
   width: 100%;
-  padding: var(--spacing-md) var(--spacing-lg);
+  height: 40px;
+  padding: 0 var(--spacing-lg);
   background-color: var(--color-error);
   color: var(--color-on-error);
-  border: none;
-  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-error);
+  border-radius: var(--radius-default);
   font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
-  font-weight: 500;
+  font-weight: 560;
   cursor: pointer;
-  transition: filter 0.2s;
+  box-shadow:
+    var(--shadow-sm),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  transition:
+    filter var(--transition-fast),
+    transform var(--duration-instant) var(--ease-out);
 }
 
 .dangerButton:hover {
-  filter: brightness(1.1);
+  filter: brightness(1.08);
+}
+
+.dangerButton:active {
+  transform: scale(0.98);
+  filter: brightness(0.94);
+}
+
+.dangerButton:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--color-surface-container-lowest),
+    0 0 0 4px color-mix(in srgb, var(--color-error) 35%, transparent);
 }
 
 .cancelButton {
   width: 100%;
-  padding: var(--spacing-md) var(--spacing-lg);
-  background-color: transparent;
-  color: var(--color-on-surface-variant);
-  border: 1px solid var(--color-outline-variant);
-  border-radius: var(--radius-lg);
+  height: 40px;
+  padding: 0 var(--spacing-lg);
+  background-color: var(--color-surface-container-lowest);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-default);
   font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
-  font-weight: 500;
+  font-weight: 560;
   cursor: pointer;
-  transition: background-color 0.2s;
+  box-shadow: var(--shadow-xs);
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--duration-instant) var(--ease-out);
 }
 
 .cancelButton:hover {
-  background-color: var(--color-surface-variant);
+  background-color: var(--color-surface-container-low);
+  border-color: var(--border-strong);
+}
+
+.cancelButton:active {
+  transform: scale(0.98);
+}
+
+.cancelButton:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }

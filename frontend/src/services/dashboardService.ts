@@ -3,6 +3,16 @@ import { apiClient } from '../api';
 export interface DashboardMetrics {
   totalClients: number;
   totalClientsLastWeek: number;
+  /** Appointments scheduled for today, excluding cancelled ones. */
+  appointmentsToday: number;
+  /** Same window yesterday, for the day-over-day delta. */
+  appointmentsYesterday: number;
+  /** Quotations that are neither accepted, rejected nor expired. */
+  openQuotations: number;
+  quotationsAwaitingApproval: number;
+  /** Products at or below their low-stock threshold. */
+  lowStockProducts: number;
+  outOfStockProducts: number;
 }
 
 export interface ActivityFeedItem {

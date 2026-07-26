@@ -1,7 +1,11 @@
+/* ============================================================================
+ * WarehouseStockRow — one warehouse/quantity pair in the allocation editor.
+ * ========================================================================= */
+
 .row {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
   align-items: flex-end;
 }
 
@@ -18,23 +22,53 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  height: 36px; /* Match input height */
+  height: 38px; /* Match input height */
 }
 
+/* Neutral at rest so a column of rows isn't a column of red; commits to the
+   destructive colour only on hover. */
 .deleteButton {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border: none;
   background-color: transparent;
-  color: var(--color-error);
-  border-radius: var(--radius-default);
+  color: var(--text-tertiary);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .deleteButton:hover {
   background-color: var(--color-error-container);
+  color: var(--color-error);
+}
+
+.deleteButton:focus-visible {
+  outline: 2px solid var(--color-error);
+  outline-offset: 1px;
+}
+
+/* Fields stack on narrow viewports; the delete control keeps its own row. */
+@media (max-width: 560px) {
+  .col6,
+  .col4 {
+    grid-column: span 12;
+  }
+
+  .col2 {
+    grid-column: span 12;
+    justify-content: flex-start;
+    height: auto;
+  }
+}
+
+@media (max-width: 767px) {
+  .col2 {
+    height: 44px;
+  }
 }

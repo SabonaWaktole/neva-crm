@@ -1,12 +1,43 @@
+/* ============================================================================
+ * OnboardingPage
+ * A single card that slides horizontally between steps. First impressions
+ * matter most here, so the card gets real elevation and the steps move with
+ * a spring rather than a linear ease.
+ * ========================================================================= */
+
 .container {
+  position: relative;
   display: flex;
   min-height: 100vh;
   align-items: center;
   justify-content: center;
   background-color: var(--color-background);
   font-family: var(--font-family-base);
-  color: var(--color-on-surface);
+  color: var(--text-primary);
   padding: var(--spacing-md);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* Ambient wash, matching the auth screens so signup→onboarding feels like
+   one continuous flow. */
+.container::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: -300px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(1100px, 140%);
+  height: 700px;
+  border-radius: 50%;
+  filter: blur(90px);
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--color-primary) 13%, transparent),
+    transparent 68%
+  );
+  pointer-events: none;
 }
 
 .mainWrapper {
@@ -27,41 +58,45 @@
 }
 
 .title {
-  font-family: var(--font-family-base);
+  font-family: var(--font-family-display);
   font-size: var(--font-size-display);
-  font-weight: 700;
-  color: var(--color-primary);
+  font-weight: var(--font-weight-display);
+  letter-spacing: var(--font-letter-spacing-display);
+  line-height: 1.05;
+  color: var(--text-primary);
   margin: 0;
 }
 
 .subtitle {
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-lg);
-  color: var(--color-on-surface-variant);
+  color: var(--text-secondary);
   margin-top: var(--spacing-sm);
   margin-bottom: 0;
 }
 
+/* This element is a <Card>, which already supplies the surface, radius and
+   resting elevation. Only the things Card cannot know about are set here —
+   the step-slider needs a clipping context and a floor height. */
 .cardContainer {
   position: relative;
   min-height: 500px;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .stepperHeader {
   padding: var(--spacing-lg) var(--spacing-md);
-  border-bottom: 1px solid var(--color-outline-variant);
+  border-bottom: 1px solid var(--border-hairline);
   background-color: var(--color-surface-container-lowest);
   position: relative;
   z-index: 10;
-  border-top-left-radius: var(--radius-xl);
-  border-top-right-radius: var(--radius-xl);
 }
 
 @media (min-width: 640px) {
   .stepperHeader {
-    padding: var(--spacing-2xl) var(--spacing-2xl) var(--spacing-lg);
+    padding: var(--spacing-xl) var(--spacing-2xl) var(--spacing-lg);
   }
 }
 
@@ -77,7 +112,10 @@
   padding: var(--spacing-md);
   display: flex;
   flex-direction: column;
-  transition: all 0.5s ease-in-out;
+  /* Spring easing makes the step change feel like a physical swipe. */
+  transition:
+    transform var(--duration-slower) var(--ease-spring),
+    opacity var(--duration-normal) var(--ease-out);
   overflow-y: auto; /* Allow scrolling if it still overflows */
 }
 
@@ -106,38 +144,50 @@
 }
 
 .stepTitle {
-  font-family: var(--font-family-base);
-  font-size: var(--font-size-headline-lg);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-headline-lg-mobile);
   font-weight: var(--font-weight-headline-lg);
-  color: var(--color-on-surface);
-  margin: 0 0 var(--spacing-sm) 0;
+  letter-spacing: var(--font-letter-spacing-headline-lg);
+  line-height: 1.15;
+  color: var(--text-primary);
+  margin: 0 0 6px 0;
+}
+
+@media (min-width: 640px) {
+  .stepTitle {
+    font-size: var(--font-size-headline-lg);
+  }
 }
 
 .stepSubtitle {
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
-  color: var(--color-on-surface-variant);
-  margin: 0 0 var(--spacing-md) 0;
+  line-height: var(--font-line-height-body-md);
+  color: var(--text-secondary);
+  margin: 0 0 var(--spacing-lg) 0;
+  max-width: 52ch;
 }
 
 .formContent {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-base);
 }
 
 .formContentMaxW {
   max-width: 28rem; /* max-w-md */
 }
 
-/* Specific to step 1 */
+/* ------------------------------------------------------- step 1: the URL */
+
 .urlPreviewBox {
   margin-top: var(--spacing-md);
-  padding: var(--spacing-md);
+  padding: var(--spacing-base) var(--spacing-md);
   background-color: var(--color-surface-container-low);
-  border-radius: var(--radius-default);
-  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-lg);
+  border: none;
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
   max-width: 28rem;
   display: flex;
   align-items: center;
@@ -145,9 +195,9 @@
 }
 
 .urlText {
-  font-family: var(--font-family-base);
-  font-size: var(--font-size-body-md);
-  color: var(--color-on-surface-variant);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-body-sm);
+  color: var(--text-tertiary);
   flex: 1;
   white-space: nowrap;
   overflow: hidden;
@@ -156,49 +206,55 @@
 
 .urlSlug {
   color: var(--color-primary);
-  font-weight: 500;
+  font-weight: 600;
 }
 
-/* Specific to step 2 */
+/* ---------------------------------------------------- step 2: the upload */
+
 .uploadBox {
   width: 100%;
   height: 12rem;
-  border: 2px dashed var(--color-outline-variant);
-  border-radius: var(--radius-lg);
-  background-color: var(--color-surface);
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius-xl);
+  background-color: var(--color-surface-container-low);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition:
+    background-color var(--transition-normal),
+    border-color var(--transition-normal);
 }
 
 .uploadBox:hover {
-  background-color: var(--color-surface-container-low);
+  background-color: var(--color-primary-a10);
   border-color: var(--color-primary);
 }
 
 .uploadIconBox {
-  width: 4rem;
-  height: 4rem;
+  width: 56px;
+  height: 56px;
   border-radius: var(--radius-full);
   background-color: var(--color-surface-container-high);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: var(--spacing-md);
-  transition: all 0.2s;
+  margin-bottom: var(--spacing-base);
+  transition:
+    background-color var(--transition-normal),
+    transform var(--transition-normal);
 }
 
 .uploadBox:hover .uploadIconBox {
   background-color: var(--color-primary-container);
+  transform: translateY(-2px);
 }
 
 .uploadIcon {
-  font-size: 32px;
-  color: var(--color-outline);
-  transition: all 0.2s;
+  font-size: 26px;
+  color: var(--text-tertiary);
+  transition: color var(--transition-normal);
 }
 
 .uploadBox:hover .uploadIcon {
@@ -207,10 +263,11 @@
 
 .uploadTitle {
   font-family: var(--font-family-base);
-  font-size: var(--font-size-headline-md);
-  font-weight: var(--font-weight-headline-md);
-  color: var(--color-on-surface);
-  transition: all 0.2s;
+  font-size: var(--font-size-body-md);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  transition: color var(--transition-normal);
 }
 
 .uploadBox:hover .uploadTitle {
@@ -219,32 +276,33 @@
 
 .uploadSubtitle {
   font-family: var(--font-family-base);
-  font-size: var(--font-size-body-md);
-  color: var(--color-on-surface-variant);
-  margin-top: var(--spacing-xs);
+  font-size: var(--font-size-body-sm);
+  color: var(--text-secondary);
+  margin-top: 2px;
 }
 
 .uploadHelp {
   font-family: var(--font-family-base);
   font-size: var(--font-size-label-sm);
-  color: var(--color-outline);
+  color: var(--text-quaternary);
   margin-top: var(--spacing-sm);
 }
 
-/* Specific to step 3 */
+/* ------------------------------------------------------------- step 3 */
+
 .gapLg {
-  gap: var(--spacing-lg);
+  gap: var(--spacing-md);
 }
 
 .gapXs {
-  gap: var(--spacing-xs);
+  gap: 6px;
 }
 
 .label {
   font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
-  font-weight: var(--font-weight-label-md);
-  color: var(--color-on-surface);
+  font-weight: 540;
+  color: var(--text-primary);
 }
 
 .selectWrapper {
@@ -253,86 +311,115 @@
 
 .select {
   appearance: none;
-  height: 36px;
+  height: 38px;
   width: 100%;
-  padding: 0 var(--spacing-md);
+  padding: 0 var(--spacing-xl) 0 var(--spacing-base);
   border-radius: var(--radius-default);
-  border: 1px solid var(--color-outline-variant);
+  border: 1px solid var(--border-subtle);
   background-color: var(--color-surface-container-lowest);
-  color: var(--color-on-surface);
+  color: var(--text-primary);
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-md);
   outline: none;
   cursor: pointer;
-  transition: all 0.2s;
+  box-shadow: var(--shadow-xs);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.select:hover:not(:disabled) {
+  border-color: var(--border-strong);
 }
 
 .select:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 1px var(--color-primary);
+  box-shadow: var(--focus-ring-tight);
 }
 
 .selectIcon {
   position: absolute;
-  right: var(--spacing-md);
+  right: var(--spacing-base);
   top: 50%;
   transform: translateY(-50%);
-  color: var(--color-outline);
+  color: var(--text-tertiary);
   pointer-events: none;
-  font-size: 20px;
+  font-size: 18px;
+  transition: color var(--transition-fast);
 }
 
+.selectWrapper:focus-within .selectIcon {
+  color: var(--color-primary);
+}
+
+@media (max-width: 767px) {
+  .select {
+    height: 44px;
+    font-size: 16px;
+  }
+}
+
+/* ---------------------------------------------------------------- footer */
+
 .footer {
-  padding: var(--spacing-lg);
+  padding: var(--spacing-base) var(--spacing-lg);
   background-color: var(--color-surface-container-low);
-  border-top: 1px solid var(--color-outline-variant);
+  border-top: 1px solid var(--border-hairline);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--spacing-md);
   z-index: 10;
-  border-bottom-left-radius: var(--radius-xl);
-  border-bottom-right-radius: var(--radius-xl);
 }
 
 .btnBack {
   height: 36px;
-  padding: 0 var(--spacing-md);
+  padding: 0 var(--spacing-base);
   border-radius: var(--radius-default);
   font-family: var(--font-family-base);
   font-size: var(--font-size-label-md);
-  font-weight: var(--font-weight-label-md);
-  color: var(--color-on-surface);
+  font-weight: 550;
+  color: var(--text-secondary);
   background: transparent;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
-  transition: all 0.2s;
+  gap: 5px;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .btnBack:hover {
-  background-color: var(--color-surface-container-highest);
+  background-color: var(--color-surface-container-high);
+  color: var(--text-primary);
+}
+
+.btnBack:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 /* Shown in the footer's left slot on step 1, where Back does not apply. */
 .signInPrompt {
   font-family: var(--font-family-base);
-  font-size: var(--font-size-label-sm);
-  color: var(--color-on-surface-variant);
+  font-size: var(--font-size-body-sm);
+  color: var(--text-secondary);
 }
 
 .signInLink {
   font-family: var(--font-family-base);
-  font-size: var(--font-size-label-sm);
-  font-weight: 500;
+  font-size: var(--font-size-body-sm);
+  font-weight: 600;
   color: var(--color-primary);
   text-decoration: none;
-  border-radius: var(--radius-default);
+  border-radius: var(--radius-sm);
 }
 
 .signInLink:hover {
   text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .signInLink:focus-visible {

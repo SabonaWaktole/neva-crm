@@ -21,8 +21,19 @@ export class SettingsController {
       if (!tenant) {
         return res.status(404).json({ error: 'Tenant not found' });
       }
+      // Branding URLs are read directly from Prisma — they are presentation
+      // strings with no domain behaviour, so they are not carried on the
+      // Tenant entity. See the same note in AuthController.getMe.
+      const { prisma } = require('../../../shared/infrastructure/prisma/client');
+      const branding = await prisma.tenant.findUnique({
+        where: { id: tenantId },
+        select: { logoUrl: true, coverImageUrl: true },
+      });
+
       res.json({
-        requiresQuotationApproval: tenant.requiresQuotationApproval
+        requiresQuotationApproval: tenant.requiresQuotationApproval,
+        logoUrl: branding?.logoUrl ?? null,
+        coverImageUrl: branding?.coverImageUrl ?? null,
       });
     } catch (error: any) {
       res.status(400).json({ error: error.message });

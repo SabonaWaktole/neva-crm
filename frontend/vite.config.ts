@@ -18,6 +18,13 @@ export default defineConfig({
         target: 'http://localhost:3000',
         changeOrigin: true,
       },
+      // Uploaded media is served by the API. Without this the dev server's
+      // SPA fallback answers /uploads/* with index.html — a 200 carrying HTML
+      // — and images fail to decode instead of returning an honest 404.
+      '/uploads': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
     },
   },
   test: {

@@ -1,8 +1,16 @@
+/* ============================================================================
+ * StaffScheduleTable
+ * Table on desktop, stacked cards on mobile. Header treatment matches the
+ * shared DataTable so the two never look like different products.
+ * ========================================================================= */
+
 .tableContainer {
   background-color: var(--color-surface-container-lowest);
-  border: 1px solid var(--color-outline-variant);
+  border: none;
   border-radius: var(--radius-xl);
-  box-shadow: var(--elevation-1);
+  box-shadow:
+    var(--shadow-xs),
+    inset 0 0 0 1px var(--border-hairline);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -12,8 +20,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: var(--spacing-sm);
   padding: var(--spacing-md) var(--spacing-lg);
-  border-bottom: 1px solid var(--color-outline-variant);
+  border-bottom: 1px solid var(--border-hairline);
 }
 
 .headerLeft {
@@ -23,24 +32,28 @@
 }
 
 .headerIcon {
-  color: var(--color-primary);
+  color: var(--text-tertiary);
+  flex-shrink: 0;
 }
 
 .headerLeft h2 {
-  font-family: var(--font-family-base);
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--color-on-surface);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-headline-sm);
+  font-weight: 620;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
   margin: 0;
 }
 
 .headerDate {
-  font-size: 13px;
-  color: var(--color-on-surface-variant);
+  font-size: var(--font-size-body-sm);
+  color: var(--text-tertiary);
   margin-left: var(--spacing-xs);
+  font-variant-numeric: tabular-nums;
 }
 
-/* Desktop Table View */
+/* --------------------------------------------------- desktop table view */
+
 .tableWrapper {
   display: none;
   overflow-x: auto;
@@ -50,7 +63,7 @@
   .tableWrapper {
     display: block;
   }
-  
+
   .mobileList {
     display: none;
   }
@@ -58,63 +71,77 @@
 
 .table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   text-align: left;
+  font-variant-numeric: tabular-nums lining-nums;
 }
 
 .table th {
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: 0 var(--spacing-lg);
+  height: 40px;
   background-color: var(--color-surface-container-low);
   font-family: var(--font-family-base);
-  font-size: var(--font-size-label-md);
-  font-weight: var(--font-weight-label-md);
-  color: var(--color-on-surface-variant);
-  border-bottom: 1px solid var(--color-outline-variant);
+  font-size: var(--font-size-label-sm);
+  font-weight: 600;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  user-select: none;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .table td {
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-bottom: 1px solid var(--color-outline-variant);
+  padding: var(--spacing-base) var(--spacing-lg);
+  height: 56px;
+  border-bottom: 1px solid var(--border-hairline);
   vertical-align: middle;
+  font-size: var(--font-size-body-md);
+  color: var(--text-primary);
+  transition: background-color var(--duration-instant) var(--ease-out);
 }
 
 .table tr:last-child td {
   border-bottom: none;
 }
 
-.table tr:hover td {
+.table tbody tr:hover td {
   background-color: var(--color-surface-container-low);
 }
 
 .timeCell {
   font-family: var(--font-family-base);
-  font-weight: 600;
-  color: var(--color-on-surface);
+  font-weight: 620;
+  color: var(--text-primary);
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .clientName {
   font-weight: 600;
-  color: var(--color-on-surface);
-  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  margin-bottom: 1px;
 }
 
 .appointmentDetail {
-  font-size: 13px;
-  color: var(--color-on-surface-variant);
+  font-size: var(--font-size-body-sm);
+  color: var(--text-tertiary);
 }
 
 .statusCell {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
 }
 
 .statusDot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background-color: var(--color-outline);
+  flex-shrink: 0;
 }
 
 .dotScheduled { background-color: var(--color-primary); }
@@ -123,8 +150,9 @@
 .dotCancelled { background-color: var(--color-error); }
 
 .statusText {
-  font-size: 13px;
-  color: var(--color-on-surface-variant);
+  font-size: var(--font-size-body-sm);
+  font-weight: 550;
+  color: var(--text-secondary);
   text-transform: capitalize;
 }
 
@@ -139,72 +167,101 @@
 .actionButton {
   background: none;
   border: none;
-  color: var(--color-outline);
+  color: var(--text-tertiary);
   cursor: pointer;
-  padding: 4px;
-  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-full);
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  opacity: 0;
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    opacity var(--transition-fast);
+}
+
+tr:hover .actionButton,
+.actionButton:focus-visible {
+  opacity: 1;
 }
 
 .actionButton:hover {
-  color: var(--color-on-surface);
+  color: var(--text-primary);
   background-color: var(--color-surface-container-high);
+}
+
+.actionButton:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
 }
 
 .actionButton:disabled {
   cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .actionButton:disabled:hover {
-  color: var(--color-outline);
+  color: var(--text-tertiary);
   background-color: transparent;
+}
+
+@media (hover: none) {
+  .actionButton {
+    opacity: 1;
+  }
 }
 
 .emptyState {
   text-align: center;
-  color: var(--color-on-surface-variant);
-  padding: var(--spacing-xl) !important;
+  color: var(--text-tertiary);
+  padding: var(--spacing-2xl) !important;
 }
 
-/* Mobile Stacked View */
+/* --------------------------------------------------- mobile stacked view */
+
 .mobileList {
   display: flex;
   flex-direction: column;
   padding: var(--spacing-md);
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
 }
 
 .mobileCard {
-  background-color: var(--color-surface-container-low);
-  border: 1px solid var(--color-outline-variant);
+  background-color: var(--color-surface-container-lowest);
+  border: none;
   border-radius: var(--radius-lg);
-  padding: var(--spacing-md);
+  padding: var(--spacing-base) var(--spacing-md);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
+  box-shadow:
+    var(--shadow-xs),
+    inset 0 0 0 1px var(--border-hairline);
 }
 
 .mobileHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--color-outline-variant);
+  gap: var(--spacing-sm);
+  border-bottom: 1px solid var(--border-hairline);
   padding-bottom: var(--spacing-sm);
 }
 
 .mobileBody {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .mobileFooter {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: var(--spacing-sm);
+  gap: var(--spacing-sm);
+  margin-top: 2px;
 }
 
 .mobileActions {
@@ -213,19 +270,28 @@
 }
 
 .iconAction {
-  background-color: var(--color-surface-container-highest);
-  color: var(--color-on-surface);
+  background-color: var(--color-surface-container);
+  color: var(--text-primary);
   border: none;
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+  transition:
+    background-color var(--transition-fast),
+    transform var(--duration-instant) var(--ease-out);
+}
+
+.iconAction:active {
+  transform: scale(0.92);
 }
 
 .iconAction:disabled {
-  color: var(--color-outline);
+  color: var(--text-quaternary);
   cursor: not-allowed;
+  opacity: 0.6;
 }
