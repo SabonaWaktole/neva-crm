@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Controller, useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 import { User, FileText, Save, Puzzle } from 'lucide-react';
@@ -123,6 +124,8 @@ export const ClientFormContent: React.FC = () => {
     }
   };
 
+  const { t } = useTranslation('clients');
+  const { t: tc } = useTranslation('common');
   const error = createError || updateError;
   const isLoading = isCreating || isUpdating;
 
@@ -131,17 +134,17 @@ export const ClientFormContent: React.FC = () => {
       {/* Page Header */}
       <div className={styles.header}>
         <div className={styles.headerText}>
-          <h1 className={styles.title}>{isEdit ? 'Edit Client' : 'Add New Client'}</h1>
+          <h1 className={styles.title}>{isEdit ? t('form.editTitle') : t('form.createTitle')}</h1>
           <p className={styles.subtitle}>
-            {isEdit ? 'Update the client information below.' : 'Fill out the form below to add a new client to the CRM.'}
+            {isEdit ? t('form.editSubtitle') : t('form.createSubtitle')}
           </p>
         </div>
         <div className={styles.actions}>
           <Button variant="outline" type="button" onClick={() => navigate(`/${tenantSlug}/clients`)}>
-            Cancel
+            {tc('actions.cancel')}
           </Button>
           <Button variant="primary" type="submit" icon={<Save size={18} />} disabled={isLoading}>
-            {isLoading ? 'Saving...' : 'Save Client'}
+            {isLoading ? tc('state.saving') : t('form.saveClient')}
           </Button>
         </div>
       </div>
@@ -155,35 +158,35 @@ export const ClientFormContent: React.FC = () => {
             <div className={styles.iconWrapper}>
               <User size={20} />
             </div>
-            <h2 className={styles.sectionTitle}>Basic Information</h2>
+            <h2 className={styles.sectionTitle}>{t('form.basicInformation')}</h2>
           </div>
           <div className={styles.grid2}>
             <TextInput
-              label="Client Name"
-              placeholder="e.g. Acme Corp"
+              label={t('form.nameLabel')}
+              placeholder={t('form.namePlaceholderClient')}
               error={errors.name?.message}
-              {...register('name', { required: 'Client name is required' })}
+              {...register('name', { required: t('form.nameRequired') })}
             />
             <TextInput
-              label="Email"
+              label={t('form.email')}
               type="email"
-              placeholder="contact@example.com"
+              placeholder={t('form.emailPlaceholderClient')}
               error={errors.email?.message}
               {...register('email', {
-                pattern: { value: EMAIL_PATTERN, message: 'Enter a valid email address' },
+                pattern: { value: EMAIL_PATTERN, message: t('form.emailInvalid') },
               })}
             />
             <TextInput
-              label="Phone"
+              label={t('form.phone')}
               type="tel"
-              placeholder="(555) 123-4567"
+              placeholder={t('form.phonePlaceholderClient')}
               error={errors.phone?.message}
               {...register('phone')}
             />
-            <SelectInput label="Status" {...register('status')}>
-              <option value={ClientStatus.PROSPECT}>Prospect</option>
-              <option value={ClientStatus.ACTIVE}>Active</option>
-              <option value={ClientStatus.INACTIVE}>Inactive</option>
+            <SelectInput label={t('form.status')} {...register('status')}>
+              <option value={ClientStatus.PROSPECT}>{t('status.prospect')}</option>
+              <option value={ClientStatus.ACTIVE}>{t('status.active')}</option>
+              <option value={ClientStatus.INACTIVE}>{t('status.inactive')}</option>
             </SelectInput>
             {/*
               Available to Staff as well as Business Owners: SRS §6.2 lists
@@ -192,8 +195,8 @@ export const ClientFormContent: React.FC = () => {
               matrix gives Staff Full (assigned/shared) client management. The
               /auth/staff endpoint is likewise authorized for both roles.
             */}
-            <SelectInput label="Assigned To" {...register('assignedUserId')}>
-              <option value="">Unassigned</option>
+            <SelectInput label={t('form.assignedTo')} {...register('assignedUserId')}>
+              <option value="">{t('form.unassigned')}</option>
               {staff.map((member) => (
                 <option key={member.id} value={member.id}>
                   {getStaffDisplayName(member)}
@@ -210,7 +213,7 @@ export const ClientFormContent: React.FC = () => {
               <div className={styles.iconWrapper}>
                 <Puzzle size={20} />
               </div>
-              <h2 className={styles.sectionTitle}>Custom Fields</h2>
+              <h2 className={styles.sectionTitle}>{t('form.customFieldsSection')}</h2>
             </div>
             <div className={styles.grid2}>
               {customFields.map((field) => (
@@ -239,12 +242,12 @@ export const ClientFormContent: React.FC = () => {
             <div className={styles.iconWrapper}>
               <FileText size={20} />
             </div>
-            <h2 className={styles.sectionTitle}>Internal Notes</h2>
+            <h2 className={styles.sectionTitle}>{t('form.internalNotes')}</h2>
           </div>
           <div className={styles.fullWidth}>
             <TextareaInput
-              label="Notes"
-              placeholder="Coming soon: internal notes are not yet saved with the client record."
+              label={t('form.notesLabel')}
+              placeholder={t('form.notesComingSoon')}
               rows={4}
               disabled
               helperText="This field isn't wired up to the backend yet, so notes typed here won't be saved."

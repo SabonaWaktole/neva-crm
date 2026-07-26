@@ -1,0 +1,10 @@
+{
+  "status": {
+    "draft": "Draft",
+    "pendingApproval": "Pending Approval",
+    "sent": "Sent",
+    "accepted": "Accepted",
+    "rejected": "Rejected",
+    "expired": "Expired"
+  }
+}

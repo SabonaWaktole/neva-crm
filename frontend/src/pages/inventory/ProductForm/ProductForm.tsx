@@ -29,7 +29,7 @@ import { useWarehouses } from '../../../hooks/useWarehouses';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { useLogout } from '../../../hooks/useLogout';
 import { useNavigation } from '../../../hooks/useNavigation';
-import { PRODUCT_STATUS_LABELS } from '../../../types/inventory';
+import { useStatusLabel } from '../../../hooks/useStatusLabel';
 import type { ProductStatus } from '../../../types/inventory';
 
 import styles from './ProductForm.module.css';
@@ -105,6 +105,7 @@ const validate = (form: FormState): FieldErrors => {
 
 const ProductFormContent: React.FC = () => {
   const { format: formatMoney } = useMoneyFormat();
+  const statusLabel = useStatusLabel();
   const navigate = useNavigate();
   const toast = useToast();
   const { tenantSlug, productId } = useParams();
@@ -330,7 +331,7 @@ const ProductFormContent: React.FC = () => {
 
         {isEdit && product && (
           <Badge variant={STATUS_VARIANT[product.status]}>
-            {PRODUCT_STATUS_LABELS[product.status]}
+            {statusLabel.product(product.status)}
           </Badge>
         )}
       </header>

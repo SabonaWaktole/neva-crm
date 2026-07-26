@@ -16,6 +16,7 @@ const toDomain = (data: {
   locale: string;
   timezone: string;
   dateFormat: string;
+  defaultLanguage: string;
   createdAt: Date;
 }): Tenant =>
   Tenant.create({
@@ -27,6 +28,7 @@ const toDomain = (data: {
     locale: data.locale,
     timezone: data.timezone,
     dateFormat: data.dateFormat,
+    defaultLanguage: data.defaultLanguage,
     createdAt: data.createdAt,
   });
 
@@ -52,6 +54,7 @@ export class PrismaTenantRepository implements ITenantRepository {
         locale: tenant.locale,
         timezone: tenant.timezone,
         dateFormat: tenant.dateFormat,
+        defaultLanguage: tenant.defaultLanguage,
         createdAt: tenant.createdAt,
       },
     });
@@ -81,6 +84,7 @@ export class PrismaTenantRepository implements ITenantRepository {
     if (settings.locale !== undefined) data.locale = settings.locale;
     if (settings.timezone !== undefined) data.timezone = settings.timezone;
     if (settings.dateFormat !== undefined) data.dateFormat = settings.dateFormat;
+    if (settings.defaultLanguage !== undefined) data.defaultLanguage = settings.defaultLanguage;
 
     if (Object.keys(data).length === 0) return;
 

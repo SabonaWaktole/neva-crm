@@ -55,6 +55,7 @@ export class UpdateTenantSettingsUseCase {
       locale: parsed.locale,
       timezone: parsed.timezone,
       dateFormat: parsed.dateFormat,
+      defaultLanguage: parsed.defaultLanguage,
     };
 
     const profile: Partial<TenantProfile> = {

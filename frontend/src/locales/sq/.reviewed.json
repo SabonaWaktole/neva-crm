@@ -1,0 +1,14 @@
+{
+  "$comment": [
+    "Albanian key paths that a native speaker has reviewed and approved.",
+    "Anything in the sq catalogues but absent from this list is treated as",
+    "unreviewed by scripts/check-translations.mjs.",
+    "",
+    "This is an allowlist rather than a blocklist on purpose: a newly added",
+    "string is unreviewed by default. A blocklist would silently treat every",
+    "new string as approved, which is the failure mode worth designing out.",
+    "",
+    "See TD-019. Nothing may be added here without an actual review."
+  ],
+  "reviewed": []
+}

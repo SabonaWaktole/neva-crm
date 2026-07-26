@@ -1,0 +1,45 @@
+{
+  "actions": {
+    "save": "Save",
+    "saveChanges": "Save Changes",
+    "discardChanges": "Discard Changes",
+    "cancel": "Cancel",
+    "close": "Close",
+    "confirm": "Confirm",
+    "continue": "Continue",
+    "back": "Back",
+    "edit": "Edit",
+    "delete": "Delete",
+    "create": "Create",
+    "add": "Add",
+    "remove": "Remove",
+    "search": "Search",
+    "refresh": "Refresh",
+    "retry": "Try again",
+    "viewAll": "View all"
+  },
+  "state": {
+    "loading": "Loading…",
+    "saving": "Saving...",
+    "noResults": "No results found",
+    "notSet": "—"
+  },
+  "feedback": {
+    "saved": "Settings saved.",
+    "saveFailed": "Could not save settings.",
+    "loadFailed": "Could not load settings."
+  },
+  "labels": {
+    "actions": "Actions",
+    "status": "Status",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "date": "Date",
+    "required": "Required"
+  },
+  "pagination": {
+    "page": "Page {{page}}",
+    "showing": "Showing {{from}}–{{to}} of {{total}}"
+  }
+}

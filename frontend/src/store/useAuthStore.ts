@@ -30,6 +30,14 @@ export interface User {
    */
   tenantCurrency?: string | null;
   tenantLocale?: string | null;
+  /**
+   * Interface language, kept strictly separate from the formatting fields
+   * above. `userLanguage` is null when the user has expressed no preference,
+   * which means "follow the workspace default" — distinct from having chosen
+   * English. See resolveLanguage.
+   */
+  userLanguage?: string | null;
+  tenantDefaultLanguage?: string | null;
 }
 
 interface AuthState {

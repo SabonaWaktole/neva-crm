@@ -1,0 +1,8 @@
+{
+  "status": {
+    "inStock": "In Stock",
+    "lowStock": "Low Stock",
+    "outOfStock": "Out of Stock",
+    "archived": "Archived"
+  }
+}

@@ -2,11 +2,14 @@ import { useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { apiClient } from '../api';
 import { extractApiErrorMessage } from '../utils/apiError';
+import type { Language } from '../i18n/config';
 
 export const DATE_FORMATS = ['MM/DD/YYYY', 'DD/MM/YYYY', 'YYYY-MM-DD'] as const;
 export type DateFormat = (typeof DATE_FORMATS)[number];
 
-export const SUPPORTED_LOCALES = ['en-US', 'en-GB'] as const;
+// Mirrors the backend's Tenant.SUPPORTED_LOCALES. This is a FORMATTING locale
+// (separators, date order), deliberately independent of the UI language.
+export const SUPPORTED_LOCALES = ['en-US', 'en-GB', 'sq-AL'] as const;
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 
 export interface TenantSettings {
@@ -18,6 +21,9 @@ export interface TenantSettings {
   locale: SupportedLocale;
   timezone: string;
   dateFormat: DateFormat;
+
+  /** Interface language for the workspace. A different axis from `locale`. */
+  defaultLanguage: Language;
 
   // Company profile
   registrationNumber: string | null;

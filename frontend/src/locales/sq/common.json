@@ -1,0 +1,45 @@
+{
+  "actions": {
+    "save": "Ruaj",
+    "saveChanges": "Ruaj ndryshimet",
+    "discardChanges": "Hiq ndryshimet",
+    "cancel": "Anulo",
+    "close": "Mbyll",
+    "confirm": "Konfirmo",
+    "continue": "Vazhdo",
+    "back": "Kthehu",
+    "edit": "Ndrysho",
+    "delete": "Fshi",
+    "create": "Krijo",
+    "add": "Shto",
+    "remove": "Hiq",
+    "search": "Kërko",
+    "refresh": "Rifresko",
+    "retry": "Provo përsëri",
+    "viewAll": "Shiko të gjitha"
+  },
+  "state": {
+    "loading": "Duke u ngarkuar…",
+    "saving": "Duke ruajtur...",
+    "noResults": "Nuk u gjet asnjë rezultat",
+    "notSet": "—"
+  },
+  "feedback": {
+    "saved": "Cilësimet u ruajtën.",
+    "saveFailed": "Cilësimet nuk u ruajtën dot.",
+    "loadFailed": "Cilësimet nuk u ngarkuan dot."
+  },
+  "labels": {
+    "actions": "Veprimet",
+    "status": "Statusi",
+    "name": "Emri",
+    "email": "Email",
+    "phone": "Telefoni",
+    "date": "Data",
+    "required": "E detyrueshme"
+  },
+  "pagination": {
+    "page": "Faqja {{page}}",
+    "showing": "Duke shfaqur {{from}}–{{to}} nga {{total}}"
+  }
+}

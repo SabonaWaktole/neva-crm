@@ -1,0 +1,9 @@
+{
+  "status": {
+    "scheduled": "E planifikuar",
+    "confirmed": "E konfirmuar",
+    "completed": "E përfunduar",
+    "cancelled": "E anuluar",
+    "rescheduled": "E riplanifikuar"
+  }
+}

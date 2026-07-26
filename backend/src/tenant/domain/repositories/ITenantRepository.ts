@@ -22,6 +22,8 @@ export interface TenantSettingsUpdate {
   locale?: string;
   timezone?: string;
   dateFormat?: string;
+  /** Interface language, not a formatting locale. */
+  defaultLanguage?: string;
 }
 
 export interface ITenantRepository {

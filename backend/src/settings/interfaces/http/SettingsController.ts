@@ -47,6 +47,7 @@ export class SettingsController {
         locale: tenant.locale,
         timezone: tenant.timezone,
         dateFormat: tenant.dateFormat,
+        defaultLanguage: tenant.defaultLanguage,
 
         registrationNumber: profile?.registrationNumber ?? null,
         addressLine: profile?.addressLine ?? null,

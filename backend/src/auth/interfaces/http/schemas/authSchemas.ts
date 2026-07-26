@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SUPPORTED_LANGUAGES } from '../../../../tenant/domain/entities/Tenant';
 
 export const authSchemas = {
   register: z.object({
@@ -42,5 +43,9 @@ export const authSchemas = {
     lastName: z.string().min(1).optional().nullable(),
     phone: z.string().optional().nullable(),
     email: z.string().email().optional(),
+    // Interface language override. Explicitly nullable: sending null is how a
+    // user returns to "follow the workspace default", which is a real choice
+    // and not the same as omitting the field.
+    language: z.enum(SUPPORTED_LANGUAGES).optional().nullable(),
   }),
 };

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { authService } from '../../../services/authService';
@@ -12,6 +13,8 @@ import { TextInput } from '../../../components/ui/TextInput/TextInput';
 import { Button } from '../../../components/ui/Button/Button';
 import { ImagePicker } from '../../../components/ui/ImagePicker';
 import { resolveMediaUrl } from '../../../services/mediaService';
+import { LanguagePicker } from '../../../components/settings/LanguagePicker';
+import type { Language } from '../../../i18n/config';
 import { ChevronRight } from 'lucide-react';
 import styles from './ProfilePage.module.css';
 
@@ -21,6 +24,8 @@ export const ProfilePage: React.FC = () => {
   const { logout } = useLogout();
   const location = useLocation();
 
+  const { t } = useTranslation('settings');
+  const { t: tc } = useTranslation('common');
   const { user, setUser } = useAuthStore();
   const navItems = useNavigation(user, location.pathname);
   
@@ -28,6 +33,9 @@ export const ProfilePage: React.FC = () => {
   const [lastName, setLastName] = useState(user?.lastName || '');
   const [phone, setPhone] = useState(user?.phone || '');
   const [email, setEmail] = useState(user?.email || '');
+  // '' means "follow the workspace default" and is sent as null. It is a real
+  // choice, not an absent one, so it must round-trip distinctly from a language.
+  const [language, setLanguage] = useState<Language | ''>((user?.userLanguage as Language) || '');
   
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -41,6 +49,7 @@ export const ProfilePage: React.FC = () => {
       setLastName(user.lastName || '');
       setPhone(user.phone || '');
       setEmail(user.email || '');
+      setLanguage((user.userLanguage as Language) || '');
     }
   }, [user]);
 
@@ -68,6 +77,7 @@ export const ProfilePage: React.FC = () => {
         lastName: lastName || null,
         phone: phone || null,
         email: isBusinessOwner ? email : undefined, // Only send email if Business Owner
+        language: language === '' ? null : language,
       });
       
       // Update local state
@@ -78,12 +88,13 @@ export const ProfilePage: React.FC = () => {
           lastName: lastName || null,
           phone: phone || null,
           email: isBusinessOwner ? email : user.email,
+          userLanguage: language === '' ? null : language,
         });
       }
       
-      setMessage('Profile updated successfully');
+      setMessage(t('profile.updated'));
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to update profile');
+      setError(err.response?.data?.error || t('profile.updateFailed'));
     } finally {
       setLoading(false);
     }
@@ -110,14 +121,14 @@ export const ProfilePage: React.FC = () => {
           <div className={styles.breadcrumbWrapper}>
             <nav aria-label="Breadcrumb" className={styles.breadcrumb}>
               <ol className={styles.breadcrumbList}>
-                <li><a href="#settings" onClick={(e) => { e.preventDefault(); navigate(`/${tenantSlug}/settings/profile`); }} className={styles.breadcrumbLink}>Settings</a></li>
+                <li><a href="#settings" onClick={(e) => { e.preventDefault(); navigate(`/${tenantSlug}/settings/profile`); }} className={styles.breadcrumbLink}>{t('breadcrumb')}</a></li>
                 <li><ChevronRight size={14} /></li>
-                <li aria-current="page" className={styles.breadcrumbCurrent}>My Profile</li>
+                <li aria-current="page" className={styles.breadcrumbCurrent}>{t('profile.title')}</li>
               </ol>
             </nav>
           </div>
 
-          <h1 className={styles.title}>My Profile</h1>
+          <h1 className={styles.title}>{t('profile.title')}</h1>
 
           {/*
             Media lives in its own card and saves immediately on upload — it
@@ -127,10 +138,8 @@ export const ProfilePage: React.FC = () => {
           */}
           <Card padding="lg" className={styles.mediaCard}>
             <div className={styles.mediaHeader}>
-              <h2 className={styles.mediaTitle}>Photos</h2>
-              <p className={styles.mediaSubtitle}>
-                Your profile photo appears next to your name across the workspace.
-              </p>
+              <h2 className={styles.mediaTitle}>{t('profile.photos')}</h2>
+              <p className={styles.mediaSubtitle}>{t('profile.photosSubtitle')}</p>
             </div>
 
             <ImagePicker
@@ -168,21 +177,21 @@ export const ProfilePage: React.FC = () => {
             <form onSubmit={handleSubmit} className={styles.form}>
               <div className={styles.nameRow}>
                 <TextInput
-                  label="First Name"
+                  label={t('profile.firstName')}
                   value={firstName}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFirstName(e.target.value)}
-                  placeholder="John"
+                  placeholder={t('profile.firstNamePlaceholder')}
                 />
                 <TextInput
-                  label="Last Name"
+                  label={t('profile.lastName')}
                   value={lastName}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLastName(e.target.value)}
-                  placeholder="Doe"
+                  placeholder={t('profile.lastNamePlaceholder')}
                 />
               </div>
 
               <TextInput
-                label="Email Address"
+                label={t('profile.email')}
                 type="email"
                 value={email}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
@@ -190,21 +199,34 @@ export const ProfilePage: React.FC = () => {
               />
               {!isBusinessOwner && (
                 <p className={styles.helperText}>
-                  Only Business Owners can change their email address.
+                  {t('profile.emailOwnerOnly')}
                 </p>
               )}
 
               <TextInput
-                label="Phone Number"
+                label={t('profile.phone')}
                 type="tel"
                 value={phone}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhone(e.target.value)}
-                placeholder="+1 234 567 8900"
+                placeholder={t('profile.phonePlaceholder')}
               />
+
+              <div>
+                <label className={styles.fieldLabel} htmlFor="languageSelect">
+                  {t('profile.languageLabel')}
+                </label>
+                <LanguagePicker
+                  id="languageSelect"
+                  value={language}
+                  onChange={setLanguage}
+                  inheritOption={{ label: t('profile.languageInherit') }}
+                />
+                <p className={styles.helperText}>{t('profile.languageHint')}</p>
+              </div>
 
               <div className={styles.formActions}>
                 <Button type="submit" variant="primary" isLoading={loading}>
-                  Save Changes
+                  {tc('actions.saveChanges')}
                 </Button>
               </div>
             </form>

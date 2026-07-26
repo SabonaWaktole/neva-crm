@@ -20,9 +20,11 @@ import { useQuotations, usePendingApprovals } from '../../hooks/useQuotations';
 import { useDebounce } from '../../hooks/useDebounce';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useMoneyFormat } from '../../hooks/useMoneyFormat';
+import { useStatusLabel } from '../../hooks/useStatusLabel';
 
 export const QuotationListContent: React.FC = () => {
   const { format: formatMoney } = useMoneyFormat();
+  const statusLabel = useStatusLabel();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'ALL' | 'DRAFT' | 'PENDING_APPROVAL' | 'SENT' | 'COMPLETED'>('ALL');
   const { tenantSlug } = useParams();
@@ -81,12 +83,6 @@ export const QuotationListContent: React.FC = () => {
     }
   };
 
-  const getStatusLabel = (status: string) => {
-    if (status === 'PENDING_APPROVAL') return 'Pending Approval';
-    if (status === 'MARK_ACCEPTED') return 'Accepted';
-    if (status === 'MARK_REJECTED') return 'Rejected';
-    return status.charAt(0) + status.slice(1).toLowerCase();
-  };
 
   const isLoading = loadingAll || loadingPending;
 
@@ -209,7 +205,7 @@ export const QuotationListContent: React.FC = () => {
                       </td>
                       <td>
                         <Badge variant={getStatusBadgeVariant(quotation.status)}>
-                          {getStatusLabel(quotation.status)}
+                          {statusLabel.quotation(quotation.status)}
                         </Badge>
                       </td>
                       <td className={styles.tdAction}>

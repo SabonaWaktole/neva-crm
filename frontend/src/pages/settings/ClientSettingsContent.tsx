@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, Edit2 } from 'lucide-react';
 import { SettingsLayout } from '../../components/layout/SettingsLayout';
 import { SlideOver } from '../../components/ui/SlideOver';
@@ -9,6 +10,8 @@ import { useClientSettings, useDefineCustomField, useDefineOutcomeCategory } fro
 import styles from './ClientSettingsContent.module.css';
 
 export const ClientSettingsContent: React.FC = () => {
+  const { t } = useTranslation('settings');
+  const { t: tc } = useTranslation('common');
   const [isSlideOverOpen, setIsSlideOverOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'fields' | 'outcomes'>('fields');
 
@@ -61,21 +64,23 @@ export const ClientSettingsContent: React.FC = () => {
       <div className={styles.container}>
         <div className={styles.header}>
           <div className={styles.breadcrumbs}>
-            <a href="#settings" className={styles.breadcrumbLink}>Settings</a> &gt; Client Management
+            <a href="#settings" className={styles.breadcrumbLink}>{t('breadcrumb')}</a>
+            {' > '}
+            {t('clientManagement.breadcrumb')}
           </div>
-          <h1 className={styles.title}>Client Management Settings</h1>
+          <h1 className={styles.title}>{t('clientManagement.title')}</h1>
           <div className={styles.tabs}>
             <button
               className={`${styles.tab} ${activeTab === 'fields' ? styles.tabActive : ''}`}
               onClick={() => setActiveTab('fields')}
             >
-              Custom Fields
+              {t('clientManagement.tabCustomFields')}
             </button>
             <button
               className={`${styles.tab} ${activeTab === 'outcomes' ? styles.tabActive : ''}`}
               onClick={() => setActiveTab('outcomes')}
             >
-              Outcome Categories
+              {t('clientManagement.tabOutcomeCategories')}
             </button>
           </div>
         </div>
@@ -84,9 +89,9 @@ export const ClientSettingsContent: React.FC = () => {
         {activeTab === 'fields' && (
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
-              <h2 className={styles.sectionTitle}>Active Custom Fields</h2>
+              <h2 className={styles.sectionTitle}>{t('clientManagement.customFields')}</h2>
               <Button icon={<Plus size={16} />} onClick={() => setIsSlideOverOpen(true)}>
-                Add Field
+                {t('clientManagement.addField')}
               </Button>
             </div>
 
@@ -94,28 +99,32 @@ export const ClientSettingsContent: React.FC = () => {
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th className={styles.th}>Field Name</th>
-                    <th className={styles.th}>Type</th>
-                    <th className={styles.th}>Required</th>
-                    <th className={styles.th}>Actions</th>
+                    <th className={styles.th}>{t('clientManagement.fieldName')}</th>
+                    <th className={styles.th}>{t('clientManagement.type')}</th>
+                    <th className={styles.th}>{t('clientManagement.required')}</th>
+                    <th className={styles.th}>{tc('labels.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {isLoading && (
-                    <tr><td colSpan={4} style={{ textAlign: 'center', padding: '20px' }}>Loading...</td></tr>
+                    <tr><td colSpan={4} style={{ textAlign: 'center', padding: '20px' }}>{tc('state.loading')}</td></tr>
                   )}
                   {!isLoading && customFields.length === 0 && (
-                    <tr><td colSpan={4} style={{ textAlign: 'center', padding: '20px', color: 'var(--color-on-surface-variant)' }}>No custom fields defined yet.</td></tr>
+                    <tr><td colSpan={4} style={{ textAlign: 'center', padding: '20px', color: 'var(--color-on-surface-variant)' }}>{t('clientManagement.noCustomFields')}</td></tr>
                   )}
                   {!isLoading && customFields.map((field) => (
                     <tr key={field.id} className={styles.tr}>
                       <td className={styles.td}>{field.fieldName}</td>
                       <td className={styles.td}>
-                        <span className={styles.typeBadge}>{field.fieldType}</span>
+                        {/* The raw enum value used to render here, so a user saw
+                            SINGLE_SELECT rather than a readable type name. */}
+                        <span className={styles.typeBadge}>
+                          {t(`clientManagement.fieldTypes.${field.fieldType}`, { defaultValue: field.fieldType })}
+                        </span>
                       </td>
-                      <td className={styles.td}>{field.isRequired ? 'Yes' : 'No'}</td>
+                      <td className={styles.td}>{field.isRequired ? t('clientManagement.yes') : t('clientManagement.no')}</td>
                       <td className={styles.td}>
-                        <button className={styles.actionButton} aria-label="Edit field" disabled title="Editing custom fields is coming soon">
+                        <button className={styles.actionButton} aria-label={t('clientManagement.editFieldAria')} disabled title={t('clientManagement.editFieldSoon')}>
                           <Edit2 size={16} />
                         </button>
                       </td>
@@ -131,9 +140,9 @@ export const ClientSettingsContent: React.FC = () => {
         {activeTab === 'outcomes' && (
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
-              <h2 className={styles.sectionTitle}>Outcome Categories</h2>
+              <h2 className={styles.sectionTitle}>{t('clientManagement.outcomeCategories')}</h2>
               <Button icon={<Plus size={16} />} onClick={() => setIsSlideOverOpen(true)}>
-                Add Category
+                {t('clientManagement.addCategory')}
               </Button>
             </div>
 
@@ -141,22 +150,22 @@ export const ClientSettingsContent: React.FC = () => {
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th className={styles.th}>Label</th>
-                    <th className={styles.th}>Actions</th>
+                    <th className={styles.th}>{t('clientManagement.label')}</th>
+                    <th className={styles.th}>{tc('labels.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {isLoading && (
-                    <tr><td colSpan={2} style={{ textAlign: 'center', padding: '20px' }}>Loading...</td></tr>
+                    <tr><td colSpan={2} style={{ textAlign: 'center', padding: '20px' }}>{tc('state.loading')}</td></tr>
                   )}
                   {!isLoading && outcomeCategories.length === 0 && (
-                    <tr><td colSpan={2} style={{ textAlign: 'center', padding: '20px', color: 'var(--color-on-surface-variant)' }}>No outcome categories defined yet.</td></tr>
+                    <tr><td colSpan={2} style={{ textAlign: 'center', padding: '20px', color: 'var(--color-on-surface-variant)' }}>{t('clientManagement.noOutcomeCategories')}</td></tr>
                   )}
                   {!isLoading && outcomeCategories.map((cat) => (
                     <tr key={cat.id} className={styles.tr}>
                       <td className={styles.td}>{cat.label}</td>
                       <td className={styles.td}>
-                        <button className={styles.actionButton} aria-label="Edit category" disabled title="Editing outcome categories is coming soon">
+                        <button className={styles.actionButton} aria-label={t('clientManagement.editCategoryAria')} disabled title={t('clientManagement.editCategorySoon')}>
                           <Edit2 size={16} />
                         </button>
                       </td>
@@ -173,17 +182,17 @@ export const ClientSettingsContent: React.FC = () => {
       <SlideOver
         isOpen={isSlideOverOpen}
         onClose={() => setIsSlideOverOpen(false)}
-        title={activeTab === 'fields' ? 'Add Custom Field' : 'Add Outcome Category'}
+        title={activeTab === 'fields' ? t('clientManagement.addFieldTitle') : t('clientManagement.addCategoryTitle')}
         footer={
           <div className={styles.slideOverFooter}>
             <Button variant="outline" onClick={() => setIsSlideOverOpen(false)}>
-              Cancel
+              {tc('actions.cancel')}
             </Button>
             <Button
               onClick={activeTab === 'fields' ? handleSaveField : handleSaveOutcome}
               disabled={activeTab === 'fields' ? isDefiningField || !newFieldName : isDefiningCategory || !newOutcomeLabel}
             >
-              {(isDefiningField || isDefiningCategory) ? 'Saving...' : 'Save'}
+              {(isDefiningField || isDefiningCategory) ? tc('state.saving') : tc('actions.save')}
             </Button>
           </div>
         }
@@ -197,22 +206,22 @@ export const ClientSettingsContent: React.FC = () => {
           {activeTab === 'fields' ? (
             <>
               <TextInput
-                label="Field Name"
-                placeholder="e.g. Industry"
+                label={t('clientManagement.fieldName')}
+                placeholder={t('clientManagement.fieldNamePlaceholder')}
                 value={newFieldName}
                 onChange={(e) => setNewFieldName(e.target.value)}
               />
-              <SelectInput label="Field Type" value={newFieldType} onChange={(e) => setNewFieldType(e.target.value)}>
-                <option value="TEXT">Text</option>
-                <option value="NUMBER">Number</option>
-                <option value="DATE">Date</option>
-                <option value="BOOLEAN">Boolean</option>
+              <SelectInput label={t('clientManagement.fieldType')} value={newFieldType} onChange={(e) => setNewFieldType(e.target.value)}>
+                <option value="TEXT">{t('clientManagement.fieldTypes.TEXT')}</option>
+                <option value="NUMBER">{t('clientManagement.fieldTypes.NUMBER')}</option>
+                <option value="DATE">{t('clientManagement.fieldTypes.DATE')}</option>
+                <option value="BOOLEAN">{t('clientManagement.fieldTypes.BOOLEAN')}</option>
               </SelectInput>
             </>
           ) : (
             <TextInput
-              label="Category Label"
-              placeholder="e.g. Positive"
+              label={t('clientManagement.categoryLabel')}
+              placeholder={t('clientManagement.categoryPlaceholder')}
               value={newOutcomeLabel}
               onChange={(e) => setNewOutcomeLabel(e.target.value)}
             />

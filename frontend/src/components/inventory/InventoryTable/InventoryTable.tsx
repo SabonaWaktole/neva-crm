@@ -18,7 +18,7 @@ import { DropdownMenu } from '../../ui/DropdownMenu';
 import type { DropdownMenuItemType } from '../../ui/DropdownMenu';
 import { MultiLocationStockIndicator } from '../../ui/MultiLocationStockIndicator/MultiLocationStockIndicator';
 import { resolveMediaUrl } from '../../../services/mediaService';
-import { PRODUCT_STATUS_LABELS } from '../../../types/inventory';
+import { useStatusLabel } from '../../../hooks/useStatusLabel';
 import type { Product, ProductStatus } from '../../../types/inventory';
 
 export interface InventoryTableProps {
@@ -55,6 +55,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   isFiltered = false,
 }) => {
   const { format: formatMoney } = useMoneyFormat();
+  const statusLabel = useStatusLabel();
 
   const buildMenu = (product: Product): DropdownMenuItemType[] => {
     const items: DropdownMenuItemType[] = [];
@@ -167,7 +168,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
       header: 'Status',
       render: (product) => (
         <Badge variant={STATUS_VARIANT[product.status]}>
-          {PRODUCT_STATUS_LABELS[product.status]}
+          {statusLabel.product(product.status)}
         </Badge>
       ),
     },

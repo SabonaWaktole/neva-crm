@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
   Plus, 
@@ -23,8 +24,12 @@ import { useClients } from '../../hooks/useClients';
 import { useTeam } from '../../hooks/useTeam';
 import { findPersonById, getStaffDisplayName, getStaffInitials } from '../../utils/userUtils';
 import { useDebounce } from '../../hooks/useDebounce';
+import { useStatusLabel } from '../../hooks/useStatusLabel';
 
 export const ClientListContent: React.FC = () => {
+  const { t } = useTranslation('clients');
+  const { t: tc } = useTranslation('common');
+  const statusLabel = useStatusLabel();
   const [searchTerm, setSearchTerm] = useState('');
   const { tenantSlug } = useParams();
   const navigate = useNavigate();
@@ -52,16 +57,13 @@ export const ClientListContent: React.FC = () => {
     }
   };
 
-  const getStatusLabel = (status: string) => {
-    return status.charAt(0).toUpperCase() + status.slice(1);
-  };
 
   type ClientRow = (typeof clients)[number];
 
   const columns: DataTableColumn<ClientRow>[] = [
     {
       id: 'client',
-      header: 'Client',
+      header: t('list.columnClient'),
       cardLabel: null,
       render: (client) => (
         <div className={styles.clientCell}>
@@ -79,16 +81,16 @@ export const ClientListContent: React.FC = () => {
     },
     {
       id: 'status',
-      header: 'Status',
+      header: t('list.columnStatus'),
       render: (client) => (
         <Badge variant={getStatusBadgeVariant(client.status.toLowerCase()) as any}>
-          {getStatusLabel(client.status.toLowerCase())}
+          {statusLabel.client(client.status)}
         </Badge>
       ),
     },
     {
       id: 'assigned',
-      header: 'Assigned To',
+      header: t('list.columnAssigned'),
       render: (client) => {
         // Resolve the stored id to a person; previously both the avatar and the
         // label rendered raw UUID fragments.
@@ -103,8 +105,10 @@ export const ClientListContent: React.FC = () => {
     },
     {
       id: 'activity',
-      header: 'Recent Activity',
-      render: () => <span className={styles.recentActivity}>-</span>,
+      header: t('list.columnRecentActivity'),
+      // Every row renders the not-set dash: this column has never been wired to
+      // any data. Kept as-is rather than quietly removed — see TD-020.
+      render: () => <span className={styles.recentActivity}>{tc('state.notSet')}</span>,
     },
     {
       id: 'actions',
@@ -115,14 +119,14 @@ export const ClientListContent: React.FC = () => {
       render: (client) => (
         <DropdownMenu
           trigger={
-            <button className={styles.actionButton} aria-label={`Actions for ${client.name}`}>
+            <button className={styles.actionButton} aria-label={t('list.actionsFor', { name: client.name })}>
               <MoreVertical size={18} />
             </button>
           }
           items={[
             {
               id: 'view',
-              label: 'View Details',
+              label: t('list.viewDetails'),
               icon: <Edit size={16} />,
               onClick: () => navigate(`/${tenantSlug}/clients/${client.id}`),
             },
@@ -137,15 +141,15 @@ export const ClientListContent: React.FC = () => {
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerTitle}>
-          <div className={styles.breadcrumb}>CRM &gt; Clients</div>
-          <h1 className={styles.title}>Client Directory</h1>
+          <div className={styles.breadcrumb}>{t('list.breadcrumb')}</div>
+          <h1 className={styles.title}>{t('list.title')}</h1>
         </div>
         <div className={styles.headerActions}>
           <Button variant="outline" icon={<Filter size={18} />}>
-            Filter
+            {t('list.filter')}
           </Button>
           <Button variant="primary" icon={<Plus size={18} />} onClick={() => navigate(`/${tenantSlug}/clients/new`)}>
-            Add Client
+            {t('list.addClient')}
           </Button>
         </div>
       </div>
@@ -156,7 +160,7 @@ export const ClientListContent: React.FC = () => {
         <div className={styles.tableToolbar}>
           <div className={styles.searchWrapper}>
             <TextInput 
-              placeholder="Search by name, email or phone..."
+              placeholder={t('list.searchPlaceholder')}
               iconLeft={<Search size={18} />}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -170,22 +174,22 @@ export const ClientListContent: React.FC = () => {
           rows={clients}
           rowKey={(client) => client.id}
           isLoading={isLoading}
-          caption="Client directory"
+          caption={t('list.caption')}
           className={styles.table}
           onRowClick={(client) => navigate(`/${tenantSlug}/clients/${client.id}`)}
           empty={{
             icon: <Users size={20} />,
-            title: searchTerm ? 'No matching clients' : 'No clients yet',
+            title: searchTerm ? t('list.emptyNoMatch') : t('list.empty'),
             description: searchTerm
-              ? `No clients match "${searchTerm}". Try a different search.`
-              : 'Clients you add will appear here.',
+              ? t('list.emptyNoMatchDescription', { term: searchTerm })
+              : t('list.emptyDescription'),
             action: searchTerm ? undefined : (
               <Button
                 variant="primary"
                 icon={<Plus size={18} />}
                 onClick={() => navigate(`/${tenantSlug}/clients/new`)}
               >
-                Add Client
+                {t('list.addClient')}
               </Button>
             ),
           }}
@@ -193,13 +197,15 @@ export const ClientListContent: React.FC = () => {
 
         {/* Pagination Footer */}
         <div className={styles.pagination}>
-          <span className={styles.paginationText}>Showing {clients.length} of {total} entries</span>
+          <span className={styles.paginationText}>
+            {t('list.showing', { shown: clients.length, total })}
+          </span>
           <div className={styles.paginationControls}>
             <Button variant="outline" disabled icon={<ChevronLeft size={18} />}>
-              Prev
+              {t('list.prev')}
             </Button>
             <Button variant="outline" disabled icon={<ChevronRight size={18} />} iconPosition="right">
-              Next
+              {t('list.next')}
             </Button>
           </div>
         </div>

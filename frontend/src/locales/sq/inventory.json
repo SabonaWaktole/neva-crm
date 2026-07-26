@@ -1,0 +1,8 @@
+{
+  "status": {
+    "inStock": "Në gjendje",
+    "lowStock": "Gjendje e ulët",
+    "outOfStock": "Pa gjendje",
+    "archived": "Arkivuar"
+  }
+}

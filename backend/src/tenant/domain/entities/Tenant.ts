@@ -16,9 +16,25 @@ export type DateFormat = (typeof DATE_FORMATS)[number];
  * parse. Kept deliberately small and honest: this is a BCP-47 tag used for
  * number and date *conventions* (separators, ordering), which is a different
  * concern from UI translation language.
+ *
+ * `sq-AL` is offered because Albanian is a shipped UI language and its users are
+ * the most likely to want Albanian formatting — but the two remain independent.
+ * Choosing Albanian as an interface language does NOT change formatting, and a
+ * tenant may pair either locale with either language.
  */
-export const SUPPORTED_LOCALES = ['en-US', 'en-GB'] as const;
+export const SUPPORTED_LOCALES = ['en-US', 'en-GB', 'sq-AL'] as const;
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
+
+/**
+ * Interface languages, as opposed to formatting locales above.
+ *
+ * These are two different axes and must not be merged. `sq-AL` is a formatting
+ * locale; `sq` is a language. A tenant can hold any combination of the two.
+ */
+export const SUPPORTED_LANGUAGES = ['en', 'sq'] as const;
+export type Language = (typeof SUPPORTED_LANGUAGES)[number];
+
+export const DEFAULT_LANGUAGE: Language = 'en';
 
 export const DEFAULT_CURRENCY = 'USD';
 export const DEFAULT_LOCALE: SupportedLocale = 'en-US';
@@ -34,6 +50,7 @@ interface TenantProps {
   locale?: string;
   timezone?: string;
   dateFormat?: string;
+  defaultLanguage?: string;
   createdAt: Date;
 }
 
@@ -55,6 +72,12 @@ export class Tenant {
   public readonly timezone: string;
   public readonly dateFormat: string;
 
+  /**
+   * The workspace's interface language. Independent of `locale` above — that is
+   * how values are formatted, this is what language the words are in.
+   */
+  public readonly defaultLanguage: string;
+
   public readonly createdAt: Date;
 
   private constructor(props: TenantProps) {
@@ -68,6 +91,7 @@ export class Tenant {
     this.locale = props.locale ?? DEFAULT_LOCALE;
     this.timezone = props.timezone ?? DEFAULT_TIMEZONE;
     this.dateFormat = props.dateFormat ?? DEFAULT_DATE_FORMAT;
+    this.defaultLanguage = props.defaultLanguage ?? DEFAULT_LANGUAGE;
     this.createdAt = props.createdAt;
   }
 

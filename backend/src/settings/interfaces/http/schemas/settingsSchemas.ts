@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DATE_FORMATS, SUPPORTED_LOCALES } from '../../../../tenant/domain/entities/Tenant';
+import { DATE_FORMATS, SUPPORTED_LOCALES, SUPPORTED_LANGUAGES } from '../../../../tenant/domain/entities/Tenant';
 
 /**
  * Currency and timezone are validated against the runtime's own CLDR tables
@@ -66,6 +66,9 @@ export const updateTenantSettingsSchema = z.object({
   locale: z.enum(SUPPORTED_LOCALES).optional(),
   timezone: timezone.optional(),
   dateFormat: z.enum(DATE_FORMATS).optional(),
+
+  // Interface language for the workspace. A separate axis from `locale`.
+  defaultLanguage: z.enum(SUPPORTED_LANGUAGES).optional(),
 
   // Company profile — presentation-only.
   registrationNumber: optionalText(64),

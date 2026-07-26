@@ -9,9 +9,11 @@ import styles from './QuotationDetailContent.module.css';
 
 import { useQuotations, useQuotationActions } from '../../hooks/useQuotations';
 import { useMoneyFormat } from '../../hooks/useMoneyFormat';
+import { useStatusLabel } from '../../hooks/useStatusLabel';
 
 export const QuotationDetailContent: React.FC = () => {
   const { format: formatMoney } = useMoneyFormat();
+  const statusLabel = useStatusLabel();
   const navigate = useNavigate();
   const { tenantSlug, id } = useParams();
   
@@ -70,12 +72,6 @@ export const QuotationDetailContent: React.FC = () => {
     }
   };
 
-  const getStatusLabel = (status: string) => {
-    if (status === 'PENDING_APPROVAL') return 'Pending Approval';
-    if (status === 'MARK_ACCEPTED') return 'Accepted';
-    if (status === 'MARK_REJECTED') return 'Rejected';
-    return status.charAt(0) + status.slice(1).toLowerCase();
-  };
 
   return (
     <div className={styles.container}>
@@ -93,7 +89,7 @@ export const QuotationDetailContent: React.FC = () => {
           <div className={styles.headerTitleRow}>
             <h1 className={styles.title}>Quotation {quotation.id.split('-')[0].toUpperCase()}</h1>
             <Badge variant={getStatusBadgeVariant(quotation.status)}>
-              {getStatusLabel(quotation.status)}
+              {statusLabel.quotation(quotation.status)}
             </Badge>
           </div>
         </div>
@@ -215,7 +211,7 @@ export const QuotationDetailContent: React.FC = () => {
                 <div key={idx} className={styles.timelineItem}>
                   <div className={styles.timelineDot} />
                   <div className={styles.timelineContent}>
-                    <span className={styles.timelineStatus}>{getStatusLabel(event.status)}</span>
+                    <span className={styles.timelineStatus}>{statusLabel.quotation(event.status)}</span>
                     <span className={styles.timelineDate}>{new Date(event.changedAt).toLocaleString()}</span>
                     <span className={styles.timelineUser}>By User: {event.changedByUserId.substring(0, 8)}</span>
                     {event.reason && <span style={{ fontSize: '12px', fontStyle: 'italic', color: 'var(--color-on-surface-variant)' }}>Reason: {event.reason}</span>}

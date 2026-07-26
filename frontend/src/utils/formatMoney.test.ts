@@ -37,6 +37,45 @@ describe('formatMoney', () => {
     expect(formatMoneyWhole(1234.56)).toBe('$1,235');
   });
 
+  /**
+   * `exact` used to force two fraction digits, which invented sub-units for
+   * currencies that have none. JPY was already selectable in the currency
+   * picker, so this rendered fictional precision in production before it was
+   * ever an Albanian concern.
+   */
+  describe('sub-unit precision follows the currency, not a hard-coded 2', () => {
+    it('gives two digits to currencies that have hundredths', () => {
+      expect(formatMoney(1234.5, { currency: 'USD', locale: 'en-US' })).toBe('$1,234.50');
+      expect(formatMoney(1234.5, { currency: 'EUR', locale: 'en-GB' })).toBe('€1,234.50');
+    });
+
+    it('gives zero digits to currencies that have no sub-unit', () => {
+      // Japanese Yen: no sen in circulation. Was '¥1,234.50'.
+      expect(formatMoney(1234.5, { currency: 'JPY', locale: 'en-US' })).toBe('¥1,235');
+
+      // Albanian Lek: no qindarka in circulation. Was '1234,50 Lekë'.
+      const lek = formatMoney(1234.5, { currency: 'ALL', locale: 'sq-AL' });
+      expect(lek).toContain('1235');
+      expect(lek).not.toContain('1234');
+      expect(lek).not.toMatch(/[.,]50/);
+    });
+
+    it('gives three digits to currencies that have thousandths', () => {
+      // Kuwaiti Dinar has 1000 fils. Nothing in the app selects it today, but a
+      // hard-coded 2 would silently truncate it if anything ever did.
+      // Three decimal places, half-expand rounding: 1.2345 -> 1.235.
+      expect(formatMoney(1.2345, { currency: 'KWD', locale: 'en-US' })).toMatch(/1\.235/);
+      expect(formatMoney(1.2, { currency: 'KWD', locale: 'en-US' })).toMatch(/1\.200/);
+    });
+
+    it('keeps aggregates whole regardless of the currency class', () => {
+      // `whole` still overrides on purpose — a KPI tile reads as noise with
+      // sub-units, whatever the currency.
+      expect(formatMoneyWhole(1234.56, { currency: 'USD', locale: 'en-US' })).toBe('$1,235');
+      expect(formatMoneyWhole(1234.56, { currency: 'JPY', locale: 'en-US' })).toBe('¥1,235');
+    });
+  });
+
   it('abbreviates compactly for chart axes, with the right symbol', () => {
     // The previous compactCurrency glued on a literal '$', so the symbol stayed
     // a dollar no matter what currency the tenant had configured.

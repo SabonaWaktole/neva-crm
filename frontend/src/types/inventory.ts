@@ -158,10 +158,8 @@ export interface StockMovement {
   createdAt?: string;
 }
 
-/** Human-readable labels for each status, used by badges and filters. */
-export const PRODUCT_STATUS_LABELS: Record<ProductStatus, string> = {
-  IN_STOCK: 'In Stock',
-  LOW_STOCK: 'Low Stock',
-  OUT_OF_STOCK: 'Out of Stock',
-  ARCHIVED: 'Archived',
-};
+/*
+ * PRODUCT_STATUS_LABELS lived here and hard-coded English. Status labels now
+ * come from the catalogue via useStatusLabel(); the key map is in
+ * constants/statusKeys.ts.
+ */

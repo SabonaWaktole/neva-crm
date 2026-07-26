@@ -1,0 +1,10 @@
+{
+  "status": {
+    "draft": "Draft",
+    "pendingApproval": "Në pritje të miratimit",
+    "sent": "Dërguar",
+    "accepted": "Pranuar",
+    "rejected": "Refuzuar",
+    "expired": "Skaduar"
+  }
+}

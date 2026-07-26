@@ -38,13 +38,14 @@ import { useWarehouses } from '../../../hooks/useWarehouses';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { useLogout } from '../../../hooks/useLogout';
 import { useNavigation } from '../../../hooks/useNavigation';
-import { PRODUCT_STATUS_LABELS } from '../../../types/inventory';
+import { useStatusLabel } from '../../../hooks/useStatusLabel';
 import type { BulkProductAction, Product, ProductStatus } from '../../../types/inventory';
 
 const STATUS_OPTIONS: ProductStatus[] = ['IN_STOCK', 'LOW_STOCK', 'OUT_OF_STOCK', 'ARCHIVED'];
 
 const InventoryListContent: React.FC = () => {
   const { formatWhole: formatMoney } = useMoneyFormat();
+  const statusLabel = useStatusLabel();
   const navigate = useNavigate();
   const toast = useToast();
   const { tenantSlug } = useParams();
@@ -222,7 +223,11 @@ const InventoryListContent: React.FC = () => {
         trendValue: 'Hidden from the catalogue',
       },
     ],
-    [summary]
+    // formatMoney is memoised on the tenant's currency and locale, so listing it
+    // here is what makes the Inventory Value tile re-render when the workspace
+    // currency changes. Without it the tile kept its old symbol until something
+    // else happened to change `summary`.
+    [summary, formatMoney]
   );
 
   return (
@@ -300,7 +305,7 @@ const InventoryListContent: React.FC = () => {
             <option value="">All Statuses</option>
             {STATUS_OPTIONS.map((status) => (
               <option key={status} value={status}>
-                {PRODUCT_STATUS_LABELS[status]}
+                {statusLabel.product(status)}
               </option>
             ))}
           </SelectInput>

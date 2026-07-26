@@ -12,6 +12,12 @@ interface UserProps {
   warehouseId?: string | null;
   /** Defaults to true so existing construction sites keep working. */
   isActive?: boolean;
+  /**
+   * Interface language override. `null` means "follow the workspace default" —
+   * deliberately distinct from having chosen English, so a tenant changing its
+   * default moves users who never expressed a preference.
+   */
+  language?: string | null;
   createdAt: Date;
 }
 
@@ -31,6 +37,7 @@ export class User {
    * destroy financial and audit history.
    */
   public readonly isActive: boolean;
+  public readonly language: string | null;
   public readonly createdAt: Date;
 
   private constructor(props: UserProps) {
@@ -44,6 +51,7 @@ export class User {
     this.tenantId = props.tenantId;
     this.warehouseId = props.warehouseId || null;
     this.isActive = props.isActive ?? true;
+    this.language = props.language ?? null;
     this.createdAt = props.createdAt;
   }
 

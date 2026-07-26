@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card } from '../../../components/ui/Card/Card';
 import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
 import { Button } from '../../../components/ui/Button/Button';
@@ -10,6 +11,7 @@ import { useAuthStore } from '../../../store/useAuthStore';
 import styles from './TeamSettingsContent.module.css';
 
 export const TeamSettingsContent: React.FC = () => {
+  const { t } = useTranslation('settings');
   const { staff, pendingInvitations, loadingStaff, loadingInvitations, fetchStaff, fetchPendingInvitations, inviteStaff, updateStaffRole, cancelInvitation, fetchDeactivationImpact, deactivateStaff } = useTeam();
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<StaffMember | null>(null);
@@ -39,7 +41,7 @@ export const TeamSettingsContent: React.FC = () => {
   };
 
   const handleCancelInvitation = async (invitationId: string) => {
-    if (window.confirm('Are you sure you want to cancel this invitation?')) {
+    if (window.confirm(t('team.confirmCancelInvitation'))) {
       await cancelInvitation(invitationId);
     }
   };
@@ -48,24 +50,22 @@ export const TeamSettingsContent: React.FC = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <div>
-          <h2 className={styles.headerTitle}>Team Members</h2>
-          <p className={styles.headerSubtitle}>
-            Manage your team, their roles, and pending invitations.
-          </p>
+          <h2 className={styles.headerTitle}>{t('team.title')}</h2>
+          <p className={styles.headerSubtitle}>{t('team.subtitle')}</p>
         </div>
         {isOwner && (
           <Button variant="primary" onClick={() => setIsInviteModalOpen(true)}>
-            Invite Member
+            {t('team.inviteMember')}
           </Button>
         )}
       </div>
 
       <Card padding="md">
-        <h3 className={styles.cardTitle}>Active Members</h3>
+        <h3 className={styles.cardTitle}>{t('team.activeMembers')}</h3>
         {loadingStaff ? (
-          <p className={styles.mutedText}>Loading members...</p>
+          <p className={styles.mutedText}>{t('team.loadingMembers')}</p>
         ) : staff.length === 0 ? (
-          <p className={styles.mutedText}>No active staff members found.</p>
+          <p className={styles.mutedText}>{t('team.noMembers')}</p>
         ) : (
           <div className={styles.list}>
             {staff.map((member) => (
@@ -82,7 +82,7 @@ export const TeamSettingsContent: React.FC = () => {
                 <div className={styles.rowRight}>
                   <div className={styles.roleBadge}>
                     <Shield size={14} />
-                    {member.role === 'STAFF' ? 'Sales Rep' : member.role}
+                    {t(`team.roles.${member.role}`, { defaultValue: member.role })}
                   </div>
                   {isOwner && (
                     <>
@@ -96,7 +96,7 @@ export const TeamSettingsContent: React.FC = () => {
                           variant="outline"
                           onClick={() => openDeactivateDialog(member)}
                           className={styles.iconButton}
-                          aria-label={`Deactivate ${member.email}`}
+                          aria-label={t('team.deactivateAria', { email: member.email })}
                         >
                           <UserMinus size={14} />
                         </Button>
@@ -112,11 +112,11 @@ export const TeamSettingsContent: React.FC = () => {
 
       {isOwner && (
         <Card padding="md">
-          <h3 className={styles.cardTitle}>Pending Invitations</h3>
+          <h3 className={styles.cardTitle}>{t('team.pendingInvitations')}</h3>
           {loadingInvitations ? (
-            <p className={styles.mutedText}>Loading invitations...</p>
+            <p className={styles.mutedText}>{t('team.loadingInvitations')}</p>
           ) : pendingInvitations.length === 0 ? (
-            <p className={styles.mutedText}>No pending invitations.</p>
+            <p className={styles.mutedText}>{t('team.noInvitations')}</p>
           ) : (
             <div className={styles.list}>
               {pendingInvitations.map((inv) => (
@@ -129,21 +129,21 @@ export const TeamSettingsContent: React.FC = () => {
                       <div className={styles.memberName}>{inv.email}</div>
                       <div className={styles.memberExpiry}>
                         <Clock size={12} />
-                        Expires {new Date(inv.expiresAt).toLocaleDateString()}
+                        {t('team.expires', { date: new Date(inv.expiresAt).toLocaleDateString() })}
                       </div>
                     </div>
                   </div>
                   <div className={styles.rowRight}>
                     <div className={styles.roleBadge}>
                       <Shield size={14} />
-                      {inv.role === 'STAFF' ? 'Sales Rep' : inv.role}
+                      {t(`team.roles.${inv.role}`, { defaultValue: inv.role })}
                     </div>
                     {isOwner && (
                       <Button
                         variant="outline"
                         onClick={() => handleCancelInvitation(inv.id)}
                         className={`${styles.iconButton} ${styles.dangerButton}`}
-                        title="Cancel Invitation"
+                        title={t('team.cancelInvitation')}
                       >
                         <Trash2 size={14} />
                       </Button>
@@ -177,32 +177,32 @@ export const TeamSettingsContent: React.FC = () => {
         onConfirm={async () => {
           if (memberToDeactivate) await deactivateStaff(memberToDeactivate.id);
         }}
-        title="Deactivate team member?"
-        confirmLabel="Deactivate"
+        title={t('team.deactivate.title')}
+        confirmLabel={t('team.deactivate.confirm')}
         tone="danger"
         message={
           <>
             <p>
-              {memberToDeactivate?.firstName || memberToDeactivate?.email} will no longer be
-              able to sign in. Their account and history are kept, not deleted.
+              {t('team.deactivate.intro', {
+                name: memberToDeactivate?.firstName || memberToDeactivate?.email,
+              })}
             </p>
 
             {impact && (impact.clients > 0 || impact.upcomingAppointments > 0) && (
               <p>
-                They are still assigned{' '}
+                {t('team.deactivate.stillAssignedPrefix')}
+                {/* Counts go through i18next plurals rather than a `=== 1 ? '' : 's'`
+                    ternary, which only ever produced English plurals. */}
                 {impact.clients > 0 && (
-                  <strong>
-                    {impact.clients} client{impact.clients === 1 ? '' : 's'}
-                  </strong>
+                  <strong>{t('team.deactivate.clients', { count: impact.clients })}</strong>
                 )}
-                {impact.clients > 0 && impact.upcomingAppointments > 0 && ' and '}
+                {impact.clients > 0 && impact.upcomingAppointments > 0 && t('team.deactivate.and')}
                 {impact.upcomingAppointments > 0 && (
                   <strong>
-                    {impact.upcomingAppointments} upcoming appointment
-                    {impact.upcomingAppointments === 1 ? '' : 's'}
+                    {t('team.deactivate.appointments', { count: impact.upcomingAppointments })}
                   </strong>
                 )}
-                . These stay assigned to them until you reassign them.
+                {t('team.deactivate.stillAssignedSuffix')}
               </p>
             )}
 
@@ -212,10 +212,7 @@ export const TeamSettingsContent: React.FC = () => {
               the user, so an active session survives until the token expires.
               See TD-010.
             */}
-            <p>
-              If they are signed in right now, their session ends the next time the
-              app reloads, and within an hour at the latest.
-            </p>
+            <p>{t('team.deactivate.residualAccess')}</p>
           </>
         }
       />

@@ -29,18 +29,27 @@ const resolve = (settings: MoneyFormatSettings) => ({
 const cache = new Map<string, Intl.NumberFormat>();
 
 /**
- * `exact` shows cents and suits line items and prices. `whole` drops them and
- * suits large aggregates — KPI tiles and chart tooltips, which read as noise
- * with a trailing `.00`. `compact` abbreviates for axis ticks.
+ * `exact` shows the currency's own sub-unit precision and suits line items and
+ * prices. `whole` drops sub-units and suits large aggregates — KPI tiles and
+ * chart tooltips, which read as noise with a trailing `.00`. `compact`
+ * abbreviates for axis ticks.
  *
- * The distinction is preserved from the helpers this replaced rather than
- * invented: the inventory KPI and the revenue tooltip both already used
- * `maximumFractionDigits: 0` on purpose.
+ * The whole/exact distinction is preserved from the helpers this replaced
+ * rather than invented: the inventory KPI and the revenue tooltip both already
+ * used `maximumFractionDigits: 0` on purpose.
+ *
+ * `exact` deliberately sets NO fraction digits of its own. It used to force
+ * `{ minimumFractionDigits: 2, maximumFractionDigits: 2 }`, which overrode the
+ * currency's real precision and invented sub-units for currencies that have
+ * none: Japanese Yen rendered as `¥1,234.50` and Albanian Lek as `1234,50 Lekë`,
+ * when neither currency has a hundredth. Leaving it to Intl means USD gets 2
+ * digits, JPY and ALL get 0, and a currency with 3 (e.g. KWD) gets 3 — each
+ * from the same CLDR table the API validates codes against.
  */
 type Precision = 'exact' | 'whole' | 'compact';
 
 const OPTIONS: Record<Precision, Intl.NumberFormatOptions> = {
-  exact: { minimumFractionDigits: 2, maximumFractionDigits: 2 },
+  exact: {},
   whole: { maximumFractionDigits: 0 },
   compact: { notation: 'compact', maximumFractionDigits: 1 },
 };

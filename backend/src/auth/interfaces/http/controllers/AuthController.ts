@@ -125,7 +125,10 @@ export class AuthController {
               // reason: the money formatter is used on nearly every page, and
               // making each one fetch settings separately would be a round trip
               // per page for two short strings.
-              select: { logoUrl: true, coverImageUrl: true, name: true, currency: true, locale: true },
+              select: {
+                logoUrl: true, coverImageUrl: true, name: true,
+                currency: true, locale: true, defaultLanguage: true,
+              },
             })
           : Promise.resolve(null),
       ]);
@@ -150,6 +153,12 @@ export class AuthController {
           // these columns NOT NULL, so a tenanted user always gets real values.
           tenantCurrency: tenantBranding?.currency ?? null,
           tenantLocale: tenantBranding?.locale ?? null,
+          // Interface language, kept separate from the formatting fields above.
+          // `userLanguage` is null when the user follows the workspace default;
+          // the client needs the raw value, not just the resolved one, so the
+          // settings UI can show "Follow company default" as selected.
+          userLanguage: user.language ?? null,
+          tenantDefaultLanguage: tenantBranding?.defaultLanguage ?? null,
         }
       });
     } catch (error: any) {
@@ -282,6 +291,7 @@ export class AuthController {
         lastName: req.body.lastName,
         phone: req.body.phone,
         email: req.body.email,
+        language: req.body.language,
       });
       res.status(200).json({ message: 'Profile updated successfully' });
     } catch (error: any) {
