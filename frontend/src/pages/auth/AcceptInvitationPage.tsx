@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AuthLayout } from '../../components/layout/AuthLayout/AuthLayout';
 import { TextInput } from '../../components/ui/TextInput/TextInput';
@@ -6,6 +7,7 @@ import { Button } from '../../components/ui/Button/Button';
 import { apiClient as api } from '../../api';
 
 export const AcceptInvitationPage: React.FC = () => {
+  const { t } = useTranslation('auth');
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
   const email = searchParams.get('email');
@@ -53,15 +55,15 @@ export const AcceptInvitationPage: React.FC = () => {
 
   return (
     <AuthLayout
-      title="Accept Invitation"
-      subtitle={email ? `Join your team as ${email}` : 'Join your team'}
+      title={t('acceptInvitation.title')}
+      subtitle={email ? t('acceptInvitation.subtitleWithEmail', { email }) : t('acceptInvitation.subtitle')}
     >
       {success ? (
         <div style={{ textAlign: 'center' }}>
-          <h3 style={{ color: 'var(--color-primary)', marginBottom: '16px' }}>Invitation Accepted!</h3>
+          <h3 style={{ color: 'var(--color-primary)', marginBottom: '16px' }}>{t('acceptInvitation.accepted')}</h3>
           <p style={{ marginBottom: '24px' }}>Your account has been created successfully.</p>
           <Button variant="primary" onClick={() => navigate(acceptedTenantSlug ? `/${acceptedTenantSlug}/login` : '/login')} fullWidth>
-            Go to Login
+            {t('goToLogin')}
           </Button>
         </div>
       ) : (
@@ -73,7 +75,7 @@ export const AcceptInvitationPage: React.FC = () => {
           )}
 
           <TextInput
-            label="Create Password"
+            label={t('acceptInvitation.createPassword')}
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -82,7 +84,7 @@ export const AcceptInvitationPage: React.FC = () => {
           />
 
           <TextInput
-            label="Confirm Password"
+            label={t('acceptInvitation.confirmPassword')}
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
@@ -98,7 +100,7 @@ export const AcceptInvitationPage: React.FC = () => {
             disabled={!token || !email}
             style={{ marginTop: '8px' }}
           >
-            Accept Invitation
+            {t('acceptInvitation.submit')}
           </Button>
         </form>
       )}

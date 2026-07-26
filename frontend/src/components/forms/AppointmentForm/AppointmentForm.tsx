@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { useCreateAppointment } from '../../../hooks/useAppointments';
 import { useAuthStore } from '../../../store/useAuthStore';
@@ -43,6 +44,7 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
   onSubmit,
   onCancel
 }) => {
+  const { t } = useTranslation('appointments');
   const { createAppointment, isLoading, error } = useCreateAppointment();
   const { user } = useAuthStore();
 
@@ -100,7 +102,7 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
         {!isLockedContext && (
           <div className={styles.sectionHeader}>
             <UserSearch size={24} className={styles.headerIcon} />
-            <h2>Client Information</h2>
+            <h2>{t('form.clientInformation')}</h2>
           </div>
         )}
 
@@ -116,18 +118,18 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
         ) : (
           <div className={styles.formGroup}>
             <TextInput
-              label="Search Client"
-              placeholder="Start typing client name..."
+              label={t('form.searchClient')}
+              placeholder={t('form.searchClientPlaceholder')}
               iconLeft={<Search size={18} />}
               required
               error={errors.clientId?.message}
-              {...register('clientId', { required: 'Select a client for this appointment' })}
+              {...register('clientId', { required: t('form.clientRequired') })}
             />
           </div>
         )}
 
         <div className={styles.formGroup}>
-          <SelectInput label="Appointment Type">
+          <SelectInput label={t('form.appointmentType')}>
             <option value="initial">Initial Consultation</option>
             <option value="review">Quarterly Review</option>
             <option value="support">Technical Integration Support</option>
@@ -141,7 +143,7 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
         {!isLockedContext && (
           <div className={styles.sectionHeader}>
             <CalendarDays size={24} className={styles.headerIcon} />
-            <h2>Schedule & Staff</h2>
+            <h2>{t('form.scheduleAndStaff')}</h2>
           </div>
         )}
 
@@ -149,28 +151,28 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
           <div className={styles.formGroup}>
             <TextInput
               type="date"
-              label="Date"
+              label={t('form.date')}
               iconRight={<Calendar size={18} />}
               required
               error={errors.date?.message}
-              {...register('date', { required: 'Choose a date' })}
+              {...register('date', { required: t('form.dateRequired') })}
             />
           </div>
           <div className={styles.formGroup}>
             <TextInput
               type="time"
-              label="Time"
+              label={t('form.time')}
               iconRight={<Clock size={18} />}
               required
               error={errors.time?.message}
-              {...register('time', { required: 'Choose a time' })}
+              {...register('time', { required: t('form.timeRequired') })}
             />
           </div>
         </div>
 
         <div className={styles.formGroup}>
-          <SelectInput label="Assigned Staff" {...register('assignedUserId')}>
-            {user && <option value={user.userId}>Myself</option>}
+          <SelectInput label={t('form.assignedStaff')} {...register('assignedUserId')}>
+            {user && <option value={user.userId}>{t('form.myself')}</option>}
             <option value="1">Marcus Thorne (Lead Architect)</option>
             <option value="2">Elena Vance (Senior Consultant)</option>
             <option value="3">Riley Matthews (Account Manager)</option>
@@ -179,8 +181,8 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
 
         <div className={styles.formGroup}>
           <TextareaInput
-            label="Purpose of Appointment"
-            placeholder="Briefly describe the objective of this meeting..."
+            label={t('form.purpose')}
+            placeholder={t('form.purposePlaceholder')}
             rows={4}
             {...register('notes')}
           />
@@ -196,13 +198,13 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
           <div className={styles.priorityToggleInfo}>
             <AlertCircle size={24} className={styles.priorityIcon} />
             <div>
-              <div className={styles.priorityTitle}>High Priority</div>
-              <div className={styles.priorityDesc}>Flags this in the global calendar</div>
+              <div className={styles.priorityTitle}>{t('form.highPriority')}</div>
+              <div className={styles.priorityDesc}>{t('form.highPriorityDesc')}</div>
             </div>
           </div>
           
           <label className={styles.toggleSwitch}>
-            <span className={styles.visuallyHidden}>High Priority</span>
+            <span className={styles.visuallyHidden}>{t('form.highPriority')}</span>
             <input
               type="checkbox"
               className={styles.toggleInput}

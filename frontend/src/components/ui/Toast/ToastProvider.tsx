@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AlertTriangle, CheckCircle2, Info, X, XCircle } from 'lucide-react';
@@ -36,6 +37,7 @@ const ICONS: Record<ToastVariant, ReactNode> = {
 const MAX_VISIBLE = 4;
 
 export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const { t } = useTranslation('common');
   const [toasts, setToasts] = useState<Toast[]>([]);
   const nextId = useRef(1);
   const timers = useRef(new Map<number, number>());
@@ -85,7 +87,7 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         something the user just did, so they should not interrupt whatever a
         screen reader is currently saying.
       */}
-      <div className={styles.viewport} role="region" aria-live="polite" aria-label="Notifications">
+      <div className={styles.viewport} role="region" aria-live="polite" aria-label={t('a11y.notifications')}>
         <AnimatePresence initial={false}>
           {toasts.map((toast) => (
             <motion.div
@@ -120,7 +122,7 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
                 type="button"
                 className={styles.close}
                 onClick={() => dismiss(toast.id)}
-                aria-label="Dismiss notification"
+                aria-label={t('a11y.dismissNotification')}
               >
                 <X size={15} />
               </button>

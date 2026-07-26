@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Package, ArrowDown, Info as InfoIcon, ArrowRightLeft } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { SlideOver } from '../../ui/SlideOver';
 import { SelectInput } from '../../ui/SelectInput';
 import { TextInput } from '../../ui/TextInput';
@@ -26,6 +27,8 @@ export const StockAdjustmentPanel: React.FC<StockAdjustmentPanelProps> = ({
   productId,
   productName,
 }) => {
+  const { t } = useTranslation('inventory');
+  const { t: tc } = useTranslation('common');
   const [activeTab, setActiveTab] = useState<TabType>('adjust');
   const [adjustType, setAdjustType] = useState<AdjustType>('subtract');
   const [reason, setReason] = useState<ReasonType | null>(null);
@@ -49,11 +52,17 @@ export const StockAdjustmentPanel: React.FC<StockAdjustmentPanelProps> = ({
   const [transferDestinationId, setTransferDestinationId] = useState('');
   const [transferQuantity, setTransferQuantity] = useState('');
 
-  // Auto-select first warehouse when stockLevels load
+  /*
+   * Seeds a default selection once stock levels arrive. Both ids are in the
+   * dependency array because the effect reads them: with only [stockLevels] it
+   * closed over stale values, so a user who cleared a selection could not get
+   * the default back until the levels themselves changed. Each guard is
+   * self-limiting (`!id`), so re-running cannot overwrite a real choice.
+   */
   React.useEffect(() => {
     if (stockLevels.length > 0 && !adjustWarehouseId) setAdjustWarehouseId(stockLevels[0].warehouseId);
     if (stockLevels.length > 0 && !transferOriginId) setTransferOriginId(stockLevels[0].warehouseId);
-  }, [stockLevels]);
+  }, [stockLevels, adjustWarehouseId, transferOriginId]);
 
   const handleConfirm = async () => {
     if (activeTab === 'adjust') {
@@ -91,14 +100,14 @@ export const StockAdjustmentPanel: React.FC<StockAdjustmentPanelProps> = ({
   };
 
   return (
-    <SlideOver isOpen={isOpen} onClose={onClose} title={`New Adjustment — ${productName}`}>
+    <SlideOver isOpen={isOpen} onClose={onClose} title={t('stock.adjustTitle', { product: productName })}>
       <div className={styles.container}>
         
         {/* Current Stock Summary - MOCK */}
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
             <Package size={20} />
-            <span>Current Stock Levels</span>
+            <span>{t('stock.currentLevels')}</span>
           </div>
           <div className={styles.stockGrid}>
             {stockLevels.map(sl => (
@@ -108,7 +117,7 @@ export const StockAdjustmentPanel: React.FC<StockAdjustmentPanelProps> = ({
               </div>
             ))}
             {stockLevels.length === 0 && (
-              <p className={styles.emptyText}>No stock levels found.</p>
+              <p className={styles.emptyText}>{t('stock.noLevels')}</p>
             )}
           </div>
         </section>
@@ -120,14 +129,14 @@ export const StockAdjustmentPanel: React.FC<StockAdjustmentPanelProps> = ({
             onClick={() => setActiveTab('adjust')}
           >
             <Package size={16} />
-            Adjust Stock
+            {t('stock.tabAdjust')}
           </button>
           <button
             className={`${styles.tabButton} ${activeTab === 'transfer' ? styles.tabActive : ''}`}
             onClick={() => setActiveTab('transfer')}
           >
             <ArrowRightLeft size={16} />
-            Transfer Stock
+            {t('stock.tabTransfer')}
           </button>
         </div>
 
@@ -135,11 +144,11 @@ export const StockAdjustmentPanel: React.FC<StockAdjustmentPanelProps> = ({
         {activeTab === 'adjust' && (
           <div className={styles.formSection}>
             <SelectInput 
-              label="Select Location"
+              label={t('stock.selectLocation')}
               value={adjustWarehouseId}
               onChange={(e) => setAdjustWarehouseId(e.target.value)}
             >
-              <option value="">Select a warehouse...</option>
+              <option value="">{t('stock.selectWarehouse')}</option>
               {stockLevels.map(l => (
                 <option key={l.warehouseId} value={l.warehouseId}>
                   {l.warehouse?.name || 'Unknown'} ({l.quantity} units)
@@ -149,7 +158,7 @@ export const StockAdjustmentPanel: React.FC<StockAdjustmentPanelProps> = ({
 
             <div className={styles.splitRow}>
               <div className={styles.typeSelectorWrapper}>
-                <label className={styles.fieldLabel}>Type</label>
+                <label className={styles.fieldLabel}>{t('stock.type')}</label>
                 <div className={styles.typeToggle}>
                   <button
                     className={`${styles.typeBtn} ${adjustType === 'subtract' ? styles.typeBtnActive : ''}`}
@@ -166,16 +175,16 @@ export const StockAdjustmentPanel: React.FC<StockAdjustmentPanelProps> = ({
                 </div>
               </div>
               <TextInput
-                label="Quantity"
+                label={t('stock.quantity')}
                 type="number"
                 value={adjustQuantity}
                 onChange={(e) => setAdjustQuantity(e.target.value)}
-                placeholder="0"
+                placeholder={t('stock.quantityPlaceholder')}
               />
             </div>
 
             <div className={styles.reasonGrid}>
-              <label className={styles.fieldLabel}>Reason</label>
+              <label className={styles.fieldLabel}>{t('stock.reason')}</label>
               <div className={styles.reasonOptions}>
                 {(['damaged', 'audit', 'return', 'other'] as ReasonType[]).map(r => (
                   <button
@@ -190,10 +199,10 @@ export const StockAdjustmentPanel: React.FC<StockAdjustmentPanelProps> = ({
             </div>
 
             <TextareaInput
-              label="Notes (Optional)"
+              label={t('stock.notesLabel')}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Any additional details..."
+              placeholder={t('stock.notesPlaceholder')}
             />
           </div>
         )}
@@ -202,11 +211,11 @@ export const StockAdjustmentPanel: React.FC<StockAdjustmentPanelProps> = ({
         {activeTab === 'transfer' && (
           <div className={styles.formSection}>
             <SelectInput 
-              label="Origin Location"
+              label={t('stock.originLabel')}
               value={transferOriginId}
               onChange={(e) => setTransferOriginId(e.target.value)}
             >
-              <option value="">Select origin...</option>
+              <option value="">{t('stock.selectOrigin')}</option>
               {stockLevels.map(l => (
                 <option key={l.warehouseId} value={l.warehouseId}>
                   {l.warehouse?.name || 'Unknown'} ({l.quantity} units)
@@ -221,11 +230,11 @@ export const StockAdjustmentPanel: React.FC<StockAdjustmentPanelProps> = ({
             </div>
 
             <SelectInput 
-              label="Destination Location"
+              label={t('stock.destinationLabel')}
               value={transferDestinationId}
               onChange={(e) => setTransferDestinationId(e.target.value)}
             >
-              <option value="">Select destination...</option>
+              <option value="">{t('stock.selectDestination')}</option>
               {warehouses.map(l => (
                 <option key={l.id} value={l.id}>
                   {l.name}
@@ -235,7 +244,7 @@ export const StockAdjustmentPanel: React.FC<StockAdjustmentPanelProps> = ({
 
             <div className={styles.transferQuantityWrap}>
               <TextInput 
-                label="Transfer Quantity"
+                label={t('stock.transferQuantity')}
                 type="number"
                 value={transferQuantity}
                 onChange={(e) => setTransferQuantity(e.target.value)}
@@ -245,7 +254,7 @@ export const StockAdjustmentPanel: React.FC<StockAdjustmentPanelProps> = ({
 
             <div className={styles.infoBanner}>
               <InfoIcon size={20} className={styles.infoIcon} />
-              <p>Stock levels update immediately once the transfer is confirmed.</p>
+              <p>{t('stock.transferNote')}</p>
             </div>
           </div>
         )}
@@ -253,7 +262,7 @@ export const StockAdjustmentPanel: React.FC<StockAdjustmentPanelProps> = ({
       </div>
 
       <div className={styles.footer}>
-        <Button variant="outline" fullWidth onClick={onClose} disabled={isAdjustPending || isTransferPending}>Cancel</Button>
+        <Button variant="outline" fullWidth onClick={onClose} disabled={isAdjustPending || isTransferPending}>{tc('actions.cancel')}</Button>
         <Button variant="primary" fullWidth onClick={handleConfirm} disabled={isAdjustPending || isTransferPending}>
           {isAdjustPending || isTransferPending ? 'Updating...' : 'Confirm Update'}
         </Button>

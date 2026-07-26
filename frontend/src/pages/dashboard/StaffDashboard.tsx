@@ -1,4 +1,5 @@
 import { getUserFirstName } from '../../utils/userUtils';
+import { useTranslation } from 'react-i18next';
 import styles from './StaffDashboard.module.css'; 
 import { Users, CalendarCheck, AlertTriangle, History, FileText, UserPlus, CalendarPlus, TrendingUp, CheckCircle2, TrendingDown, Download } from 'lucide-react'; 
 import { Button } from '../../components/ui/Button/Button'; 
@@ -9,8 +10,11 @@ import { getActivityConfig } from '../../utils/activityMapper';
 import { useDashboardMetrics, useActivityFeed } from '../../hooks/useDashboard'; 
 import { useAppointmentsByDateRange } from '../../hooks/useAppointments';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useDateFormat } from '../../hooks/useDateFormat';
 
 export const StaffDashboard = () => {
+  const dates = useDateFormat();
+  const { t } = useTranslation('dashboard');
   const { user } = useAuthStore();
   const { metrics, isLoading: isLoadingMetrics } = useDashboardMetrics();
   const { activities, isLoading: isLoadingFeed } = useActivityFeed(5);
@@ -40,34 +44,34 @@ export const StaffDashboard = () => {
              
       {/* Mobile-Only Header */}
       <div className={styles.mobileHeader}>
-        <h1 className={styles.titleMobile}>Hello, {getUserFirstName(user)}</h1>
-        <p className={styles.subtitleMobile}>You have {appointments?.length || 0} appointments scheduled for today.</p>
+        <h1 className={styles.titleMobile}>{t('greetingStaffMobile', { name: getUserFirstName(user) })}</h1>
+        <p className={styles.subtitleMobile}>{t('appointmentsToday', { count: appointments?.length || 0 })}</p>
       </div>
 
       {/* Mobile-Only Quick Actions */}
       <div className={styles.mobileQuickActions}>
         <button className={styles.quickActionButtonPrimary}>
           <UserPlus size={24} />
-          <span>Add Client</span>
+          <span>{t('addClient')}</span>
         </button>
         <button className={styles.quickActionButtonSecondary}>
           <CalendarPlus size={24} />
-          <span>New Appt</span>
+          <span>{t('newAppointment')}</span>
         </button>
       </div>
 
       {/* Desktop Header */}
       <header className={styles.desktopHeader}>
         <div className={styles.headerContent}>
-          <h1 className={styles.title}>Welcome back, {getUserFirstName(user)}.</h1>
-          <p className={styles.subtitle}>Here's a summary of your individual pipeline for today.</p>
+          <h1 className={styles.title}>{t('greetingOwner', { name: getUserFirstName(user) })}</h1>
+          <p className={styles.subtitle}>{t('subtitleStaff')}</p>
         </div>
         <div className={styles.headerActions}>
           <Button variant="outline" icon={<CalendarCheck size={18} />}>
             Today, Oct 24
           </Button>
           <Button variant="outline" icon={<Download size={18} />}>
-            Export Report
+            {t('exportReport')}
           </Button>
         </div>
       </header>
@@ -116,9 +120,9 @@ export const StaffDashboard = () => {
             <div className={styles.scheduleHeader}>
               <div className={styles.scheduleTitleGroup}>
                 <CalendarCheck size={20} color="var(--color-primary)" />
-                <h2>My Schedule</h2>
+                <h2>{t('mySchedule')}</h2>
               </div>
-              <Button variant="ghost">View Calendar</Button>
+              <Button variant="ghost">{t('viewCalendar')}</Button>
             </div>
             {isLoadingAppointments ? (
               <p style={{ padding: '1rem', color: 'var(--color-on-surface-variant)' }}>Loading appointments...</p>
@@ -129,20 +133,20 @@ export const StaffDashboard = () => {
                      
           {/* Mobile-Only Horizontal Stats Scroll */}
           <div className={styles.mobileStatsSection}>
-             <h3>My Stats</h3>
+             <h3>{t('myStats')}</h3>
              <div className={styles.statsScrollContainer}>
                 <div className={styles.statCard}>
-                   <span className={styles.statLabel}>REVENUE</span>
+                   <span className={styles.statLabel}>{t('statRevenue')}</span>
                    <span className={styles.statValue}>$12.4k</span>
                    <div className={styles.statTrendUp}><TrendingUp size={14}/> +8%</div>
                 </div>
                 <div className={styles.statCard}>
-                   <span className={styles.statLabel}>CLOSED</span>
+                   <span className={styles.statLabel}>{t('statClosed')}</span>
                    <span className={styles.statValue}>18</span>
                    <div className={styles.statTrendNeutral}><CheckCircle2 size={14}/> Target 20</div>
                 </div>
                 <div className={styles.statCard}>
-                   <span className={styles.statLabel}>WIN RATE</span>
+                   <span className={styles.statLabel}>{t('statWinRate')}</span>
                    <span className={styles.statValue}>64%</span>
                    <div className={styles.statTrendDown}><TrendingDown size={14}/> -2%</div>
                 </div>
@@ -154,15 +158,15 @@ export const StaffDashboard = () => {
              <div className={styles.glassButton}>
                 <CalendarPlus size={32} color="var(--color-primary)" />
                 <div className={styles.glassButtonContent}>
-                  <h3>Schedule Appointment</h3>
-                  <p>Create a new meeting for your clients</p>
+                  <h3>{t('scheduleAppointment')}</h3>
+                  <p>{t('scheduleAppointmentDesc')}</p>
                 </div>
              </div>
              <div className={styles.glassButton}>
                 <FileText size={32} color="var(--color-secondary)" />
                 <div className={styles.glassButtonContent}>
-                  <h3>Log Note</h3>
-                  <p>Record interaction details and summaries</p>
+                  <h3>{t('logNote')}</h3>
+                  <p>{t('logNoteDesc')}</p>
                 </div>
              </div>
           </div>
@@ -174,7 +178,7 @@ export const StaffDashboard = () => {
             <div className={styles.feedHeader}>
               <div className={styles.feedTitleGroup}>
                 <History size={20} color="var(--color-on-surface-variant)" />
-                <h2>My Activity</h2>
+                <h2>{t('myActivity')}</h2>
               </div>
             </div>
                          
@@ -190,7 +194,7 @@ export const StaffDashboard = () => {
                     <TimelineItem 
                       key={activity.id}
                       title={activity.type.replace(/_/g, ' ')}
-                      subtitle={new Date(activity.timestamp).toLocaleString()}
+                      subtitle={dates.dateTime(activity.timestamp)}
                       content={`${activity.actor.name}: ${activity.description}`}
                       icon={config.icon}
                       iconTextColor={config.color}
@@ -203,7 +207,7 @@ export const StaffDashboard = () => {
             </div>
                          
             <div className={styles.feedFooter}>
-              <Button variant="ghost" fullWidth>View All Activity</Button>
+              <Button variant="ghost" fullWidth>{t('viewAllActivity')}</Button>
             </div>
           </div>
         </div>

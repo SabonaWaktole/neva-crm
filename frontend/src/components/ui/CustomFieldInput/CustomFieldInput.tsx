@@ -3,6 +3,7 @@ import { TextInput } from '../TextInput/TextInput';
 import { SelectInput } from '../SelectInput/SelectInput';
 import { TextareaInput } from '../TextareaInput/TextareaInput';
 import styles from './CustomFieldInput.module.css';
+import { useTranslation } from 'react-i18next';
 
 export interface CustomFieldInputProps {
   fieldType: 'text' | 'multiline' | 'number' | 'dropdown' | 'date' | 'checkbox';
@@ -20,6 +21,7 @@ export const CustomFieldInput = forwardRef<HTMLElement, CustomFieldInputProps>(
     { fieldType, label, options = [], value, onChange, error, required, className = '' },
     ref
   ) => {
+    const { t } = useTranslation('common');
     switch (fieldType) {
       case 'text':
       case 'number':
@@ -59,7 +61,7 @@ export const CustomFieldInput = forwardRef<HTMLElement, CustomFieldInputProps>(
             required={required}
             className={className}
           >
-            <option value="" disabled>Select an option</option>
+            <option value="" disabled>{t('input.selectAnOption')}</option>
             {options.map((opt) => (
               <option key={opt} value={opt}>
                 {opt}

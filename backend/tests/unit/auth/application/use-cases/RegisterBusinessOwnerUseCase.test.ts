@@ -24,6 +24,8 @@ describe('RegisterBusinessOwnerUseCase', () => {
       updatePassword: jest.fn(),
       updateProfile: jest.fn(),
       updateRoleAndWarehouse: jest.fn(),
+      setActive: jest.fn(),
+      countAssignedWork: jest.fn(),
     };
     tenantRepository = {
       create: jest.fn(),
@@ -61,7 +63,6 @@ describe('RegisterBusinessOwnerUseCase', () => {
       urlSlug: 'acme-corp',
       ownerEmail: 'owner@acme.com',
       ownerPassword: 'StrongPassword123!',
-      locale: 'en',
     });
 
     expect(tenantRepository.findBySlug).toHaveBeenCalledWith('acme-corp');
@@ -81,7 +82,6 @@ describe('RegisterBusinessOwnerUseCase', () => {
         urlSlug: 'acme-corp',
         ownerEmail: 'owner@acme.com',
         ownerPassword: 'StrongPassword123!',
-        locale: 'en',
       })
     ).rejects.toThrow(SlugAlreadyTakenError);
   });

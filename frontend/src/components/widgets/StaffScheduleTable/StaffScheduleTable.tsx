@@ -1,9 +1,11 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from './StaffScheduleTable.module.css';
 import { CalendarDays, MoreVertical, Phone, MapPin, Check } from 'lucide-react';
 import { Badge } from '../../ui/Badge/Badge';
 import { Button } from '../../ui/Button/Button';
 import type { Appointment } from '../../../types/appointment';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 
 interface StaffScheduleTableProps {
   appointments: Appointment[];
@@ -11,25 +13,27 @@ interface StaffScheduleTableProps {
 }
 
 export const StaffScheduleTable: React.FC<StaffScheduleTableProps> = ({ appointments, isLoading }) => {
+  const dates = useDateFormat();
+  const { t } = useTranslation('dashboard');
   return (
     <div className={styles.tableContainer}>
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <CalendarDays size={20} className={styles.headerIcon} />
-          <h2>My Schedule</h2>
-          <span className={styles.headerDate}>Today</span>
+          <h2>{t('schedule.title')}</h2>
+          <span className={styles.headerDate}>{t('schedule.today')}</span>
         </div>
-        <Button variant="ghost" disabled title="Coming soon">View Calendar</Button>
+        <Button variant="ghost" disabled title={t('schedule.comingSoon')}>{t('schedule.viewCalendar')}</Button>
       </div>
 
       <div className={styles.tableWrapper}>
         <table className={styles.table}>
           <thead>
             <tr>
-              <th>Time</th>
-              <th>Client / Appointment</th>
-              <th>Type</th>
-              <th>Status</th>
+              <th>{t('schedule.columnTime')}</th>
+              <th>{t('schedule.columnClient')}</th>
+              <th>{t('schedule.columnType')}</th>
+              <th>{t('schedule.columnStatus')}</th>
               <th className={styles.actionsColumn}></th>
             </tr>
           </thead>
@@ -42,7 +46,7 @@ export const StaffScheduleTable: React.FC<StaffScheduleTableProps> = ({ appointm
               appointments.map((apt) => (
                 <tr key={apt.id}>
                   <td className={styles.timeCell}>
-                    {new Date(apt.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {dates.time(apt.scheduledAt)}
                   </td>
                   <td>
                     <div className={styles.clientName}>{apt.clientName || 'Unknown Client'}</div>
@@ -87,7 +91,7 @@ export const StaffScheduleTable: React.FC<StaffScheduleTableProps> = ({ appointm
             <div key={apt.id} className={styles.mobileCard}>
               <div className={styles.mobileHeader}>
                 <span className={styles.timeCell}>
-                  {new Date(apt.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {dates.time(apt.scheduledAt)}
                 </span>
                 <span className={styles.statusText}>{apt.status}</span>
               </div>

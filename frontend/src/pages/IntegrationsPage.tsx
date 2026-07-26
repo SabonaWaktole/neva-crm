@@ -7,6 +7,8 @@ import { useNavigation } from '../hooks/useNavigation';
 import { AppLayout } from '../components/layout/AppLayout/AppLayout';
 import { Sidebar } from '../components/layout/Sidebar/Sidebar';
 import { SettingsLayout } from '../components/layout/SettingsLayout/SettingsLayout';
+import { useTranslation } from 'react-i18next';
+import { useDateFormat } from '../hooks/useDateFormat';
 
 const AVAILABLE_INTEGRATIONS = [
   {
@@ -24,6 +26,9 @@ const AVAILABLE_INTEGRATIONS = [
 ];
 
 export const IntegrationsPage: React.FC = () => {
+  const dates = useDateFormat();
+  const { t } = useTranslation('settings');
+  const { t: tc } = useTranslation('common');
   const { user } = useAuthStore();
   const { logout } = useLogout();
   const navigate = useNavigate();
@@ -88,15 +93,15 @@ export const IntegrationsPage: React.FC = () => {
         <div style={{ padding: 'var(--spacing-md)', maxWidth: '1200px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
           {/* Header */}
           <div>
-            <nav aria-label="Breadcrumb" style={{ marginBottom: 'var(--spacing-md)' }}>
+            <nav aria-label={tc('a11y.breadcrumb')} style={{ marginBottom: 'var(--spacing-md)' }}>
               <ol style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', gap: 'var(--spacing-sm)', fontSize: '13px', color: 'var(--color-on-surface-variant)' }}>
-                <li><a href="#settings" onClick={(e) => { e.preventDefault(); navigate(`/${tenantSlug}/settings/profile`); }} style={{ color: 'inherit', textDecoration: 'none' }}>Settings</a></li>
+                <li><a href="#settings" onClick={(e) => { e.preventDefault(); navigate(`/${tenantSlug}/settings/profile`); }} style={{ color: 'inherit', textDecoration: 'none' }}>{t('breadcrumb')}</a></li>
                 <li>/</li>
-                <li aria-current="page" style={{ color: 'var(--color-on-surface)', fontWeight: 600 }}>Integrations</li>
+                <li aria-current="page" style={{ color: 'var(--color-on-surface)', fontWeight: 600 }}>{t('integrations.breadcrumb')}</li>
               </ol>
             </nav>
-            <h1 style={{ fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-headline-lg)', color: 'var(--color-on-surface)', margin: 0 }}>Integrations</h1>
-            <p style={{ fontFamily: 'var(--font-family-base)', fontSize: '13px', margin: 'var(--spacing-xs) 0 0 0', color: 'var(--color-on-surface-variant)' }}>Manage connections to third-party services.</p>
+            <h1 style={{ fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-headline-lg)', color: 'var(--color-on-surface)', margin: 0 }}>{t('integrations.title')}</h1>
+            <p style={{ fontFamily: 'var(--font-family-base)', fontSize: '13px', margin: 'var(--spacing-xs) 0 0 0', color: 'var(--color-on-surface-variant)' }}>{t('integrations.subtitle')}</p>
           </div>
 
           {error && (
@@ -161,7 +166,7 @@ export const IntegrationsPage: React.FC = () => {
                     {isConnected ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
                         <div style={{ fontSize: '11px', color: 'var(--color-on-surface-variant)' }}>
-                          Connected since {new Date(connectedInt.createdAt).toLocaleDateString()}
+                          {t('integrations.connectedSince', { date: dates.date(connectedInt.createdAt) })}
                         </div>
                         <button
                           onClick={() => handleDisconnect(def.provider)}
@@ -179,7 +184,7 @@ export const IntegrationsPage: React.FC = () => {
                             opacity: (!isBusinessOwner || isProcessing) ? 0.5 : 1
                           }}
                         >
-                          {isProcessing ? 'Disconnecting...' : 'Disconnect'}
+                          {isProcessing ? t('integrations.disconnecting') : t('integrations.disconnect')}
                         </button>
                       </div>
                     ) : (
@@ -199,7 +204,7 @@ export const IntegrationsPage: React.FC = () => {
                           opacity: (!isBusinessOwner || isProcessing) ? 0.5 : 1
                         }}
                       >
-                        {isProcessing ? 'Connecting...' : `Connect ${def.name}`}
+                        {isProcessing ? t('integrations.connecting') : t('integrations.connect', { name: def.name })}
                       </button>
                     )}
                   </div>

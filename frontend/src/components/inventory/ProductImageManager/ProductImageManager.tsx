@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { DragEvent } from 'react';
 import { AlertCircle, GripVertical, ImagePlus, Loader2, Star, Trash2 } from 'lucide-react';
 import type { ProductImageGallery } from '../../../hooks/useProductImages';
@@ -37,6 +38,7 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
   disabled = false,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const { t } = useTranslation('inventory');
   const [isDraggingFiles, setIsDraggingFiles] = useState(false);
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dropTargetId, setDropTargetId] = useState<string | null>(null);
@@ -130,11 +132,11 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
   const remaining = MAX_IMAGES_PER_PRODUCT - tiles.length;
 
   return (
-    <section className={styles.card} aria-label="Product images">
+    <section className={styles.card} aria-label={t('form.imagesAria')}>
       <header className={styles.header}>
-        <h2 className={styles.title}>Product Images</h2>
+        <h2 className={styles.title}>{t('form.productImages')}</h2>
         <span className={styles.counter}>
-          {tiles.length}/{MAX_IMAGES_PER_PRODUCT}
+          {t('form.imageCount', { used: tiles.length, max: MAX_IMAGES_PER_PRODUCT })}
         </span>
       </header>
 
@@ -217,7 +219,7 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
                 <span
                   className={styles.dragHandle}
                   aria-hidden="true"
-                  title="Drag to reorder"
+                  title={t('form.dragToReorder')}
                 >
                   <GripVertical size={13} />
                 </span>
@@ -279,7 +281,7 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
           }}
           role="button"
           tabIndex={disabled ? -1 : 0}
-          aria-label="Add product images"
+          aria-label={t('form.addImagesAria')}
           aria-disabled={disabled}
         >
           <ImagePlus className={styles.dropzoneIcon} size={26} />
@@ -307,10 +309,7 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
         }}
       />
 
-      <p className={styles.footnote}>
-        Large images are resized and compressed in your browser before upload. Drag a tile, or use
-        the arrows, to reorder — the first image is used as the product thumbnail.
-      </p>
+      <p className={styles.footnote}>{t('form.imageFootnote')}</p>
     </section>
   );
 };

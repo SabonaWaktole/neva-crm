@@ -22,6 +22,28 @@ export interface User {
   tenantName?: string | null;
   tenantLogoUrl?: string | null;
   tenantCoverImageUrl?: string | null;
+  /**
+   * The workspace's money-formatting settings, returned by GET /auth/me on the
+   * same call as the branding above. Held here so every page can format an
+   * amount without its own settings fetch. Null for SUPER_ADMIN, who has no
+   * tenant — see useMoneyFormat for how that case falls back.
+   */
+  tenantCurrency?: string | null;
+  tenantLocale?: string | null;
+  /**
+   * Timezone decides which DAY an instant falls on — a correctness setting,
+   * not a formatting one. See useDateFormat and utils/tenantDay.
+   */
+  tenantTimezone?: string | null;
+  tenantDateFormat?: string | null;
+  /**
+   * Interface language, kept strictly separate from the formatting fields
+   * above. `userLanguage` is null when the user has expressed no preference,
+   * which means "follow the workspace default" — distinct from having chosen
+   * English. See resolveLanguage.
+   */
+  userLanguage?: string | null;
+  tenantDefaultLanguage?: string | null;
 }
 
 interface AuthState {

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line
@@ -11,6 +12,7 @@ import { Button } from '../components/ui/Button/Button';
 import { useAuthStore } from '../store/useAuthStore';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useNavigation } from '../hooks/useNavigation';
+import { useMoneyFormat } from '../hooks/useMoneyFormat';
 import styles from './ReportsPage.module.css';
 
 /**
@@ -25,15 +27,6 @@ const COLORS = [
   'var(--chart-5)',
   'var(--chart-6)',
 ];
-
-const currency = new Intl.NumberFormat(undefined, {
-  style: 'currency',
-  currency: 'USD',
-  maximumFractionDigits: 0,
-});
-
-const compactCurrency = (value: number) =>
-  `$${Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 }).format(value)}`;
 
 /** Shared tooltip so every chart on the page reads identically. */
 const ChartTooltip: React.FC<{
@@ -79,12 +72,16 @@ const axisProps = {
 } as const;
 
 export const ReportsPage: React.FC = () => {
+  const { t } = useTranslation('dashboard');
   const user = useAuthStore(state => state.user);
   const tenantSlug = user?.tenantSlug;
   const roleName = user?.role;
   const userName = user?.firstName ? `${user.firstName} ${user.lastName || ''}` : user?.email || 'User';
 
   const logout = useAuthStore(state => state.logout);
+  // Both the tooltip amounts and the axis ticks come from here, so the tenant's
+  // currency drives the whole page rather than just the tooltips.
+  const { formatWhole: formatCurrency, formatCompact: compactCurrency } = useMoneyFormat();
   const { revenue, clients, inventory, loading, error, refresh } = useReports();
   const navigate = useNavigate();
   const location = useLocation();
@@ -117,12 +114,12 @@ export const ReportsPage: React.FC = () => {
         <div className={styles.page}>
           <div className={styles.header}>
             <div className={styles.headerContent}>
-              <h1 className={styles.title}>Reports &amp; Analytics</h1>
-              <p className={styles.subtitle}>Loading your latest figures…</p>
+              <h1 className={styles.title}>{t('reports.title')}</h1>
+              <p className={styles.subtitle}>{t('reports.loading')}</p>
             </div>
           </div>
           {/* Skeletons in the final layout, so nothing jumps when data lands. */}
-          <div className={styles.loadingGrid} aria-busy="true" aria-label="Loading reports">
+          <div className={styles.loadingGrid} aria-busy="true" aria-label={t('reports.loadingAria')}>
             <div className={`${styles.skeletonCard} skeleton`} />
             <div className={`${styles.skeletonCard} skeleton`} />
           </div>
@@ -141,11 +138,11 @@ export const ReportsPage: React.FC = () => {
       <div className={styles.page}>
         <header className={styles.header}>
           <div className={styles.headerContent}>
-            <h1 className={styles.title}>Reports &amp; Analytics</h1>
-            <p className={styles.subtitle}>Revenue, client mix and inventory at a glance.</p>
+            <h1 className={styles.title}>{t('reports.title')}</h1>
+            <p className={styles.subtitle}>{t('reports.subtitle')}</p>
           </div>
           <Button variant="outline" onClick={refresh}>
-            Refresh data
+            {t('reports.refresh')}
           </Button>
         </header>
 
@@ -161,8 +158,8 @@ export const ReportsPage: React.FC = () => {
             {/* Revenue Chart */}
             <div className={styles.chartCard}>
               <div className={styles.chartHeader}>
-                <h2 className={styles.chartTitle}>Monthly revenue</h2>
-                <p className={styles.chartCaption}>Total invoiced value per month</p>
+                <h2 className={styles.chartTitle}>{t('reports.monthlyRevenue')}</h2>
+                <p className={styles.chartCaption}>{t('reports.monthlyRevenueCaption')}</p>
               </div>
               <div className={styles.chartBody}>
                 {revenue.length > 0 ? (
@@ -172,7 +169,7 @@ export const ReportsPage: React.FC = () => {
                       <XAxis dataKey="month" {...axisProps} />
                       <YAxis tickFormatter={compactCurrency} width={56} {...axisProps} />
                       <Tooltip
-                        content={<ChartTooltip format={(v) => currency.format(v)} />}
+                        content={<ChartTooltip format={(v) => formatCurrency(v)} />}
                         cursor={{ stroke: 'var(--border-strong)', strokeWidth: 1 }}
                       />
                       {/* Single series: the card title names it, so no legend box. */}
@@ -188,7 +185,7 @@ export const ReportsPage: React.FC = () => {
                     </LineChart>
                   </ResponsiveContainer>
                 ) : (
-                  <EmptyChart message="No revenue data yet" />
+                  <EmptyChart message={t('reports.noRevenue')} />
                 )}
               </div>
             </div>
@@ -196,8 +193,8 @@ export const ReportsPage: React.FC = () => {
             {/* Client Status Chart */}
             <div className={styles.chartCard}>
               <div className={styles.chartHeader}>
-                <h2 className={styles.chartTitle}>Client distribution</h2>
-                <p className={styles.chartCaption}>Share of clients by status</p>
+                <h2 className={styles.chartTitle}>{t('reports.clientDistribution')}</h2>
+                <p className={styles.chartCaption}>{t('reports.clientDistributionCaption')}</p>
               </div>
               <div className={styles.chartBody}>
                 {clients.length > 0 ? (
@@ -228,7 +225,7 @@ export const ReportsPage: React.FC = () => {
                     </PieChart>
                   </ResponsiveContainer>
                 ) : (
-                  <EmptyChart message="No client data yet" />
+                  <EmptyChart message={t('reports.noClients')} />
                 )}
               </div>
             </div>
@@ -241,8 +238,8 @@ export const ReportsPage: React.FC = () => {
             */}
             <div className={styles.chartCard}>
               <div className={styles.chartHeader}>
-                <h2 className={styles.chartTitle}>Inventory value by warehouse</h2>
-                <p className={styles.chartCaption}>Total stock value held at each location</p>
+                <h2 className={styles.chartTitle}>{t('reports.inventoryValue')}</h2>
+                <p className={styles.chartCaption}>{t('reports.inventoryValueCaption')}</p>
               </div>
               <div className={styles.chartBody}>
                 {inventory.length > 0 ? (
@@ -252,7 +249,7 @@ export const ReportsPage: React.FC = () => {
                       <XAxis dataKey="warehouseName" {...axisProps} />
                       <YAxis tickFormatter={compactCurrency} width={56} {...axisProps} />
                       <Tooltip
-                        content={<ChartTooltip format={(v) => currency.format(v)} />}
+                        content={<ChartTooltip format={(v) => formatCurrency(v)} />}
                         cursor={{ fill: 'var(--color-primary-a10)' }}
                       />
                       <Bar
@@ -272,8 +269,8 @@ export const ReportsPage: React.FC = () => {
 
             <div className={styles.chartCard}>
               <div className={styles.chartHeader}>
-                <h2 className={styles.chartTitle}>Items held by warehouse</h2>
-                <p className={styles.chartCaption}>Unit count at each location</p>
+                <h2 className={styles.chartTitle}>{t('reports.itemsHeld')}</h2>
+                <p className={styles.chartCaption}>{t('reports.itemsHeldCaption')}</p>
               </div>
               <div className={styles.chartBody}>
                 {inventory.length > 0 ? (

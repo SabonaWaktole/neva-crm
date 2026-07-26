@@ -9,9 +9,13 @@ import { Card } from '../../components/ui/Card/Card';
 import { SettingsLayout } from '../../components/layout/SettingsLayout/SettingsLayout';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useLogout } from '../../hooks/useLogout';
-import { useTenantSettings } from '../../hooks/useTenantSettings';
+import { useTenantSettings, SUPPORTED_LOCALES } from '../../hooks/useTenantSettings';
+import type { TenantSettings } from '../../hooks/useTenantSettings';
+import { useToast } from '../../components/ui/Toast';
 import { ImagePicker } from '../../components/ui/ImagePicker';
+import { LanguagePicker } from '../../components/settings/LanguagePicker';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from './AccountSettingsPage.module.css';
 
 const mockNavItems: NavItem[] = [
@@ -24,20 +28,136 @@ const mockNavItems: NavItem[] = [
   { id: 'settings', label: 'Settings', icon: 'settings', isActive: true },
 ];
 
+/**
+ * The currencies offered in the picker.
+ *
+ * A short list rather than all 162 ISO codes: a dropdown of every currency on
+ * earth is worse to use than a short one, and the server validates against the
+ * full `Intl.supportedValuesOf('currency')` set regardless — so this list can
+ * grow without any server change.
+ */
+const CURRENCY_OPTIONS = [
+  { code: 'USD', label: 'USD — US Dollar ($)' },
+  { code: 'EUR', label: 'EUR — Euro (€)' },
+  { code: 'GBP', label: 'GBP — British Pound (£)' },
+  { code: 'CAD', label: 'CAD — Canadian Dollar ($)' },
+  { code: 'AUD', label: 'AUD — Australian Dollar ($)' },
+  { code: 'ETB', label: 'ETB — Ethiopian Birr (Br)' },
+  { code: 'KES', label: 'KES — Kenyan Shilling (KSh)' },
+  { code: 'NGN', label: 'NGN — Nigerian Naira (₦)' },
+  { code: 'INR', label: 'INR — Indian Rupee (₹)' },
+  { code: 'JPY', label: 'JPY — Japanese Yen (¥)' },
+];
+
+/**
+ * A shortlist, not all 418 IANA zones — a dropdown of every zone on earth is
+ * unusable. The server validates against the full `Intl.supportedValuesOf`
+ * set, so this list can grow with no server change.
+ */
+const TIMEZONE_OPTIONS = [
+  'UTC',
+  'Europe/Tirane',
+  'Europe/London',
+  'Europe/Berlin',
+  'Africa/Addis_Ababa',
+  'Africa/Nairobi',
+  'Africa/Lagos',
+  'America/New_York',
+  'America/Chicago',
+  'America/Los_Angeles',
+  'Asia/Dubai',
+  'Asia/Kolkata',
+  'Asia/Tokyo',
+  'Australia/Sydney',
+];
+
+const LOCALE_LABELS: Record<(typeof SUPPORTED_LOCALES)[number], string> = {
+  'en-US': 'English (United States) — 1,234.56',
+  'en-GB': 'English (United Kingdom) — 1,234.56',
+  'sq-AL': 'Albanian (Albania) — 1 234,56',
+};
+
+/** The fields this form owns. Branding is deliberately not among them. */
+type FormState = Pick<
+  TenantSettings,
+  | 'name'
+  | 'currency'
+  | 'locale'
+  | 'timezone'
+  | 'defaultLanguage'
+  | 'requiresQuotationApproval'
+  | 'registrationNumber'
+  | 'addressLine'
+  | 'addressCity'
+  | 'addressState'
+  | 'addressPostalCode'
+  | 'contactEmail'
+  | 'contactPhone'
+>;
+
+const EMPTY_FORM: FormState = {
+  name: '',
+  currency: 'USD',
+  locale: 'en-US',
+  timezone: 'UTC',
+  defaultLanguage: 'en',
+  requiresQuotationApproval: true,
+  registrationNumber: '',
+  addressLine: '',
+  addressCity: '',
+  addressState: '',
+  addressPostalCode: '',
+  contactEmail: '',
+  contactPhone: '',
+};
+
+const toFormState = (settings: TenantSettings): FormState => ({
+  name: settings.name ?? '',
+  currency: settings.currency,
+  locale: settings.locale,
+  timezone: settings.timezone,
+  defaultLanguage: settings.defaultLanguage,
+  requiresQuotationApproval: settings.requiresQuotationApproval,
+  // Null means "never set". The inputs are controlled, so it becomes '' here
+  // and is normalised back to null server-side on save.
+  registrationNumber: settings.registrationNumber ?? '',
+  addressLine: settings.addressLine ?? '',
+  addressCity: settings.addressCity ?? '',
+  addressState: settings.addressState ?? '',
+  addressPostalCode: settings.addressPostalCode ?? '',
+  contactEmail: settings.contactEmail ?? '',
+  contactPhone: settings.contactPhone ?? '',
+});
+
 export const AccountSettingsPage = () => {
   const navigate = useNavigate();
   const { tenantSlug } = useParams();
   const { user, setUser } = useAuthStore();
   const { logout } = useLogout();
-  const isBusinessOwner = user?.role === 'BUSINESS_OWNER';
+  const toast = useToast();
+  const { t } = useTranslation('settings');
+  const { t: tc } = useTranslation('common');
   const { fetchSettings, updateSettings, loading } = useTenantSettings();
 
-  const [requiresQuotationApproval, setRequiresQuotationApproval] = useState(true);
+  // One expression for "may edit workspace settings", used by every control on
+  // the page. There used to be two — an `isBusinessOwner` const and a separate
+  // `roleName !== 'Business Owner'` string comparison — which could disagree
+  // for SUPER_ADMIN. Same class of bug as the duplicated nav arrays.
+  const isBusinessOwner = user?.role === 'BUSINESS_OWNER';
+
+  const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [saved, setSaved] = useState<TenantSettings | null>(null);
+
+  const setField = <K extends keyof FormState>(key: K, value: FormState[K]) =>
+    setForm((prev) => ({ ...prev, [key]: value }));
 
   const loadSettings = () => {
-    fetchSettings().then((settings) => {
-      setRequiresQuotationApproval(settings.requiresQuotationApproval);
-    }).catch(console.error);
+    fetchSettings()
+      .then((settings) => {
+        setSaved(settings);
+        setForm(toFormState(settings));
+      })
+      .catch(() => toast.error(tc('feedback.loadFailed')));
   };
 
   useEffect(() => {
@@ -52,15 +172,38 @@ export const AccountSettingsPage = () => {
 
   const handleSave = async () => {
     try {
-      await updateSettings({ requiresQuotationApproval });
-      alert('Settings saved successfully');
-    } catch (err) {
-      alert('Failed to save settings');
+      const updated = await updateSettings(form);
+      setSaved(updated);
+      setForm(toFormState(updated));
+
+      // The money formatter reads currency and locale from the auth store, so
+      // it has to learn about the change without waiting for a page reload.
+      if (user) {
+        setUser({
+          ...user,
+          tenantCurrency: updated.currency,
+          tenantLocale: updated.locale,
+          tenantTimezone: updated.timezone,
+          tenantDateFormat: updated.dateFormat,
+        });
+      }
+      toast.success(tc('feedback.saved'));
+    } catch {
+      toast.error(tc('feedback.saveFailed'));
     }
   };
 
+  const handleDiscard = () => {
+    if (saved) setForm(toFormState(saved));
+  };
+
   const userName = user?.userId ? `User ${user.userId.substring(0, 8)}` : 'Settings User';
-  const roleName = user?.role === 'SUPER_ADMIN' ? 'Super Admin' : user?.role === 'BUSINESS_OWNER' ? 'Business Owner' : 'Staff';
+  const roleName =
+    user?.role === 'SUPER_ADMIN'
+      ? 'Super Admin'
+      : user?.role === 'BUSINESS_OWNER'
+        ? 'Business Owner'
+        : 'Staff';
 
   const handleNavClick = (id: string) => {
     navigate(`/${tenantSlug || ''}/${id === 'dashboard' ? '' : id}`);
@@ -83,33 +226,35 @@ export const AccountSettingsPage = () => {
     >
       <SettingsLayout activeNavId="company">
         <div className={styles.container}>
-          {/* Page Header */}
           <div className={styles.headerBlock}>
             <nav aria-label="Breadcrumb" className={styles.breadcrumb}>
               <ol className={styles.breadcrumbList}>
-                <li><a href="#settings" className={styles.breadcrumbLink}>Settings</a></li>
+                <li><a href="#settings" className={styles.breadcrumbLink}>{t('breadcrumb')}</a></li>
                 <li><ChevronRight size={14} /></li>
-                <li aria-current="page" className={styles.breadcrumbCurrent}>Company Settings</li>
+                <li aria-current="page" className={styles.breadcrumbCurrent}>{t('company.title')}</li>
               </ol>
             </nav>
-            <h1 className={styles.title}>Company Settings</h1>
-            <p className={styles.subtitle}>
-              Manage your organization's core details, localization, and preferences.
-            </p>
+            <h1 className={styles.title}>{t('company.title')}</h1>
+            <p className={styles.subtitle}>{t('company.subtitle')}</p>
           </div>
 
           <div className={styles.sectionsColumn}>
             {/*
-              Branding is API-backed and saves on upload, so it is its own
-              enabled card — separate from the Company Profile fields below,
-              which are still awaiting an endpoint.
+              Branding uploads immediately and is therefore NOT governed by the
+              Save/Discard footer below. Previously the page-wide footer implied
+              it was, so "Discard Changes" appeared to offer a way back from a
+              logo replacement that had in fact already been committed. Saying so
+              on the card is the honest fix; making Save/Discard actually govern
+              an upload would mean deferring the upload and deleting the orphaned
+              asset on discard, which is a media-lifecycle feature, not this.
             */}
             <Card padding="lg" className={styles.card}>
               <div className={styles.cardHeader}>
                 <div className={styles.cardHeaderWithIcon}>
                   <ImagePlus size={17} />
-                  <h2 className={styles.cardTitle}>Branding</h2>
+                  <h2 className={styles.cardTitle}>{t('company.branding.title')}</h2>
                 </div>
+                <span className={styles.comingSoonBadge}>{t('company.branding.savedAutomatically')}</span>
               </div>
 
               <ImagePicker
@@ -117,8 +262,8 @@ export const AccountSettingsPage = () => {
                 tenantSlug={tenantSlug || ''}
                 value={user?.tenantLogoUrl ?? null}
                 onChange={(url) => user && setUser({ ...user, tenantLogoUrl: url })}
-                label="Company logo"
-                hint="Square image, at least 256×256. Shown in the sidebar and on customer-facing documents."
+                label={t('company.branding.logoLabel')}
+                hint={t('company.branding.logoHint')}
                 disabled={!isBusinessOwner}
               />
 
@@ -128,103 +273,216 @@ export const AccountSettingsPage = () => {
                 value={user?.tenantCoverImageUrl ?? null}
                 onChange={(url) => user && setUser({ ...user, tenantCoverImageUrl: url })}
                 variant="banner"
-                label="Company banner"
-                hint="Wide image, ideally 1600×400 or larger."
+                label={t('company.branding.bannerLabel')}
+                hint={t('company.branding.bannerHint')}
                 disabled={!isBusinessOwner}
               />
 
+              <p className={styles.helperText}>{t('company.branding.autosaveNote')}</p>
+
               {!isBusinessOwner && (
-                <p className={styles.helperText}>
-                  Only Business Owners can change workspace branding.
-                </p>
+                <p className={styles.helperText}>{t('company.branding.ownerOnly')}</p>
               )}
             </Card>
 
-            {/* Company Profile Section — not yet backed by the API, shown disabled */}
-            <Card padding="lg" className={`${styles.card} ${styles.disabledSection}`}>
+            <Card padding="lg" className={styles.card}>
               <div className={styles.cardHeader}>
-                <h2 className={styles.cardTitle}>Company Profile</h2>
-                <span className={styles.comingSoonBadge}>Coming soon</span>
+                <h2 className={styles.cardTitle}>{t('company.profile.title')}</h2>
               </div>
 
               <div className={styles.twoColGrid}>
-                <TextInput label="Company Name *" placeholder="Your company name" disabled />
-                <TextInput label="Registration Number" placeholder="e.g. 12345678" disabled />
+                <TextInput
+                  label={t('company.profile.nameLabel')}
+                  placeholder={t('company.profile.namePlaceholder')}
+                  value={form.name}
+                  onChange={(e) => setField('name', e.target.value)}
+                  disabled={!isBusinessOwner}
+                />
+                <TextInput
+                  label={t('company.profile.registrationNumberLabel')}
+                  placeholder={t('company.profile.registrationNumberPlaceholder')}
+                  value={form.registrationNumber ?? ''}
+                  onChange={(e) => setField('registrationNumber', e.target.value)}
+                  disabled={!isBusinessOwner}
+                />
               </div>
 
               <div>
-                <TextInput label="Registered Address" placeholder="Street address" disabled />
+                <TextInput
+                  label={t('company.profile.addressLabel')}
+                  placeholder={t('company.profile.addressPlaceholder')}
+                  value={form.addressLine ?? ''}
+                  onChange={(e) => setField('addressLine', e.target.value)}
+                  disabled={!isBusinessOwner}
+                />
                 <div className={styles.addressRow}>
-                  <TextInput placeholder="City" disabled />
-                  <TextInput placeholder="State/Region" disabled />
-                  <TextInput placeholder="Postal Code" disabled />
+                  <TextInput
+                    placeholder={t('company.profile.city')}
+                    aria-label={t('company.profile.city')}
+                    value={form.addressCity ?? ''}
+                    onChange={(e) => setField('addressCity', e.target.value)}
+                    disabled={!isBusinessOwner}
+                  />
+                  <TextInput
+                    placeholder={t('company.profile.state')}
+                    aria-label={t('company.profile.state')}
+                    value={form.addressState ?? ''}
+                    onChange={(e) => setField('addressState', e.target.value)}
+                    disabled={!isBusinessOwner}
+                  />
+                  <TextInput
+                    placeholder={t('company.profile.postalCode')}
+                    aria-label={t('company.profile.postalCode')}
+                    value={form.addressPostalCode ?? ''}
+                    onChange={(e) => setField('addressPostalCode', e.target.value)}
+                    disabled={!isBusinessOwner}
+                  />
                 </div>
               </div>
 
+              {/*
+                No asterisk on the contact email: every existing tenant has none,
+                so requiring it would make the form unsubmittable for all of them.
+                It is optional in the database and optional here.
+              */}
               <div className={styles.twoColGrid}>
-                <TextInput label="Primary Contact Email *" type="email" placeholder="billing@yourcompany.com" disabled />
-                <TextInput label="Contact Phone" type="tel" placeholder="+1 (555) 000-0000" disabled />
+                <TextInput
+                  label={t('company.profile.contactEmailLabel')}
+                  type="email"
+                  placeholder={t('company.profile.contactEmailPlaceholder')}
+                  value={form.contactEmail ?? ''}
+                  onChange={(e) => setField('contactEmail', e.target.value)}
+                  disabled={!isBusinessOwner}
+                />
+                <TextInput
+                  label={t('company.profile.contactPhoneLabel')}
+                  type="tel"
+                  placeholder={t('company.profile.contactPhonePlaceholder')}
+                  value={form.contactPhone ?? ''}
+                  onChange={(e) => setField('contactPhone', e.target.value)}
+                  disabled={!isBusinessOwner}
+                />
               </div>
             </Card>
 
             <div className={styles.localizationGrid}>
-              {/* Localization — not yet backed by the API, shown disabled */}
-              <Card padding="lg" className={styles.disabledSection}>
+              <Card padding="lg">
                 <div className={styles.cardHeader}>
                   <div>
-                    <h2 className={styles.cardTitle}>Localization</h2>
-                    <p className={styles.cardSubtitle}>Regional formats for the organization.</p>
+                    <h2 className={styles.cardTitle}>{t('company.localization.title')}</h2>
+                    <p className={styles.cardSubtitle}>{t('company.localization.subtitle')}</p>
                   </div>
-                  <span className={styles.comingSoonBadge}>Coming soon</span>
                 </div>
 
                 <div className={styles.sectionsColumn} style={{ marginTop: 'var(--spacing-md)' }}>
                   <div className={styles.fieldGroup}>
-                    <label className={styles.fieldLabel}>Timezone</label>
-                    <select className={styles.nativeSelect} disabled>
-                      <option>UTC-08:00 Pacific Time (US & Canada)</option>
+                    <label className={styles.fieldLabel} htmlFor="currencySelect">{t('company.localization.currencyLabel')}</label>
+                    <select
+                      id="currencySelect"
+                      className={styles.nativeSelect}
+                      value={form.currency}
+                      onChange={(e) => setField('currency', e.target.value)}
+                      disabled={!isBusinessOwner}
+                    >
+                      {/*
+                        A tenant whose stored currency is outside the shortlist
+                        still sees its own value rather than being silently
+                        switched to the first option on the next save.
+                      */}
+                      {!CURRENCY_OPTIONS.some((c) => c.code === form.currency) && (
+                        <option value={form.currency}>{form.currency}</option>
+                      )}
+                      {CURRENCY_OPTIONS.map((c) => (
+                        <option key={c.code} value={c.code}>{c.label}</option>
+                      ))}
                     </select>
+                    <p className={styles.helperText}>{t('company.localization.currencyHint')}</p>
                   </div>
 
                   <div className={styles.fieldGroup}>
-                    <label className={styles.fieldLabel}>Date Format</label>
-                    <select className={styles.nativeSelect} disabled>
-                      <option>MM/DD/YYYY (12/31/2023)</option>
+                    <label className={styles.fieldLabel} htmlFor="localeSelect">{t('company.localization.conventionsLabel')}</label>
+                    <select
+                      id="localeSelect"
+                      className={styles.nativeSelect}
+                      value={form.locale}
+                      onChange={(e) => setField('locale', e.target.value as FormState['locale'])}
+                      disabled={!isBusinessOwner}
+                    >
+                      {SUPPORTED_LOCALES.map((code) => (
+                        <option key={code} value={code}>{LOCALE_LABELS[code]}</option>
+                      ))}
                     </select>
                   </div>
 
+                  {/*
+                    Timezone is now genuinely consumed — it decides which day an
+                    instant belongs to on both the dashboard KPI and the calendar
+                    — so the control is live.
+
+                    Date Format is still NOT consumed: date ordering comes from
+                    the locale via Intl, and layering an explicit pattern on top
+                    would let the two disagree. It stays disabled with copy that
+                    says so, rather than becoming a setting that quietly does
+                    nothing. See TD-012.
+                  */}
                   <div className={styles.fieldGroup}>
-                    <label className={styles.fieldLabel}>Base Currency</label>
-                    <select className={styles.nativeSelect} disabled>
-                      <option>USD - US Dollar ($)</option>
+                    <label className={styles.fieldLabel} htmlFor="timezoneSelect">
+                      {t('company.localization.timezoneLabel')}
+                    </label>
+                    <select
+                      id="timezoneSelect"
+                      className={styles.nativeSelect}
+                      value={form.timezone}
+                      onChange={(e) => setField('timezone', e.target.value)}
+                      disabled={!isBusinessOwner}
+                    >
+                      {/* A tenant already on a zone outside the shortlist keeps
+                          its own value rather than being switched on next save. */}
+                      {!TIMEZONE_OPTIONS.includes(form.timezone) && (
+                        <option value={form.timezone}>{form.timezone}</option>
+                      )}
+                      {TIMEZONE_OPTIONS.map((zone) => (
+                        <option key={zone} value={zone}>{zone}</option>
+                      ))}
                     </select>
-                    <p className={styles.helperText}>Changing base currency affects all historical reporting.</p>
+                    <p className={styles.helperText}>{t('company.localization.timezoneHint')}</p>
+                  </div>
+
+                  <div className={styles.fieldGroup}>
+                    <label className={styles.fieldLabel}>{t('company.localization.dateFormatLabel')}</label>
+                    <select className={styles.nativeSelect} disabled value={saved?.dateFormat ?? 'MM/DD/YYYY'}>
+                      <option value={saved?.dateFormat ?? 'MM/DD/YYYY'}>{saved?.dateFormat ?? 'MM/DD/YYYY'}</option>
+                    </select>
+                    <p className={styles.helperText}>{t('company.localization.dateFormatNotUsed')}</p>
                   </div>
                 </div>
               </Card>
 
-              {/* Language — not yet backed by the API, shown disabled */}
-              <Card padding="lg" className={styles.disabledSection}>
+              <Card padding="lg">
                 <div className={styles.cardHeaderWithIcon} style={{ borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: 'var(--spacing-md)', marginBottom: 'var(--spacing-md)' }}>
                   <Globe color="var(--color-on-surface-variant)" />
-                  <h2 className={styles.cardTitle}>Language</h2>
-                  <span className={styles.comingSoonBadge} style={{ marginLeft: 'auto' }}>Coming soon</span>
+                  <h2 className={styles.cardTitle}>{t('company.language.title')}</h2>
                 </div>
 
                 <div className={styles.fieldGroup}>
-                  <label className={styles.fieldLabel}>Default System Language</label>
-                  <select className={styles.nativeSelect} disabled>
-                    <option>English (US)</option>
-                  </select>
+                  <label className={styles.fieldLabel} htmlFor="defaultLanguageSelect">
+                    {t('company.language.defaultLabel')}
+                  </label>
+                  <LanguagePicker
+                    id="defaultLanguageSelect"
+                    value={form.defaultLanguage}
+                    onChange={(next) => next && setField('defaultLanguage', next)}
+                    disabled={!isBusinessOwner}
+                  />
+                  <p className={styles.helperText}>{t('company.language.hint')}</p>
                 </div>
               </Card>
 
-              {/* Quotations — the only section actually wired to the backend */}
               <Card padding="lg">
                 <div className={styles.cardHeader} style={{ borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: 'var(--spacing-md)', marginBottom: 'var(--spacing-md)' }}>
                   <div>
-                    <h2 className={styles.cardTitle}>Quotations</h2>
-                    <p className={styles.cardSubtitle}>Manage quotation workflow settings.</p>
+                    <h2 className={styles.cardTitle}>{t('company.quotations.title')}</h2>
+                    <p className={styles.cardSubtitle}>{t('company.quotations.subtitle')}</p>
                   </div>
                 </div>
 
@@ -232,26 +490,31 @@ export const AccountSettingsPage = () => {
                   <label className={styles.checkboxLabel}>
                     <input
                       type="checkbox"
-                      checked={requiresQuotationApproval}
-                      onChange={(e) => setRequiresQuotationApproval(e.target.checked)}
-                      disabled={loading || roleName !== 'Business Owner'}
+                      checked={form.requiresQuotationApproval}
+                      onChange={(e) => setField('requiresQuotationApproval', e.target.checked)}
+                      disabled={loading || !isBusinessOwner}
                       className={styles.checkbox}
                     />
-                    <span className={styles.checkboxText}>Require Approval for Quotations</span>
+                    <span className={styles.checkboxText}>{t('company.quotations.requireApproval')}</span>
                   </label>
                   <p className={styles.helperText} style={{ marginLeft: '26px' }}>
-                    If enabled, Staff quotations must be approved by a Business Owner before sending.
+                    {t('company.quotations.requireApprovalHint')}
                   </p>
                 </div>
               </Card>
             </div>
           </div>
 
-          {/* Page Action Footer */}
-          <div className={styles.footer}>
-            <Button variant="outline" onClick={loadSettings} disabled={loading}>Discard Changes</Button>
-            <Button variant="primary" onClick={handleSave} isLoading={loading}>Save Changes</Button>
-          </div>
+          {isBusinessOwner && (
+            <div className={styles.footer}>
+              <Button variant="outline" onClick={handleDiscard} disabled={loading || !saved}>
+                {tc('actions.discardChanges')}
+              </Button>
+              <Button variant="primary" onClick={handleSave} isLoading={loading}>
+                {tc('actions.saveChanges')}
+              </Button>
+            </div>
+          )}
         </div>
       </SettingsLayout>
     </AppLayout>

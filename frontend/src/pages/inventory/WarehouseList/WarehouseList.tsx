@@ -10,6 +10,7 @@ import styles from './WarehouseList.module.css';
 
 import { useWarehouses, useCreateWarehouse, useUpdateWarehouse, useDeleteWarehouse } from '../../../hooks/useWarehouses';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { AppLayout } from '../../../components/layout/AppLayout/AppLayout';
 import { Sidebar } from '../../../components/layout/Sidebar/Sidebar';
 import { SettingsLayout } from '../../../components/layout/SettingsLayout/SettingsLayout';
@@ -19,6 +20,7 @@ import { useLogout } from '../../../hooks/useLogout';
 import { useNavigation } from '../../../hooks/useNavigation';
 
 const WarehouseListContent: React.FC = () => {
+  const { t } = useTranslation('inventory');
   const { warehouses, fetchWarehouses } = useWarehouses();
   const { createWarehouse } = useCreateWarehouse();
   const { updateWarehouse } = useUpdateWarehouse();
@@ -81,8 +83,8 @@ const WarehouseListContent: React.FC = () => {
     <div className={styles.pageContainer}>
       <header className={styles.header}>
         <div>
-          <h2 className={styles.pageTitle}>Warehouse Infrastructure</h2>
-          <p className={styles.pageSubtitle}>Configure and manage your regional logistics hubs.</p>
+          <h2 className={styles.pageTitle}>{t('warehouses.title')}</h2>
+          <p className={styles.pageSubtitle}>{t('warehouses.subtitle')}</p>
         </div>
         {isBusinessOwner && (
           <button className={styles.addButton} onClick={handleOpenAdd}>
@@ -95,21 +97,21 @@ const WarehouseListContent: React.FC = () => {
       {/* MOCK DATA - Backend currently only supports Warehouse entities, not capacity/traffic KPIs */}
       <div className={styles.kpiGrid}>
         <KPICard
-          title="Total Active"
+          title={t('warehouses.totalActive')}
           value={warehouses.length.toString()}
           icon={<Warehouse />}
           trendValue="0%"
           trendDirection="up"
         />
         <KPICard
-          title="Capacity Used"
+          title={t('warehouses.capacityUsed')}
           value="84%"
           icon={<Package />}
           trendValue="2%"
           trendDirection="up"
         />
         <KPICard
-          title="Hub Traffic"
+          title={t('warehouses.hubTraffic')}
           value="Optimal"
           icon={<Truck />}
         />
@@ -142,6 +144,7 @@ const WarehouseListContent: React.FC = () => {
 };
 
 export const WarehouseList: React.FC = () => {
+  const { t } = useTranslation('inventory');
   const navigate = useNavigate();
   const { tenantSlug } = useParams();
   const { user } = useAuthStore();
@@ -178,9 +181,9 @@ export const WarehouseList: React.FC = () => {
           <div style={{ marginBottom: 'var(--spacing-lg)' }}>
             <nav aria-label="Breadcrumb" style={{ display: 'flex', alignItems: 'center', color: 'var(--color-on-surface-variant)', fontSize: 'var(--font-size-label-sm)', marginBottom: 'var(--spacing-xs)' }}>
               <ol style={{ display: 'flex', alignItems: 'center', listStyle: 'none', padding: 0, margin: 0, gap: '8px' }}>
-                <li><a href="#settings" onClick={(e) => { e.preventDefault(); navigate(`/${tenantSlug}/settings/profile`); }} style={{ color: 'inherit', textDecoration: 'none' }}>Settings</a></li>
+                <li><a href="#settings" onClick={(e) => { e.preventDefault(); navigate(`/${tenantSlug}/settings/profile`); }} style={{ color: 'inherit', textDecoration: 'none' }}>{t('warehouses.breadcrumbSettings')}</a></li>
                 <li><ChevronRight size={14} /></li>
-                <li aria-current="page" style={{ color: 'var(--color-on-surface)', fontWeight: 600 }}>Warehouses</li>
+                <li aria-current="page" style={{ color: 'var(--color-on-surface)', fontWeight: 600 }}>{t('warehouses.breadcrumbCurrent')}</li>
               </ol>
             </nav>
           </div>

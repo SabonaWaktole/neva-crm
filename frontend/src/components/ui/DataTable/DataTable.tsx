@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ArrowDown, ArrowUp, ChevronsUpDown } from 'lucide-react';
 import { useIsDesktop } from '../../../hooks/useMediaQuery';
 import styles from './DataTable.module.css';
@@ -88,6 +89,7 @@ export function DataTable<T>({
   selection,
   className = '',
 }: DataTableProps<T>) {
+  const { t } = useTranslation('common');
   const isEmpty = !isLoading && rows.length === 0;
   const isInteractive = Boolean(onRowClick);
   // Render one layout or the other, never both, so rows are not duplicated
@@ -198,10 +200,10 @@ export function DataTable<T>({
         {selection && selectableKeys.length > 0 && !isLoading && (
           <div className={styles.cardSelectAll}>
             <label className={styles.cardSelectAllLabel}>
-              {renderCheckbox(allSelected, someSelected, toggleAll, 'Select all rows')}
+              {renderCheckbox(allSelected, someSelected, toggleAll, t('table.selectAllRows'))}
               {selectedOnPage.length > 0
-                ? `${selectedOnPage.length} selected`
-                : 'Select all'}
+                ? t('table.selected', { count: selectedOnPage.length })
+                : t('table.selectAll')}
             </label>
           </div>
         )}
@@ -279,7 +281,7 @@ export function DataTable<T>({
             <tr>
               {selection && (
                 <th scope="col" className={styles.checkboxCell} style={{ width: '44px' }}>
-                  {renderCheckbox(allSelected, someSelected, toggleAll, 'Select all rows')}
+                  {renderCheckbox(allSelected, someSelected, toggleAll, t('table.selectAllRows'))}
                 </th>
               )}
               {columns.map((column) => {

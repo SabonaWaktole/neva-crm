@@ -152,6 +152,17 @@
   margin-top: calc(-1 * var(--spacing-sm));
 }
 
+/* Matches TextInput's own label so the language field does not read as a
+   different kind of control from the ones above it. */
+.fieldLabel {
+  display: block;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-label-md);
+  font-weight: 540;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
 .formActions {
   display: flex;
   justify-content: flex-end;

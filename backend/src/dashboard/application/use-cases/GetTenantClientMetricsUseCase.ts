@@ -1,9 +1,16 @@
 import { IClientRepository } from '../../../clients/domain/repositories/IClientRepository';
+import { dayBoundsInZone } from '@shared/domain/time/tenantDay';
 import { Client } from '../../../clients/domain/entities/Client';
 import { prisma } from '../../../shared/infrastructure/prisma/client';
 
 export interface GetTenantClientMetricsDTO {
   tenantId: string;
+  /**
+   * The tenant's configured IANA timezone. Day buckets below are resolved in
+   * it, so "Appointments Today" means the tenant's today rather than the
+   * server host's. See tenantDay.ts for the defect this closes.
+   */
+  timeZone: string;
   /** The requesting user. Only used when their role scopes them to own data. */
   userId?: string;
   /** Requesting user's role. STAFF sees only their own figures. */
@@ -36,15 +43,13 @@ const OPEN_QUOTATION_STATUSES = ['DRAFT', 'PENDING_APPROVAL', 'SENT'];
 /** A cancelled appointment is not something the day's count should include. */
 const ACTIVE_APPOINTMENT_STATUSES = ['SCHEDULED', 'CONFIRMED', 'COMPLETED'];
 
-/** Local midnight `offset` days from today, and midnight the day after. */
-const dayBounds = (offset: number): { start: Date; end: Date } => {
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-  start.setDate(start.getDate() + offset);
-  const end = new Date(start);
-  end.setDate(end.getDate() + 1);
-  return { start, end };
-};
+/*
+ * `dayBounds` used to be `new Date(); setHours(0,0,0,0)` — midnight in the
+ * SERVER HOST's timezone. That silently disagreed with the calendar, which
+ * bucketed by the browser's timezone: with the host on UTC+3 and a user on
+ * UTC+2, a 21:30Z appointment was counted "today" here and drawn on the next
+ * day there. Both now resolve through the tenant's zone.
+ */
 
 export class GetTenantClientMetricsUseCase {
   constructor(private clientRepository: IClientRepository) {}
@@ -81,8 +86,8 @@ export class GetTenantClientMetricsUseCase {
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
     const totalClientsLastWeek = allClients.filter((c: Client) => c.createdAt < oneWeekAgo).length;
 
-    const today = dayBounds(0);
-    const yesterday = dayBounds(-1);
+    const today = dayBoundsInZone(dto.timeZone, 0);
+    const yesterday = dayBoundsInZone(dto.timeZone, -1);
 
     // Counted directly through Prisma rather than via repositories: these are
     // read-only aggregates for a dashboard, and adding count methods to three

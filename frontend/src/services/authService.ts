@@ -12,7 +12,7 @@ export const authService = {
     return response.data.user ?? null;
   },
 
-  updateProfile: async (data: { firstName?: string | null; lastName?: string | null; phone?: string | null; email?: string }) => {
+  updateProfile: async (data: { firstName?: string | null; lastName?: string | null; phone?: string | null; email?: string; language?: string | null }) => {
     const response = await apiClient.put('/auth/me', data);
     return response.data;
   },
@@ -36,7 +36,6 @@ export const authService = {
     urlSlug: string;
     ownerEmail: string;
     ownerPassword: string;
-    locale?: string;
   }) => {
     const response = await apiClient.post('/auth/register', data);
     return response.data;

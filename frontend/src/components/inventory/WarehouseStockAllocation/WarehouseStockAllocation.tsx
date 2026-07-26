@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Store, MapPin } from 'lucide-react';
 import { Button } from '../../ui/Button/Button';
 import { WarehouseStockRow } from './WarehouseStockRow';
@@ -24,6 +25,8 @@ export function WarehouseStockAllocation({
   onRemoveRow,
   availableWarehouses,
 }: WarehouseStockAllocationProps) {
+  const { t } = useTranslation('inventory');
+
   const totalQuantity = rows.reduce((sum, row) => sum + (Number(row.quantity) || 0), 0);
 
   return (
@@ -31,7 +34,7 @@ export function WarehouseStockAllocation({
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <MapPin size={20} className={styles.icon} />
-          <h2 className={styles.title}>Starting Stock by Location</h2>
+          <h2 className={styles.title}>{t('stock.allocationTitle')}</h2>
         </div>
         <Button 
           type="button" 
@@ -41,7 +44,7 @@ export function WarehouseStockAllocation({
           iconPosition="left"
           disabled={rows.filter((r) => r.warehouseId).length >= availableWarehouses.length}
         >
-          Add Warehouse Row
+          {t('stock.addWarehouseRow')}
         </Button>
       </div>
 
@@ -75,7 +78,7 @@ export function WarehouseStockAllocation({
       </div>
 
       <div className={styles.footer}>
-        <span className={styles.summaryText}>Total Aggregated Inventory Across Selected Nodes:</span>
+        <span className={styles.summaryText}>{t('stock.allocationTotal')}</span>
         <span className={styles.totalValue}>{totalQuantity}</span>
       </div>
     </div>

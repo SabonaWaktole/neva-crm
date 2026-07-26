@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {} from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { KeyRound, CheckCircle2, ArrowLeft } from 'lucide-react';
@@ -8,6 +9,7 @@ import { Button } from '../../components/ui/Button/Button';
 import { useForgotPassword } from '../../hooks/useForgotPassword';
 
 export const ForgotPasswordPage = () => {
+  const { t } = useTranslation('auth');
   const { tenantSlug } = useParams();
   const { requestReset, isLoading, error, isSuccess } = useForgotPassword();
   const [email, setEmail] = useState('');
@@ -23,15 +25,15 @@ export const ForgotPasswordPage = () => {
 
   return (
     <AuthLayout
-      title="Reset your password"
-      subtitle="Enter your email and we'll send you a link to reset your password."
+      title={t('forgotPassword.title')}
+      subtitle={t('forgotPassword.subtitle')}
       logoIcon={<KeyRound size={32} color="var(--color-primary)" />}
     >
       {isSuccess ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)', alignItems: 'center', textAlign: 'center' }}>
           <CheckCircle2 size={48} color="var(--color-success)" />
           <p style={{ fontFamily: 'var(--font-family-base)', fontSize: 'var(--font-size-body-md)', color: 'var(--color-on-surface)' }}>
-            If an account exists with that email, we've sent a password reset link.
+            {t('forgotPassword.sent')}
           </p>
           <Link 
             to={`/${tenantSlug || 'admin'}/login`}
@@ -57,8 +59,8 @@ export const ForgotPasswordPage = () => {
             </div>
           )}
           <TextInput 
-            label="Email Address" 
-            placeholder="name@company.com" 
+            label={t('forgotPassword.email')} 
+            placeholder={t('emailPlaceholder')} 
             type="email"
             id="email"
             value={email}
@@ -68,7 +70,7 @@ export const ForgotPasswordPage = () => {
           
           <div style={{ paddingTop: 'var(--spacing-sm)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
             <Button fullWidth variant="primary" type="submit" isLoading={isLoading}>
-              Send Reset Link
+              {t('forgotPassword.submit')}
             </Button>
             
             <div style={{ display: 'flex', justifyContent: 'center' }}>

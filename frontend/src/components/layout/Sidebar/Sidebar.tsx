@@ -8,6 +8,7 @@ import { Button } from '../../ui/Button/Button';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { resolveMediaUrl, srcSetFor } from '../../../services/mediaService';
 import styles from './Sidebar.module.css';
+import { useTranslation } from 'react-i18next';
 
 // Map material-symbols icon names to Lucide components
 const iconMap: Record<string, LucideIcon> = {
@@ -54,6 +55,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onNewEntryClick,
   onLogoutClick,
 }) => {
+  const { t } = useTranslation('common');
   const tenantLogoUrl = useAuthStore((state) => state.user?.tenantLogoUrl);
   const logoSrc = resolveMediaUrl(tenantLogoUrl);
 
@@ -130,7 +132,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           onClick={(e) => e.preventDefault()}
         >
           <HelpCircle className={styles.navIcon} size={20} />
-          <span className={styles.navLabel}>Support</span>
+          <span className={styles.navLabel}>{t('actions.support')}</span>
         </a>
         <a 
           className={`${styles.navItem} ${styles.logoutItem}`} 
@@ -141,7 +143,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           }}
         >
           <LogOut className={styles.navIcon} size={20} />
-          <span className={styles.navLabel}>Log Out</span>
+          <span className={styles.navLabel}>{t('actions.logOut')}</span>
         </a>
       </div>
     </nav>

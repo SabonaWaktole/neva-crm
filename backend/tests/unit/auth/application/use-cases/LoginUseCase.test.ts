@@ -24,6 +24,8 @@ describe('LoginUseCase', () => {
       updatePassword: jest.fn(),
       updateProfile: jest.fn(),
       updateRoleAndWarehouse: jest.fn(),
+      setActive: jest.fn(),
+      countAssignedWork: jest.fn(),
     };
     tenantRepository = {
       create: jest.fn(),
@@ -50,7 +52,7 @@ describe('LoginUseCase', () => {
 
   it('should login a tenant user successfully', async () => {
     tenantRepository.findBySlug.mockResolvedValue({ id: 'tenant-1', urlSlug: 'acme', name: 'Acme', createdAt: new Date() } as any);
-    userRepository.findByEmail.mockResolvedValue({ id: 'user-1', role: UserRole.STAFF, tenantId: 'tenant-1', hashedPassword: 'hashed' } as any);
+    userRepository.findByEmail.mockResolvedValue({ id: 'user-1', role: UserRole.STAFF, tenantId: 'tenant-1', hashedPassword: 'hashed', isActive: true } as any);
     passwordHasher.compare.mockResolvedValue(true);
     tokenService.sign.mockReturnValue('valid-jwt-token');
 
@@ -65,7 +67,7 @@ describe('LoginUseCase', () => {
   });
 
   it('should login a super admin successfully', async () => {
-    userRepository.findAnyByEmail.mockResolvedValue({ id: 'sa-1', role: UserRole.SUPER_ADMIN, tenantId: null, hashedPassword: 'hashed' } as any);
+    userRepository.findAnyByEmail.mockResolvedValue({ id: 'sa-1', role: UserRole.SUPER_ADMIN, tenantId: null, hashedPassword: 'hashed', isActive: true } as any);
     passwordHasher.compare.mockResolvedValue(true);
     tokenService.sign.mockReturnValue('sa-jwt-token');
 
@@ -81,7 +83,7 @@ describe('LoginUseCase', () => {
   });
 
   it('should login a regular user globally and fetch tenantSlug', async () => {
-    userRepository.findAnyByEmail.mockResolvedValue({ id: 'user-1', role: UserRole.STAFF, tenantId: 'tenant-1', hashedPassword: 'hashed' } as any);
+    userRepository.findAnyByEmail.mockResolvedValue({ id: 'user-1', role: UserRole.STAFF, tenantId: 'tenant-1', hashedPassword: 'hashed', isActive: true } as any);
     tenantRepository.findById.mockResolvedValue({ id: 'tenant-1', urlSlug: 'acme' } as any);
     passwordHasher.compare.mockResolvedValue(true);
     tokenService.sign.mockReturnValue('user-jwt-token');
@@ -99,7 +101,7 @@ describe('LoginUseCase', () => {
 
   it('should throw InvalidCredentialsError on invalid password', async () => {
     tenantRepository.findBySlug.mockResolvedValue({ id: 'tenant-1' } as any);
-    userRepository.findByEmail.mockResolvedValue({ id: 'user-1', role: UserRole.STAFF, tenantId: 'tenant-1', hashedPassword: 'hashed' } as any);
+    userRepository.findByEmail.mockResolvedValue({ id: 'user-1', role: UserRole.STAFF, tenantId: 'tenant-1', hashedPassword: 'hashed', isActive: true } as any);
     passwordHasher.compare.mockResolvedValue(false);
 
     await expect(useCase.execute({ email: 'staff@acme.com', password: 'wrong', tenantSlug: 'acme' }))
@@ -108,9 +110,23 @@ describe('LoginUseCase', () => {
 
   it('should throw InvalidCredentialsError if tenant slug is provided but user is SUPER_ADMIN', async () => {
     tenantRepository.findBySlug.mockResolvedValue({ id: 'tenant-1' } as any);
-    userRepository.findByEmail.mockResolvedValue({ id: 'user-1', role: UserRole.SUPER_ADMIN, tenantId: null, hashedPassword: 'hashed' } as any);
+    userRepository.findByEmail.mockResolvedValue({ id: 'user-1', role: UserRole.SUPER_ADMIN, tenantId: null, hashedPassword: 'hashed', isActive: true } as any);
 
     await expect(useCase.execute({ email: 'admin@platform.com', password: 'Pass', tenantSlug: 'acme' }))
       .rejects.toThrow(InvalidCredentialsError);
+  });
+
+  it('rejects a deactivated user with the same error as a wrong password', async () => {
+    tenantRepository.findBySlug.mockResolvedValue({ id: 'tenant-1', urlSlug: 'acme', name: 'Acme', createdAt: new Date() } as any);
+    userRepository.findByEmail.mockResolvedValue({ id: 'user-1', role: UserRole.STAFF, tenantId: 'tenant-1', hashedPassword: 'hashed', isActive: false } as any);
+    passwordHasher.compare.mockResolvedValue(true);
+
+    // Correct password, but the account is off-boarded: no new token is issued,
+    // and the generic error avoids disclosing that the account exists.
+    await expect(
+      useCase.execute({ email: 'staff@acme.com', password: 'Password123', tenantSlug: 'acme' })
+    ).rejects.toThrow(InvalidCredentialsError);
+
+    expect(tokenService.sign).not.toHaveBeenCalled();
   });
 });

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronRight, Edit3, Mail, MoreVertical, Phone, Settings, Filter, Search, PhoneCall, Video, FileText, Calendar } from 'lucide-react';
 import { useClientDetail, useClientHistory, useClientSettings } from '../../hooks/useClients';
@@ -20,7 +21,9 @@ import { useAddInteraction } from '../../hooks/useClients';
 import type { Appointment } from '../../types/appointment';
 import { useTeam } from '../../hooks/useTeam';
 import { findPersonById, getStaffDisplayName, getStaffInitials } from '../../utils/userUtils';
+import { useStatusLabel } from '../../hooks/useStatusLabel';
 import styles from './ClientDetailContent.module.css';
+import { useDateFormat } from '../../hooks/useDateFormat';
 
 /**
  * Custom field values are stored as JSONB and can be any JSON scalar, so they
@@ -31,8 +34,11 @@ import styles from './ClientDetailContent.module.css';
  * is falsy and fell through to the em dash used for "not set" — making "No"
  * indistinguishable from "never filled in".
  */
-const formatCustomFieldValue = (value: unknown): string => {
-  if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+const formatCustomFieldValue = (
+  value: unknown,
+  labels: { yes: string; no: string }
+): string => {
+  if (typeof value === 'boolean') return value ? labels.yes : labels.no;
   if (value === null || value === undefined || value === '') return '-';
   return String(value);
 };
@@ -53,6 +59,10 @@ const getAppointmentStatusVariant = (status: Appointment['status']) => {
 };
 
 export const ClientDetailContent: React.FC = () => {
+  const dates = useDateFormat();
+  const { t } = useTranslation('clients');
+  const { t: tc } = useTranslation('common');
+  const statusLabel = useStatusLabel();
   const { clientId, tenantSlug } = useParams();
   const navigate = useNavigate();
   const { client, isLoading: isClientLoading, fetchClient } = useClientDetail(clientId || '');
@@ -99,15 +109,15 @@ export const ClientDetailContent: React.FC = () => {
     fetchStaff();
   }, [fetchClient, fetchHistory, fetchSettings, fetchStaff]);
 
-  if (isClientLoading) return <div className={styles.container}>Loading client...</div>;
-  if (!client) return <div className={styles.container}>Client not found.</div>;
+  if (isClientLoading) return <div className={styles.container}>{t('detail.loading')}</div>;
+  if (!client) return <div className={styles.container}>{t('detail.notFound')}</div>;
 
   return (
     <div className={styles.container}>
       {/* Header section */}
       <div className={styles.headerArea}>
         <div className={styles.breadcrumbs}>
-          <span className={styles.breadcrumbLink}>Clients</span>
+          <span className={styles.breadcrumbLink}>{t('breadcrumb')}</span>
           <ChevronRight size={14} className={styles.breadcrumbSeparator} />
           <span className={styles.breadcrumbCurrent}>{client.name}</span>
         </div>
@@ -120,7 +130,7 @@ export const ClientDetailContent: React.FC = () => {
             <div className={styles.companyInfo}>
               <div className={styles.companyTitleRow}>
                 <h1 className={styles.companyName}>{client.name}</h1>
-                <Badge variant="primary">{client.status}</Badge>
+                <Badge variant="primary">{statusLabel.client(client.status)}</Badge>
               </div>
               <p className={styles.companySubtitle}>
                 {client.contactInfo?.email} {client.contactInfo?.phone ? `· ${client.contactInfo.phone}` : ''}
@@ -131,7 +141,7 @@ export const ClientDetailContent: React.FC = () => {
             <Button
               variant="outline"
               className={styles.iconButton}
-              aria-label="Edit client"
+              aria-label={t('detail.editAria')}
               onClick={() => navigate(`/${tenantSlug}/clients/${clientId}/edit`)}
             >
               <Edit3 size={18} />
@@ -140,7 +150,7 @@ export const ClientDetailContent: React.FC = () => {
               <Button
                 variant="outline"
                 className={styles.iconButton}
-                aria-label="Email client"
+                aria-label={t('detail.emailAria')}
                 onClick={() => window.location.assign(`mailto:${client.contactInfo?.email}`)}
               >
                 <Mail size={18} />
@@ -149,14 +159,14 @@ export const ClientDetailContent: React.FC = () => {
             <DropdownMenu
               align="right"
               trigger={
-                <Button variant="outline" className={styles.iconButton} aria-label="More actions">
+                <Button variant="outline" className={styles.iconButton} aria-label={t('detail.moreAria')}>
                   <MoreVertical size={18} />
                 </Button>
               }
               items={[
                 {
                   id: 'edit',
-                  label: 'Edit Client',
+                  label: t('detail.editClient'),
                   icon: <Edit3 size={16} />,
                   onClick: () => navigate(`/${tenantSlug}/clients/${clientId}/edit`),
                 },
@@ -172,7 +182,7 @@ export const ClientDetailContent: React.FC = () => {
         <div className={styles.leftColumn}>
           {/* Key Contact Card */}
           <Card padding="lg">
-            <h2 className={styles.cardTitle}>Key Contact</h2>
+            <h2 className={styles.cardTitle}>{t('detail.keyContact')}</h2>
             <div className={styles.contactDetails}>
               <Avatar
                 size="lg"
@@ -183,7 +193,7 @@ export const ClientDetailContent: React.FC = () => {
                 <h3 className={styles.contactName}>
                   {getStaffDisplayName(findPersonById(staff, client.assignedUserId))}
                 </h3>
-                <p className={styles.contactTitle}>Assigned User</p>
+                <p className={styles.contactTitle}>{t('detail.assignedUser')}</p>
               </div>
             </div>
             <div className={styles.contactActions}>
@@ -203,12 +213,12 @@ export const ClientDetailContent: React.FC = () => {
           {/* Custom Fields Card */}
           <Card padding="lg" className={styles.customFieldsCard}>
             <div className={styles.cardHeader}>
-              <h2 className={styles.cardTitle}>About</h2>
+              <h2 className={styles.cardTitle}>{t('detail.about')}</h2>
               <button
                 className={styles.settingsButton}
                 disabled
-                title="Custom field settings coming soon"
-                aria-label="Custom field settings (coming soon)"
+                title={t('detail.customFieldSettingsSoon')}
+                aria-label={t('detail.customFieldSettingsAria')}
               >
                 <Settings size={16} />
               </button>
@@ -218,13 +228,16 @@ export const ClientDetailContent: React.FC = () => {
                 <div key={field.id} className={styles.fieldRow}>
                   <span className={styles.fieldLabel}>{field.fieldName}</span>
                   <span className={styles.fieldValue}>
-                    {formatCustomFieldValue(client.customFieldValues?.[field.fieldName])}
+                    {formatCustomFieldValue(client.customFieldValues?.[field.fieldName], {
+                      yes: t('detail.yes'),
+                      no: t('detail.no'),
+                    })}
                   </span>
                 </div>
               ))}
               {customFields.length === 0 && (
                 <div className={styles.fieldRow}>
-                  <span className={styles.fieldValue}>No custom fields defined.</span>
+                  <span className={styles.fieldValue}>{t('detail.noCustomFields')}</span>
                 </div>
               )}
             </div>
@@ -235,24 +248,24 @@ export const ClientDetailContent: React.FC = () => {
         <div className={styles.rightColumn}>
           <Tabs
             className={styles.tabsContainer}
-            label="Client detail sections"
+            label={t('detail.sectionsLabel')}
             activeId={activeTab}
             onChange={setActiveTab}
             tabs={[
-              { id: 'timeline', label: 'Timeline', count: history?.timeline.length },
-              { id: 'appointments', label: 'Appointments', count: appointments.length },
+              { id: 'timeline', label: t('detail.tabTimeline'), count: history?.timeline.length },
+              { id: 'appointments', label: t('detail.tabAppointments'), count: appointments.length },
             ]}
           />
 
           {activeTab === 'timeline' ? (
             <Card padding="lg" className={styles.timelineCard}>
               <div className={styles.cardHeader}>
-                <h2 className={styles.cardTitle}>Interactions</h2>
+                <h2 className={styles.cardTitle}>{t('detail.interactions')}</h2>
                 <div className={styles.timelineActions}>
-                  <Button variant="outline" className={styles.smallIconButton} disabled title="Filtering coming soon" aria-label="Filter timeline (coming soon)">
+                  <Button variant="outline" className={styles.smallIconButton} disabled title={t('detail.filterSoon')} aria-label={t('detail.filterAria')}>
                     <Filter size={16} />
                   </Button>
-                  <Button variant="outline" className={styles.smallIconButton} disabled title="Search coming soon" aria-label="Search timeline (coming soon)">
+                  <Button variant="outline" className={styles.smallIconButton} disabled title={t('detail.searchSoon')} aria-label={t('detail.searchAria')}>
                     <Search size={16} />
                   </Button>
                 </div>
@@ -260,39 +273,42 @@ export const ClientDetailContent: React.FC = () => {
 
             <div className={styles.logActivityRow}>
               <Button variant="outline" className={styles.logActivityButton} onClick={() => { setInteractionChannel('CALL'); setIsInteractionSlideOverOpen(true); }}>
-                <PhoneCall size={16} /> Log Call
+                <PhoneCall size={16} /> {t('detail.logCall')}
               </Button>
               <Button variant="outline" className={styles.logActivityButton} onClick={() => { setInteractionChannel('EMAIL'); setIsInteractionSlideOverOpen(true); }}>
-                <Mail size={16} /> Email
+                <Mail size={16} /> {t('detail.logEmail')}
               </Button>
               <Button variant="outline" className={styles.logActivityButton} onClick={() => { setInteractionChannel('MEETING'); setIsInteractionSlideOverOpen(true); }}>
-                <Video size={16} /> Meeting
+                <Video size={16} /> {t('detail.logMeeting')}
               </Button>
               <Button variant="outline" className={styles.logActivityButton} onClick={() => { setInteractionChannel('NOTE'); setIsInteractionSlideOverOpen(true); }}>
-                <FileText size={16} /> Note
+                <FileText size={16} /> {t('detail.logNote')}
               </Button>
             </div>
 
             <div className={styles.timelineList}>
-              {isHistoryLoading && <div className={styles.emptyMessage}>Loading history...</div>}
+              {isHistoryLoading && <div className={styles.emptyMessage}>{t('detail.loadingHistory')}</div>}
               {!isHistoryLoading && history?.timeline.length === 0 && (
-                <div className={styles.emptyMessage}>No interactions yet.</div>
+                <div className={styles.emptyMessage}>{t('detail.noInteractions')}</div>
               )}
               {!isHistoryLoading && history?.timeline.map((item, index) => {
                 const config = getActivityConfig(item.type, item.details);
                 
                 let title = item.description;
                 if (item.type === 'INTERACTION_ADDED') {
-                  title = `Interaction (${item.details?.channel})`;
+                  title = t('detail.interactionTitle', { channel: item.details?.channel });
                 } else if (item.type.startsWith('APPOINTMENT_')) {
-                  title = item.details?.purposeTitle || `Appointment ${config.statusLabel || ''}`;
+                  title = item.details?.purposeTitle || t('detail.appointmentTitle', { status: config.statusLabel || '' });
                 }
 
                 return (
                   <TimelineItem
                     key={item.id}
                     title={title}
-                    subtitle={`${new Date(item.timestamp).toLocaleString()} · by ${item.actor}`}
+                    subtitle={t('detail.timelineSubtitle', {
+                      timestamp: dates.dateTime(item.timestamp),
+                      actor: item.actor,
+                    })}
                     content={item.details?.content}
                     icon={config.icon}
                     iconBgColor={config.bg}
@@ -309,17 +325,17 @@ export const ClientDetailContent: React.FC = () => {
           ) : (
             <Card padding="lg">
               <div className={styles.cardHeader}>
-                <h2 className={styles.cardTitle}>Appointments</h2>
+                <h2 className={styles.cardTitle}>{t('detail.appointments')}</h2>
                 <Button variant="primary" icon={<Calendar size={16} />} onClick={() => setIsAppointmentSlideOverOpen(true)}>
-                  New Appointment
+                  {t('detail.newAppointment')}
                 </Button>
               </div>
               <div className={styles.appointmentList}>
                 {isAppointmentsLoading && (
-                  <div className={styles.emptyMessage}>Loading appointments...</div>
+                  <div className={styles.emptyMessage}>{t('detail.loadingAppointments')}</div>
                 )}
                 {!isAppointmentsLoading && appointments.length === 0 && (
-                  <div className={styles.emptyMessage}>No appointments scheduled.</div>
+                  <div className={styles.emptyMessage}>{t('detail.noAppointments')}</div>
                 )}
                 {!isAppointmentsLoading && appointments.map(app => (
                   <button
@@ -330,11 +346,11 @@ export const ClientDetailContent: React.FC = () => {
                   >
                     <div className={styles.appointmentInfo}>
                       <span className={styles.appointmentDate}>
-                        {new Date(app.scheduledAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+                        {dates.dateTime(app.scheduledAt)}
                       </span>
-                      <span className={styles.appointmentNotes}>{app.notes || 'No notes'}</span>
+                      <span className={styles.appointmentNotes}>{app.notes || t('detail.noNotes')}</span>
                     </div>
-                    <Badge variant={getAppointmentStatusVariant(app.status)}>{app.status}</Badge>
+                    <Badge variant={getAppointmentStatusVariant(app.status)}>{statusLabel.appointment(app.status)}</Badge>
                   </button>
                 ))}
               </div>
@@ -346,33 +362,33 @@ export const ClientDetailContent: React.FC = () => {
       <SlideOver
         isOpen={isInteractionSlideOverOpen}
         onClose={() => setIsInteractionSlideOverOpen(false)}
-        title="Add Interaction"
+        title={t('detail.addInteraction')}
         footer={
           <div className={styles.slideOverFooter}>
-            <Button variant="outline" onClick={() => setIsInteractionSlideOverOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setIsInteractionSlideOverOpen(false)}>{tc('actions.cancel')}</Button>
             <Button onClick={handleAddInteraction} disabled={isAddingInteraction || !interactionContent}>
-              {isAddingInteraction ? 'Saving...' : 'Save Interaction'}
+              {isAddingInteraction ? tc('state.saving') : t('detail.saveInteraction')}
             </Button>
           </div>
         }
       >
         <div className={styles.slideOverForm}>
-          <SelectInput label="Channel" value={interactionChannel} onChange={e => setInteractionChannel(e.target.value)}>
-            <option value="CALL">Call</option>
-            <option value="EMAIL">Email</option>
-            <option value="MEETING">Meeting</option>
-            <option value="NOTE">Note</option>
+          <SelectInput label={t('detail.channel')} value={interactionChannel} onChange={e => setInteractionChannel(e.target.value)}>
+            <option value="CALL">{t('detail.channels.CALL')}</option>
+            <option value="EMAIL">{t('detail.channels.EMAIL')}</option>
+            <option value="MEETING">{t('detail.channels.MEETING')}</option>
+            <option value="NOTE">{t('detail.channels.NOTE')}</option>
           </SelectInput>
           <TextareaInput 
-            label="Notes" 
-            placeholder="Add details about this interaction..." 
+            label={t('detail.notes')}
+            placeholder={t('detail.notesPlaceholder')}
             rows={5}
             value={interactionContent}
             onChange={e => setInteractionContent(e.target.value)}
           />
           {outcomeCategories && outcomeCategories.length > 0 && (
-            <SelectInput label="Outcome" value={interactionOutcomeId} onChange={e => setInteractionOutcomeId(e.target.value)}>
-              <option value="">No Outcome</option>
+            <SelectInput label={t('detail.outcome')} value={interactionOutcomeId} onChange={e => setInteractionOutcomeId(e.target.value)}>
+              <option value="">{t('detail.noOutcome')}</option>
               {outcomeCategories.map(oc => (
                 <option key={oc.id} value={oc.id}>{oc.label}</option>
               ))}
@@ -384,7 +400,7 @@ export const ClientDetailContent: React.FC = () => {
       <SlideOver
         isOpen={isAppointmentSlideOverOpen}
         onClose={() => setIsAppointmentSlideOverOpen(false)}
-        title="Schedule Appointment"
+        title={t('detail.scheduleAppointment')}
       >
         <div className={styles.slideOverBody}>
           <AppointmentForm

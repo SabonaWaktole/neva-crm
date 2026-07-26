@@ -12,7 +12,6 @@ export const useRegisterBusiness = () => {
     urlSlug: string;
     ownerEmail: string;
     ownerPassword: string;
-    locale?: string;
   }) => {
     setIsLoading(true);
     setError(null);

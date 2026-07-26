@@ -355,6 +355,16 @@
 
 .logActivityRow {
   display: flex;
+  /*
+   * Wraps rather than overflowing. Button sets `white-space: nowrap` and the
+   * items below are `flex: 1` with the default `min-width: auto`, so a label
+   * longer than its quarter-width slot would otherwise push the whole row past
+   * the card edge instead of reflowing. English labels ("Log Call", "Note")
+   * fit on one line and are unaffected; Albanian ones ("Regjistro telefonatë")
+   * are roughly two and a half times longer and are exactly the case this
+   * guards.
+   */
+  flex-wrap: wrap;
   gap: var(--spacing-sm);
   margin-bottom: var(--spacing-lg);
   padding-bottom: var(--spacing-lg);
@@ -362,7 +372,9 @@
 }
 
 .logActivityButton {
-  flex: 1;
+  flex: 1 1 auto;
+  /* Allows the flex item to shrink below its content width before wrapping. */
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: center;

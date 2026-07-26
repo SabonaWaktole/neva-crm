@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useUpcomingAppointments } from '../../hooks/useAppointments';
 import { Calendar, MoreVertical, Clock, User } from 'lucide-react';
 import { Card } from '../ui/Card/Card';
@@ -13,8 +14,11 @@ import styles from './UpcomingAppointmentsWidget.module.css';
 
 
 import { useNavigate, useParams } from 'react-router-dom';
+import { useDateFormat } from '../../hooks/useDateFormat';
 
 export const UpcomingAppointmentsWidget: React.FC = () => {
+  const dates = useDateFormat();
+  const { t } = useTranslation('dashboard');
   const { tenantSlug } = useParams();
   const navigate = useNavigate();
   const { appointments, isLoading, error } = useUpcomingAppointments(5);
@@ -31,8 +35,7 @@ export const UpcomingAppointmentsWidget: React.FC = () => {
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + 
-           date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return dates.dateTime(date);
   };
 
   return (
@@ -42,10 +45,10 @@ export const UpcomingAppointmentsWidget: React.FC = () => {
           <div className={styles.iconWrapper}>
             <Calendar size={20} />
           </div>
-          <h2 className={styles.title}>Upcoming Appointments</h2>
+          <h2 className={styles.title}>{t('upcomingAppointments')}</h2>
         </div>
         <Button variant="outline" className={styles.viewAllButton} onClick={() => navigate(`/${tenantSlug}/appointments`)}>
-          View Calendar
+          {t('viewCalendar')}
         </Button>
       </div>
 

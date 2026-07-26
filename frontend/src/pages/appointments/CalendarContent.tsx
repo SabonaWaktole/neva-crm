@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { RescheduleModal } from './RescheduleModal';
 import { AppointmentDetailPanel } from '../../components/panels/AppointmentDetailPanel/AppointmentDetailPanel';
@@ -18,8 +19,9 @@ import { Avatar } from '../../components/ui/Avatar/Avatar';
 import styles from './CalendarContent.module.css';
 
 import { useAppointmentsByDateRange, useRescheduleAppointment } from '../../hooks/useAppointments';
-import { isSameDayLocal } from '../../utils/dateUtils';
+import { isSameDayInZone } from '../../utils/tenantDay';
 import type { Appointment } from '../../types/appointment';
+import { useDateFormat } from '../../hooks/useDateFormat';
 
 // Helper to map backend status to UI color tokens
 const getStatusToken = (status: string) => {
@@ -39,6 +41,8 @@ const CalendarDesktopView = ({
   appointments: Appointment[],
   onAppointmentClick: (app: Appointment) => void 
 }) => {
+  const { timeZone } = useDateFormat();
+  const { t } = useTranslation('appointments');
   const { tenantSlug } = useParams();
   const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -70,7 +74,9 @@ const CalendarDesktopView = ({
 
   // Derive today's queue from the month's appointments (real logic: today relative to user's real today)
   const realToday = new Date();
-  const queueAppointments = (appointments || []).filter(app => isSameDayLocal(app.scheduledAt, realToday));
+  const queueAppointments = (appointments || []).filter(app =>
+    isSameDayInZone(app.scheduledAt, realToday, timeZone)
+  );
   
   const monthYearString = currentDate.toLocaleDateString([], { month: 'long', year: 'numeric' });
   
@@ -106,18 +112,18 @@ const CalendarDesktopView = ({
               <h2>{viewTitleString}</h2>
               <div className={styles.monthControls}>
                 <button onClick={handlePrevMonth}><ChevronLeft size={16} /></button>
-                <span onClick={handleToday} style={{ cursor: 'pointer' }}>Today</span>
+                <span onClick={handleToday} style={{ cursor: 'pointer' }}>{t('calendar.today')}</span>
                 <button onClick={handleNextMonth}><ChevronRight size={16} /></button>
               </div>
             </div>
             <div className={styles.calendarActions}>
               <div className={styles.segmentedControl}>
-                <button className={viewMode === 'day' ? styles.activeSegment : ''} onClick={() => setViewMode('day')}>Day</button>
-                <button className={viewMode === 'week' ? styles.activeSegment : ''} onClick={() => setViewMode('week')}>Week</button>
-                <button className={viewMode === 'month' ? styles.activeSegment : ''} onClick={() => setViewMode('month')}>Month</button>
+                <button className={viewMode === 'day' ? styles.activeSegment : ''} onClick={() => setViewMode('day')}>{t('calendar.day')}</button>
+                <button className={viewMode === 'week' ? styles.activeSegment : ''} onClick={() => setViewMode('week')}>{t('calendar.week')}</button>
+                <button className={viewMode === 'month' ? styles.activeSegment : ''} onClick={() => setViewMode('month')}>{t('calendar.month')}</button>
               </div>
               <Button variant="primary" icon={<Plus size={18} />} onClick={() => navigate(`/${tenantSlug}/appointments/new`)}>
-                New Appointment
+                {t('calendar.newAppointment')}
               </Button>
             </div>
           </div>
@@ -148,10 +154,12 @@ const CalendarDesktopView = ({
                 }
                 
                 const dayNumber = cellDate.getDate();
-                const dayAppointments = appointments.filter(app => {
-                  const date = new Date(app.scheduledAt);
-                  return date.getDate() === dayNumber && date.getMonth() === cellDate.getMonth() && date.getFullYear() === cellDate.getFullYear();
-                });
+                // Was a hand-copied re-implementation of isSameDayLocal
+                // comparing browser-local date parts. Both it and the queue
+                // above now go through the one tenant-zone definition.
+                const dayAppointments = appointments.filter(app =>
+                  isSameDayInZone(app.scheduledAt, cellDate, timeZone)
+                );
                 
                 return (
                   <div key={cellDate.toISOString()} className={styles.cell}>
@@ -179,16 +187,16 @@ const CalendarDesktopView = ({
         {/* Right: Queue */}
         <aside className={styles.queueSidebar}>
           <div className={styles.queueHeader}>
-            <h3>Queue</h3>
-            <p>{queueAppointments.length} upcoming for today</p>
+            <h3>{t('calendar.queue')}</h3>
+            <p>{t('calendar.queueCount', { count: queueAppointments.length })}</p>
           </div>
           <div className={styles.queueContent}>
             <div className={styles.statusLegend}>
-              <div className={styles.legendItem}><span className={`${styles.dot} ${styles.dotPrimary}`}></span> Scheduled</div>
-              <div className={styles.legendItem}><span className={`${styles.dot} ${styles.dotEmerald}`}></span> Confirmed</div>
-              <div className={styles.legendItem}><span className={`${styles.dot} ${styles.dotSlate}`}></span> Completed</div>
-              <div className={styles.legendItem}><span className={`${styles.dot} ${styles.dotError}`}></span> Cancelled</div>
-              <div className={styles.legendItem}><span className={`${styles.dot} ${styles.dotAmber}`}></span> Rescheduled</div>
+              <div className={styles.legendItem}><span className={`${styles.dot} ${styles.dotPrimary}`}></span> {t('calendar.legendScheduled')}</div>
+              <div className={styles.legendItem}><span className={`${styles.dot} ${styles.dotEmerald}`}></span> {t('calendar.legendConfirmed')}</div>
+              <div className={styles.legendItem}><span className={`${styles.dot} ${styles.dotSlate}`}></span> {t('calendar.legendCompleted')}</div>
+              <div className={styles.legendItem}><span className={`${styles.dot} ${styles.dotError}`}></span> {t('calendar.legendCancelled')}</div>
+              <div className={styles.legendItem}><span className={`${styles.dot} ${styles.dotAmber}`}></span> {t('calendar.legendRescheduled')}</div>
             </div>
 
             <div className={styles.queueList}>
@@ -224,7 +232,7 @@ const CalendarDesktopView = ({
           </div>
           <div className={styles.queueFooterAction}>
             <Button variant="outline" icon={<CalendarIcon size={18} />} fullWidth>
-              Schedule Waitlist
+              {t('calendar.scheduleWaitlist')}
             </Button>
           </div>
         </aside>
@@ -241,9 +249,13 @@ const CalendarMobileAgenda = ({
   appointments: Appointment[],
   onAppointmentClick: (app: Appointment) => void
 }) => {
+  const { timeZone } = useDateFormat();
+  const { t } = useTranslation('appointments');
   const today = new Date();
   const [selectedDate, setSelectedDate] = useState(today);
-  const agendaAppointments = appointments.filter(app => isSameDayLocal(app.scheduledAt, selectedDate));
+  const agendaAppointments = appointments.filter(app =>
+    isSameDayInZone(app.scheduledAt, selectedDate, timeZone)
+  );
 
   // Show a 7-day window centered on "today" so the strip always reflects real dates
   const weekDays = Array.from({ length: 7 }).map((_, i) => {
@@ -259,16 +271,16 @@ const CalendarMobileAgenda = ({
       {/* Top App Bar */}
       <header className={styles.mobileHeader}>
         <div className={styles.mobileHeaderTop}>
-          <h1 className={styles.mobileTitle}>Neva CRM</h1>
+          <h1 className={styles.mobileTitle}>{t('calendar.appName')}</h1>
           <div className={styles.mobileActions}>
             <button><Bell size={20} /></button>
             <Avatar fallback="AR" size="sm" />
           </div>
         </div>
         <div className={styles.mobileViewSwitcher}>
-          <button className={styles.activePill}>Day</button>
-          <button>Week</button>
-          <button>Month</button>
+          <button className={styles.activePill}>{t('calendar.day')}</button>
+          <button>{t('calendar.week')}</button>
+          <button>{t('calendar.month')}</button>
         </div>
       </header>
 
@@ -330,6 +342,7 @@ const CalendarMobileAgenda = ({
 };
 
 export const CalendarContent = () => {
+  const { t } = useTranslation('appointments');
   // In a real implementation, startDate and endDate would be dynamically updated via state when navigating months
   const [currentDate] = useState(new Date());
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
@@ -363,8 +376,8 @@ export const CalendarContent = () => {
     navigate(`/${tenantSlug}/appointments/${appointment.id}/edit`);
   };
 
-  if (isLoading) return <div>Loading calendar...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (isLoading) return <div>{t('calendar.loading')}</div>;
+  if (error) return <div>{t('calendar.error', { message: error })}</div>;
 
   return (
     <>

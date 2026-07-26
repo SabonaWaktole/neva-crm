@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ReactNode } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { Modal } from '../Modal';
@@ -13,7 +14,9 @@ export interface ConfirmDialogProps {
   title: string;
   /** The consequence, stated plainly. */
   message: ReactNode;
+  /** Defaults to the translated "Confirm". */
   confirmLabel?: string;
+  /** Defaults to the translated "Cancel". */
   cancelLabel?: string;
   /** `danger` for anything that destroys data. */
   tone?: 'danger' | 'primary';
@@ -31,10 +34,11 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onConfirm,
   title,
   message,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
+  confirmLabel,
+  cancelLabel,
   tone = 'danger',
 }) => {
+  const { t } = useTranslation('common');
   const [isPending, setIsPending] = useState(false);
 
   const handleConfirm = async () => {
@@ -68,7 +72,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 
         <div className={styles.actions}>
           <Button variant="ghost" type="button" onClick={onClose} disabled={isPending}>
-            {cancelLabel}
+            {cancelLabel ?? t('dialog.cancel')}
           </Button>
           <Button
             variant={tone === 'danger' ? 'danger' : 'primary'}
@@ -76,7 +80,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             onClick={handleConfirm}
             isLoading={isPending}
           >
-            {confirmLabel}
+            {confirmLabel ?? t('dialog.confirm')}
           </Button>
         </div>
       </div>

@@ -7,6 +7,11 @@ declare global {
       tenant?: {
         id: string;
         urlSlug: string;
+        /**
+         * The tenant's IANA timezone, carried on the request so day-bucketing
+         * handlers do not each re-read the tenant. See tenantDay.ts.
+         */
+        timezone: string;
       };
     }
   }
@@ -38,7 +43,7 @@ export const resolveTenant = (tenantRepository: ITenantRepository) => {
       return res.status(403).json({ error: 'Cross-tenant access forbidden' });
     }
 
-    req.tenant = { id: tenant.id, urlSlug: tenant.urlSlug };
+    req.tenant = { id: tenant.id, urlSlug: tenant.urlSlug, timezone: tenant.timezone };
     next();
   };
 };

@@ -10,6 +10,11 @@ export interface UpdateUserProfileInput {
   lastName?: string | null;
   phone?: string | null;
   email?: string;
+  /**
+   * `null` clears the override and returns the user to the workspace default.
+   * `undefined` leaves it untouched — the two are not interchangeable here.
+   */
+  language?: string | null;
 }
 
 export class UpdateUserProfileUseCase {
@@ -47,6 +52,7 @@ export class UpdateUserProfileUseCase {
     if (input.lastName !== undefined) updateData.lastName = input.lastName;
     if (input.phone !== undefined) updateData.phone = input.phone;
     if (input.email !== undefined) updateData.email = input.email;
+    if (input.language !== undefined) updateData.language = input.language;
 
     await this.userRepository.updateProfile(input.userId, updateData);
   }

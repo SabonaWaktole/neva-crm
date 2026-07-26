@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { RotateCcw, ZoomIn } from 'lucide-react';
 import { Button } from '../Button/Button';
 import styles from './ImageCropper.module.css';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Pan-and-zoom cropper.
@@ -44,6 +45,7 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
   isBusy = false,
   confirmLabel = 'Save',
 }) => {
+  const { t } = useTranslation('common');
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
   const [image, setImage] = useState<HTMLImageElement | null>(null);
   const [zoom, setZoom] = useState(1);
@@ -236,11 +238,11 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
         </motion.button>
       </div>
 
-      <p className={styles.hint}>Drag to reposition · scroll or use the slider to zoom</p>
+      <p className={styles.hint}>{t('cropper.hint')}</p>
 
       <div className={styles.actions}>
         <Button variant="ghost" onClick={onCancel} disabled={isBusy}>
-          Cancel
+          {t('actions.cancel')}
         </Button>
         <Button variant="primary" onClick={handleConfirm} isLoading={isBusy}>
           {confirmLabel}

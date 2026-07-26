@@ -1,4 +1,5 @@
 import { Fragment, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   motion,
@@ -25,14 +26,29 @@ import {
 } from '../../lib/motion';
 import styles from './LandingPage.module.css';
 
-const HEADLINE = 'Manage your enterprise with absolute clarity.';
+/**
+ * LANDING PAGE CONTENT LIVES IN THE i18n CATALOGUE, NOT IN THIS FILE.
+ *
+ * All copy is under `landing.*` in `src/locales/{en,sq}/auth.json`. To add or
+ * change a headline, feature, or any other visible text: add the key there and
+ * reference it here.
+ *
+ * Why this file looks different from every other component, which just calls
+ * `t('some.key')` inline: this content is declared at MODULE scope, where React
+ * hooks cannot reach. So the constants hold key NAMES, and the component
+ * resolves them with `t(...)` at render time.
+ *
+ * Do not put literal strings in this file. They will not be translatable, and
+ * the Albanian build will silently fall back to English for them.
+ */
+const HEADLINE_KEY = 'landing.headline';
 
+/* Keys, not copy — see the note above HEADLINE_KEY. */
 const FEATURES = [
   {
     icon: Building2,
-    title: 'True Multi-Tenancy',
-    description:
-      'Isolated data environments ensuring complete privacy and dedicated branding for every workspace.',
+    titleKey: 'landing.featureMultiTenancy',
+    descriptionKey: 'landing.featureMultiTenancyDesc',
     iconStyle: {
       backgroundColor: 'var(--color-primary-container)',
       color: 'var(--color-primary)',
@@ -40,9 +56,8 @@ const FEATURES = [
   },
   {
     icon: ShieldCheck,
-    title: 'Enterprise Security',
-    description:
-      'Bank-grade encryption, strict Role-Based Access Control (RBAC), and full compliance reporting.',
+    titleKey: 'landing.featureSecurity',
+    descriptionKey: 'landing.featureSecurityDesc',
     iconStyle: {
       backgroundColor: 'var(--color-secondary-container)',
       color: 'var(--color-on-secondary-container)',
@@ -50,9 +65,8 @@ const FEATURES = [
   },
   {
     icon: Zap,
-    title: 'Lightning Fast',
-    description:
-      'Optimized API responses and instantaneous UI updates keep your team moving at the speed of thought.',
+    titleKey: 'landing.featureFast',
+    descriptionKey: 'landing.featureFastDesc',
     iconStyle: {
       backgroundColor: 'var(--color-surface-variant)',
       color: 'var(--color-on-surface-variant)',
@@ -61,6 +75,8 @@ const FEATURES = [
 ];
 
 export const LandingPage: React.FC = () => {
+  const { t } = useTranslation('auth');
+  const headline = t(HEADLINE_KEY);
   const navigate = useNavigate();
   const prefersReducedMotion = useReducedMotion();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -130,7 +146,7 @@ export const LandingPage: React.FC = () => {
           >
             <Network size={28} color="var(--color-primary)" />
           </motion.span>
-          <span className={styles.brandText}>Neva CRM</span>
+          <span className={styles.brandText}>{t('appName')}</span>
         </motion.div>
 
         <motion.div
@@ -141,10 +157,10 @@ export const LandingPage: React.FC = () => {
         >
           <ThemeToggle />
           <Button variant="outline" onClick={() => navigate('/login')}>
-            Sign In
+            {t('landing.signIn')}
           </Button>
           <Button variant="primary" onClick={() => navigate('/register-business')}>
-            Get Started
+            {t('landing.getStarted')}
           </Button>
         </motion.div>
 
@@ -177,7 +193,7 @@ export const LandingPage: React.FC = () => {
         >
           <motion.div className={styles.badge} variants={itemVariants}>
             <Zap size={14} />
-            <span>Neva v2.0 is now live!</span>
+            <span>{t('landing.versionBanner')}</span>
           </motion.div>
 
           {/*
@@ -190,9 +206,9 @@ export const LandingPage: React.FC = () => {
             variants={wordContainerVariants}
             initial="hidden"
             animate="visible"
-            aria-label={HEADLINE}
+            aria-label={headline}
           >
-            {HEADLINE.split(' ').map((word, index, all) => (
+            {headline.split(' ').map((word, index, all) => (
               <Fragment key={`${word}-${index}`}>
                 <span className={styles.word} aria-hidden="true">
                   <motion.span className={styles.wordInner} variants={wordVariants}>
@@ -208,8 +224,7 @@ export const LandingPage: React.FC = () => {
           </motion.h1>
 
           <motion.p className={styles.subtitle} variants={itemVariants}>
-            The ultimate multi-tenant CRM designed for scale, speed, and security.
-            Empower your teams to do their best work in a unified workspace.
+            {t('landing.subtitle')}
           </motion.p>
 
           <motion.div className={styles.ctaRow} variants={itemVariants}>
@@ -240,10 +255,10 @@ export const LandingPage: React.FC = () => {
           whileInView="visible"
           viewport={revealViewport}
         >
-          {FEATURES.map(({ icon: Icon, title, description, iconStyle }) => (
+          {FEATURES.map(({ icon: Icon, titleKey, descriptionKey, iconStyle }) => (
             <motion.div
               className={styles.featureCard}
-              key={title}
+              key={titleKey}
               variants={sectionVariants}
               whileHover={prefersReducedMotion ? undefined : { y: -6 }}
               transition={{ type: 'spring', stiffness: 300, damping: 26 }}
@@ -261,8 +276,8 @@ export const LandingPage: React.FC = () => {
               >
                 <Icon size={24} />
               </motion.div>
-              <h3 className={styles.featureTitle}>{title}</h3>
-              <p className={styles.featureDescription}>{description}</p>
+              <h3 className={styles.featureTitle}>{t(titleKey)}</h3>
+              <p className={styles.featureDescription}>{t(descriptionKey)}</p>
             </motion.div>
           ))}
         </motion.div>
@@ -276,7 +291,7 @@ export const LandingPage: React.FC = () => {
         whileInView="visible"
         viewport={revealViewport}
       >
-        © 2026 Neva CRM. All rights reserved.
+        {t('landing.copyright')}
       </motion.footer>
     </motion.div>
   );

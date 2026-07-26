@@ -1,0 +1,56 @@
+/* Matches AccountSettingsPage's .nativeSelect so a language picker dropped into
+   either settings page looks native to it. */
+.select {
+  height: 44px;
+  width: 100%;
+  padding: 0 var(--spacing-base);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-default);
+  background-color: var(--color-surface-container-lowest);
+  color: var(--text-primary);
+  outline: none;
+  cursor: pointer;
+  box-shadow: var(--shadow-xs);
+  font-family: var(--font-family-base);
+  font-size: 16px;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.select:hover:not(:disabled) {
+  border-color: var(--border-strong);
+}
+
+.select:focus {
+  border-color: var(--color-primary);
+  box-shadow: var(--focus-ring-tight);
+}
+
+@media (min-width: 768px) {
+  .select {
+    height: 38px;
+    font-size: var(--font-size-body-md);
+  }
+}
+
+.select:disabled {
+  background-color: var(--color-surface-container);
+  color: var(--text-quaternary);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Deliberately not styled as a dismissible or decorative hint — it is a
+   caveat about correctness, so it reads with the same weight as a warning. */
+.reviewNotice {
+  margin: var(--spacing-sm) 0 0 0;
+  padding: var(--spacing-sm) var(--spacing-base);
+  border-radius: var(--radius-default);
+  border-left: 3px solid var(--color-warning, var(--color-primary));
+  background-color: var(--color-surface-container);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-sm);
+  line-height: var(--font-line-height-body-sm);
+  color: var(--text-secondary);
+}

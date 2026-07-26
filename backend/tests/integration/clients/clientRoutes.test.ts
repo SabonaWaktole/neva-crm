@@ -5,6 +5,7 @@ import { PrismaClient } from '@prisma/client';
 import { ClientStatus } from '../../../src/clients/domain/enums/ClientStatus';
 import { ITokenService } from '../../../src/auth/application/ports/ITokenService';
 import { ITenantRepository } from '../../../src/tenant/domain/repositories/ITenantRepository';
+import { Tenant } from '../../../src/tenant/domain/entities/Tenant';
 import { UserRole } from '../../../src/auth/domain/enums/UserRole';
 
 const prisma = new PrismaClient();
@@ -29,9 +30,12 @@ const validToken = stubTokenService.sign({ userId: 'u1', role: UserRole.BUSINESS
 // Stub tenantRepository so real resolveTenant middleware can resolve by slug
 const stubTenantRepo: ITenantRepository = {
   findById: async () => null,
+  // Built through Tenant.create rather than as an object literal: a literal has
+  // to be updated by hand every time the entity gains a field, which is how this
+  // double broke on the last three entity changes. See TD-002.
   findBySlug: async (slug: string) => {
-    if (slug === 't1') return { id: 't1', name: 'Tenant 1', urlSlug: 't1', createdAt: new Date(), requiresQuotationApproval: true };
-    if (slug === 't2') return { id: 't2', name: 'Tenant 2', urlSlug: 't2', createdAt: new Date(), requiresQuotationApproval: true };
+    if (slug === 't1') return Tenant.create({ id: 't1', name: 'Tenant 1', urlSlug: 't1', createdAt: new Date() });
+    if (slug === 't2') return Tenant.create({ id: 't2', name: 'Tenant 2', urlSlug: 't2', createdAt: new Date() });
     return null;
   },
   create: async (t: any) => t,

@@ -15,6 +15,31 @@ model Tenant {
   // Workspace branding, surfaced in the sidebar, settings and customer-facing pages.
   logoUrl                   String?
   coverImageUrl             String?
+
+  // Company profile. Like the branding URLs above, these are presentation-only
+  // and are read straight from Prisma rather than through the Tenant entity.
+  registrationNumber String?
+  addressLine        String?
+  addressCity        String?
+  addressState       String?
+  addressPostalCode  String?
+  contactEmail       String?
+  contactPhone       String?
+
+  // Localization. Unlike the fields above these drive real behaviour (money
+  // formatting, and notifications later), so they DO live on the domain entity.
+  // NOT NULL with defaults so the fallback lives here and nowhere else.
+  currency   String @default("USD")
+  locale     String @default("en-US")
+  timezone   String @default("UTC")
+  dateFormat String @default("MM/DD/YYYY")
+
+  // Interface language for the workspace. Separate from `locale` above by
+  // design: locale is how things are FORMATTED, this is what language they are
+  // WRITTEN in. Also the only language source available for invitation emails,
+  // whose recipients have no account yet.
+  defaultLanguage String @default("en")
+
   createdAt                 DateTime @default(now())
 
   users                  User[]
@@ -53,6 +78,9 @@ model User {
   // Client.lastUpdatedByUserId, ...), so RESTRICT blocks it and cascading would
   // destroy financial and audit history. Same reasoning as ProductInUseError.
   isActive       Boolean  @default(true)
+  // Interface language override. NULL means "follow the workspace default" —
+  // distinct from having explicitly chosen English.
+  language       String?
   // Profile media. Store the public URL of the canonical (1x) asset; the
   // responsive variants are derived from it by convention (see MediaService).
   avatarUrl      String?

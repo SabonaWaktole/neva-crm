@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../../../components/ui/Modal/Modal';
 import { Button } from '../../../components/ui/Button/Button';
 import { SelectInput } from '../../../components/ui/SelectInput/SelectInput';
@@ -17,6 +18,8 @@ export const EditMemberModal: React.FC<EditMemberModalProps> = ({
   onClose,
   onUpdate
 }) => {
+  const { t } = useTranslation('settings');
+  const { t: tc } = useTranslation('common');
   const [role, setRole] = useState('STAFF');
   const [warehouseId, setWarehouseId] = useState<string>('');
   const [loading, setLoading] = useState(false);
@@ -39,7 +42,7 @@ export const EditMemberModal: React.FC<EditMemberModalProps> = ({
       onClose();
     } catch (err) {
       console.error(err);
-      alert('Failed to update member');
+      alert(t('team.edit.failed'));
     } finally {
       setLoading(false);
     }
@@ -48,24 +51,24 @@ export const EditMemberModal: React.FC<EditMemberModalProps> = ({
   if (!member) return null;
 
   return (
-    <Modal isOpen={!!member} onClose={onClose} title="Edit Team Member">
-      <p className={styles.subtitle}>Editing {member.email}</p>
+    <Modal isOpen={!!member} onClose={onClose} title={t('team.edit.title')}>
+      <p className={styles.subtitle}>{t('team.edit.editing', { email: member.email })}</p>
       <form onSubmit={handleSubmit} className={styles.form}>
-        <SelectInput label="Role" value={role} onChange={(e) => setRole(e.target.value)}>
-          <option value="STAFF">Staff (Sales Representative)</option>
-          <option value="BUSINESS_OWNER">Business Owner</option>
+        <SelectInput label={t('team.edit.role')} value={role} onChange={(e) => setRole(e.target.value)}>
+          <option value="STAFF">{t('team.invite.roleStaff')}</option>
+          <option value="BUSINESS_OWNER">{t('team.invite.roleOwner')}</option>
         </SelectInput>
 
-        <SelectInput label="Assign Warehouse" value={warehouseId} onChange={(e) => setWarehouseId(e.target.value)}>
-          <option value="">No Warehouse (Dashboard Only)</option>
+        <SelectInput label={t('team.edit.warehouse')} value={warehouseId} onChange={(e) => setWarehouseId(e.target.value)}>
+          <option value="">{t('team.invite.noWarehouse')}</option>
           {warehouses.map(w => (
             <option key={w.id} value={w.id}>{w.name}</option>
           ))}
         </SelectInput>
 
         <div className={styles.actions}>
-          <Button variant="outline" onClick={onClose} type="button">Cancel</Button>
-          <Button variant="primary" type="submit" isLoading={loading}>Save Changes</Button>
+          <Button variant="outline" onClick={onClose} type="button">{tc('actions.cancel')}</Button>
+          <Button variant="primary" type="submit" isLoading={loading}>{tc('actions.saveChanges')}</Button>
         </div>
       </form>
     </Modal>

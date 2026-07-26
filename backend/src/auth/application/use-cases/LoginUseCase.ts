@@ -44,6 +44,13 @@ export class LoginUseCase {
       throw new InvalidCredentialsError();
     }
 
+    // Deactivated accounts cannot obtain a new token. The same generic error is
+    // used as for a wrong password: telling an unauthenticated caller that an
+    // account exists but is disabled leaks account state.
+    if (!user.isActive) {
+      throw new InvalidCredentialsError();
+    }
+
     const token = this.tokenService.sign({
       userId: user.id,
       role: user.role,

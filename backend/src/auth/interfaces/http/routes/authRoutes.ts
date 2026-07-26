@@ -80,6 +80,24 @@ export const createTenantAuthRoutes = (
     authController.getTenantStaff
   );
 
+  // Business-Owner-only: deactivation revokes access, and the impact lookup
+  // reveals how much work a colleague holds.
+  router.get(
+    '/staff/:id/deactivation-impact',
+    authMw,
+    resolveTenantMw,
+    authorize([UserRole.BUSINESS_OWNER]),
+    authController.getDeactivationImpact
+  );
+
+  router.post(
+    '/staff/:id/deactivate',
+    authMw,
+    resolveTenantMw,
+    authorize([UserRole.BUSINESS_OWNER]),
+    authController.deactivateStaff
+  );
+
   router.put(
     '/staff/:id',
     authMw,

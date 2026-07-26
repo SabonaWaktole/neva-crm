@@ -1,0 +1,80 @@
+{
+  "actions": {
+    "save": "Save",
+    "saveChanges": "Save Changes",
+    "discardChanges": "Discard Changes",
+    "cancel": "Cancel",
+    "close": "Close",
+    "confirm": "Confirm",
+    "continue": "Continue",
+    "back": "Back",
+    "edit": "Edit",
+    "delete": "Delete",
+    "create": "Create",
+    "add": "Add",
+    "remove": "Remove",
+    "search": "Search",
+    "refresh": "Refresh",
+    "retry": "Try again",
+    "viewAll": "View all",
+    "logOut": "Log Out",
+    "support": "Support"
+  },
+  "state": {
+    "loading": "Loading…",
+    "saving": "Saving...",
+    "noResults": "No results found",
+    "notSet": "—"
+  },
+  "feedback": {
+    "saved": "Settings saved.",
+    "saveFailed": "Could not save settings.",
+    "loadFailed": "Could not load settings."
+  },
+  "labels": {
+    "actions": "Actions",
+    "status": "Status",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "date": "Date",
+    "required": "Required"
+  },
+  "pagination": {
+    "page": "Page {{page}}",
+    "showing": "Showing {{from}}–{{to}} of {{total}}",
+    "range": "{{first}}–{{last}} of {{total}} {{itemLabel}}",
+    "empty": "No {{itemLabel}}",
+    "rows": "Rows",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "label": "Pagination",
+    "items": "items"
+  },
+  "table": {
+    "selectAllRows": "Select all rows",
+    "selectAll": "Select all",
+    "selected": "{{count}} selected",
+    "selectRow": "Select row"
+  },
+  "dialog": {
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  },
+  "a11y": {
+    "notifications": "Notifications",
+    "dismissNotification": "Dismiss notification",
+    "closePanel": "Close panel",
+    "closeModal": "Close modal",
+    "breadcrumb": "Breadcrumb"
+  },
+  "input": {
+    "selectAnOption": "Select an option"
+  },
+  "stock": {
+    "units": "{{count}} Units"
+  },
+  "cropper": {
+    "hint": "Drag to reposition · scroll or use the slider to zoom"
+  }
+}

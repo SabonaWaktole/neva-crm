@@ -48,7 +48,7 @@ describe('GetTenantClientMetricsUseCase', () => {
     mockClientRepository.countByTenant.mockResolvedValue(3);
     mockClientRepository.search.mockResolvedValue({ items: mockClients, total: 3 });
 
-    const result = await useCase.execute({ tenantId, userId: 'u1', role: 'BUSINESS_OWNER' });
+    const result = await useCase.execute({ tenantId, timeZone: 'Europe/Tirane', userId: 'u1', role: 'BUSINESS_OWNER' });
 
     // Total clients should be 3
     expect(result.totalClients).toBe(3);
@@ -67,7 +67,7 @@ describe('GetTenantClientMetricsUseCase', () => {
 
     it('scopes client figures to the requesting user when role is STAFF', async () => {
       const result = await useCase.execute({
-        tenantId: 'tenant-1',
+        tenantId: 'tenant-1', timeZone: 'Europe/Tirane',
         userId: 'staff-1',
         role: 'STAFF',
       });
@@ -85,7 +85,7 @@ describe('GetTenantClientMetricsUseCase', () => {
 
     it('does NOT scope for BUSINESS_OWNER', async () => {
       const result = await useCase.execute({
-        tenantId: 'tenant-1',
+        tenantId: 'tenant-1', timeZone: 'Europe/Tirane',
         userId: 'owner-1',
         role: 'BUSINESS_OWNER',
       });
@@ -95,13 +95,13 @@ describe('GetTenantClientMetricsUseCase', () => {
     });
 
     it('does not scope when no role is supplied (defaults to tenant-wide)', async () => {
-      await useCase.execute({ tenantId: 'tenant-1' });
+      await useCase.execute({ tenantId: 'tenant-1', timeZone: 'Europe/Tirane' });
 
       expect(mockClientRepository.search).toHaveBeenCalledWith('tenant-1', {}, 0, 10000);
     });
 
     it('ignores userId when the role is not STAFF', async () => {
-      await useCase.execute({ tenantId: 'tenant-1', userId: 'owner-1', role: 'BUSINESS_OWNER' });
+      await useCase.execute({ tenantId: 'tenant-1', timeZone: 'Europe/Tirane', userId: 'owner-1', role: 'BUSINESS_OWNER' });
 
       expect(mockClientRepository.search).toHaveBeenCalledWith('tenant-1', {}, 0, 10000);
     });
@@ -113,7 +113,7 @@ describe('GetTenantClientMetricsUseCase', () => {
     mockClientRepository.countByTenant.mockResolvedValue(0);
     mockClientRepository.search.mockResolvedValue({ items: [], total: 0 });
 
-    await useCase.execute({ tenantId, userId: 'u1', role: 'BUSINESS_OWNER' });
+    await useCase.execute({ tenantId, timeZone: 'Europe/Tirane', userId: 'u1', role: 'BUSINESS_OWNER' });
 
     // Verify the repository is queried ONLY for the requested tenant
     expect(mockClientRepository.countByTenant).toHaveBeenCalledWith(tenantId);

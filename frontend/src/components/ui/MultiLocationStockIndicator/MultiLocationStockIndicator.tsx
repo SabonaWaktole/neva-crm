@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import styles from './MultiLocationStockIndicator.module.css';
+import { useTranslation } from 'react-i18next';
 
 export interface StockBreakdown {
   warehouseName: string;
@@ -18,6 +19,7 @@ export const MultiLocationStockIndicator: React.FC<MultiLocationStockIndicatorPr
   breakdown = [],
   className = '',
 }) => {
+  const { t } = useTranslation('common');
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -66,7 +68,7 @@ export const MultiLocationStockIndicator: React.FC<MultiLocationStockIndicatorPr
           }
         }}
       >
-        <span>{totalUnits} Units</span>
+        <span>{t('stock.units', { count: totalUnits })}</span>
         {hasBreakdown && (
           <ChevronDown size={16} />
         )}

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { Modal } from '../../components/ui/Modal/Modal';
 import { TextInput } from '../../components/ui/TextInput/TextInput';
@@ -27,6 +28,7 @@ export const RescheduleModal: React.FC<RescheduleModalProps> = ({
   onConfirm,
   isLoading,
 }) => {
+  const { t } = useTranslation('appointments');
   const [submitError, setSubmitError] = useState<string | null>(null);
   const {
     register,
@@ -64,38 +66,38 @@ export const RescheduleModal: React.FC<RescheduleModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Reschedule Appointment">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('reschedule.title')}>
       <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
         {submitError && <p className={styles.formError}>{submitError}</p>}
 
         <div className={styles.dateTimeRow}>
           <TextInput
             type="date"
-            label="New Date"
+            label={t('reschedule.newDate')}
             error={errors.newDate?.message}
-            {...register('newDate', { required: 'Date is required' })}
+            {...register('newDate', { required: t('reschedule.dateRequired') })}
           />
           <TextInput
             type="time"
-            label="New Time"
+            label={t('reschedule.newTime')}
             error={errors.newTime?.message}
-            {...register('newTime', { required: 'Time is required' })}
+            {...register('newTime', { required: t('reschedule.timeRequired') })}
           />
         </div>
 
         <TextInput
-          label="Reason for Rescheduling"
-          placeholder="E.g., Client requested a different time"
+          label={t('reschedule.reason')}
+          placeholder={t('reschedule.reasonPlaceholder')}
           error={errors.reason?.message}
-          {...register('reason', { required: 'A reason is required' })}
+          {...register('reason', { required: t('reschedule.reasonRequired') })}
         />
 
         <div className={styles.actions}>
           <Button variant="outline" onClick={onClose} type="button" disabled={isLoading}>
-            Cancel
+            {t('detail.cancel')}
           </Button>
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? 'Rescheduling...' : 'Confirm Reschedule'}
+            {isLoading ? t('reschedule.rescheduling') : t('reschedule.confirm')}
           </Button>
         </div>
       </form>

@@ -4,7 +4,7 @@ import { GetTenantActivityFeedUseCase } from '../../../application/use-cases/Get
 import { authenticate } from '../../../../main/interfaces/http/middlewares/authenticate';
 import { authorize } from '../../../../main/interfaces/http/middlewares/authorize';
 import { resolveTenant } from '../../../../main/interfaces/http/middlewares/resolveTenant';
-import { requireTenantId } from '../../../../main/interfaces/http/tenantContext';
+import { requireTenant, requireTenantId } from '../../../../main/interfaces/http/tenantContext';
 import { UserRole } from '../../../../auth/domain/enums/UserRole';
 import { ITokenService } from '../../../../auth/application/ports/ITokenService';
 import { ITenantRepository } from '../../../../tenant/domain/repositories/ITenantRepository';
@@ -26,8 +26,11 @@ export function createDashboardRouter(
     authorize([UserRole.BUSINESS_OWNER, UserRole.STAFF]),
     async (req: Request, res: Response, next: NextFunction) => {
       try {
+        // The tenant is already resolved on the request by resolveTenant, so
+        // its timezone comes along without an extra read.
         const result = await metricsUseCase.execute({
           tenantId: requireTenantId(req),
+          timeZone: requireTenant(req).timezone,
           userId: req.user!.userId,
           role: req.user!.role,
         });

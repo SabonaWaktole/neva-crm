@@ -23,6 +23,7 @@ export class GetTenantStaffUseCase {
         lastName: u.lastName,
         role: u.role,
         warehouseId: u.warehouseId,
+        isActive: u.isActive,
       }))
     };
   }

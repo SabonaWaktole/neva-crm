@@ -9,6 +9,13 @@ export interface StaffMember {
   firstName?: string;
   lastName?: string;
   warehouseId?: string;
+  /** Deactivated members are retained but cannot sign in. */
+  isActive?: boolean;
+}
+
+export interface DeactivationImpact {
+  clients: number;
+  upcomingAppointments: number;
 }
 
 export interface PendingInvitation {
@@ -74,6 +81,24 @@ export const useTeam = () => {
     }
   };
 
+  /** What the member still holds, shown before confirming deactivation. */
+  const fetchDeactivationImpact = async (userId: string): Promise<DeactivationImpact> => {
+    if (!tenantSlug) throw new Error('Missing tenant context');
+    const response = await api.get(`/${tenantSlug}/auth/staff/${userId}/deactivation-impact`);
+    return response.data;
+  };
+
+  const deactivateStaff = async (userId: string) => {
+    if (!tenantSlug) throw new Error('Missing tenant context');
+    try {
+      await api.post(`/${tenantSlug}/auth/staff/${userId}/deactivate`);
+      await fetchStaff();
+    } catch (error) {
+      console.error('Failed to deactivate staff member', error);
+      throw error;
+    }
+  };
+
   const cancelInvitation = async (invitationId: string) => {
     if (!tenantSlug) return;
     try {
@@ -95,5 +120,7 @@ export const useTeam = () => {
     inviteStaff,
     updateStaffRole,
     cancelInvitation,
+    fetchDeactivationImpact,
+    deactivateStaff,
   };
 };

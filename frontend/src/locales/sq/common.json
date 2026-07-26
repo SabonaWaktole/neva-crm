@@ -1,0 +1,80 @@
+{
+  "actions": {
+    "save": "Ruaj",
+    "saveChanges": "Ruaj ndryshimet",
+    "discardChanges": "Hiq ndryshimet",
+    "cancel": "Anulo",
+    "close": "Mbyll",
+    "confirm": "Konfirmo",
+    "continue": "Vazhdo",
+    "back": "Kthehu",
+    "edit": "Ndrysho",
+    "delete": "Fshi",
+    "create": "Krijo",
+    "add": "Shto",
+    "remove": "Hiq",
+    "search": "Kërko",
+    "refresh": "Rifresko",
+    "retry": "Provo përsëri",
+    "viewAll": "Shiko të gjitha",
+    "logOut": "Dil",
+    "support": "Mbështetje"
+  },
+  "state": {
+    "loading": "Duke u ngarkuar…",
+    "saving": "Duke ruajtur...",
+    "noResults": "Nuk u gjet asnjë rezultat",
+    "notSet": "—"
+  },
+  "feedback": {
+    "saved": "Cilësimet u ruajtën.",
+    "saveFailed": "Cilësimet nuk u ruajtën dot.",
+    "loadFailed": "Cilësimet nuk u ngarkuan dot."
+  },
+  "labels": {
+    "actions": "Veprimet",
+    "status": "Statusi",
+    "name": "Emri",
+    "email": "Email",
+    "phone": "Telefoni",
+    "date": "Data",
+    "required": "E detyrueshme"
+  },
+  "pagination": {
+    "page": "Faqja {{page}}",
+    "showing": "Duke shfaqur {{from}}–{{to}} nga {{total}}",
+    "range": "{{first}}–{{last}} nga {{total}} {{itemLabel}}",
+    "empty": "Asnjë {{itemLabel}}",
+    "rows": "Rreshta",
+    "previousPage": "Faqja e mëparshme",
+    "nextPage": "Faqja tjetër",
+    "label": "Faqëzimi",
+    "items": "artikuj"
+  },
+  "table": {
+    "selectAllRows": "Zgjidh të gjithë rreshtat",
+    "selectAll": "Zgjidh të gjitha",
+    "selected": "{{count}} të zgjedhura",
+    "selectRow": "Zgjidh rreshtin"
+  },
+  "dialog": {
+    "confirm": "Konfirmo",
+    "cancel": "Anulo"
+  },
+  "a11y": {
+    "notifications": "Njoftimet",
+    "dismissNotification": "Hiq njoftimin",
+    "closePanel": "Mbyll panelin",
+    "closeModal": "Mbyll dritaren",
+    "breadcrumb": "Shtegu i navigimit"
+  },
+  "input": {
+    "selectAnOption": "Zgjidhni një opsion"
+  },
+  "stock": {
+    "units": "{{count}} njësi"
+  },
+  "cropper": {
+    "hint": "Tërhiqni për ta ripozicionuar · rrotulloni ose përdorni rrëshqitësin për të zmadhuar"
+  }
+}

@@ -15,6 +15,7 @@ import { useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory,
 import { CategoryFormModal, type CategoryFormData } from '../../../components/inventory/CategoryFormModal/CategoryFormModal';
 import { DeleteCategoryModal } from '../../../components/inventory/DeleteCategoryModal/DeleteCategoryModal';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { SettingsLayout } from '../../../components/layout/SettingsLayout/SettingsLayout';
 import { useAuthStore } from '../../../store/useAuthStore';
 
@@ -78,7 +79,7 @@ const CategoryListContent: React.FC = () => {
   const handleRunCleanup = async () => {
     try {
       const result = await cleanupCategories();
-      alert(`System Cleanup: ${result.count} unused categories have been archived successfully.`);
+      alert(t('categories.cleanupDone', { count: result.count }));
       await fetchCategories();
     } catch (err) {
       alert('Failed to cleanup categories.');
@@ -98,6 +99,8 @@ const CategoryListContent: React.FC = () => {
     }));
   }, [realCategories]);
 
+  const { t } = useTranslation('inventory');
+
   const getIcon = (type: CategoryRowData['iconType']) => {
     switch (type) {
       case 'hardware': return <Hardware className={styles.iconPrimary} />;
@@ -112,26 +115,26 @@ const CategoryListContent: React.FC = () => {
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.breadcrumbs}>
-          <span>Settings</span>
+          <span>{t('categories.breadcrumbSettings')}</span>
           <ChevronRight size={16} />
-          <span>Inventory</span>
+          <span>{t('categories.breadcrumbInventory')}</span>
           <ChevronRight size={16} />
-          <span className={styles.breadcrumbActive}>Category Management</span>
+          <span className={styles.breadcrumbActive}>{t('categories.title')}</span>
         </div>
         <div className={styles.headerTop}>
           <div>
-            <h1 className={styles.pageTitle}>Category Management</h1>
-            <p className={styles.pageSubtitle}>Define and organize product categories for the global inventory ledger.</p>
+            <h1 className={styles.pageTitle}>{t('categories.title')}</h1>
+            <p className={styles.pageSubtitle}>{t('categories.subtitle')}</p>
           </div>
           {isBusinessOwner && (
             <div style={{ display: 'flex', gap: 'var(--spacing-md)', alignItems: 'center' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', color: 'var(--color-on-surface-variant)' }}>
                 <input type="checkbox" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />
-                Show Archived
+                {t('categories.showArchived')}
               </label>
               <button className={styles.primaryButton} onClick={handleOpenAdd}>
                 <Plus size={20} />
-                New Category
+                {t('categories.newCategory')}
               </button>
             </div>
           )}
@@ -142,22 +145,22 @@ const CategoryListContent: React.FC = () => {
         {/* Sidebar Options */}
         <div className={styles.sidebar}>
           <div className={styles.sidebarBox}>
-            <h3 className={styles.sidebarTitle}>INVENTORY CONFIG</h3>
+            <h3 className={styles.sidebarTitle}>{t('categories.configHeading')}</h3>
             <nav className={styles.navLinks}>
               <a href={`/${tenantSlug}/settings/company`} onClick={(e) => { e.preventDefault(); navigate(`/${tenantSlug}/settings/company`); }} className={styles.navLink}>
-                <span>General Defaults</span>
+                <span>{t('categories.generalDefaults')}</span>
                 <ChevronRight size={18} />
               </a>
               <a href={`/${tenantSlug}/settings/categories`} onClick={(e) => { e.preventDefault(); navigate(`/${tenantSlug}/settings/categories`); }} className={`${styles.navLink} ${styles.navLinkActive}`}>
-                <span>Category Labels</span>
+                <span>{t('categories.categoryLabels')}</span>
                 <Tags size={18} />
               </a>
               <a href={`/${tenantSlug}/settings/warehouses`} onClick={(e) => { e.preventDefault(); navigate(`/${tenantSlug}/settings/warehouses`); }} className={styles.navLink}>
-                <span>Warehouse Zones</span>
+                <span>{t('categories.warehouseZones')}</span>
                 <WarehouseIcon size={18} />
               </a>
-              <a href={`/${tenantSlug}/settings/tax`} onClick={(e) => { e.preventDefault(); alert('Tax Configurations coming soon'); }} className={styles.navLink}>
-                <span>Tax Configurations</span>
+              <a href={`/${tenantSlug}/settings/tax`} onClick={(e) => { e.preventDefault(); alert(t('categories.taxComingSoon')); }} className={styles.navLink}>
+                <span>{t('categories.taxConfigurations')}</span>
                 <FileText size={18} />
               </a>
             </nav>
@@ -166,11 +169,9 @@ const CategoryListContent: React.FC = () => {
           <div className={`${styles.sidebarBox} ${styles.insightBox}`}>
             <div className={styles.insightHeader}>
               <Activity size={16} className={styles.insightIcon} />
-              <span className={styles.insightTitle}>Data Insight</span>
+              <span className={styles.insightTitle}>{t('categories.dataInsight')}</span>
             </div>
-            <p className={styles.insightText}>
-              Categories help in generating granular reporting. Each category can be mapped to specific tax codes and GL accounts.
-            </p>
+            <p className={styles.insightText}>{t('categories.dataInsightText')}</p>
           </div>
         </div>
 
@@ -178,9 +179,9 @@ const CategoryListContent: React.FC = () => {
         <div className={styles.mainContent}>
           <div className={styles.listContainer}>
             <div className={styles.listHeader}>
-              <div className={styles.colName}>CATEGORY NAME</div>
-              <div className={styles.colItems}>ITEM COUNT</div>
-              {isBusinessOwner && <div className={styles.colActions}>ACTIONS</div>}
+              <div className={styles.colName}>{t('categories.columnName')}</div>
+              <div className={styles.colItems}>{t('categories.columnItemCount')}</div>
+              {isBusinessOwner && <div className={styles.colActions}>{t('categories.columnActions')}</div>}
             </div>
 
             <div className={styles.listBody}>
@@ -192,26 +193,26 @@ const CategoryListContent: React.FC = () => {
                     </div>
                     <div>
                       <div className={styles.catName}>
-                        {cat.name} {cat.isArchived && <span style={{ fontSize: '12px', padding: '2px 6px', background: '#e0e0e0', borderRadius: '4px', marginLeft: '8px' }}>Archived</span>}
+                        {cat.name} {cat.isArchived && <span style={{ fontSize: '12px', padding: '2px 6px', background: '#e0e0e0', borderRadius: '4px', marginLeft: '8px' }}>{t('categories.archivedBadge')}</span>}
                       </div>
-                      <div className={styles.catId}>Key ID: {cat.id} • Root Category</div>
+                      <div className={styles.catId}>{t('categories.keyId', { id: cat.id })}</div>
                     </div>
                   </div>
                   <div className={styles.colItems}>
                     <div className={styles.itemCountWrap}>
                       <div className={`${styles.dot} ${styles[`dot-${cat.iconType}`]}`} />
-                      <span>{cat.itemCount.toLocaleString()} Items</span>
+                      <span>{t('categories.items', { count: cat.itemCount })}</span>
                     </div>
                   </div>
                   {isBusinessOwner && (
                     <div className={styles.colActions}>
-                      <button className={styles.actionBtn} title="Edit" onClick={() => handleOpenEdit(cat)}>
+                      <button className={styles.actionBtn} title={t('categories.edit')} onClick={() => handleOpenEdit(cat)}>
                         <Edit2 size={18} />
                       </button>
-                      <button className={`${styles.actionBtn} ${styles.actionBtnDanger}`} title="Delete" onClick={() => handleOpenDelete(cat)}>
+                      <button className={`${styles.actionBtn} ${styles.actionBtnDanger}`} title={t('categories.delete')} onClick={() => handleOpenDelete(cat)}>
                         <Trash2 size={18} />
                       </button>
-                      <button className={styles.actionBtn} disabled title="More options coming soon">
+                      <button className={styles.actionBtn} disabled title={t('categories.moreSoon')}>
                         <MoreVertical size={18} />
                       </button>
                     </div>
@@ -225,19 +226,19 @@ const CategoryListContent: React.FC = () => {
           <div className={styles.widgetsGrid}>
             <div className={styles.widgetCard}>
               <div className={styles.widgetHeader}>
-                <h3>Hierarchy Health</h3>
+                <h3>{t('categories.hierarchyHealth')}</h3>
                 <Activity size={20} className={styles.iconPrimary} />
               </div>
               <div className={styles.progressSection}>
                 <div className={styles.progressRow}>
-                  <span>Root Categories</span>
+                  <span>{t('categories.rootCategories')}</span>
                   <strong>14</strong>
                 </div>
                 <div className={styles.progressBarBg}>
                   <div className={styles.progressBarFillPrimary} style={{ width: '65%' }} />
                 </div>
                 <div className={styles.progressRow}>
-                  <span>Sub-Categories</span>
+                  <span>{t('categories.subCategories')}</span>
                   <strong>82</strong>
                 </div>
                 <div className={styles.progressBarBg}>
@@ -247,18 +248,18 @@ const CategoryListContent: React.FC = () => {
             </div>
 
             <div className={`${styles.widgetCard} ${styles.widgetCardHigh}`}>
-              <h3 className={styles.widgetTitle}>QUICK AUDIT</h3>
+              <h3 className={styles.widgetTitle}>{t('categories.quickAudit')}</h3>
               <div className={styles.auditAlert}>
                 <div className={styles.auditIconWrap}>
                   <AlertTriangle size={20} />
                 </div>
                 <div>
-                  <div className={styles.auditMain}>3 Unused Categories</div>
-                  <div className={styles.auditSub}>Consider archiving for database cleanup.</div>
+                  <div className={styles.auditMain}>3 {t('categories.unusedCategories')}</div>
+                  <div className={styles.auditSub}>{t('categories.unusedHint')}</div>
                 </div>
               </div>
               <button className={styles.auditBtn} onClick={handleRunCleanup} disabled={isCleaningUp}>
-                {isCleaningUp ? 'Cleaning up...' : 'Run System Cleanup'}
+                {isCleaningUp ? t('categories.cleaningUp') : t('categories.runCleanup')}
               </button>
             </div>
           </div>

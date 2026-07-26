@@ -1,4 +1,5 @@
 
+import { useTranslation } from 'react-i18next';
 import styles from './SuperAdminDashboard.module.css';
 import { 
   Users, 
@@ -61,6 +62,7 @@ const mockGlobalEvents = [
 ];
 
 export const SuperAdminDashboard = () => {
+  const { t } = useTranslation('dashboard');
   const { tenants, total, isLoading: isLoadingTenants } = useTenants();
 
   return (
@@ -69,10 +71,10 @@ export const SuperAdminDashboard = () => {
       {/* Header & Quick Action */}
       <header className={styles.header}>
         <div className={styles.headerContent}>
-          <h1 className={styles.title}>Platform Overview</h1>
-          <p className={styles.subtitle}>Real-time health and tenant distribution metrics.</p>
+          <h1 className={styles.title}>{t('superAdmin.title')}</h1>
+          <p className={styles.subtitle}>{t('superAdmin.subtitle')}</p>
         </div>
-        <Button icon={<Plus size={20} />} disabled title="Tenant provisioning is coming soon">
+        <Button icon={<Plus size={20} />} disabled title={t('superAdmin.provisionSoon')}>
           New Tenant
         </Button>
       </header>
@@ -121,7 +123,7 @@ export const SuperAdminDashboard = () => {
           <div className={styles.feedCardWrapper}>
             <div className={styles.feedCard}>
               <div className={styles.feedHeader}>
-                <h2 className={styles.feedTitle}>Platform Activity</h2>
+                <h2 className={styles.feedTitle}>{t('superAdmin.platformActivity')}</h2>
               </div>
               
               <div className={styles.feedList}>
@@ -140,7 +142,7 @@ export const SuperAdminDashboard = () => {
               </div>
               
               <div className={styles.feedFooter}>
-                <Button variant="ghost" fullWidth>View Global Event Log</Button>
+                <Button variant="ghost" fullWidth>{t('superAdmin.viewEventLog')}</Button>
               </div>
             </div>
             
@@ -157,7 +159,7 @@ export const SuperAdminDashboard = () => {
         <div className={styles.latencyVisualizer}>
           <div className={styles.latencyStats}>
             <div>
-              <p className={styles.latencyLabel}>Global Latency</p>
+              <p className={styles.latencyLabel}>{t('superAdmin.globalLatency')}</p>
               <div className={styles.latencyValueGroup}>
                 <div className={styles.pulseDot}></div>
                 <span className={styles.latencyValue}>24ms</span>
@@ -165,7 +167,7 @@ export const SuperAdminDashboard = () => {
             </div>
             <div className={styles.latencyDivider}></div>
             <div>
-              <p className={styles.latencyLabel}>Active Requests</p>
+              <p className={styles.latencyLabel}>{t('superAdmin.activeRequests')}</p>
               <span className={styles.latencyValue}>14.2k/s</span>
             </div>
           </div>
@@ -181,7 +183,7 @@ export const SuperAdminDashboard = () => {
                <div className={styles.bar} style={{ height: '33%', opacity: 0.4 }}></div>
                <div className={styles.bar} style={{ height: '66%', opacity: 1 }}></div>
              </div>
-             <span className={styles.chartLabel}>Real-time Traffic</span>
+             <span className={styles.chartLabel}>{t('superAdmin.realtimeTraffic')}</span>
           </div>
         </div>
         

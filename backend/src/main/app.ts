@@ -17,6 +17,8 @@ import { UpdateUserProfileUseCase } from '@auth/application/use-cases/UpdateUser
 import { GetUserProfileUseCase } from '@auth/application/use-cases/GetUserProfileUseCase';
 import { UpdateUserRoleUseCase } from '@auth/application/use-cases/UpdateUserRoleUseCase';
 import { CancelInvitationUseCase } from '@auth/application/use-cases/CancelInvitationUseCase';
+import { DeactivateUserUseCase } from '@auth/application/use-cases/DeactivateUserUseCase';
+import { GetDeactivationImpactUseCase } from '@auth/application/use-cases/GetDeactivationImpactUseCase';
 import { PrismaUserRepository } from '@auth/infrastructure/repositories/PrismaUserRepository';
 import { PrismaTenantRepository } from '@tenant/infrastructure/repositories/PrismaTenantRepository';
 import { PrismaInvitationRepository } from '@auth/infrastructure/repositories/PrismaInvitationRepository';
@@ -95,6 +97,8 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const getUserProfileUseCase = new GetUserProfileUseCase(userRepository);
   const updateUserRoleUseCase = new UpdateUserRoleUseCase(userRepository);
   const cancelInvitationUseCase = new CancelInvitationUseCase(invitationRepository);
+  const deactivateUserUseCase = new DeactivateUserUseCase(userRepository);
+  const getDeactivationImpactUseCase = new GetDeactivationImpactUseCase(userRepository);
 
   // Controller
   const authController = new AuthController(
@@ -110,7 +114,9 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
     updateUserProfileUseCase,
     getUserProfileUseCase,
     updateUserRoleUseCase,
-    cancelInvitationUseCase
+    cancelInvitationUseCase,
+    deactivateUserUseCase,
+    getDeactivationImpactUseCase
   );
 
   // Auth Routes
@@ -315,7 +321,12 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const { SettingsController } = require('../settings/interfaces/http/SettingsController');
   const { createSettingsRouter } = require('../settings/interfaces/http/settingsRoutes');
   
-  const settingsController = new SettingsController(tenantRepository);
+  const { TenantProfileStore } = require('../settings/infrastructure/TenantProfileStore');
+  const { UpdateTenantSettingsUseCase } = require('../settings/application/use-cases/UpdateTenantSettingsUseCase');
+
+  const tenantProfileStore = new TenantProfileStore();
+  const updateTenantSettingsUseCase = new UpdateTenantSettingsUseCase(tenantRepository, tenantProfileStore);
+  const settingsController = new SettingsController(tenantRepository, tenantProfileStore, updateTenantSettingsUseCase);
   const settingsRoutes = createSettingsRouter(settingsController, tokenService, tenantRepository);
   app.use('/api/:tenantSlug/settings', settingsRoutes);
 
