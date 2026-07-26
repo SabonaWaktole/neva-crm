@@ -45,20 +45,15 @@ describe('Tenant scope enforcement across modules', () => {
     await prisma.$disconnect();
   });
 
-  beforeEach(async () => {
-    await prisma.stockMovement.deleteMany();
-    await prisma.productImage.deleteMany();
-    await prisma.stockLevel.deleteMany();
-    await prisma.product.deleteMany();
-    await prisma.warehouse.deleteMany();
-    await prisma.category.deleteMany();
-    await prisma.interaction.deleteMany();
-    await prisma.appointment.deleteMany();
-    await prisma.client.deleteMany();
-    await prisma.user.deleteMany();
-    await prisma.integration.deleteMany();
-    await prisma.tenant.deleteMany();
+  // Every fixture this file creates is tracked so cleanup can be scoped to
+  // exactly those rows. Deliberately NOT using unscoped deleteMany({}): that
+  // pattern (see TD-001) truncates whole tables and is only safe because Jest
+  // runs suites sequentially within a worker — a property of the runner, not a
+  // guarantee. A new file has no convention to preserve, so it should not add
+  // another site to migrate later.
+  let createdUserIds: string[] = [];
 
+  beforeEach(async () => {
     tenant1Id = uuidv4();
     tenant2Id = uuidv4();
 
@@ -85,7 +80,20 @@ describe('Tenant scope enforcement across modules', () => {
     owner2Token = tokenService.sign({ userId: owner2.id, tenantId: tenant2Id, tenantSlug: 'tenant2', role: 'BUSINESS_OWNER', warehouseId: null });
     superAdminToken = tokenService.sign({ userId: superAdmin.id, tenantId: null, tenantSlug: null, role: 'SUPER_ADMIN', warehouseId: null });
 
+    // The SUPER_ADMIN has a null tenantId, so it cannot be cleaned up by tenant
+    // scope — track user ids explicitly.
+    createdUserIds = [owner1.id, staff1.id, owner2.id, superAdmin.id];
+
     await prisma.warehouse.create({ data: { id: uuidv4(), tenantId: tenant1Id, name: 'T1 WH', address: '1 A St' } });
+  });
+
+  afterEach(async () => {
+    // Scoped teardown, children before parents. Only rows this file created.
+    const tenantIds = [tenant1Id, tenant2Id];
+    await prisma.warehouse.deleteMany({ where: { tenantId: { in: tenantIds } } });
+    await prisma.user.deleteMany({ where: { id: { in: createdUserIds } } });
+    await prisma.tenant.deleteMany({ where: { id: { in: tenantIds } } });
+    createdUserIds = [];
   });
 
   describe('SUPER_ADMIN is denied on every tenant-scoped module', () => {

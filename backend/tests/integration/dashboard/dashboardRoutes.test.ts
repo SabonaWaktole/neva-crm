@@ -88,14 +88,19 @@ describe('Dashboard Routes (Integration)', () => {
       expect(response.body.totalClients).toBe(1);
     });
 
-    it('returns 200 and metrics for STAFF', async () => {
+    it('returns 200 for STAFF, scoped to their own records', async () => {
       const response = await request(app)
         .get(`/api/t-dash-1/dashboard/metrics`)
         .set('Cookie', [`jwt=${t1StaffToken}`]);
-      
+
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('totalClients');
-      expect(response.body.totalClients).toBe(1);
+      // The seeded client has no assignedUserId, so it belongs to nobody and is
+      // not this staff member's. Before scoping was wired up this returned 1 —
+      // the tenant-wide figure the BUSINESS_OWNER sees. See
+      // tests/integration/dashboard/dashboardStaffScoping.test.ts for the
+      // positive case, where a staff member does own records.
+      expect(response.body.totalClients).toBe(0);
     });
 
     it('returns 403 when Tenant 2 tries to access Tenant 1 metrics', async () => {

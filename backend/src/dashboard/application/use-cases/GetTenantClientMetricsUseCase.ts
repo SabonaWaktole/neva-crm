@@ -2,6 +2,14 @@ import { IClientRepository } from '../../../clients/domain/repositories/IClientR
 import { Client } from '../../../clients/domain/entities/Client';
 import { prisma } from '../../../shared/infrastructure/prisma/client';
 
+export interface GetTenantClientMetricsDTO {
+  tenantId: string;
+  /** The requesting user. Only used when their role scopes them to own data. */
+  userId?: string;
+  /** Requesting user's role. STAFF sees only their own figures. */
+  role?: string;
+}
+
 export interface TenantClientMetrics {
   totalClients: number;
   totalClientsLastWeek: number;
@@ -41,13 +49,33 @@ const dayBounds = (offset: number): { start: Date; end: Date } => {
 export class GetTenantClientMetricsUseCase {
   constructor(private clientRepository: IClientRepository) {}
 
-  async execute(tenantId: string): Promise<TenantClientMetrics> {
-    const totalClients = await this.clientRepository.countByTenant(tenantId);
+  async execute(dto: GetTenantClientMetricsDTO): Promise<TenantClientMetrics> {
+    const { tenantId } = dto;
 
-    // In production we would add countByTenantAndDateRange to the repository.
-    // For now, we fetch all to count in memory.
-    const result = await this.clientRepository.search(tenantId, {}, 0, 10000);
+    // Role-based visibility, matching GetUpcomingAppointmentsUseCase: STAFF see
+    // only figures for records they own, BUSINESS_OWNER sees the whole tenant.
+    //
+    // Ownership differs per entity, so each aggregate below uses its own field:
+    // Client.assignedUserId, Appointment.assignedUserId, Quotation.createdByUserId.
+    // Product and StockLevel have NO user-ownership column at all — stock is a
+    // property of the warehouse, not of a person — so the low/out-of-stock
+    // counts stay tenant-wide for every role. That is a real limit of the data
+    // model, not an oversight: there is nothing to scope those numbers by.
+    const scopedUserId = dto.role === 'STAFF' ? dto.userId : undefined;
+
+    // Scoped counts come from search().total, since countByTenant() takes no
+    // user filter.
+    const result = await this.clientRepository.search(
+      tenantId,
+      scopedUserId ? { assignedUserId: scopedUserId } : {},
+      0,
+      10000
+    );
     const allClients = result.items;
+
+    const totalClients = scopedUserId
+      ? result.total
+      : await this.clientRepository.countByTenant(tenantId);
 
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
@@ -71,6 +99,7 @@ export class GetTenantClientMetricsUseCase {
       prisma.appointment.count({
         where: {
           tenantId,
+          ...(scopedUserId ? { assignedUserId: scopedUserId } : {}),
           status: { in: ACTIVE_APPOINTMENT_STATUSES },
           scheduledAt: { gte: today.start, lt: today.end },
         },
@@ -78,15 +107,24 @@ export class GetTenantClientMetricsUseCase {
       prisma.appointment.count({
         where: {
           tenantId,
+          ...(scopedUserId ? { assignedUserId: scopedUserId } : {}),
           status: { in: ACTIVE_APPOINTMENT_STATUSES },
           scheduledAt: { gte: yesterday.start, lt: yesterday.end },
         },
       }),
       prisma.quotation.count({
-        where: { tenantId, status: { in: OPEN_QUOTATION_STATUSES } },
+        where: {
+          tenantId,
+          ...(scopedUserId ? { createdByUserId: scopedUserId } : {}),
+          status: { in: OPEN_QUOTATION_STATUSES },
+        },
       }),
       prisma.quotation.count({
-        where: { tenantId, status: 'PENDING_APPROVAL' },
+        where: {
+          tenantId,
+          ...(scopedUserId ? { createdByUserId: scopedUserId } : {}),
+          status: 'PENDING_APPROVAL',
+        },
       }),
       // Stock lives per warehouse, but "low stock" is a property of the
       // product as a whole, so totals are summed across warehouses first.
