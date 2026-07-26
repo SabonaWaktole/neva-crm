@@ -116,15 +116,6 @@ export const mediaService = {
 };
 
 /**
- * Builds a `srcSet` from a stored @1x URL, matching the server's naming
- * convention. Returns undefined when there is no 2x sibling to point at.
- */
-export const srcSetFor = (url: string | null | undefined): string | undefined => {
-  if (!url || !url.includes('@1x.webp')) return undefined;
-  return `${url} 1x, ${url.replace('@1x.webp', '@2x.webp')} 2x`;
-};
-
-/**
  * Stored URLs are root-relative (`/uploads/...`) and are served by the API
  * origin, which in development is a different port from the SPA. This resolves
  * them against the same base the API client uses.
@@ -141,4 +132,23 @@ export const resolveMediaUrl = (url: string | null | undefined): string | undefi
   } catch {
     return url;
   }
+};
+
+/**
+ * Builds a `srcSet` from a stored @1x URL, matching the server's naming
+ * convention. Returns undefined when there is no 2x sibling to point at.
+ *
+ * Both candidates are run through `resolveMediaUrl`. That matters more than it
+ * looks: a browser picks a `srcSet` candidate in preference to `src`, so if
+ * these stayed root-relative they would resolve against the SPA's origin
+ * rather than the API's. In development Vite answers /uploads/* with its
+ * index.html SPA fallback — a 200 carrying HTML — and the image silently
+ * fails to decode while `src` looks perfectly correct in devtools.
+ */
+export const srcSetFor = (url: string | null | undefined): string | undefined => {
+  if (!url || !url.includes('@1x.webp')) return undefined;
+  const one = resolveMediaUrl(url);
+  const two = resolveMediaUrl(url.replace('@1x.webp', '@2x.webp'));
+  if (!one || !two) return undefined;
+  return `${one} 1x, ${two} 2x`;
 };

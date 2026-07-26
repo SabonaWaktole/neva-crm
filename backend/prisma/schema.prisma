@@ -29,6 +29,7 @@ model Tenant {
   categories     Category[]
   warehouses     Warehouse[]
   products       Product[]
+  productImages  ProductImage[]
   stockLevels    StockLevel[]
   stockMovements StockMovement[]
 
@@ -237,9 +238,17 @@ model Product {
   tenantId          String
   name              String
   description       String
+  sku               String?
+  brand             String?
   categoryId        String?
   price             Float
+  // Unit cost. Nullable because a catalogue can be priced before it is costed.
+  cost              Float?
+  tags              String[] @default([])
   lowStockThreshold Int      @default(10)
+  // Archived products stay queryable (quotations reference them) but drop out
+  // of the default catalogue view. Availability is always derived from stock.
+  isArchived        Boolean  @default(false)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -247,10 +256,33 @@ model Product {
   category           Category?           @relation(fields: [categoryId], references: [id])
   stockLevels        StockLevel[]
   movements          StockMovement[]
+  images             ProductImage[]
   quotationLineItems QuotationLineItem[]
 
+  @@unique([tenantId, sku])
   @@index([tenantId, categoryId])
   @@index([tenantId, name])
+  @@index([tenantId, isArchived])
+}
+
+model ProductImage {
+  id        String   @id
+  tenantId  String
+  productId String
+  // Public URL of the @1x rendition; @2x is derived by naming convention.
+  url       String
+  url2x     String
+  width     Int
+  height    Int
+  bytes     Int
+  // Zero-based gallery order. Position 0 is the product's primary image.
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, productId, position])
 }
 
 model StockLevel {
