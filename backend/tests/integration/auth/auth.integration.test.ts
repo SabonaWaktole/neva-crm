@@ -98,6 +98,31 @@ class InMemoryUserRepository implements IUserRepository {
     }
   }
 
+  async setActive(userId: string, isActive: boolean): Promise<void> {
+    const user = this.users.find(u => u.id === userId);
+    if (user) {
+      const idx = this.users.indexOf(user);
+      this.users[idx] = User.create({
+        id: user.id,
+        email: user.email,
+        hashedPassword: user.hashedPassword,
+        role: user.role,
+        tenantId: user.tenantId,
+        createdAt: user.createdAt,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: user.phone,
+        warehouseId: user.warehouseId,
+        isActive,
+      });
+    }
+  }
+
+  async countAssignedWork(_userId: string): Promise<{ clients: number; upcomingAppointments: number }> {
+    // This double holds no clients or appointments, so there is nothing to count.
+    return { clients: 0, upcomingAppointments: 0 };
+  }
+
   // Test helper
   getAll(): User[] { return [...this.users]; }
   clear(): void { this.users = []; }

@@ -12,6 +12,8 @@ import { UpdateUserProfileUseCase } from '@auth/application/use-cases/UpdateUser
 import { GetUserProfileUseCase } from '@auth/application/use-cases/GetUserProfileUseCase';
 import { UpdateUserRoleUseCase } from '@auth/application/use-cases/UpdateUserRoleUseCase';
 import { CancelInvitationUseCase } from '@auth/application/use-cases/CancelInvitationUseCase';
+import { DeactivateUserUseCase } from '@auth/application/use-cases/DeactivateUserUseCase';
+import { GetDeactivationImpactUseCase } from '@auth/application/use-cases/GetDeactivationImpactUseCase';
 import { ITenantRepository } from '@tenant/domain/repositories/ITenantRepository';
 import { UserRole } from '@auth/domain/enums/UserRole';
 export class AuthController {
@@ -28,7 +30,9 @@ export class AuthController {
     private updateUserProfileUseCase: UpdateUserProfileUseCase,
     private getUserProfileUseCase: GetUserProfileUseCase,
     private updateUserRoleUseCase: UpdateUserRoleUseCase,
-    private cancelInvitationUseCase?: CancelInvitationUseCase
+    private cancelInvitationUseCase?: CancelInvitationUseCase,
+    private deactivateUserUseCase?: DeactivateUserUseCase,
+    private getDeactivationImpactUseCase?: GetDeactivationImpactUseCase
   ) {}
 
   register = async (req: Request, res: Response) => {
@@ -87,6 +91,18 @@ export class AuthController {
       const user = await this.getUserProfileUseCase.execute(req.user.userId);
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Session bootstrap is the one authenticated path that re-reads the user,
+      // so it is where a deactivated account can still be caught. The
+      // authenticate middleware only verifies the JWT signature and never hits
+      // the database, so an already-issued token keeps working against other
+      // endpoints until it expires (JWT_EXPIRATION, currently 1h). Rejecting
+      // here drops the browser session on the next load; it is a practical
+      // shortening of exposure, not true revocation. See TD-010.
+      if (!user.isActive) {
+        res.clearCookie('jwt');
+        return res.status(401).json({ error: 'This account has been deactivated.' });
       }
 
       // Media URLs are read straight from Prisma rather than through the User
@@ -163,6 +179,35 @@ export class AuthController {
         newWarehouseId: req.body.warehouseId,
       });
       res.status(200).json({ message: 'User role and permissions updated' });
+    } catch (error: any) {
+      if (error.message.includes('Unauthorized')) return res.status(403).json({ error: error.message });
+      res.status(400).json({ error: error.message });
+    }
+  };
+
+  getDeactivationImpact = async (req: Request, res: Response) => {
+    try {
+      const impact = await this.getDeactivationImpactUseCase!.execute({
+        requestingUserRole: req.user!.role,
+        tenantId: requireTenantId(req),
+        userId: req.params.id as string,
+      });
+      res.status(200).json(impact);
+    } catch (error: any) {
+      if (error.message.includes('Unauthorized')) return res.status(403).json({ error: error.message });
+      res.status(400).json({ error: error.message });
+    }
+  };
+
+  deactivateStaff = async (req: Request, res: Response) => {
+    try {
+      await this.deactivateUserUseCase!.execute({
+        requestingUserRole: req.user!.role,
+        requestingUserId: req.user!.userId,
+        tenantId: requireTenantId(req),
+        userIdToDeactivate: req.params.id as string,
+      });
+      res.status(200).json({ message: 'Team member deactivated' });
     } catch (error: any) {
       if (error.message.includes('Unauthorized')) return res.status(403).json({ error: error.message });
       res.status(400).json({ error: error.message });

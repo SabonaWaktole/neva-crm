@@ -1,17 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import { Card } from '../../../components/ui/Card/Card';
+import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
 import { Button } from '../../../components/ui/Button/Button';
 import { useTeam, type StaffMember } from '../../../hooks/useTeam';
 import { InviteMemberModal } from './InviteMemberModal';
 import { EditMemberModal } from './EditMemberModal';
-import { Mail, Shield, Clock, Edit2, Trash2 } from 'lucide-react';
+import { Mail, Shield, Clock, Edit2, Trash2, UserMinus } from 'lucide-react';
 import { useAuthStore } from '../../../store/useAuthStore';
 import styles from './TeamSettingsContent.module.css';
 
 export const TeamSettingsContent: React.FC = () => {
-  const { staff, pendingInvitations, loadingStaff, loadingInvitations, fetchStaff, fetchPendingInvitations, inviteStaff, updateStaffRole, cancelInvitation } = useTeam();
+  const { staff, pendingInvitations, loadingStaff, loadingInvitations, fetchStaff, fetchPendingInvitations, inviteStaff, updateStaffRole, cancelInvitation, fetchDeactivationImpact, deactivateStaff } = useTeam();
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<StaffMember | null>(null);
+  const [memberToDeactivate, setMemberToDeactivate] = useState<StaffMember | null>(null);
+  const [impact, setImpact] = useState<{ clients: number; upcomingAppointments: number } | null>(null);
+
+  const openDeactivateDialog = async (member: StaffMember) => {
+    setMemberToDeactivate(member);
+    setImpact(null);
+    try {
+      setImpact(await fetchDeactivationImpact(member.id));
+    } catch {
+      // The counts are advisory; if they cannot be loaded the dialog still
+      // works, it just omits the "still holds" line rather than blocking.
+    }
+  };
   const { user } = useAuthStore();
   const isOwner = user?.role === 'BUSINESS_OWNER' || user?.role === 'SUPER_ADMIN';
 
@@ -71,9 +85,23 @@ export const TeamSettingsContent: React.FC = () => {
                     {member.role === 'STAFF' ? 'Sales Rep' : member.role}
                   </div>
                   {isOwner && (
-                    <Button variant="outline" onClick={() => setEditingMember(member)} className={styles.iconButton}>
-                      <Edit2 size={14} />
-                    </Button>
+                    <>
+                      <Button variant="outline" onClick={() => setEditingMember(member)} className={styles.iconButton}>
+                        <Edit2 size={14} />
+                      </Button>
+                      {/* A Business Owner cannot be deactivated, and nobody can
+                          deactivate themselves — both enforced server-side too. */}
+                      {member.role !== 'BUSINESS_OWNER' && member.id !== user?.userId && (
+                        <Button
+                          variant="outline"
+                          onClick={() => openDeactivateDialog(member)}
+                          className={styles.iconButton}
+                          aria-label={`Deactivate ${member.email}`}
+                        >
+                          <UserMinus size={14} />
+                        </Button>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -138,6 +166,58 @@ export const TeamSettingsContent: React.FC = () => {
         member={editingMember}
         onClose={() => setEditingMember(null)}
         onUpdate={updateStaffRole}
+      />
+
+      <ConfirmDialog
+        isOpen={!!memberToDeactivate}
+        onClose={() => {
+          setMemberToDeactivate(null);
+          setImpact(null);
+        }}
+        onConfirm={async () => {
+          if (memberToDeactivate) await deactivateStaff(memberToDeactivate.id);
+        }}
+        title="Deactivate team member?"
+        confirmLabel="Deactivate"
+        tone="danger"
+        message={
+          <>
+            <p>
+              {memberToDeactivate?.firstName || memberToDeactivate?.email} will no longer be
+              able to sign in. Their account and history are kept, not deleted.
+            </p>
+
+            {impact && (impact.clients > 0 || impact.upcomingAppointments > 0) && (
+              <p>
+                They are still assigned{' '}
+                {impact.clients > 0 && (
+                  <strong>
+                    {impact.clients} client{impact.clients === 1 ? '' : 's'}
+                  </strong>
+                )}
+                {impact.clients > 0 && impact.upcomingAppointments > 0 && ' and '}
+                {impact.upcomingAppointments > 0 && (
+                  <strong>
+                    {impact.upcomingAppointments} upcoming appointment
+                    {impact.upcomingAppointments === 1 ? '' : 's'}
+                  </strong>
+                )}
+                . These stay assigned to them until you reassign them.
+              </p>
+            )}
+
+            {/*
+              Stated plainly rather than implying instant lockout: the auth
+              middleware only verifies the token signature and never re-reads
+              the user, so an active session survives until the token expires.
+              See TD-010.
+            */}
+            <p>
+              If they are signed in right now, their session ends the next time the
+              app reloads, and within an hour at the latest.
+            </p>
+          </>
+        }
       />
     </div>
   );

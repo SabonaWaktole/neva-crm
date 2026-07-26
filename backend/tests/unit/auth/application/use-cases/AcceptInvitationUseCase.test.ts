@@ -33,6 +33,8 @@ describe('AcceptInvitationUseCase', () => {
       updatePassword: jest.fn(),
       updateProfile: jest.fn(),
       updateRoleAndWarehouse: jest.fn(),
+      setActive: jest.fn(),
+      countAssignedWork: jest.fn(),
     };
     passwordHasher = {
       hash: jest.fn(),

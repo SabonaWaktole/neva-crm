@@ -71,4 +71,29 @@ export class PrismaUserRepository implements IUserRepository {
       data: { role, warehouseId },
     });
   }
+
+  async setActive(userId: string, isActive: boolean): Promise<void> {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { isActive },
+    });
+  }
+
+  async countAssignedWork(userId: string): Promise<{ clients: number; upcomingAppointments: number }> {
+    // Only work that would actually go unattended is counted: currently
+    // assigned clients, and appointments still ahead that are not cancelled.
+    // Past and cancelled appointments are history, not a handover concern.
+    const [clients, upcomingAppointments] = await Promise.all([
+      prisma.client.count({ where: { assignedUserId: userId } }),
+      prisma.appointment.count({
+        where: {
+          assignedUserId: userId,
+          scheduledAt: { gte: new Date() },
+          status: { in: ['SCHEDULED', 'CONFIRMED'] },
+        },
+      }),
+    ]);
+
+    return { clients, upcomingAppointments };
+  }
 }

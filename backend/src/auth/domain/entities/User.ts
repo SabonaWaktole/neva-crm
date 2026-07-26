@@ -10,6 +10,8 @@ interface UserProps {
   role: UserRole;
   tenantId: string | null;
   warehouseId?: string | null;
+  /** Defaults to true so existing construction sites keep working. */
+  isActive?: boolean;
   createdAt: Date;
 }
 
@@ -23,6 +25,12 @@ export class User {
   public readonly role: UserRole;
   public readonly tenantId: string | null;
   public warehouseId: string | null;
+  /**
+   * Deactivated users are retained, never deleted: seven non-nullable columns
+   * reference User, so removal would be blocked by the database or would
+   * destroy financial and audit history.
+   */
+  public readonly isActive: boolean;
   public readonly createdAt: Date;
 
   private constructor(props: UserProps) {
@@ -35,6 +43,7 @@ export class User {
     this.role = props.role;
     this.tenantId = props.tenantId;
     this.warehouseId = props.warehouseId || null;
+    this.isActive = props.isActive ?? true;
     this.createdAt = props.createdAt;
   }
 
