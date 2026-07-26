@@ -266,3 +266,14 @@
   gap: var(--spacing-sm);
   width: 100%;
 }
+
+/* Surfaces the save error from useDefineCustomField / useDefineOutcomeCategory.
+   Previously these errors were captured in hook state and never rendered, so a
+   rejected submission looked like nothing had happened. */
+.saveError {
+  margin: 0;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-sm);
+  line-height: var(--font-line-height-body-sm);
+  color: var(--color-error);
+}

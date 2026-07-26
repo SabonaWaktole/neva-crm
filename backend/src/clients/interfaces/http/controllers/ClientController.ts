@@ -110,7 +110,10 @@ export class ClientController {
       const result = await this.searchClientsUseCase.execute({
         tenantId,
         filters: {
+          search: validatedData.search,
           name: validatedData.name,
+          email: validatedData.email,
+          phone: validatedData.phone,
           status: validatedData.status,
           assignedUserId: validatedData.assignedUserId,
           customFields: validatedData.customFields,

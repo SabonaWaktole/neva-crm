@@ -18,8 +18,10 @@ export const ClientSettingsContent: React.FC = () => {
   const [newOutcomeLabel, setNewOutcomeLabel] = useState('');
 
   const { customFields, outcomeCategories, isLoading, fetchSettings } = useClientSettings();
-  const { defineCustomField, isLoading: isDefiningField } = useDefineCustomField();
-  const { defineOutcomeCategory, isLoading: isDefiningCategory } = useDefineOutcomeCategory();
+  const { defineCustomField, isLoading: isDefiningField, error: fieldError } = useDefineCustomField();
+  const { defineOutcomeCategory, isLoading: isDefiningCategory, error: outcomeError } = useDefineOutcomeCategory();
+
+  const saveError = activeTab === 'fields' ? fieldError : outcomeError;
 
   useEffect(() => {
     fetchSettings();
@@ -34,7 +36,9 @@ export const ClientSettingsContent: React.FC = () => {
       setIsSlideOverOpen(false);
       fetchSettings(); // refresh
     } catch {
-      // error handled by hook
+      // Swallowed on purpose: the hook records the message in its `error`
+      // state, which is rendered above the form as `saveError`. The slide-over
+      // deliberately stays open so the user can correct the input.
     }
   };
 
@@ -46,7 +50,9 @@ export const ClientSettingsContent: React.FC = () => {
       setIsSlideOverOpen(false);
       fetchSettings(); // refresh
     } catch {
-      // error handled by hook
+      // Swallowed on purpose: the hook records the message in its `error`
+      // state, which is rendered above the form as `saveError`. The slide-over
+      // deliberately stays open so the user can correct the input.
     }
   };
 
@@ -183,6 +189,11 @@ export const ClientSettingsContent: React.FC = () => {
         }
       >
         <div className={styles.slideOverForm}>
+          {saveError && (
+            <p className={styles.saveError} role="alert">
+              {saveError}
+            </p>
+          )}
           {activeTab === 'fields' ? (
             <>
               <TextInput

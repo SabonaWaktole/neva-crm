@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { requireTenantId } from "@main/interfaces/http/tenantContext";
+import { requireTenant, requireTenantId } from "@main/interfaces/http/tenantContext";
 import { RegisterBusinessOwnerUseCase } from '@auth/application/use-cases/RegisterBusinessOwnerUseCase';
 import { LoginUseCase } from '@auth/application/use-cases/LoginUseCase';
 import { InviteStaffUseCase } from '@auth/application/use-cases/InviteStaffUseCase';
@@ -46,7 +46,7 @@ export class AuthController {
 
   loginTenant = async (req: Request, res: Response) => {
     try {
-      const result = await this.loginUseCase.execute({ ...req.body, tenantSlug: req.tenant!.urlSlug });
+      const result = await this.loginUseCase.execute({ ...req.body, tenantSlug: requireTenant(req).urlSlug });
       res.cookie('jwt', result.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',

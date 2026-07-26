@@ -19,7 +19,7 @@ import { Request } from 'express';
  * which is a wiring bug that should surface loudly as a 500 in the logs rather
  * than silently pass `undefined` into a database query as a tenant filter.
  */
-export function requireTenantId(req: Request): string {
+export function requireTenant(req: Request): { id: string; urlSlug: string } {
   const tenant = req.tenant;
   if (!tenant?.id) {
     throw new Error(
@@ -27,5 +27,9 @@ export function requireTenantId(req: Request): string {
         'resolveTenant middleware having run.'
     );
   }
-  return tenant.id;
+  return tenant;
+}
+
+export function requireTenantId(req: Request): string {
+  return requireTenant(req).id;
 }

@@ -20,6 +20,8 @@ import { DropdownMenu } from '../../components/ui/DropdownMenu/DropdownMenu';
 import styles from './ClientListContent.module.css';
 
 import { useClients } from '../../hooks/useClients';
+import { useTeam } from '../../hooks/useTeam';
+import { findPersonById, getStaffDisplayName, getStaffInitials } from '../../utils/userUtils';
 import { useDebounce } from '../../hooks/useDebounce';
 
 export const ClientListContent: React.FC = () => {
@@ -27,10 +29,18 @@ export const ClientListContent: React.FC = () => {
   const { tenantSlug } = useParams();
   const navigate = useNavigate();
   const { clients, total, isLoading, fetchClients } = useClients();
+  // Only the staff list is needed here; fetchPendingInvitations is a
+  // Business-Owner-only endpoint and is deliberately not called.
+  const { staff, fetchStaff } = useTeam();
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   useEffect(() => {
-    fetchClients({ name: debouncedSearchTerm });
+    fetchStaff();
+  }, [fetchStaff]);
+
+  useEffect(() => {
+    // One box, matched across name / email / phone — SRS §6.2.
+    fetchClients({ search: debouncedSearchTerm });
   }, [fetchClients, debouncedSearchTerm]);
 
   const getStatusBadgeVariant = (status: string) => {
@@ -79,16 +89,17 @@ export const ClientListContent: React.FC = () => {
     {
       id: 'assigned',
       header: 'Assigned To',
-      render: (client) => (
-        <div className={styles.assigneeCell}>
-          <Avatar
-            src={undefined}
-            size="sm"
-            fallback={client.assignedUserId?.substring(0, 2).toUpperCase() || 'UN'}
-          />
-          <span className={styles.assigneeName}>{client.assignedUserId || 'Unassigned'}</span>
-        </div>
-      ),
+      render: (client) => {
+        // Resolve the stored id to a person; previously both the avatar and the
+        // label rendered raw UUID fragments.
+        const assignee = findPersonById(staff, client.assignedUserId);
+        return (
+          <div className={styles.assigneeCell}>
+            <Avatar src={undefined} size="sm" fallback={getStaffInitials(assignee)} />
+            <span className={styles.assigneeName}>{getStaffDisplayName(assignee)}</span>
+          </div>
+        );
+      },
     },
     {
       id: 'activity',
@@ -145,7 +156,7 @@ export const ClientListContent: React.FC = () => {
         <div className={styles.tableToolbar}>
           <div className={styles.searchWrapper}>
             <TextInput 
-              placeholder="Search clients..." 
+              placeholder="Search by name, email or phone..."
               iconLeft={<Search size={18} />}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 import { User, FileText, Save, Puzzle } from 'lucide-react';
 import { Button } from '../../components/ui/Button/Button';
@@ -7,8 +7,11 @@ import { Card } from '../../components/ui/Card/Card';
 import { TextInput } from '../../components/ui/TextInput/TextInput';
 import { SelectInput } from '../../components/ui/SelectInput/SelectInput';
 import { TextareaInput } from '../../components/ui/TextareaInput/TextareaInput';
+import { CustomFieldInput, type CustomFieldInputProps } from '../../components/ui/CustomFieldInput/CustomFieldInput';
 import { useCreateClient, useUpdateClient, useClientDetail, useClientSettings } from '../../hooks/useClients';
-import { ClientStatus } from '../../types/client';
+import { useTeam } from '../../hooks/useTeam';
+import { getStaffDisplayName } from '../../utils/userUtils';
+import { ClientStatus, type CustomFieldType } from '../../types/client';
 import styles from './ClientFormContent.module.css';
 
 interface ClientFormValues {
@@ -16,8 +19,27 @@ interface ClientFormValues {
   email: string;
   phone: string;
   status: string;
-  customFieldValues: Record<string, string>;
+  assignedUserId: string;
+  customFieldValues: Record<string, unknown>;
 }
+
+/**
+ * Backend field type → the input variant that renders it.
+ *
+ * Explicit rather than derived, so adding a backend type is a deliberate choice
+ * here too. Anything unrecognised falls back to a plain text box: a field the UI
+ * does not know about should still be readable and editable, never blank.
+ */
+const FIELD_TYPE_TO_INPUT: Record<CustomFieldType, CustomFieldInputProps['fieldType']> = {
+  TEXT: 'text',
+  NUMBER: 'number',
+  DATE: 'date',
+  BOOLEAN: 'checkbox',
+  SINGLE_SELECT: 'dropdown',
+};
+
+const inputVariantFor = (fieldType: string): CustomFieldInputProps['fieldType'] =>
+  FIELD_TYPE_TO_INPUT[fieldType as CustomFieldType] ?? 'text';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -30,9 +52,12 @@ export const ClientFormContent: React.FC = () => {
   const { updateClient, isLoading: isUpdating, error: updateError } = useUpdateClient();
   const { client, fetchClient } = useClientDetail(clientId || '');
   const { customFields, fetchSettings } = useClientSettings();
+  // Only the staff list; pending invitations are Business-Owner-only.
+  const { staff, fetchStaff } = useTeam();
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors },
@@ -42,16 +67,18 @@ export const ClientFormContent: React.FC = () => {
       email: '',
       phone: '',
       status: ClientStatus.PROSPECT,
+      assignedUserId: '',
       customFieldValues: {},
     },
   });
 
   useEffect(() => {
     fetchSettings();
+    fetchStaff();
     if (isEdit) {
       fetchClient();
     }
-  }, [fetchSettings, isEdit, fetchClient]);
+  }, [fetchSettings, fetchStaff, isEdit, fetchClient]);
 
   // Populate form when editing
   useEffect(() => {
@@ -61,9 +88,13 @@ export const ClientFormContent: React.FC = () => {
         email: client.contactInfo?.email || '',
         phone: client.contactInfo?.phone || '',
         status: client.status,
-        customFieldValues: Object.fromEntries(
-          Object.entries(client.customFieldValues || {}).map(([k, v]) => [k, String(v)])
-        ),
+        // '' is the Unassigned option; the column is nullable.
+        assignedUserId: client.assignedUserId ?? '',
+        // Values are passed through as stored, NOT String()-coerced. Coercing
+        // turned a stored `false` into the string "false", which is truthy — so
+        // a checkbox field that was off rendered as on, and saving it back
+        // silently flipped the value to true.
+        customFieldValues: { ...(client.customFieldValues || {}) },
       });
     }
   }, [client, isEdit, reset]);
@@ -73,6 +104,9 @@ export const ClientFormContent: React.FC = () => {
       name: values.name,
       contactInfo: { email: values.email || undefined, phone: values.phone || undefined },
       status: values.status as ClientStatus,
+      // Empty string means Unassigned — send null so the column is cleared
+      // rather than set to an invalid empty id.
+      assignedUserId: values.assignedUserId || null,
       customFieldValues: values.customFieldValues,
     };
 
@@ -151,6 +185,21 @@ export const ClientFormContent: React.FC = () => {
               <option value={ClientStatus.ACTIVE}>Active</option>
               <option value={ClientStatus.INACTIVE}>Inactive</option>
             </SelectInput>
+            {/*
+              Available to Staff as well as Business Owners: SRS §6.2 lists
+              "Assign the client to a staff member" under Add Client, which it
+              states is for "staff and business owners", and the permission
+              matrix gives Staff Full (assigned/shared) client management. The
+              /auth/staff endpoint is likewise authorized for both roles.
+            */}
+            <SelectInput label="Assigned To" {...register('assignedUserId')}>
+              <option value="">Unassigned</option>
+              {staff.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {getStaffDisplayName(member)}
+                </option>
+              ))}
+            </SelectInput>
           </div>
         </Card>
 
@@ -165,12 +214,19 @@ export const ClientFormContent: React.FC = () => {
             </div>
             <div className={styles.grid2}>
               {customFields.map((field) => (
-                <TextInput
+                <Controller
                   key={field.id}
-                  label={field.fieldName}
-                  placeholder={`Enter ${field.fieldName}`}
-                  type={field.fieldType === 'NUMBER' ? 'number' : 'text'}
-                  {...register(`customFieldValues.${field.fieldName}`)}
+                  name={`customFieldValues.${field.fieldName}`}
+                  control={control}
+                  render={({ field: controlled }) => (
+                    <CustomFieldInput
+                      fieldType={inputVariantFor(field.fieldType)}
+                      label={field.fieldName}
+                      options={field.options ?? []}
+                      value={controlled.value}
+                      onChange={controlled.onChange}
+                    />
+                  )}
                 />
               ))}
             </div>

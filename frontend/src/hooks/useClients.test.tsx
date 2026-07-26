@@ -345,6 +345,78 @@ describe('useClients Hooks', () => {
       expect(caughtError).toBeDefined();
       expect(result.current.error).toBe('Already exists');
     });
+
+    // Request-validation failures come back as a raw ZodError (`{ issues: [] }`),
+    // not `{ error }`. The hook used to read only `.error`, so these fell
+    // through to the generic fallback and the user learned nothing about what
+    // was wrong — which is how an invalid field type failed silently.
+    it('surfaces zod validation issues from a 400 rather than a generic message', async () => {
+      server.use(
+        http.post('http://localhost:3000/api/tenant-1/clients/settings/custom-fields', () => {
+          return HttpResponse.json(
+            {
+              issues: [
+                { path: ['fieldType'], message: 'Invalid enum value. Expected TEXT | NUMBER | DATE | BOOLEAN | SINGLE_SELECT' },
+              ],
+            },
+            { status: 400 }
+          );
+        })
+      );
+
+      const { result } = renderHook(() => useDefineCustomField());
+
+      await act(async () => {
+        try {
+          await result.current.defineCustomField({ fieldName: 'Test', fieldType: 'NOPE' });
+        } catch {
+          /* expected */
+        }
+      });
+
+      expect(result.current.error).toContain('fieldType');
+      expect(result.current.error).toContain('Invalid enum value');
+      expect(result.current.error).not.toBe('Failed to define custom field');
+    });
+
+    it('accepts BOOLEAN, the type the settings dropdown offers', async () => {
+      let received: any = null;
+      server.use(
+        http.post('http://localhost:3000/api/tenant-1/clients/settings/custom-fields', async ({ request }) => {
+          received = await request.json();
+          return HttpResponse.json({ id: 'cf-bool' });
+        })
+      );
+
+      const { result } = renderHook(() => useDefineCustomField());
+
+      await act(async () => {
+        await result.current.defineCustomField({ fieldName: 'isVip', fieldType: 'BOOLEAN' });
+      });
+
+      expect(received.fieldType).toBe('BOOLEAN');
+      expect(result.current.error).toBeNull();
+    });
+
+    it('falls back to a generic message when the response has no usable shape', async () => {
+      server.use(
+        http.post('http://localhost:3000/api/tenant-1/clients/settings/custom-fields', () => {
+          return HttpResponse.json({}, { status: 500 });
+        })
+      );
+
+      const { result } = renderHook(() => useDefineCustomField());
+
+      await act(async () => {
+        try {
+          await result.current.defineCustomField({ fieldName: 'Test', fieldType: 'TEXT' });
+        } catch {
+          /* expected */
+        }
+      });
+
+      expect(result.current.error).toBe('Failed to define custom field');
+    });
   });
 
   describe('useDefineOutcomeCategory', () => {

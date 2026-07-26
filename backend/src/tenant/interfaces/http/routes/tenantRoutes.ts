@@ -17,7 +17,16 @@ export function createTenantRouter(
     authorize([UserRole.SUPER_ADMIN]),
     async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const callerRole = (req as any).user?.role;
+        // The previous `as any` cast hid this line from type-aware searches for
+        // auth reads, and silenced the fact that req.user is optional. Both
+        // authenticate and authorize run first, so this is unreachable in
+        // practice — but it is checked rather than asserted away, so a future
+        // remount of this route without authenticate fails closed with a 401
+        // instead of passing `undefined` in as the caller's role.
+        if (!req.user) {
+          return res.status(401).json({ error: 'Access denied. No token provided.' });
+        }
+        const callerRole = req.user.role;
         const skip = req.query.skip ? parseInt(req.query.skip as string, 10) : undefined;
         const take = req.query.take ? parseInt(req.query.take as string, 10) : undefined;
 

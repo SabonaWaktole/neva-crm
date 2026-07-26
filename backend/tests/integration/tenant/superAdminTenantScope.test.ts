@@ -26,6 +26,14 @@ describe('Tenant scope enforcement across modules', () => {
   let owner2Token: string;
   let superAdminToken: string;
 
+  // Slugs are unique per run, not the shared literals 'tenant1'/'tenant2'.
+  // inventoryRoutes.test.ts creates those same literals and its afterAll only
+  // disconnects, so its rows persist in the worker schema; a suite reusing the
+  // slug then fails on the urlSlug unique constraint depending on which suites
+  // shared the worker. See TD-001 — this is that hazard, concretely.
+  let slug1: string;
+  let slug2: string;
+
   // One representative endpoint per tenant-scoped module.
   const endpoints = [
     { module: 'Clients', path: (slug: string) => `/api/${slug}/clients/search` },
@@ -56,28 +64,31 @@ describe('Tenant scope enforcement across modules', () => {
   beforeEach(async () => {
     tenant1Id = uuidv4();
     tenant2Id = uuidv4();
+    slug1 = `scope-a-${tenant1Id.slice(0, 8)}`;
+    slug2 = `scope-b-${tenant2Id.slice(0, 8)}`;
 
-    await prisma.tenant.create({ data: { id: tenant1Id, name: 'Tenant 1', urlSlug: 'tenant1' } });
-    await prisma.tenant.create({ data: { id: tenant2Id, name: 'Tenant 2', urlSlug: 'tenant2' } });
+    await prisma.tenant.create({ data: { id: tenant1Id, name: 'Tenant 1', urlSlug: slug1 } });
+    await prisma.tenant.create({ data: { id: tenant2Id, name: 'Tenant 2', urlSlug: slug2 } });
 
+    // Emails are unique too, so they are namespaced per run for the same reason.
     const owner1 = await prisma.user.create({
-      data: { id: uuidv4(), tenantId: tenant1Id, email: 'owner1@test.com', hashedPassword: 'hash', role: 'BUSINESS_OWNER' },
+      data: { id: uuidv4(), tenantId: tenant1Id, email: `owner1-${slug1}@test.com`, hashedPassword: 'hash', role: 'BUSINESS_OWNER' },
     });
     const staff1 = await prisma.user.create({
-      data: { id: uuidv4(), tenantId: tenant1Id, email: 'staff1@test.com', hashedPassword: 'hash', role: 'STAFF' },
+      data: { id: uuidv4(), tenantId: tenant1Id, email: `staff1-${slug1}@test.com`, hashedPassword: 'hash', role: 'STAFF' },
     });
     const owner2 = await prisma.user.create({
-      data: { id: uuidv4(), tenantId: tenant2Id, email: 'owner2@test.com', hashedPassword: 'hash', role: 'BUSINESS_OWNER' },
+      data: { id: uuidv4(), tenantId: tenant2Id, email: `owner2-${slug2}@test.com`, hashedPassword: 'hash', role: 'BUSINESS_OWNER' },
     });
     // A SUPER_ADMIN has no tenant at all — that null is precisely what used to
     // reach the controllers once the guard let it through.
     const superAdmin = await prisma.user.create({
-      data: { id: uuidv4(), tenantId: null, email: 'super@platform.com', hashedPassword: 'hash', role: 'SUPER_ADMIN' },
+      data: { id: uuidv4(), tenantId: null, email: `super-${slug1}@platform.com`, hashedPassword: 'hash', role: 'SUPER_ADMIN' },
     });
 
-    owner1Token = tokenService.sign({ userId: owner1.id, tenantId: tenant1Id, tenantSlug: 'tenant1', role: 'BUSINESS_OWNER', warehouseId: null });
-    staff1Token = tokenService.sign({ userId: staff1.id, tenantId: tenant1Id, tenantSlug: 'tenant1', role: 'STAFF', warehouseId: null });
-    owner2Token = tokenService.sign({ userId: owner2.id, tenantId: tenant2Id, tenantSlug: 'tenant2', role: 'BUSINESS_OWNER', warehouseId: null });
+    owner1Token = tokenService.sign({ userId: owner1.id, tenantId: tenant1Id, tenantSlug: slug1, role: 'BUSINESS_OWNER', warehouseId: null });
+    staff1Token = tokenService.sign({ userId: staff1.id, tenantId: tenant1Id, tenantSlug: slug1, role: 'STAFF', warehouseId: null });
+    owner2Token = tokenService.sign({ userId: owner2.id, tenantId: tenant2Id, tenantSlug: slug2, role: 'BUSINESS_OWNER', warehouseId: null });
     superAdminToken = tokenService.sign({ userId: superAdmin.id, tenantId: null, tenantSlug: null, role: 'SUPER_ADMIN', warehouseId: null });
 
     // The SUPER_ADMIN has a null tenantId, so it cannot be cleaned up by tenant
@@ -100,7 +111,7 @@ describe('Tenant scope enforcement across modules', () => {
     endpoints.forEach(({ module, path }) => {
       it(`returns 403 (not 500, not empty 200) for SUPER_ADMIN on ${module}`, async () => {
         const res = await request(app)
-          .get(path('tenant1'))
+          .get(path(slug1))
           .set('Authorization', `Bearer ${superAdminToken}`);
 
         expect(res.status).toBe(403);
@@ -113,7 +124,7 @@ describe('Tenant scope enforcement across modules', () => {
       // non-null assertion on req.user.tenantId deeper in the stack.
       for (const { path } of endpoints) {
         const res = await request(app)
-          .get(path('tenant1'))
+          .get(path(slug1))
           .set('Authorization', `Bearer ${superAdminToken}`);
 
         expect(res.status).not.toBe(500);
@@ -125,7 +136,7 @@ describe('Tenant scope enforcement across modules', () => {
   describe('normal tenant access is unaffected', () => {
     it('allows a BUSINESS_OWNER to read their own tenant', async () => {
       const res = await request(app)
-        .get('/api/tenant1/inventory/warehouses')
+        .get(`/api/${slug1}/inventory/warehouses`)
         .set('Authorization', `Bearer ${owner1Token}`);
 
       expect(res.status).toBe(200);
@@ -135,7 +146,7 @@ describe('Tenant scope enforcement across modules', () => {
 
     it('allows a STAFF member to read their own tenant', async () => {
       const res = await request(app)
-        .get('/api/tenant1/inventory/warehouses')
+        .get(`/api/${slug1}/inventory/warehouses`)
         .set('Authorization', `Bearer ${staff1Token}`);
 
       expect(res.status).toBe(200);
@@ -145,7 +156,7 @@ describe('Tenant scope enforcement across modules', () => {
     endpoints.forEach(({ module, path }) => {
       it(`allows a BUSINESS_OWNER through the guard on ${module}`, async () => {
         const res = await request(app)
-          .get(path('tenant1'))
+          .get(path(slug1))
           .set('Authorization', `Bearer ${owner1Token}`);
 
         // The guard must not deny; the endpoint itself may legitimately 200.
@@ -159,7 +170,7 @@ describe('Tenant scope enforcement across modules', () => {
     endpoints.forEach(({ module, path }) => {
       it(`returns 403 when a Tenant 2 owner targets Tenant 1 on ${module}`, async () => {
         const res = await request(app)
-          .get(path('tenant1'))
+          .get(path(slug1))
           .set('Authorization', `Bearer ${owner2Token}`);
 
         expect(res.status).toBe(403);
@@ -169,7 +180,7 @@ describe('Tenant scope enforcement across modules', () => {
 
     it('returns 403 when a Tenant 1 owner targets Tenant 2', async () => {
       const res = await request(app)
-        .get('/api/tenant2/inventory/warehouses')
+        .get(`/api/${slug2}/inventory/warehouses`)
         .set('Authorization', `Bearer ${owner1Token}`);
 
       expect(res.status).toBe(403);

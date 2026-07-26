@@ -77,6 +77,28 @@ describe('clientSchemas', () => {
       expect(() => defineCustomFieldSchema.parse({ fieldName: 'size', fieldType: FieldType.SINGLE_SELECT }))
         .toThrow('Options are required for SINGLE_SELECT fields');
     });
+
+    // The settings UI has always offered a "Boolean" option; before it existed
+    // in this enum every such submission was rejected with a 400 the user never
+    // saw. Pinned here so the enum and the dropdown cannot drift apart silently.
+    it('accepts BOOLEAN, which the settings UI offers', () => {
+      const data = { fieldName: 'isVip', fieldType: FieldType.BOOLEAN };
+      expect(defineCustomFieldSchema.parse(data)).toEqual(data);
+    });
+
+    it('accepts every FieldType the enum declares', () => {
+      for (const fieldType of Object.values(FieldType)) {
+        const data: any = { fieldName: 'someField', fieldType };
+        // SINGLE_SELECT is the one type carrying an extra requirement.
+        if (fieldType === FieldType.SINGLE_SELECT) data.options = ['a', 'b'];
+        expect(() => defineCustomFieldSchema.parse(data)).not.toThrow();
+      }
+    });
+
+    it('rejects a type that is not in the enum', () => {
+      expect(() => defineCustomFieldSchema.parse({ fieldName: 'x', fieldType: 'CHECKBOX' }))
+        .toThrow();
+    });
   });
 
   describe('defineOutcomeCategorySchema', () => {

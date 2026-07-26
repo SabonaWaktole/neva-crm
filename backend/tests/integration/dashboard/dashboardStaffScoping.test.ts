@@ -28,7 +28,10 @@ describe('Dashboard role-based data scoping', () => {
   let ownerToken: string;
   let staffToken: string;
 
-  const slug = 'dash-scope';
+  // Unique per run: urlSlug is a unique column, and suites that leave rows
+  // behind would otherwise collide with a fixed literal depending on which
+  // suites shared this Jest worker. See TD-001.
+  let slug = '';
 
   beforeAll(async () => {
     prisma = new PrismaClient();
@@ -46,6 +49,7 @@ describe('Dashboard role-based data scoping', () => {
     ownerId = uuidv4();
     staffId = uuidv4();
     otherStaffId = uuidv4();
+    slug = `dash-scope-${tenantId.slice(0, 8)}`;
 
     await prisma.tenant.create({
       data: { id: tenantId, name: 'Scope Tenant', urlSlug: slug },

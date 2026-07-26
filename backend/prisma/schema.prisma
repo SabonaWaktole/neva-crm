@@ -121,7 +121,10 @@ model CustomFieldDefinition {
   id        String   @id
   tenantId  String
   fieldName String
-  fieldType String // 'TEXT', 'NUMBER', 'DATE', 'SINGLE_SELECT'
+  // Stored as a plain String rather than a Postgres enum, so the authoritative
+  // list is src/clients/domain/enums/FieldType.ts and adding a value needs no
+  // migration. Currently: TEXT, NUMBER, DATE, BOOLEAN, SINGLE_SELECT.
+  fieldType String
   options   String[] // for SINGLE_SELECT
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
