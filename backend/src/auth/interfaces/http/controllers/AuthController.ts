@@ -121,7 +121,11 @@ export class AuthController {
         user.tenantId
           ? prisma.tenant.findUnique({
               where: { id: user.tenantId },
-              select: { logoUrl: true, coverImageUrl: true, name: true },
+              // currency and locale ride along with the branding for the same
+              // reason: the money formatter is used on nearly every page, and
+              // making each one fetch settings separately would be a round trip
+              // per page for two short strings.
+              select: { logoUrl: true, coverImageUrl: true, name: true, currency: true, locale: true },
             })
           : Promise.resolve(null),
       ]);
@@ -142,6 +146,10 @@ export class AuthController {
           tenantName: tenantBranding?.name ?? null,
           tenantLogoUrl: tenantBranding?.logoUrl ?? null,
           tenantCoverImageUrl: tenantBranding?.coverImageUrl ?? null,
+          // Null only for SUPER_ADMIN, who has no tenant. Every tenant row has
+          // these columns NOT NULL, so a tenanted user always gets real values.
+          tenantCurrency: tenantBranding?.currency ?? null,
+          tenantLocale: tenantBranding?.locale ?? null,
         }
       });
     } catch (error: any) {

@@ -10,6 +10,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import styles from './InventoryTable.module.css';
+import { useMoneyFormat } from '../../../hooks/useMoneyFormat';
 import { Badge } from '../../ui/Badge';
 import { DataTable } from '../../ui/DataTable';
 import type { DataTableColumn, DataTableSelection, DataTableSort } from '../../ui/DataTable';
@@ -41,14 +42,6 @@ const STATUS_VARIANT: Record<ProductStatus, 'success' | 'warning' | 'error' | 's
   ARCHIVED: 'secondary',
 };
 
-const formatMoney = (value: number | null): string => {
-  if (value === null) return '—';
-  return value.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-};
-
 export const InventoryTable: React.FC<InventoryTableProps> = ({
   products,
   isLoading,
@@ -61,6 +54,8 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   emptyAction,
   isFiltered = false,
 }) => {
+  const { format: formatMoney } = useMoneyFormat();
+
   const buildMenu = (product: Product): DropdownMenuItemType[] => {
     const items: DropdownMenuItemType[] = [];
 

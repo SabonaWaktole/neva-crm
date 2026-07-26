@@ -63,7 +63,6 @@ describe('RegisterBusinessOwnerUseCase', () => {
       urlSlug: 'acme-corp',
       ownerEmail: 'owner@acme.com',
       ownerPassword: 'StrongPassword123!',
-      locale: 'en',
     });
 
     expect(tenantRepository.findBySlug).toHaveBeenCalledWith('acme-corp');
@@ -83,7 +82,6 @@ describe('RegisterBusinessOwnerUseCase', () => {
         urlSlug: 'acme-corp',
         ownerEmail: 'owner@acme.com',
         ownerPassword: 'StrongPassword123!',
-        locale: 'en',
       })
     ).rejects.toThrow(SlugAlreadyTakenError);
   });

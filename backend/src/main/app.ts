@@ -321,7 +321,12 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const { SettingsController } = require('../settings/interfaces/http/SettingsController');
   const { createSettingsRouter } = require('../settings/interfaces/http/settingsRoutes');
   
-  const settingsController = new SettingsController(tenantRepository);
+  const { TenantProfileStore } = require('../settings/infrastructure/TenantProfileStore');
+  const { UpdateTenantSettingsUseCase } = require('../settings/application/use-cases/UpdateTenantSettingsUseCase');
+
+  const tenantProfileStore = new TenantProfileStore();
+  const updateTenantSettingsUseCase = new UpdateTenantSettingsUseCase(tenantRepository, tenantProfileStore);
+  const settingsController = new SettingsController(tenantRepository, tenantProfileStore, updateTenantSettingsUseCase);
   const settingsRoutes = createSettingsRouter(settingsController, tokenService, tenantRepository);
   app.use('/api/:tenantSlug/settings', settingsRoutes);
 

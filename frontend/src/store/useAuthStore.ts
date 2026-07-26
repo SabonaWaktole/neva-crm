@@ -22,6 +22,14 @@ export interface User {
   tenantName?: string | null;
   tenantLogoUrl?: string | null;
   tenantCoverImageUrl?: string | null;
+  /**
+   * The workspace's money-formatting settings, returned by GET /auth/me on the
+   * same call as the branding above. Held here so every page can format an
+   * amount without its own settings fetch. Null for SUPER_ADMIN, who has no
+   * tenant — see useMoneyFormat for how that case falls back.
+   */
+  tenantCurrency?: string | null;
+  tenantLocale?: string | null;
 }
 
 interface AuthState {

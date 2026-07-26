@@ -1,12 +1,19 @@
 import { Request, Response, Router } from 'express';
-import { requireTenantId } from "@main/interfaces/http/tenantContext";
+import { requireTenantId } from '@main/interfaces/http/tenantContext';
 import { ITenantRepository } from '../../../tenant/domain/repositories/ITenantRepository';
-import { UserRole } from '../../../auth/domain/enums/UserRole';
+import { TenantProfileStore } from '../../infrastructure/TenantProfileStore';
+import { UpdateTenantSettingsUseCase } from '../../application/use-cases/UpdateTenantSettingsUseCase';
+import { UnauthorizedError } from '../../../auth/domain/errors';
+import { ZodError } from 'zod';
 
 export class SettingsController {
   public router = Router({ mergeParams: true });
 
-  constructor(private tenantRepository: ITenantRepository) {
+  constructor(
+    private tenantRepository: ITenantRepository,
+    private profileStore: TenantProfileStore,
+    private updateTenantSettingsUseCase: UpdateTenantSettingsUseCase
+  ) {
     this.initializeRoutes();
   }
 
@@ -15,26 +22,42 @@ export class SettingsController {
     this.router.put('/', this.updateSettings.bind(this));
   }
 
+  /**
+   * Returns the tenant's full settings in one payload: the localization fields
+   * from the domain entity, and the company profile plus branding from the
+   * profile store.
+   */
   private async getSettings(req: Request, res: Response) {
     try {
       const tenantId = requireTenantId(req);
-      const tenant = await this.tenantRepository.findById(tenantId);
+      const [tenant, profile] = await Promise.all([
+        this.tenantRepository.findById(tenantId),
+        this.profileStore.get(tenantId),
+      ]);
+
       if (!tenant) {
         return res.status(404).json({ error: 'Tenant not found' });
       }
-      // Branding URLs are read directly from Prisma — they are presentation
-      // strings with no domain behaviour, so they are not carried on the
-      // Tenant entity. See the same note in AuthController.getMe.
-      const { prisma } = require('../../../shared/infrastructure/prisma/client');
-      const branding = await prisma.tenant.findUnique({
-        where: { id: tenantId },
-        select: { logoUrl: true, coverImageUrl: true },
-      });
 
       res.json({
+        name: tenant.name,
         requiresQuotationApproval: tenant.requiresQuotationApproval,
-        logoUrl: branding?.logoUrl ?? null,
-        coverImageUrl: branding?.coverImageUrl ?? null,
+
+        currency: tenant.currency,
+        locale: tenant.locale,
+        timezone: tenant.timezone,
+        dateFormat: tenant.dateFormat,
+
+        registrationNumber: profile?.registrationNumber ?? null,
+        addressLine: profile?.addressLine ?? null,
+        addressCity: profile?.addressCity ?? null,
+        addressState: profile?.addressState ?? null,
+        addressPostalCode: profile?.addressPostalCode ?? null,
+        contactEmail: profile?.contactEmail ?? null,
+        contactPhone: profile?.contactPhone ?? null,
+
+        logoUrl: profile?.logoUrl ?? null,
+        coverImageUrl: profile?.coverImageUrl ?? null,
       });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
@@ -44,28 +67,29 @@ export class SettingsController {
   private async updateSettings(req: Request, res: Response) {
     try {
       const tenantId = requireTenantId(req);
-      const user = req.user!;
-      
-      // Role-gate settings update to Business Owner only
-      if (user.role !== UserRole.BUSINESS_OWNER) {
-        return res.status(403).json({ error: 'Unauthorized: Only Business Owners can update settings' });
+      if (!req.user) {
+        return res.status(401).json({ error: 'Access denied. No token provided.' });
       }
 
-      const { requiresQuotationApproval } = req.body;
-      const tenant = await this.tenantRepository.findById(tenantId);
-      
-      if (!tenant) {
-        return res.status(404).json({ error: 'Tenant not found' });
-      }
+      await this.updateTenantSettingsUseCase.execute({
+        tenantId,
+        requestingUserRole: req.user.role,
+        patch: req.body,
+      });
 
-      await this.tenantRepository.updateSettings(tenantId, {
-        requiresQuotationApproval: Boolean(requiresQuotationApproval)
-      });
-      
-      res.json({
-        requiresQuotationApproval: Boolean(requiresQuotationApproval)
-      });
+      // Re-read rather than echoing the request back. The previous version
+      // returned `Boolean(req.body.requiresQuotationApproval)` — which reported
+      // whatever it had just coerced, so it confirmed a value that may never
+      // have been what the caller meant. Returning stored state means the client
+      // cannot be told a change happened that did not.
+      return this.getSettings(req, res);
     } catch (error: any) {
+      if (error instanceof UnauthorizedError) {
+        return res.status(403).json({ error: error.message });
+      }
+      if (error instanceof ZodError) {
+        return res.status(400).json({ issues: error.issues });
+      }
       res.status(400).json({ error: error.message });
     }
   }

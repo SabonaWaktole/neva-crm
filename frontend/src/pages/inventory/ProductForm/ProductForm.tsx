@@ -10,6 +10,7 @@ import { Badge } from '../../../components/ui/Badge';
 import { TagInput } from '../../../components/ui/TagInput';
 import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
 import { useToast } from '../../../components/ui/Toast';
+import { useMoneyFormat } from '../../../hooks/useMoneyFormat';
 import { ProductImageManager } from '../../../components/inventory/ProductImageManager';
 import { WarehouseStockAllocation } from '../../../components/inventory/WarehouseStockAllocation/WarehouseStockAllocation';
 import { AppLayout } from '../../../components/layout/AppLayout/AppLayout';
@@ -66,9 +67,6 @@ const STATUS_VARIANT: Record<ProductStatus, 'success' | 'warning' | 'error' | 's
   ARCHIVED: 'secondary',
 };
 
-const formatMoney = (value: number) =>
-  value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
 /**
  * Validates the whole form at once rather than field-by-field on every
  * keystroke, so a half-typed price is not flagged as an error mid-entry.
@@ -106,6 +104,7 @@ const validate = (form: FormState): FieldErrors => {
 };
 
 const ProductFormContent: React.FC = () => {
+  const { format: formatMoney } = useMoneyFormat();
   const navigate = useNavigate();
   const toast = useToast();
   const { tenantSlug, productId } = useParams();

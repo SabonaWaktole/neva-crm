@@ -36,7 +36,6 @@ export const authService = {
     urlSlug: string;
     ownerEmail: string;
     ownerPassword: string;
-    locale?: string;
   }) => {
     const response = await apiClient.post('/auth/register', data);
     return response.data;

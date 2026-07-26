@@ -1,25 +1,44 @@
-import { ITenantRepository } from '../../domain/repositories/ITenantRepository';
+import { ITenantRepository, TenantSettingsUpdate } from '../../domain/repositories/ITenantRepository';
 import { Tenant } from '../../domain/entities/Tenant';
 import { prisma } from '../../../shared/infrastructure/prisma/client';
+
+/**
+ * Every mapping goes through this one function so a new column cannot be
+ * remembered in `findBySlug` and forgotten in `findAll` — which is exactly how
+ * `requiresQuotationApproval` ended up being read inconsistently before.
+ */
+const toDomain = (data: {
+  id: string;
+  name: string;
+  urlSlug: string;
+  requiresQuotationApproval: boolean;
+  currency: string;
+  locale: string;
+  timezone: string;
+  dateFormat: string;
+  createdAt: Date;
+}): Tenant =>
+  Tenant.create({
+    id: data.id,
+    name: data.name,
+    urlSlug: data.urlSlug,
+    requiresQuotationApproval: data.requiresQuotationApproval,
+    currency: data.currency,
+    locale: data.locale,
+    timezone: data.timezone,
+    dateFormat: data.dateFormat,
+    createdAt: data.createdAt,
+  });
 
 export class PrismaTenantRepository implements ITenantRepository {
   async findById(id: string): Promise<Tenant | null> {
     const data = await prisma.tenant.findUnique({ where: { id } });
-    if (!data) return null;
-    // Map to domain entity using reflection or bypass private constructor
-    return Tenant.create(data);
+    return data ? toDomain(data) : null;
   }
 
   async findBySlug(slug: string): Promise<Tenant | null> {
     const data = await prisma.tenant.findUnique({ where: { urlSlug: slug } });
-    if (!data) return null;
-    return Tenant.create({
-      id: data.id,
-      name: data.name,
-      urlSlug: data.urlSlug,
-      requiresQuotationApproval: data.requiresQuotationApproval,
-      createdAt: data.createdAt
-    });
+    return data ? toDomain(data) : null;
   }
 
   async create(tenant: Tenant): Promise<Tenant> {
@@ -29,6 +48,10 @@ export class PrismaTenantRepository implements ITenantRepository {
         name: tenant.name,
         urlSlug: tenant.urlSlug,
         requiresQuotationApproval: tenant.requiresQuotationApproval,
+        currency: tenant.currency,
+        locale: tenant.locale,
+        timezone: tenant.timezone,
+        dateFormat: tenant.dateFormat,
         createdAt: tenant.createdAt,
       },
     });
@@ -38,27 +61,29 @@ export class PrismaTenantRepository implements ITenantRepository {
   async findAll(skip: number, take: number): Promise<{ items: Tenant[]; total: number }> {
     const [records, total] = await Promise.all([
       prisma.tenant.findMany({ skip, take, orderBy: { createdAt: 'desc' } }),
-      prisma.tenant.count()
+      prisma.tenant.count(),
     ]);
-    
-    return {
-      items: records.map(r => Tenant.create({
-        id: r.id,
-        name: r.name,
-        urlSlug: r.urlSlug,
-        requiresQuotationApproval: r.requiresQuotationApproval,
-        createdAt: r.createdAt
-      })),
-      total
-    };
+
+    return { items: records.map(toDomain), total };
   }
 
-  async updateSettings(id: string, settings: { requiresQuotationApproval: boolean }): Promise<void> {
-    await prisma.tenant.update({
-      where: { id },
-      data: {
-        requiresQuotationApproval: settings.requiresQuotationApproval
-      }
-    });
+  /**
+   * Only the keys actually present are written. Passing `{}` updates nothing,
+   * rather than coercing absent fields to `false`/empty.
+   */
+  async updateSettings(id: string, settings: TenantSettingsUpdate): Promise<void> {
+    const data: TenantSettingsUpdate = {};
+    if (settings.name !== undefined) data.name = settings.name;
+    if (settings.requiresQuotationApproval !== undefined) {
+      data.requiresQuotationApproval = settings.requiresQuotationApproval;
+    }
+    if (settings.currency !== undefined) data.currency = settings.currency;
+    if (settings.locale !== undefined) data.locale = settings.locale;
+    if (settings.timezone !== undefined) data.timezone = settings.timezone;
+    if (settings.dateFormat !== undefined) data.dateFormat = settings.dateFormat;
+
+    if (Object.keys(data).length === 0) return;
+
+    await prisma.tenant.update({ where: { id }, data });
   }
 }

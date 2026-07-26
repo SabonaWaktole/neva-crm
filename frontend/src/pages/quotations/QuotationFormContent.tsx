@@ -12,6 +12,7 @@ import { useQuotations } from '../../hooks/useQuotations';
 import { useClients } from '../../hooks/useClients';
 import { useProducts } from '../../hooks/useInventory';
 import { useWarehouses } from '../../hooks/useWarehouses';
+import { useMoneyFormat } from '../../hooks/useMoneyFormat';
 
 interface QuotationFormProps {
   mode: 'create' | 'edit';
@@ -29,6 +30,7 @@ interface QuotationFormData {
 }
 
 export const QuotationFormContent: React.FC<QuotationFormProps> = ({ mode }) => {
+  const { format: formatMoney } = useMoneyFormat();
   const navigate = useNavigate();
   const { tenantSlug, id } = useParams();
   
@@ -275,7 +277,7 @@ export const QuotationFormContent: React.FC<QuotationFormProps> = ({ mode }) => 
                           />
                         </td>
                         <td style={{ textAlign: 'right', verticalAlign: 'middle', fontWeight: 600 }}>
-                          ${lineTotal.toFixed(2)}
+                          {formatMoney(lineTotal)}
                         </td>
                         <td className={styles.tdAction}>
                           {fields.length > 1 && (
@@ -295,11 +297,11 @@ export const QuotationFormContent: React.FC<QuotationFormProps> = ({ mode }) => 
               <div className={styles.totalsCard}>
                 <div className={styles.totalRow}>
                   <span>Subtotal</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>{formatMoney(subtotal)}</span>
                 </div>
                 <div className={styles.grandTotalRow}>
                   <span>Grand Total</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>{formatMoney(subtotal)}</span>
                 </div>
               </div>
             </div>

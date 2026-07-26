@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {} from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { CheckCircle2, Link as LinkIcon, UploadCloud, ChevronDown, ArrowLeft, ArrowRight } from 'lucide-react';
+import { CheckCircle2, Link as LinkIcon, UploadCloud, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Card } from '../../components/ui/Card/Card';
 import { Stepper } from '../../components/ui/Stepper/Stepper';
 import { TextInput } from '../../components/ui/TextInput/TextInput';
@@ -10,10 +10,15 @@ import { Button } from '../../components/ui/Button/Button';
 import { useRegisterBusiness } from '../../hooks/useRegisterBusiness';
 import styles from './OnboardingPage.module.css';
 
+/*
+ * The "Localization" step was removed. Its region select sent ad-hoc codes
+ * (us/uk/eu/au/ca) that registration accepted and then silently discarded, and
+ * its language select was never wired to state at all. Locale is now set from
+ * Company Settings, where it is validated against a list we actually support.
+ */
 const steps = [
   { id: 'org', label: 'Organization' },
   { id: 'brand', label: 'Branding' },
-  { id: 'locale', label: 'Localization' },
 ];
 
 export const OnboardingPage = () => {
@@ -23,7 +28,6 @@ export const OnboardingPage = () => {
   const [companyName, setCompanyName] = useState('');
   const [ownerEmail, setOwnerEmail] = useState('');
   const [ownerPassword, setOwnerPassword] = useState('');
-  const [locale, setLocale] = useState('en');
 
   const nextStep = () => {
     if (currentStep < steps.length) {
@@ -48,7 +52,6 @@ export const OnboardingPage = () => {
         urlSlug: slug,
         ownerEmail,
         ownerPassword,
-        locale,
       });
     } catch (err) {
       // Error is handled by the hook — go back to step 1 to show error
@@ -154,47 +157,6 @@ export const OnboardingPage = () => {
                   <span className={styles.uploadTitle}>Click to upload</span>
                   <span className={styles.uploadSubtitle}>or drag and drop</span>
                   <span className={styles.uploadHelp}>SVG, PNG, JPG (max. 5MB)</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Step 3: Localization */}
-            <div className={`${styles.stepContent} ${currentStep === 3 ? styles.stepContentActive : currentStep > 3 ? styles.stepContentHiddenLeft : styles.stepContentHiddenRight}`}>
-              <h2 className={styles.stepTitle}>Set your region</h2>
-              <p className={styles.stepSubtitle}>This helps us configure date, time, and currency formats correctly.</p>
-              
-              <div className={`${styles.formContent} ${styles.formContentMaxW} ${styles.gapLg}`}>
-                <div className={styles.gapXs} style={{ display: 'flex', flexDirection: 'column' }}>
-                  <label className={styles.label} htmlFor="localeSelect">Region / Locale</label>
-                  <div className={styles.selectWrapper}>
-                    <select
-                      id="localeSelect"
-                      className={styles.select}
-                      value={locale}
-                      onChange={(e) => setLocale(e.target.value)}
-                    >
-                      <option disabled value="">Select a region...</option>
-                      <option value="us">United States (USD)</option>
-                      <option value="uk">United Kingdom (GBP)</option>
-                      <option value="eu">European Union (EUR)</option>
-                      <option value="au">Australia (AUD)</option>
-                      <option value="ca">Canada (CAD)</option>
-                    </select>
-                    <ChevronDown className={styles.selectIcon} />
-                  </div>
-                </div>
-
-                <div className={styles.gapXs} style={{ display: 'flex', flexDirection: 'column' }}>
-                  <label className={styles.label} htmlFor="langSelect">System Language</label>
-                  <div className={styles.selectWrapper}>
-                    <select id="langSelect" className={styles.select} defaultValue="en">
-                      <option value="en">English (US)</option>
-                      <option value="es">Español</option>
-                      <option value="fr">Français</option>
-                      <option value="de">Deutsch</option>
-                    </select>
-                    <ChevronDown className={styles.selectIcon} />
-                  </div>
                 </div>
               </div>
             </div>

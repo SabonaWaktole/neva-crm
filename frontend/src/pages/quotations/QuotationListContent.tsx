@@ -19,8 +19,10 @@ import styles from './QuotationListContent.module.css';
 import { useQuotations, usePendingApprovals } from '../../hooks/useQuotations';
 import { useDebounce } from '../../hooks/useDebounce';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useMoneyFormat } from '../../hooks/useMoneyFormat';
 
 export const QuotationListContent: React.FC = () => {
+  const { format: formatMoney } = useMoneyFormat();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'ALL' | 'DRAFT' | 'PENDING_APPROVAL' | 'SENT' | 'COMPLETED'>('ALL');
   const { tenantSlug } = useParams();
@@ -202,7 +204,7 @@ export const QuotationListContent: React.FC = () => {
                       </td>
                       <td>
                         <span className={styles.amountText}>
-                          ${quotation.grandTotal?.toLocaleString() || '0.00'}
+                          {formatMoney(quotation.grandTotal ?? 0)}
                         </span>
                       </td>
                       <td>

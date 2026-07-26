@@ -8,8 +8,10 @@ import type { BadgeProps } from '../../components/ui/Badge/Badge';
 import styles from './QuotationDetailContent.module.css';
 
 import { useQuotations, useQuotationActions } from '../../hooks/useQuotations';
+import { useMoneyFormat } from '../../hooks/useMoneyFormat';
 
 export const QuotationDetailContent: React.FC = () => {
+  const { format: formatMoney } = useMoneyFormat();
   const navigate = useNavigate();
   const { tenantSlug, id } = useParams();
   
@@ -178,9 +180,9 @@ export const QuotationDetailContent: React.FC = () => {
                         <div style={{ fontSize: '12px', color: 'var(--color-on-surface-variant)' }}>Warehouse: {item.warehouseName || item.warehouseId}</div>
                       </td>
                       <td>{item.quantity}</td>
-                      <td>${item.unitPrice.toFixed(2)}</td>
+                      <td>{formatMoney(item.unitPrice)}</td>
                       <td style={{ textAlign: 'right', fontWeight: 500 }}>
-                        ${(item.quantity * item.unitPrice).toFixed(2)}
+                        {formatMoney(item.quantity * item.unitPrice)}
                       </td>
                     </tr>
                   ))}
@@ -191,11 +193,11 @@ export const QuotationDetailContent: React.FC = () => {
               <div className={styles.totalsCard}>
                 <div className={styles.totalRow}>
                   <span>Subtotal</span>
-                  <span>${quotation.grandTotal?.toFixed(2) || '0.00'}</span>
+                  <span>{formatMoney(quotation.grandTotal ?? 0)}</span>
                 </div>
                 <div className={styles.grandTotalRow}>
                   <span>Grand Total</span>
-                  <span>${quotation.grandTotal?.toFixed(2) || '0.00'}</span>
+                  <span>{formatMoney(quotation.grandTotal ?? 0)}</span>
                 </div>
               </div>
             </div>

@@ -15,6 +15,25 @@ model Tenant {
   // Workspace branding, surfaced in the sidebar, settings and customer-facing pages.
   logoUrl                   String?
   coverImageUrl             String?
+
+  // Company profile. Like the branding URLs above, these are presentation-only
+  // and are read straight from Prisma rather than through the Tenant entity.
+  registrationNumber String?
+  addressLine        String?
+  addressCity        String?
+  addressState       String?
+  addressPostalCode  String?
+  contactEmail       String?
+  contactPhone       String?
+
+  // Localization. Unlike the fields above these drive real behaviour (money
+  // formatting, and notifications later), so they DO live on the domain entity.
+  // NOT NULL with defaults so the fallback lives here and nowhere else.
+  currency   String @default("USD")
+  locale     String @default("en-US")
+  timezone   String @default("UTC")
+  dateFormat String @default("MM/DD/YYYY")
+
   createdAt                 DateTime @default(now())
 
   users                  User[]

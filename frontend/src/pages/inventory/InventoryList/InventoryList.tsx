@@ -20,6 +20,7 @@ import { SelectInput } from '../../../components/ui/SelectInput';
 import { Pagination } from '../../../components/ui/Pagination';
 import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
 import { useToast } from '../../../components/ui/Toast';
+import { useMoneyFormat } from '../../../hooks/useMoneyFormat';
 import { InventoryTable } from '../../../components/inventory/InventoryTable';
 import { StockAdjustmentPanel } from '../../../components/inventory/StockAdjustmentPanel/StockAdjustmentPanel';
 import { AppLayout } from '../../../components/layout/AppLayout/AppLayout';
@@ -42,10 +43,8 @@ import type { BulkProductAction, Product, ProductStatus } from '../../../types/i
 
 const STATUS_OPTIONS: ProductStatus[] = ['IN_STOCK', 'LOW_STOCK', 'OUT_OF_STOCK', 'ARCHIVED'];
 
-const formatMoney = (value: number) =>
-  value.toLocaleString(undefined, { maximumFractionDigits: 0 });
-
 const InventoryListContent: React.FC = () => {
+  const { formatWhole: formatMoney } = useMoneyFormat();
   const navigate = useNavigate();
   const toast = useToast();
   const { tenantSlug } = useParams();
