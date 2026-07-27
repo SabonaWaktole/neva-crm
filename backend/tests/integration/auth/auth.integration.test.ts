@@ -8,7 +8,11 @@ import { IPasswordResetTokenRepository } from '@auth/domain/repositories/IPasswo
 import { IPasswordHasher } from '@auth/application/ports/IPasswordHasher';
 import { ITokenService, TokenPayload } from '@auth/application/ports/ITokenService';
 import { IEmailSender } from '@auth/application/ports/IEmailSender';
-import { IUnitOfWork } from '@shared/application/ports/IUnitOfWork';
+import {
+  ITenantProvisioningTransaction,
+  TenantProvisioningRepos,
+} from '@tenant/application/ports/ITenantProvisioningTransaction';
+import { SubscriptionStatus } from '@tenant/domain/enums/SubscriptionStatus';
 import { User } from '@auth/domain/entities/User';
 import { Tenant } from '@tenant/domain/entities/Tenant';
 import { Invitation } from '@auth/domain/entities/Invitation';
@@ -163,6 +167,21 @@ class InMemoryTenantRepository implements ITenantRepository {
     }
   }
 
+  async setSubscriptionStatus(id: string, status: SubscriptionStatus): Promise<void> {
+    const tenant = this.tenants.find(t => t.id === id);
+    if (tenant) {
+      const idx = this.tenants.indexOf(tenant);
+      this.tenants[idx] = Tenant.create({
+        id: tenant.id,
+        name: tenant.name,
+        urlSlug: tenant.urlSlug,
+        requiresQuotationApproval: tenant.requiresQuotationApproval,
+        subscriptionStatus: status,
+        createdAt: tenant.createdAt,
+      });
+    }
+  }
+
   getAll(): Tenant[] { return [...this.tenants]; }
   clear(): void { this.tenants = []; }
 }
@@ -270,9 +289,24 @@ class FakeEmailSender implements IEmailSender {
   clear(): void { this.sentEmails = []; }
 }
 
-class FakeUnitOfWork implements IUnitOfWork {
-  async execute<T>(work: () => Promise<T>): Promise<T> {
-    return work();
+/**
+ * Hands the suite's in-memory repositories to the provisioning work.
+ *
+ * Replaces the former `FakeUnitOfWork`. The difference matters even in a test
+ * double: the real port's contract is "here are repositories you should write
+ * through", so a double that ignored them and let the use case reach for its
+ * own would not be exercising the same shape as production. Real atomicity is
+ * asserted against a database in
+ * tests/integration/tenant/tenantProvisioningAtomicity.test.ts.
+ */
+class FakeTenantProvisioningTransaction implements ITenantProvisioningTransaction {
+  constructor(
+    private readonly tenantRepo: ITenantRepository,
+    private readonly userRepo: IUserRepository
+  ) {}
+
+  async run<T>(work: (repos: TenantProvisioningRepos) => Promise<T>): Promise<T> {
+    return work({ tenantRepo: this.tenantRepo, userRepo: this.userRepo });
   }
 }
 
@@ -289,7 +323,7 @@ describe('Auth Integration Tests', () => {
   let passwordHasher: FakePasswordHasher;
   let tokenService: NonCryptographicStubTokenService;
   let emailSender: FakeEmailSender;
-  let unitOfWork: FakeUnitOfWork;
+  let tenantProvisioningTransaction: FakeTenantProvisioningTransaction;
 
   beforeEach(() => {
     userRepo = new InMemoryUserRepository();
@@ -299,7 +333,7 @@ describe('Auth Integration Tests', () => {
     passwordHasher = new FakePasswordHasher();
     tokenService = new NonCryptographicStubTokenService();
     emailSender = new FakeEmailSender();
-    unitOfWork = new FakeUnitOfWork();
+    tenantProvisioningTransaction = new FakeTenantProvisioningTransaction(tenantRepo, userRepo);
 
     app = createApp({
       userRepository: userRepo,
@@ -309,7 +343,7 @@ describe('Auth Integration Tests', () => {
       passwordHasher,
       tokenService,
       emailSender,
-      unitOfWork,
+      tenantProvisioningTransaction,
     });
   });
 

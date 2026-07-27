@@ -1,54 +1,27 @@
-import { IUserRepository } from '../../domain/repositories/IUserRepository';
-import { ITenantRepository } from '../../../tenant/domain/repositories/ITenantRepository';
-import { IPasswordHasher } from '../ports/IPasswordHasher';
-import { IUnitOfWork } from '../../../shared/application/ports/IUnitOfWork';
-import { UserRole } from '../../domain/enums/UserRole';
-import { Email } from '../../domain/value-objects/Email';
-import { Password } from '../../domain/value-objects/Password';
-import { Tenant } from '../../../tenant/domain/entities/Tenant';
-import { User } from '../../domain/entities/User';
-import { SlugAlreadyTakenError } from '../../domain/errors';
-import { v4 as uuidv4 } from 'uuid';
+import {
+  CreateTenantWithOwnerUseCase,
+  CreateTenantWithOwnerDTO,
+} from '../../../tenant/application/use-cases/CreateTenantWithOwnerUseCase';
 
+/**
+ * Public self-registration: a business signs itself up.
+ *
+ * This is now a thin caller over {@link CreateTenantWithOwnerUseCase}, which
+ * owns the actual provisioning. It used to own that logic itself, wrapped in
+ * `IUnitOfWork` — a wrapper that opened a transaction and enrolled nothing in
+ * it, so a failure between the tenant write and the user write left an orphan
+ * workspace behind (TD-032). Sharing the implementation with the Super Admin
+ * create path is what guarantees the two cannot drift apart, and in particular
+ * that the admin path did not inherit that gap.
+ *
+ * The distinction between the two callers is entirely about pre-conditions —
+ * this one is unauthenticated and rate-limited at the route — so this class
+ * holds no logic of its own beyond delegating.
+ */
 export class RegisterBusinessOwnerUseCase {
-  constructor(
-    private userRepository: IUserRepository,
-    private tenantRepository: ITenantRepository,
-    private passwordHasher: IPasswordHasher,
-    private unitOfWork: IUnitOfWork
-  ) {}
+  constructor(private readonly createTenantWithOwner: CreateTenantWithOwnerUseCase) {}
 
-  async execute(input: any) {
-    const email = new Email(input.ownerEmail);
-    const password = new Password(input.ownerPassword);
-
-    const existingTenant = await this.tenantRepository.findBySlug(input.urlSlug);
-    if (existingTenant) {
-      throw new SlugAlreadyTakenError(input.urlSlug);
-    }
-
-    const hashedPassword = await this.passwordHasher.hash(password.value);
-
-    return await this.unitOfWork.execute(async () => {
-      const tenant = Tenant.create({
-        id: uuidv4(),
-        name: input.companyName,
-        urlSlug: input.urlSlug,
-        createdAt: new Date(),
-      });
-      await this.tenantRepository.create(tenant);
-
-      const user = User.create({
-        id: uuidv4(),
-        email: email.value,
-        hashedPassword,
-        role: UserRole.BUSINESS_OWNER,
-        tenantId: tenant.id,
-        createdAt: new Date(),
-      });
-      await this.userRepository.create(user);
-
-      return { tenant, user };
-    });
+  async execute(input: CreateTenantWithOwnerDTO) {
+    return this.createTenantWithOwner.execute(input);
   }
 }

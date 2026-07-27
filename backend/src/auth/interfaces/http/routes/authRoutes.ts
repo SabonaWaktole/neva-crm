@@ -44,7 +44,15 @@ export const createTenantAuthRoutes = (
   const resolveTenantMw = resolveTenant(tenantRepository);
   const authLimiter = createAuthRateLimiter();
 
-  router.post('/login', authLimiter, resolveTenantMw, validateRequest(authSchemas.login), authController.loginTenant);
+  /*
+   * Login resolves the tenant but does NOT get bounced here when it is
+   * suspended — `LoginUseCase` rejects it after checking the password instead,
+   * so the endpoint cannot be used to enumerate suspended workspaces. Every
+   * other route below keeps the default block. See ResolveTenantOptions.
+   */
+  const resolveTenantForLoginMw = resolveTenant(tenantRepository, { allowSuspended: true });
+
+  router.post('/login', authLimiter, resolveTenantForLoginMw, validateRequest(authSchemas.login), authController.loginTenant);
   router.post('/password-reset/request', authLimiter, resolveTenantMw, validateRequest(authSchemas.requestPasswordReset), authController.requestPasswordReset);
 
   router.post(

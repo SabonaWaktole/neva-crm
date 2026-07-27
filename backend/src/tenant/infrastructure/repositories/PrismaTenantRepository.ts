@@ -1,6 +1,8 @@
+import { PrismaClient } from '@prisma/client';
 import { ITenantRepository, TenantSettingsUpdate } from '../../domain/repositories/ITenantRepository';
 import { Tenant } from '../../domain/entities/Tenant';
-import { prisma } from '../../../shared/infrastructure/prisma/client';
+import { SubscriptionStatus } from '../../domain/enums/SubscriptionStatus';
+import { prisma as defaultPrisma } from '../../../shared/infrastructure/prisma/client';
 
 /**
  * Every mapping goes through this one function so a new column cannot be
@@ -17,6 +19,7 @@ const toDomain = (data: {
   timezone: string;
   dateFormat: string;
   defaultLanguage: string;
+  subscriptionStatus: SubscriptionStatus;
   createdAt: Date;
 }): Tenant =>
   Tenant.create({
@@ -29,22 +32,35 @@ const toDomain = (data: {
     timezone: data.timezone,
     dateFormat: data.dateFormat,
     defaultLanguage: data.defaultLanguage,
+    subscriptionStatus: data.subscriptionStatus,
     createdAt: data.createdAt,
   });
 
 export class PrismaTenantRepository implements ITenantRepository {
+  /**
+   * The client is injected so this repository can be constructed bound to a
+   * transaction client. Defaulting to the global one keeps every existing
+   * `new PrismaTenantRepository()` call site working unchanged.
+   *
+   * Before this, the global client was imported at module scope, which made it
+   * impossible for any wrapper to enrol this repository in a transaction —
+   * the exact reason `PrismaUnitOfWork` could never have worked. See
+   * ITenantProvisioningTransaction.
+   */
+  constructor(private readonly prisma: PrismaClient = defaultPrisma) {}
+
   async findById(id: string): Promise<Tenant | null> {
-    const data = await prisma.tenant.findUnique({ where: { id } });
+    const data = await this.prisma.tenant.findUnique({ where: { id } });
     return data ? toDomain(data) : null;
   }
 
   async findBySlug(slug: string): Promise<Tenant | null> {
-    const data = await prisma.tenant.findUnique({ where: { urlSlug: slug } });
+    const data = await this.prisma.tenant.findUnique({ where: { urlSlug: slug } });
     return data ? toDomain(data) : null;
   }
 
   async create(tenant: Tenant): Promise<Tenant> {
-    await prisma.tenant.create({
+    await this.prisma.tenant.create({
       data: {
         id: tenant.id,
         name: tenant.name,
@@ -55,16 +71,23 @@ export class PrismaTenantRepository implements ITenantRepository {
         timezone: tenant.timezone,
         dateFormat: tenant.dateFormat,
         defaultLanguage: tenant.defaultLanguage,
+        subscriptionStatus: tenant.subscriptionStatus,
         createdAt: tenant.createdAt,
       },
     });
     return tenant;
   }
 
+  /**
+   * Returns EVERY tenant, suspended ones included, and deliberately so: this
+   * backs the Super Admin console, whose whole purpose is seeing and acting on
+   * suspended workspaces. Filtering here would hide exactly the rows the
+   * operator needs.
+   */
   async findAll(skip: number, take: number): Promise<{ items: Tenant[]; total: number }> {
     const [records, total] = await Promise.all([
-      prisma.tenant.findMany({ skip, take, orderBy: { createdAt: 'desc' } }),
-      prisma.tenant.count(),
+      this.prisma.tenant.findMany({ skip, take, orderBy: { createdAt: 'desc' } }),
+      this.prisma.tenant.count(),
     ]);
 
     return { items: records.map(toDomain), total };
@@ -88,6 +111,10 @@ export class PrismaTenantRepository implements ITenantRepository {
 
     if (Object.keys(data).length === 0) return;
 
-    await prisma.tenant.update({ where: { id }, data });
+    await this.prisma.tenant.update({ where: { id }, data });
+  }
+
+  async setSubscriptionStatus(id: string, status: SubscriptionStatus): Promise<void> {
+    await this.prisma.tenant.update({ where: { id }, data: { subscriptionStatus: status } });
   }
 }

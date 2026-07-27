@@ -131,10 +131,34 @@ export class AuthController {
                 logoUrl: true, coverImageUrl: true, name: true,
                 currency: true, locale: true, defaultLanguage: true,
                 timezone: true, dateFormat: true,
+                // Selected purely to gate the session below, not to return.
+                subscriptionStatus: true,
               },
             })
           : Promise.resolve(null),
       ]);
+
+      /*
+       * Suspended workspace drops the browser session, exactly as a deactivated
+       * account does above.
+       *
+       * `resolveTenant` already blocks every `/api/:tenantSlug/...` route, but
+       * this endpoint is global — it carries no slug and so never passes
+       * through that middleware. Without this check a suspended tenant's user
+       * would bootstrap a perfectly normal-looking session and then hit 403 on
+       * every subsequent call, which reads as the app being broken rather than
+       * as the workspace being suspended.
+       *
+       * SUPER_ADMIN is unaffected: `tenantBranding` is null for them, since
+       * they have no tenantId.
+       */
+      if (tenantBranding?.subscriptionStatus === 'SUSPENDED') {
+        res.clearCookie('jwt');
+        return res.status(403).json({
+          error: 'This workspace is suspended — contact support',
+          code: 'TENANT_SUSPENDED',
+        });
+      }
 
       res.status(200).json({
         user: {

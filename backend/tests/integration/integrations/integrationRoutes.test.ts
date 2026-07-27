@@ -36,6 +36,7 @@ class InMemoryTenantRepository implements ITenantRepository {
   async create(tenant: Tenant): Promise<Tenant> { this.tenants.push(tenant); return tenant; }
   async findAll(skip: number, take: number) { return { items: this.tenants, total: this.tenants.length }; }
   async updateSettings() {}
+  async setSubscriptionStatus() {}
 }
 
 const fakeTokenService = {
