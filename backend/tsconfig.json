@@ -22,5 +22,9 @@
     }
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "tests"]
+  // Colocated `src/**/*.test.ts` files are excluded here for the same reason
+  // `tests/` is: the build ships only production code, and test files reach
+  // outside `rootDir` for shared doubles in `tests/support`. They are still
+  // typechecked by tsconfig.test.json and compiled at run time by ts-jest.
+  "exclude": ["node_modules", "dist", "tests", "src/**/*.test.ts", "src/**/*.spec.ts"]
 }
