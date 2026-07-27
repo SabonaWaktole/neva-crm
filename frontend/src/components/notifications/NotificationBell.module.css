@@ -1,0 +1,152 @@
+.container {
+  position: relative;
+  display: inline-flex;
+}
+
+.bellButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-on-surface-variant);
+  cursor: pointer;
+}
+
+.bellButton:hover {
+  background-color: var(--color-surface-container-high);
+  color: var(--color-on-surface);
+}
+
+.badge {
+  position: absolute;
+  top: 4px;
+  right: 2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-error);
+  color: var(--color-on-error, #fff);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+}
+
+.panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(380px, calc(100vw - 32px));
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-container-lowest);
+  box-shadow: var(--shadow-lg), inset 0 0 0 1px var(--border-hairline);
+  overflow: hidden;
+}
+
+.panelHeader,
+.panelFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+}
+
+.panelHeader {
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.panelFooter {
+  border-top: 1px solid var(--border-hairline);
+  justify-content: center;
+}
+
+.panelTitle {
+  margin: 0;
+  font-size: var(--font-size-title-sm);
+  font-weight: 600;
+  color: var(--color-on-surface);
+}
+
+.linkButton {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--color-primary);
+  font-size: var(--font-size-body-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Bounded so a long list scrolls inside the popover rather than off-screen. */
+.list {
+  max-height: 380px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: var(--spacing-md);
+  border: none;
+  border-bottom: 1px solid var(--border-hairline);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.item:hover {
+  background-color: var(--color-surface-container-high);
+}
+
+/* The unread marker is a left border AND a weight change, not colour alone. */
+.itemUnread {
+  border-left: 3px solid var(--color-primary);
+  background-color: var(--color-surface-container);
+}
+
+.itemUnread .itemText {
+  font-weight: 600;
+}
+
+.itemText {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-on-surface);
+  line-height: 1.4;
+}
+
+.itemMeta {
+  font-size: var(--font-size-label-sm, 12px);
+  color: var(--color-on-surface-variant);
+}
+
+.emptyState {
+  padding: var(--spacing-xl) var(--spacing-md);
+  text-align: center;
+}
+
+.emptyTitle {
+  margin: 0 0 var(--spacing-xs);
+  font-weight: 600;
+  color: var(--color-on-surface);
+}
+
+.muted {
+  margin: 0;
+  padding: var(--spacing-md);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-on-surface-variant);
+}

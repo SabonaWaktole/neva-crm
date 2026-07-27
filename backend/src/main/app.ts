@@ -39,6 +39,13 @@ import { IEmailSender } from '@auth/application/ports/IEmailSender';
 import { IUnitOfWork } from '@shared/application/ports/IUnitOfWork';
 
 import { createClientRouter } from '../clients/interfaces/http/routes/clientRoutes';
+import { PrismaNotificationRepository } from '../notifications/infrastructure/PrismaNotificationRepository';
+import { NotificationService } from '../notifications/application/NotificationService';
+import { PrismaQuotationWriteTransaction } from '../quotations/infrastructure/PrismaQuotationWriteTransaction';
+import { GetNotificationsUseCase } from '../notifications/application/GetNotificationsUseCase';
+import { MarkNotificationReadUseCase, MarkAllNotificationsReadUseCase } from '../notifications/application/MarkNotificationReadUseCase';
+import { NotificationController } from '../notifications/interfaces/http/NotificationController';
+import { createNotificationRouter } from '../notifications/interfaces/http/notificationRoutes';
 
 export interface AppDependencies {
   userRepository: IUserRepository;
@@ -89,7 +96,10 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const registerUseCase = new RegisterBusinessOwnerUseCase(userRepository, tenantRepository, passwordHasher, unitOfWork);
   const loginUseCase = new LoginUseCase(userRepository, tenantRepository, passwordHasher, tokenService);
   const inviteStaffUseCase = new InviteStaffUseCase(invitationRepository, emailSender);
-  const acceptInvitationUseCase = new AcceptInvitationUseCase(invitationRepository, userRepository, passwordHasher, tenantRepository);
+  const notificationRepository = new PrismaNotificationRepository();
+  const notificationService = new NotificationService(notificationRepository, userRepository);
+  const quotationWriteTx = new PrismaQuotationWriteTransaction();
+  const acceptInvitationUseCase = new AcceptInvitationUseCase(invitationRepository, userRepository, passwordHasher, tenantRepository, notificationService);
   const requestPasswordResetUseCase = new RequestPasswordResetUseCase(userRepository, prtRepository, emailSender);
   const resetPasswordUseCase = new ResetPasswordUseCase(prtRepository, userRepository, passwordHasher);
   const getTenantStaffUseCase = new GetTenantStaffUseCase(userRepository);
@@ -281,12 +291,12 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const quotationsController = new QuotationsController(
     new CreateQuotationUseCase(quotationRepo, quotationLineItemRepo, quotationHistoryRepo, prismaClientRepository, productRepo, warehouseRepo),
     new UpdateQuotationUseCase(quotationRepo, quotationLineItemRepo, productRepo, warehouseRepo),
-    new SubmitQuotationUseCase(quotationRepo, quotationHistoryRepo),
-    new ApproveQuotationUseCase(quotationRepo, quotationHistoryRepo),
-    new ReturnQuotationToDraftUseCase(quotationRepo, quotationHistoryRepo),
-    new MarkQuotationAcceptedUseCase(quotationRepo, quotationLineItemRepo, quotationHistoryRepo, stockLevelRepo, stockTxManager),
-    new MarkQuotationRejectedUseCase(quotationRepo, quotationHistoryRepo),
-    new ExpireQuotationUseCase(quotationRepo, quotationHistoryRepo),
+    new SubmitQuotationUseCase(quotationWriteTx, userRepository),
+    new ApproveQuotationUseCase(quotationWriteTx, userRepository),
+    new ReturnQuotationToDraftUseCase(quotationWriteTx, userRepository),
+    new MarkQuotationAcceptedUseCase(quotationRepo, quotationLineItemRepo, quotationHistoryRepo, stockLevelRepo, stockTxManager, quotationWriteTx, userRepository),
+    new MarkQuotationRejectedUseCase(quotationWriteTx, userRepository),
+    new ExpireQuotationUseCase(quotationWriteTx, userRepository),
     new SearchQuotationsUseCase(quotationRepo),
     new GetQuotationDetailUseCase(quotationRepo, quotationLineItemRepo, quotationHistoryRepo),
     new GetPendingApprovalsUseCase(quotationRepo),
@@ -369,6 +379,17 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
 
   const reportRoutes = createReportRouter(reportsController, tokenService, tenantRepository);
   app.use('/api/:tenantSlug/reports', reportRoutes);
+
+  // Notifications
+  const notificationController = new NotificationController(
+    new GetNotificationsUseCase(notificationRepository),
+    new MarkNotificationReadUseCase(notificationRepository),
+    new MarkAllNotificationsReadUseCase(notificationRepository)
+  );
+  app.use(
+    '/api/:tenantSlug/notifications',
+    createNotificationRouter(notificationController, tokenService, tenantRepository)
+  );
 
   app.use(errorHandler);
 

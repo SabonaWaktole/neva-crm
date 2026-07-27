@@ -29,3 +29,20 @@ export const teamHandlers = [
 
   http.get(`${API_URL}/:tenantSlug/auth/invitations`, () => HttpResponse.json([])),
 ];
+
+/**
+ * Notifications. Empty by default so a suite that merely renders a screen
+ * containing the bell does not have to care; tests that exercise the list
+ * override this with `server.use(...)`.
+ */
+export const notificationHandlers = [
+  http.get(`${API_URL}/:tenantSlug/notifications`, () =>
+    HttpResponse.json({ items: [], unreadCount: 0 })
+  ),
+  http.patch(`${API_URL}/:tenantSlug/notifications/read-all`, () =>
+    HttpResponse.json({ updated: 0 })
+  ),
+  http.patch(`${API_URL}/:tenantSlug/notifications/:id/read`, () =>
+    HttpResponse.json({ message: 'Notification marked read' })
+  ),
+];

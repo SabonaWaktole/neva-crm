@@ -32,6 +32,9 @@ describe('CreateAppointmentUseCase', () => {
     assignedUserId: 'user-1',
     scheduledAt: new Date(Date.now() + 86400000), // Tomorrow
     notes: 'Test notes',
+    // Distinct from assignedUserId so a notification would actually be emitted
+    // if one were wired here — self-assignment is dropped by design.
+    actingUserId: 'acting-user-1',
   };
 
   it('should successfully create an appointment when all cross-tenant checks pass', async () => {

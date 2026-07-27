@@ -5,6 +5,10 @@ import { IStockLevelRepository, IStockTransactionManager } from '../../../invent
 import { QuotationStatusHistory } from '../../domain/QuotationStatusHistory';
 import { StockMovement, StockMovementType } from '../../../inventory/domain/StockMovement';
 import { UserRole } from '../../../auth/domain/enums/UserRole';
+import { IQuotationWriteTransaction } from '../ports/IQuotationWriteTransaction';
+import { NotificationService } from '../../../notifications/application/NotificationService';
+import { IUserRepository } from '../../../auth/domain/repositories/IUserRepository';
+import { quotationReference } from '../../domain/quotationReference';
 
 export class MarkQuotationAcceptedUseCase {
   constructor(
@@ -12,7 +16,9 @@ export class MarkQuotationAcceptedUseCase {
     private lineItemRepo: IQuotationLineItemRepository,
     private historyRepo: IQuotationStatusHistoryRepository,
     private stockLevelRepo: IStockLevelRepository,
-    private transactionManager: IStockTransactionManager
+    private transactionManager: IStockTransactionManager,
+    private writeTx: IQuotationWriteTransaction,
+    private userRepo: IUserRepository
   ) {}
 
   async execute(input: {
@@ -81,8 +87,33 @@ export class MarkQuotationAcceptedUseCase {
       changedByUserId: input.actingUserId
     });
 
-    await this.quotationRepo.save(quotation);
-    await this.historyRepo.save(history);
+    /*
+     * Quotation, history and notification commit together.
+     *
+     * The stock deduction above stays in its OWN transaction, sequentially,
+     * exactly as before. Prisma rejects a nested interactive transaction, and
+     * merging the two would mean rewriting the stock path — a change to
+     * inventory correctness that has no business riding along with a
+     * notification feature. So the pre-existing boundary between "stock moved"
+     * and "quotation marked accepted" is unchanged; what is fixed is the
+     * boundary *within* the quotation writes, which used to be two independent
+     * awaits. Noted in TD-032.
+     */
+    await this.writeTx.run(async (repos) => {
+      await repos.quotationRepo.save(quotation);
+      await repos.historyRepo.save(history);
+
+      const notifications = new NotificationService(repos.notificationRepo, this.userRepo);
+      await notifications.emit({
+        tenantId: input.tenantId,
+        recipientUserIds: [quotation.createdByUserId],
+        type: 'QUOTATION_ACCEPTED',
+        params: { reference: quotationReference(quotation.id) },
+        actorUserId: input.actingUserId,
+        entityType: 'QUOTATION',
+        entityId: quotation.id,
+      });
+    });
 
     return { quotation };
   }

@@ -67,6 +67,7 @@ describe('Category cleanup — what counts as unused', () => {
     await prisma.appointment.deleteMany({ where });
     await prisma.client.deleteMany({ where });
     await prisma.invitation.deleteMany({ where });
+    await prisma.notification.deleteMany({ where });
     await prisma.user.deleteMany({ where });
     await prisma.integration.deleteMany({ where });
     await prisma.tenant.deleteMany({ where: { id: { in: createdTenantIds } } });

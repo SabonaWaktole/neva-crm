@@ -15,6 +15,7 @@ export class PrismaInvitationRepository implements IInvitationRepository {
         expiresAt: invitation.expiresAt,
         acceptedAt: invitation.acceptedAt,
         warehouseId: invitation.warehouseId,
+        invitedByUserId: invitation.invitedByUserId,
       },
     });
     return invitation;

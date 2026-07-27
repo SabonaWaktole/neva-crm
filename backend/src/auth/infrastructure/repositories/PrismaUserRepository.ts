@@ -65,6 +65,11 @@ export class PrismaUserRepository implements IUserRepository {
     return data.map(u => User.create({ ...u, role: u.role as UserRole }));
   }
 
+  async findActiveByTenantAndRole(tenantId: string, role: string): Promise<User[]> {
+    const data = await prisma.user.findMany({ where: { tenantId, role, isActive: true } });
+    return data.map(u => User.create({ ...u, role: u.role as UserRole }));
+  }
+
   async updateRoleAndWarehouse(userId: string, role: string, warehouseId: string | null): Promise<void> {
     await prisma.user.update({
       where: { id: userId },

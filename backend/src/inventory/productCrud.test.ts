@@ -99,6 +99,7 @@ describe('Product CRUD, list controls and images', () => {
     await prisma.product.deleteMany({ where: { tenantId } });
     await prisma.warehouse.deleteMany({ where: { tenantId } });
     await prisma.category.deleteMany({ where: { tenantId } });
+    await prisma.notification.deleteMany({ where: { tenantId } });
     await prisma.user.deleteMany({ where: { tenantId } });
     await prisma.tenant.deleteMany({ where: { id: tenantId } });
     await prisma.$disconnect();
@@ -560,6 +561,7 @@ describe('Product CRUD, list controls and images', () => {
       .set(auth(otherToken));
     expect(leaked.status).toBe(404);
 
+    await prisma.notification.deleteMany({ where: { tenantId: otherTenantId } });
     await prisma.user.deleteMany({ where: { tenantId: otherTenantId } });
     await prisma.tenant.deleteMany({ where: { id: otherTenantId } });
   });

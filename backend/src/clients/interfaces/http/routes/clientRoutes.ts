@@ -22,6 +22,10 @@ import { authorize } from '../../../../main/interfaces/http/middlewares/authoriz
 import { UserRole } from '../../../../auth/domain/enums/UserRole';
 import { ITokenService } from '../../../../auth/application/ports/ITokenService';
 import { ITenantRepository } from '../../../../tenant/domain/repositories/ITenantRepository';
+import { NotificationService } from '../../../../notifications/application/NotificationService';
+import { PrismaNotificationRepository } from '../../../../notifications/infrastructure/PrismaNotificationRepository';
+import { PrismaUserRepository } from '../../../../auth/infrastructure/repositories/PrismaUserRepository';
+
 
 export const createClientRouter = (
   prisma: PrismaClient,
@@ -37,9 +41,14 @@ export const createClientRouter = (
   const outcomeCategoryRepo = new PrismaOutcomeCategoryRepository(prisma);
   const appointmentRepo = new PrismaAppointmentRepository(prisma);
 
+  const notifications = new NotificationService(
+    new PrismaNotificationRepository(prisma),
+    new PrismaUserRepository()
+  );
+
   // Use Cases
-  const createClientUseCase = new CreateClientUseCase(clientRepo, customFieldRepo);
-  const updateClientUseCase = new UpdateClientUseCase(clientRepo, customFieldRepo);
+  const createClientUseCase = new CreateClientUseCase(clientRepo, customFieldRepo, notifications);
+  const updateClientUseCase = new UpdateClientUseCase(clientRepo, customFieldRepo, notifications);
   const searchClientsUseCase = new SearchClientsUseCase(clientRepo);
   const getClientHistoryUseCase = new GetClientHistoryUseCase(clientRepo, interactionRepo, appointmentRepo);
   const addInteractionUseCase = new AddInteractionUseCase(clientRepo, interactionRepo, outcomeCategoryRepo);

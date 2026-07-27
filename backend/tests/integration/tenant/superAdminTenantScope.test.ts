@@ -102,6 +102,7 @@ describe('Tenant scope enforcement across modules', () => {
     // Scoped teardown, children before parents. Only rows this file created.
     const tenantIds = [tenant1Id, tenant2Id];
     await prisma.warehouse.deleteMany({ where: { tenantId: { in: tenantIds } } });
+    await prisma.notification.deleteMany({ where: { recipientUserId: { in: createdUserIds } } });
     await prisma.user.deleteMany({ where: { id: { in: createdUserIds } } });
     await prisma.tenant.deleteMany({ where: { id: { in: tenantIds } } });
     createdUserIds = [];

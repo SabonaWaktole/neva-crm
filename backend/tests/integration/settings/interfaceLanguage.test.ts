@@ -63,6 +63,7 @@ describe('Interface language', () => {
   });
 
   afterEach(async () => {
+    await prisma.notification.deleteMany({ where: { tenantId } });
     await prisma.user.deleteMany({ where: { tenantId } });
     await prisma.tenant.deleteMany({ where: { id: tenantId } });
   });

@@ -52,6 +52,7 @@ describe('Inventory Module Integration Tests', () => {
     await prisma.product.deleteMany({ where: { tenantId: { in: [t1Id, t2Id] } } });
     await prisma.warehouse.deleteMany({ where: { tenantId: { in: [t1Id, t2Id] } } });
     await prisma.category.deleteMany({ where: { tenantId: { in: [t1Id, t2Id] } } });
+    await prisma.notification.deleteMany({ where: { tenantId: { in: [t1Id, t2Id] } } });
     await prisma.user.deleteMany({ where: { tenantId: { in: [t1Id, t2Id] } } });
     await prisma.tenant.deleteMany({ where: { id: { in: [t1Id, t2Id] } } });
     await prisma.$disconnect();

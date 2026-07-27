@@ -62,6 +62,7 @@ describe('Client search filters (name / email / phone)', () => {
 
   afterAll(async () => {
     await prisma.client.deleteMany({ where: { tenantId: { in: [tenant1Id, tenant2Id] } } });
+    await prisma.notification.deleteMany({ where: { recipientUserId: userId } });
     await prisma.user.deleteMany({ where: { id: userId } });
     await prisma.tenant.deleteMany({ where: { id: { in: [tenant1Id, tenant2Id] } } });
     await prisma.$disconnect();

@@ -107,6 +107,7 @@ afterAll(async () => {
     await prisma.warehouse.deleteMany({ where: { tenantId } });
     await prisma.category.deleteMany({ where: { tenantId } });
     await prisma.client.deleteMany({ where: { tenantId } });
+    await prisma.notification.deleteMany({ where: { tenantId } });
     await prisma.user.deleteMany({ where: { tenantId } });
     await prisma.tenant.delete({ where: { id: tenantId } });
   }

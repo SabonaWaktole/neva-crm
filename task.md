@@ -2403,3 +2403,275 @@ incidentally while fixing something else.
 **The real fix** is to make the repository half-open and adjust both callers
 together, so there is one boundary convention in the codebase rather than two.
 Cheap, but it needs its own before/after check on the calendar.
+
+---
+
+# Notifications v1 — build record
+
+In-app only, event-triggered, per-recipient, polled, keyed content. No
+scheduler, no email, no preferences — as scoped.
+
+One new item opened by the work: **TD-032**.
+
+## What it does
+
+Eleven event types across four areas, each stored as an **i18n key plus
+params**, never a rendered sentence:
+
+| Area | Types |
+|---|---|
+| Quotations | submitted-for-approval, approved, returned-to-draft, accepted, rejected, expired |
+| Appointments | assigned, rescheduled, cancelled |
+| Clients | assigned |
+| Team | invitation accepted |
+
+`GET /:tenant/notifications`, `PATCH /:tenant/notifications/:id/read`,
+`PATCH /:tenant/notifications/read-all`. A bell in the app header and a list
+page at `/:tenant/notifications`, polling every 60s.
+
+**The bell replaced a dead control.** `AppLayout` already had a
+`<button aria-label="Notifications">` with a bell icon and no handler — one more
+of the TD-020 family, found while wiring the real one.
+
+## The three rules, centralised
+
+`NotificationService` is the only place notifications are created, so three
+rules live in one file rather than eleven call sites:
+
+1. **Never notify the actor about their own action.** Approving your own
+   quotation must not badge your own bell.
+2. **Never notify a deactivated user (TD-010).** Their token stays valid for up
+   to an hour after deactivation, so recipients are filtered on the **record**.
+   `toRole` fan-out uses the new `findActiveByTenantAndRole`; explicitly named
+   recipients are re-checked individually, because an appointment can be
+   assigned to someone deactivated moments earlier.
+3. **Emitting must not break what triggered it.** Sites outside a transaction
+   call `emitSafe`, which swallows its own failure — a saved appointment must
+   not be lost to a failed notification. Sites *inside* the quotation write
+   transaction call `emit` directly, so the notification commits or rolls back
+   with the change it describes.
+
+Tenant isolation is also enforced on the record: a recipient id belonging to
+another tenant is dropped rather than trusted.
+
+## Storage decision, as agreed
+
+**Entity labels are snapshots; people are resolved live.**
+
+`params` carries `{ reference }`, `{ client }`, `{ email }` — what the thing was
+called when it happened. `actorUserId` is a column, resolved at render time
+through the same `findPersonById` / `getStaffDisplayName` helpers the client
+list and quotation detail use (TD-021), so a colleague's name reads as it is
+now. An actor no longer in the staff projection falls back to a name-shaped
+string, never a raw UUID.
+
+**Dates are never stored formatted.** `APPOINTMENT_RESCHEDULED` stores an ISO
+instant and the client formats it through `useDateFormat`, so it follows the
+tenant timezone and locale like every other date (TD-029). A server-rendered
+date string would have been frozen in one locale in a row read days later.
+
+## Retention
+
+Opportunistic prune-on-fetch, scoped to the fetching user's own rows: 90 days
+read, 180 days unread. No scheduler exists in this project, and a policy that
+depends on infrastructure which does not exist is not a policy. A tenant nobody
+visits never prunes, which is harmless precisely because nobody is querying it.
+Pruning failure is swallowed and logged — housekeeping must not stop someone
+seeing their notifications.
+
+## Preconditions that were genuinely required
+
+**`Invitation.invitedByUserId`** — the database had no record of who invited
+whom, so "your invitation was accepted" had nobody to notify. The controller had
+been passing `invitingUserId` all along; there was simply nowhere to put it.
+Nullable, because invitations predating the column cannot be attributed — and in
+that case the notification is **skipped rather than redirected to all Business
+Owners**, since guessing a recipient would make an unattributable event look
+attributed.
+
+**`CreateAppointmentDTO.actingUserId`** — cancel and reschedule already carried
+`changedByUserId`; create carried no actor at all. Taken from the token in the
+controller, never the body, so a client cannot attribute an appointment to
+someone else.
+
+## Verification
+
+| Run | Suites / Files | Tests |
+|---|---|---|
+| Backend parallel | **115 / 115** | **736 / 736** (56.6s) |
+| Backend serial | **115 / 115** | **736 / 736** (43.9s) |
+| Frontend (vitest) | **31 / 31** | **246 / 246** (30.4s) |
+
+Backend typecheck (src + tests), frontend typecheck (`tsc -b`), lint with all
+three rules at `error`, and translations 831/831 in both languages: all clean.
+
+Coverage worth naming specifically: tenant isolation on list, mark-one and
+mark-all; a notification addressed to the same user id under a different tenant
+staying invisible; 404-not-403 when marking someone else's row (a 403 would
+confirm the id exists); deactivated owners excluded from fan-out against a real
+database; both retention horizons including the case that proves they differ;
+and pruning never touching another user's rows.
+
+---
+
+## TD-032 — 🔴 PRIORITY: `PrismaUnitOfWork` is a no-op — a safety mechanism that does not do what its name promises
+
+**Status:** 🔴 **OPEN, priority-adjacent to TD-011's tier.** The quotation
+transitions are fixed by a different mechanism, described below; the class
+itself is untouched and still misleading.
+
+**Why this tier, explicitly:** it is the same *shape* of bug as TD-011 — not the
+same blast radius, but the same failure mode. A mechanism whose name promises a
+guarantee, which callers reasonably trust, and which silently provides nothing.
+TD-011 was `validateRequest` appearing to enforce a schema while discarding its
+output; this is `PrismaUnitOfWork` appearing to make writes atomic while leaving
+every repository outside the transaction. Both are worse than an absent
+mechanism, because an absent one gets noticed.
+
+**The first thing to check when this is picked up — do this before deciding
+whether to fix or delete:** `RegisterBusinessOwnerUseCase` is the class's only
+caller and is written as though it is transactional. It creates a Tenant and a
+User together. **It is almost certainly non-atomic right now**, which would mean
+a failure partway through can leave a tenant with no owner — an orphan workspace
+nobody can sign in to. That is a live production question, not a cleanup one,
+and it should be answered with a test that forces a mid-operation failure and
+checks nothing landed, exactly as `notificationEmission.test.ts` does for the
+quotation path.
+
+### The finding
+
+```ts
+export class PrismaUnitOfWork implements IUnitOfWork {
+  async execute<T>(work: () => Promise<T>): Promise<T> {
+    return await prisma.$transaction(async (tx) => {
+      // In a real implementation, you'd pass `tx` down to repositories.
+      return await work();
+    });
+  }
+}
+```
+
+It opens a transaction and hands the work **nothing**. Every repository inside
+keeps using the global client, so nothing joins the transaction. Its own comment
+says so.
+
+The instruction for this feature was to wrap the six quotation transitions in
+"the existing IUnitOfWork" because the mechanism was "already tested elsewhere".
+It is used in exactly one place — `RegisterBusinessOwnerUseCase` — and it does
+not do what its name says. Wrapping six use cases in it would have produced
+**the appearance of atomicity with none of the substance**, which is worse than
+the honest gap it replaced and is the same defect class as a check that cannot
+fail (TD-028) or a badge over fabricated numbers (TD-013).
+
+### What was built instead
+
+`IQuotationWriteTransaction` + `PrismaQuotationWriteTransaction`, which
+constructs its repositories **bound to `tx`** and hands them to the caller. That
+is the entire difference. All six transitions now write quotation, history and
+notification through it, so the two previously independent awaits — where a
+crash left a quotation whose own history did not record how it got there — are
+one atomic unit.
+
+**Proven, not assumed.** `notificationEmission.test.ts` approves a DRAFT
+quotation, which throws inside the transaction after the writes would have
+happened, and asserts the notification, the history row and the status change
+are all absent afterwards. That test fails against a `PrismaUnitOfWork`-style
+wrapper.
+
+### Left open
+
+- `PrismaUnitOfWork` still exists and is still a no-op.
+  `RegisterBusinessOwnerUseCase` is its only caller and believes it is
+  transactional. That should either be fixed the same way or deleted.
+- `MarkQuotationAcceptedUseCase` keeps its stock deduction in a **separate**
+  transaction, sequentially, exactly as before. Prisma rejects nested
+  interactive transactions, and merging them means rewriting the stock path —
+  an inventory-correctness change that should not ride along with a
+  notification feature. The pre-existing boundary between "stock moved" and
+  "quotation accepted" is unchanged.
+
+---
+
+## Notifications — deliberately NOT in v1
+
+Recorded so the next person does not have to re-derive the scope:
+
+- **No scheduler**, therefore no "remind me 1 hour before" and no digests. This
+  is the single largest piece of work the feature could have grown, and
+  avoiding it is why v1 is purely event-triggered.
+- **No email.** `IEmailSender` exists and works, so this is a follow-on rather
+  than a rewrite — but it brings deliverability, unsubscribe and bounce
+  handling with it.
+- **No per-user preferences.** Cheap to add once there is evidence about which
+  events people actually want; expensive to guess now.
+- **Low stock excluded on purpose.** It is a *condition*, not an *action* —
+  there is no moment at which it "happens", so it needs either polling or a
+  scheduler, both of which v1 does not have.
+
+---
+
+## TD-033 — Templated bulk edits across use cases have twice silently dropped logic (2x recurring)
+
+**Status:** OPEN — a process control, not a code defect. Logged the same way
+TD-002 was: after the second occurrence, not the first.
+
+**Severity:** Medium-High. Both occurrences removed real authorisation or audit
+behaviour, and neither was noticed by the person making the change. Both were
+caught by pre-existing tests — which is the only reason this is a near-miss log
+rather than an incident report.
+
+### The two occurrences
+
+| # | When | What the template assumed | What it destroyed |
+|---|---|---|---|
+| 1 | Group 3 Stage 3, batch 8 | that an import anchor appeared once per file | truncated 4 component files; inserted an import inside a multi-line `import {` block |
+| 2 | Notifications v1 | that six quotation transitions shared one shape | `ExpireQuotationUseCase` lost its **STAFF ownership guard** entirely; `Approve` and `ReturnToDraft` had their **role check moved after the lookup**, changing which error an unauthorised caller sees; `ReturnQuotationToDraftUseCase` lost the **`note`** it wrote into status history |
+
+Occurrence 2 is the more serious of the two. A dropped role guard is a
+**security regression**, and the reordering is the kind of change that looks
+harmless in review — the guard is still there, just later — while altering
+whether a caller can distinguish "you may not do this" from "that does not
+exist".
+
+### The root cause is the same both times
+
+A template is written from **one** example file and applied to N. It encodes
+what that one file happened to contain. Anything the other N−1 files had that
+the example did not — an extra guard, a differently-ordered check, an additional
+field on a constructed object — is not transformed. It is **deleted**, silently,
+because the template rewrites the whole file rather than editing part of it.
+
+This is a distinct failure mode from every other class in this project. It is
+not a stale dependency array, not a drifted double, not a fabricated value. It
+is *correct code being removed by an edit that had no idea it existed*.
+
+### The control
+
+**Any bulk or templated edit that rewrites more than one use case must be
+diffed per file against `git show HEAD:<path>` before the pattern is trusted to
+have held.** Not spot-checked — every touched file.
+
+Concretely, before moving on from a templated pass:
+
+1. `git diff` each rewritten file and read the **deletions**, not the additions.
+   The additions are what was intended; the deletions are where the damage is.
+2. Confirm every `if (...) throw` present before is present after, **in the same
+   position relative to I/O**. Position is behaviour.
+3. Confirm every field of every constructed domain object survived. Occurrence 2
+   lost a `note` this way.
+4. Prefer targeted edits over whole-file templates when the files are known to
+   differ — which, in a codebase with per-use-case authorisation rules, is the
+   normal case rather than the exception.
+
+### Why a template was still the right tool both times
+
+Worth stating so the lesson is not "never automate". Six near-identical use
+cases genuinely did need the same structural change, and hand-editing six files
+invites a different error — inconsistency. The fix is not to stop templating; it
+is to **treat a templated edit as untrusted output requiring review**, the same
+way generated code is.
+
+**Related:** TD-002 (the typecheck gap, also logged after its second
+occurrence). The tests caught both of these, which is an argument for the
+existing suite, not for relying on it — a use case with thinner coverage would
+have shipped the dropped guard.

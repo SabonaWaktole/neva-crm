@@ -36,6 +36,7 @@ describe('Inventory End-to-End User Flow', () => {
     await prisma.appointment.deleteMany();
     await prisma.client.deleteMany();
     await prisma.invitation.deleteMany();
+    await prisma.notification.deleteMany();
     await prisma.user.deleteMany();
     // Integrations hold a RESTRICT reference to Tenant; without clearing them
     // first the tenant delete aborts and every test in this file fails setup.
@@ -77,6 +78,7 @@ describe('Inventory End-to-End User Flow', () => {
     await prisma.warehouse.deleteMany();
     await prisma.category.deleteMany();
     await prisma.invitation.deleteMany();
+    await prisma.notification.deleteMany();
     await prisma.user.deleteMany();
     await prisma.tenant.deleteMany();
     await prisma.$disconnect();

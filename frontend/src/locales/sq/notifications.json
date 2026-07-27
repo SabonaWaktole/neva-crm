@@ -1,0 +1,28 @@
+{
+  "title": "Njoftimet",
+  "bellAria": "Njoftimet",
+  "bellAriaUnread": "Njoftimet, {{count}} të palexuara",
+  "markAllRead": "Shëno të gjitha si të lexuara",
+  "viewAll": "Shiko të gjitha",
+  "empty": "Nuk ka asgjë të re.",
+  "emptyHint": "Përditësimet për ofertat, takimet dhe klientët tuaj shfaqen këtu.",
+  "loading": "Duke ngarkuar njoftimet...",
+  "unreadBadge": "E re",
+  "breadcrumb": "Njoftimet",
+  "actor": {
+    "system": "Sistemi"
+  },
+  "type": {
+    "QUOTATION_SUBMITTED_FOR_APPROVAL": "{{actor}} dorëzoi ofertën {{reference}} për miratimin tuaj",
+    "QUOTATION_APPROVED": "{{actor}} miratoi ofertën {{reference}}",
+    "QUOTATION_RETURNED_TO_DRAFT": "{{actor}} e ktheu ofertën {{reference}} në skicë",
+    "QUOTATION_ACCEPTED": "Oferta {{reference}} u shënua si e pranuar nga {{actor}}",
+    "QUOTATION_REJECTED": "Oferta {{reference}} u shënua si e refuzuar nga {{actor}}",
+    "QUOTATION_EXPIRED": "Oferta {{reference}} ka skaduar",
+    "APPOINTMENT_ASSIGNED": "{{actor}} caktoi një takim me {{client}} për ju",
+    "APPOINTMENT_RESCHEDULED": "{{actor}} e zhvendosi takimin tuaj në {{scheduledAt}} — {{reason}}",
+    "APPOINTMENT_CANCELLED": "{{actor}} anuloi takimin tuaj — {{reason}}",
+    "CLIENT_ASSIGNED": "{{actor}} ju caktoi klientin {{client}}",
+    "INVITATION_ACCEPTED": "{{email}} pranoi ftesën tuaj dhe iu bashkua ekipit"
+  }
+}

@@ -1,4 +1,5 @@
 import { IClientRepository } from '../../domain/repositories/IClientRepository';
+import { NotificationService } from '../../../notifications/application/NotificationService';
 import { ICustomFieldDefinitionRepository } from '../../domain/repositories/ICustomFieldDefinitionRepository';
 import { Client } from '../../domain/entities/Client';
 import { ClientStatus } from '../../domain/enums/ClientStatus';
@@ -19,7 +20,8 @@ interface UpdateClientDTO {
 export class UpdateClientUseCase {
   constructor(
     private clientRepo: IClientRepository,
-    private customFieldRepo: ICustomFieldDefinitionRepository
+    private customFieldRepo: ICustomFieldDefinitionRepository,
+    private notifications?: NotificationService
   ) {}
 
   async execute(dto: UpdateClientDTO): Promise<Client> {
@@ -53,6 +55,28 @@ export class UpdateClientUseCase {
     }, definitions);
 
     await this.clientRepo.update(dto.tenantId, updatedClient);
+
+    /*
+     * Only a CHANGE of assignee notifies. `assignedUserId` is part of every
+     * client edit, so notifying whenever it is merely present would fire on
+     * unrelated edits — renaming a client would tell its owner they had been
+     * assigned it again. `existingClient` is already loaded above, so the
+     * before/after comparison costs nothing.
+     */
+    const previousAssignee = existingClient.assignedUserId ?? null;
+    const newAssignee = updatedClient.assignedUserId ?? null;
+    if (newAssignee && newAssignee !== previousAssignee) {
+      await this.notifications?.emitSafe({
+        tenantId: dto.tenantId,
+        recipientUserIds: [newAssignee],
+        type: 'CLIENT_ASSIGNED',
+        params: { client: updatedClient.name },
+        actorUserId: dto.updatingUserId,
+        entityType: 'CLIENT',
+        entityId: updatedClient.id,
+      });
+    }
+
     return updatedClient;
   }
 }

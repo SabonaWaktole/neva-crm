@@ -83,6 +83,7 @@ describe('Client Routes', () => {
     await prisma.client.deleteMany({ where: { tenantId: 't1' } });
     await prisma.customFieldDefinition.deleteMany({ where: { tenantId: 't1' } });
     await prisma.outcomeCategory.deleteMany({ where: { tenantId: 't1' } });
+    await prisma.notification.deleteMany({ where: { recipientUserId: 'u1' } });
     await prisma.user.deleteMany({ where: { id: 'u1' } });
     await prisma.$disconnect();
   });

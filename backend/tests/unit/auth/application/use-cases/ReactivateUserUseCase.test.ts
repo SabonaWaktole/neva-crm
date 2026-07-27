@@ -37,6 +37,7 @@ describe('ReactivateUserUseCase', () => {
       updateRoleAndWarehouse: jest.fn(),
       setActive: jest.fn(),
       countAssignedWork: jest.fn(),
+      findActiveByTenantAndRole: jest.fn().mockResolvedValue([]),
     } as unknown as jest.Mocked<IUserRepository>;
 
     useCase = new ReactivateUserUseCase(userRepository);
