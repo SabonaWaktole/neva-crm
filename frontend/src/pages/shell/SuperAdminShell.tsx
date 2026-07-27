@@ -6,6 +6,7 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { useLogout } from '../../hooks/useLogout';
 import { useNavigation } from '../../hooks/useNavigation';
 import { SuperAdminDashboard } from '../dashboard/SuperAdminDashboard';
+import { TenantsPage } from '../admin/TenantsPage';
 
 export const SuperAdminShell = () => {
   const navigate = useNavigate();
@@ -32,8 +33,15 @@ export const SuperAdminShell = () => {
         <Sidebar 
           orgName="Neva CRM Platform" 
           orgTier="Global Administration" 
-          navItems={navItemsWithActiveState} 
-          onNavItemClick={(id) => navigate(`/${id}`)}
+          navItems={navItemsWithActiveState}
+          /*
+            No :tenantSlug segment, unlike StaffShell and BusinessOwnerShell —
+            correctly, because a platform-level role has no tenant context. The
+            shell is mounted at /admin, so ids resolve to /admin/<id> and stay
+            inside it. Previously this navigated to bare `/${id}`, which matched
+            the top-level /:tenantSlug route with a slug of "clients". TD-008.
+          */
+          onNavItemClick={(id) => navigate(`/admin/${id}`)}
           onLogoutClick={handleLogout}
         />
       }
@@ -41,6 +49,13 @@ export const SuperAdminShell = () => {
       <Routes>
         <Route path="/" element={<Navigate to="dashboard" replace />} />
         <Route path="/dashboard" element={<SuperAdminDashboard />} />
+        <Route path="/tenants" element={<TenantsPage />} />
+        {/*
+          Every sidebar link this shell offers now resolves to a route defined
+          here. Anything else lands on the dashboard rather than rendering an
+          empty shell with no explanation.
+        */}
+        <Route path="*" element={<Navigate to="dashboard" replace />} />
       </Routes>
     </AppLayout>
   );

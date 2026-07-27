@@ -20,6 +20,7 @@ describe('useNavigation', () => {
   const OWNER = { role: 'BUSINESS_OWNER' };
   const STAFF = { role: 'STAFF' };
   const STAFF_WITH_WAREHOUSE = { role: 'STAFF', warehouseId: 'w-1' };
+  const SUPER_ADMIN = { role: 'SUPER_ADMIN' };
 
   describe('role gating matches the route guards', () => {
     // reports is guarded ['BUSINESS_OWNER', 'SUPER_ADMIN'] in routes/index.tsx.
@@ -35,6 +36,55 @@ describe('useNavigation', () => {
 
     it('still offers Reports to a BUSINESS_OWNER', () => {
       expect(idsFor(OWNER)).toContain('reports');
+    });
+  });
+
+  /*
+   * SUPER_ADMIN is a platform-level role with zero access to any individual
+   * tenant's business data — enforced in resolveTenant, which returns 403 for
+   * it on every /:tenantSlug/... endpoint. It used to inherit the owner list
+   * because the hook branched only on `role === 'STAFF'`, so the console
+   * offered six links the backend was designed to refuse. TD-008.
+   */
+  describe('super admin gets a platform list, not the owner one', () => {
+    it('offers exactly Dashboard and Tenants', () => {
+      expect(idsFor(SUPER_ADMIN)).toEqual(['dashboard', 'tenants']);
+    });
+
+    it.each(['clients', 'appointments', 'inventory', 'quotations', 'reports', 'settings'])(
+      'never offers %s, which resolveTenant would refuse',
+      (id) => {
+        expect(idsFor(SUPER_ADMIN)).not.toContain(id);
+      }
+    );
+
+    it('offers Tenants to nobody else — it is SUPER_ADMIN-only server-side', () => {
+      for (const user of [OWNER, STAFF, STAFF_WITH_WAREHOUSE, null]) {
+        expect(idsFor(user)).not.toContain('tenants');
+      }
+    });
+  });
+
+  describe('active-state highlighting', () => {
+    // Same pure-function-not-a-hook situation as idsFor above. See TD-018.
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const activeIdsAt = (user: any, path: string) => useNavigation(user, path)
+      .filter((i) => i.isActive)
+      .map((i) => i.id);
+
+    it('highlights Tenants alone on the tenants page', () => {
+      // The fallback used to be a hand-listed set of exclusions naming only
+      // clients, settings and appointments — so any other page lit up Dashboard
+      // as well as itself.
+      expect(activeIdsAt(SUPER_ADMIN, '/admin/tenants')).toEqual(['tenants']);
+    });
+
+    it('highlights Dashboard alone on the dashboard', () => {
+      expect(activeIdsAt(SUPER_ADMIN, '/admin/dashboard')).toEqual(['dashboard']);
+    });
+
+    it('does not also highlight Dashboard on a deep owner page', () => {
+      expect(activeIdsAt(OWNER, '/acme/inventory')).toEqual(['inventory']);
     });
   });
 

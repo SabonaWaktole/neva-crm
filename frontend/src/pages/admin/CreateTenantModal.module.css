@@ -1,0 +1,38 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md, 1rem);
+}
+
+.intro {
+  margin: 0;
+  color: var(--color-on-surface-variant);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.serverError {
+  margin: 0;
+  padding: var(--spacing-sm, 0.75rem);
+  border-radius: var(--radius-sm, 8px);
+  background: var(--color-error-container);
+  color: var(--color-on-error-container);
+  font-size: 0.875rem;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm, 0.75rem);
+  margin-top: var(--spacing-sm, 0.75rem);
+}
+
+@media (max-width: 480px) {
+  .actions {
+    flex-direction: column-reverse;
+  }
+
+  .actions > * {
+    width: 100%;
+  }
+}
