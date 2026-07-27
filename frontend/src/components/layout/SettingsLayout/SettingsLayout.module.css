@@ -159,7 +159,22 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  overflow: hidden;
+  /*
+   * `overflow-y: auto`, NOT `overflow: hidden`.
+   *
+   * This was `height: 100%; overflow: hidden`, which clipped every settings
+   * page at the fold with no way to reach the rest: the outer scroll container
+   * in AppLayout could not scroll either, because this child was pinned to
+   * exactly its height and so never overflowed it. On My Profile that hid the
+   * Interface Language control and the Save button entirely.
+   *
+   * `min-height: 0` is the part that is easy to drop and required: a flex item
+   * defaults to `min-height: auto`, which refuses to shrink below its content
+   * and would push the overflow back out to an ancestor instead of scrolling
+   * here.
+   */
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
   background-color: var(--color-background);
 }
