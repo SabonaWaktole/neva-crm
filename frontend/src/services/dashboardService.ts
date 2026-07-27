@@ -27,16 +27,31 @@ export interface ActivityFeedItem {
   details?: any;
 }
 
+/**
+ * Whether a workspace may operate. SUSPENDED retains all data — a suspended
+ * tenant's users simply cannot log in or reach any endpoint. There is no
+ * "deleted" state: hard deletion is not implemented anywhere.
+ */
+export type SubscriptionStatus = 'ACTIVE' | 'SUSPENDED';
+
 export interface Tenant {
   id: string;
   name: string;
   urlSlug: string;
+  subscriptionStatus: SubscriptionStatus;
   createdAt: string;
 }
 
 export interface PaginatedTenants {
   items: Tenant[];
   total: number;
+}
+
+export interface CreateTenantInput {
+  companyName: string;
+  urlSlug: string;
+  ownerEmail: string;
+  ownerPassword: string;
 }
 
 export const dashboardService = {
@@ -58,5 +73,27 @@ export const dashboardService = {
     // Note: This endpoint is mounted at the root /api/tenants, not /api/:tenantSlug/...
     const response = await apiClient.get<PaginatedTenants>(`/tenants`, { params });
     return response.data;
+  },
+
+  /*
+   * Platform administration. All three are SUPER_ADMIN-only and, like the list
+   * above, live at the root /api/tenants rather than under /api/:tenantSlug —
+   * they act ON tenants rather than within one.
+   */
+
+  createTenant: async (input: CreateTenantInput): Promise<Tenant> => {
+    const response = await apiClient.post<{ tenant: Tenant }>(`/tenants`, input);
+    return response.data.tenant;
+  },
+
+  /** Idempotent server-side: suspending an already-suspended tenant succeeds. */
+  suspendTenant: async (tenantId: string): Promise<Tenant> => {
+    const response = await apiClient.patch<{ tenant: Tenant }>(`/tenants/${tenantId}/suspend`);
+    return response.data.tenant;
+  },
+
+  reactivateTenant: async (tenantId: string): Promise<Tenant> => {
+    const response = await apiClient.patch<{ tenant: Tenant }>(`/tenants/${tenantId}/reactivate`);
+    return response.data.tenant;
   }
 };

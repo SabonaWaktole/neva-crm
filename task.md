@@ -468,9 +468,15 @@ surfaced to the user, so a mistake here fails visibly rather than silently.
 
 ---
 
-## TD-008 — SuperAdminShell's sidebar was never redesigned after Super Admin lost tenant access
+## TD-008 — RESOLVED: SuperAdminShell's sidebar was never redesigned after Super Admin lost tenant access
 
-**Status:** Open
+**Status:** ✅ **RESOLVED, 2026-07-28**, folded into Super Admin tenant
+provisioning exactly as this entry predicted it would be. See "Resolution" at
+the end.
+
+**Original entry follows.**
+
+**Status at the time:** Open
 **Raised:** 2026-07-26, during Phase B Group 1 Item 3
 **Severity:** Low — cosmetic dead ends, no data or security risk
 **Area:** `frontend/src/pages/shell/SuperAdminShell.tsx`, `frontend/src/hooks/useNavigation.ts`
@@ -527,6 +533,40 @@ redesign into a bug-fixing batch is the wrong scope.
 - Decide the click-handler contract for a shell with no tenant context.
 - `useNavigation.test.ts` already asserts no-duplicate-ids for a `SUPER_ADMIN`
   user; extend it to assert the expected link set once that set is decided.
+
+### Resolution (2026-07-28)
+
+Folded into the tenant provisioning feature rather than fixed separately —
+this entry's own reasoning ("that pass is unavoidable when Super Admin tenant
+management is built... doing it twice is wasted work") held. Splitting them
+would have shipped working create/suspend/reactivate endpoints behind a shell
+with nowhere to put the page.
+
+All three compounding causes are addressed:
+
+1. **`SUPER_ADMIN` has its own nav list**: Dashboard and Tenants, matching the
+   role as defined. The hook now matches the role explicitly instead of letting
+   it fall through — "not STAFF" was never a sound definition of "owner".
+2. **The click handler navigates to `/admin/${id}`**, keeping a tenant-less
+   shell inside its own mount point. Previously bare `` `/${id}` `` matched the
+   top-level `/:tenantSlug` route with a slug of `"clients"`.
+3. **The shell routes what it offers**: `/dashboard`, `/tenants`, and a
+   catch-all redirect so nothing renders an empty shell.
+
+Two things fixed along the way that were not in the original diagnosis:
+
+- The `isActive` fallback was a hand-maintained exclusion list naming three of
+  the seven destinations, so Dashboard lit up alongside Inventory, Quotations
+  and Reports. It now derives exclusions from the item list, which cannot fall
+  behind it.
+- **TD-020's Status column is reinstated** in `TenantManagementTable`, its
+  stated precondition ("reinstate alongside the billing/subscription fields
+  they would read from") now met by `subscriptionStatus`. **Plan stays
+  removed** — billing is still unmodelled, so TD-020 remains open for it.
+
+`useNavigation.test.ts` asserts the exact `SUPER_ADMIN` link set, that each of
+the six formerly-dead links is absent, that no other role sees Tenants, and the
+active-state behaviour.
 
 ---
 
@@ -603,6 +643,27 @@ be noticed. Staff deactivation (Phase B Group 2) revokes the ability to obtain a
 | Cannot get a token via password reset | ✅ same check on the login path |
 | Browser session drops on next `/auth/me` | ✅ added — the one authenticated path that re-reads the user; also clears the cookie |
 | Already-issued token rejected immediately on other endpoints | ❌ **not possible today** |
+
+### Addendum (2026-07-28) — tenant *suspension* has no such window
+
+Still open for **user deactivation**, which is what this entry is about. But the
+tenant-level equivalent shipped without the gap, and how it avoided it is worth
+recording because the same technique applies here.
+
+Suspending a workspace takes effect **immediately, mid-session, on
+already-issued tokens** — no waiting for expiry. Not because tokens are revoked
+(they still are not), but because `resolveTenant` re-reads the tenant from the
+database on *every* `/api/:tenantSlug/...` request, and every tenant-scoped route
+in the app is mounted under that prefix. The check costs nothing: the tenant was
+already being loaded for the cross-tenant membership check.
+
+`/api/auth/me` is the one authenticated path with no slug, so it carries its own
+suspension check — mirroring the `isActive` check this entry describes.
+
+**Why the same trick does not simply close this item:** `authenticate` never
+reads the database at all, and adding a per-request user lookup there is a
+different cost/benefit conversation from reusing a query that was already
+happening. That remains the open question here.
 
 ### The actual exposure window
 
@@ -1403,6 +1464,22 @@ whose only action is `alert('PDF generation coming soon')`. Its own comment says
 `{/* Always show Download PDF as a placeholder */}`. Same family as the Recent
 Activity column and the timeline Filter/Search buttons — include it in the TD-020
 sweep.
+
+### Addendum to TD-020 — the tenant table's Status column is back (2026-07-28)
+
+`TenantManagementTable` dropped its "Plan" and "Status" columns under this item
+because the Tenant model tracked neither, so both rendered the not-set dash on
+every row. That removal carried its own precondition for reversal: *"reinstate
+alongside the billing/subscription fields they would read from."*
+
+**Status is reinstated**, reading the new `Tenant.subscriptionStatus`, and the
+column now carries a real per-row value on every row — plus the suspend and
+reactivate actions that make it actionable rather than merely informative.
+
+**Plan is NOT reinstated and this item stays open for it.** Billing is still
+unmodelled; a Plan column today would be exactly the permanently empty one that
+was removed. `TenantManagementTable.test.tsx` asserts its continued absence, so
+it cannot come back by accident alongside the column that earned its place.
 
 ---
 
@@ -2514,9 +2591,32 @@ and pruning never touching another user's rows.
 
 ---
 
-## TD-032 — 🔴 PRIORITY: `PrismaUnitOfWork` is a no-op — a safety mechanism that does not do what its name promises
+## TD-032 — RESOLVED: `PrismaUnitOfWork` is a no-op — a safety mechanism that does not do what its name promises
 
-**Status:** 🔴 **OPEN, priority-adjacent to TD-011's tier.** The quotation
+**Status:** ✅ **RESOLVED, 2026-07-28**, during Super Admin tenant provisioning.
+`PrismaUnitOfWork` and `IUnitOfWork` are **deleted**; their only caller,
+`RegisterBusinessOwnerUseCase`, now provisions through
+`ITenantProvisioningTransaction`, which binds its repositories to `tx` the way
+`IQuotationWriteTransaction` already did. See "Resolution" at the end of this
+entry.
+
+**The live question this entry asked was answered first, and the answer was
+yes:** `RegisterBusinessOwnerUseCase` was genuinely non-atomic. A failure
+between the tenant write and the user write left an orphan workspace — a tenant
+holding a unique `urlSlug` that nobody could sign into and nobody could
+re-register. This is now proven in both directions by
+`tests/integration/tenant/tenantProvisioningAtomicity.test.ts`, which contains
+a **control case** reconstructing the old arrangement by hand and asserting it
+*does* leave the orphan. A rollback test with nothing to fail against proves
+nothing.
+
+**Production was checked before any of this shipped** (read-only, `.env.prod`):
+4 tenants, **0 orphans**, 0 tenants without a BUSINESS_OWNER. The bug was real
+but had not yet bitten. Nothing needed cleaning up.
+
+**Original entry follows.**
+
+**Status at the time:** 🔴 **OPEN, priority-adjacent to TD-011's tier.** The quotation
 transitions are fixed by a different mechanism, described below; the class
 itself is untouched and still misleading.
 
@@ -2578,11 +2678,38 @@ happened, and asserts the notification, the history row and the status change
 are all absent afterwards. That test fails against a `PrismaUnitOfWork`-style
 wrapper.
 
+### Resolution (2026-07-28)
+
+`ITenantProvisioningTransaction` + `PrismaTenantProvisioningTransaction`, built
+to exactly the same shape as the quotation port above: the repositories are
+constructed **inside** `$transaction`, bound to `tx`, and handed to the caller.
+That required making `PrismaTenantRepository` and `PrismaUserRepository` accept
+an injected client instead of importing the global one at module scope — which
+is precisely why no wrapper could ever have enrolled them before, `IUnitOfWork`
+included.
+
+- **Both provisioning paths share one implementation.**
+  `CreateTenantWithOwnerUseCase` owns the logic;
+  `RegisterBusinessOwnerUseCase` (public self-registration) and
+  `POST /api/tenants` (Super Admin) are two callers with different
+  pre-conditions. The admin path could not inherit the atomicity gap because
+  there is only one path to inherit from.
+- **`PrismaUnitOfWork` and `IUnitOfWork` are deleted**, not left in place with a
+  warning comment. A no-op named `UnitOfWork` sitting in the tree is how the
+  next person wraps something in it and believes they got atomicity.
+- **The slug race is handled too.** The uniqueness check moved inside the
+  transaction, and a lost race (Postgres P2002) is translated to
+  `SlugAlreadyTakenError` rather than surfacing as an opaque Prisma error.
+
+**Proven in both directions.**
+`tests/integration/tenant/tenantProvisioningAtomicity.test.ts` forces a failure
+after the tenant write and asserts no tenant row survives — *and* includes a
+control that rebuilds the old global-client-inside-`$transaction` arrangement
+and asserts it **does** leave an orphan with zero owners. If that control ever
+stops failing, the rollback test has stopped discriminating.
+
 ### Left open
 
-- `PrismaUnitOfWork` still exists and is still a no-op.
-  `RegisterBusinessOwnerUseCase` is its only caller and believes it is
-  transactional. That should either be fixed the same way or deleted.
 - `MarkQuotationAcceptedUseCase` keeps its stock deduction in a **separate**
   transaction, sequentially, exactly as before. Prisma rejects nested
   interactive transactions, and merging them means rewriting the stock path —

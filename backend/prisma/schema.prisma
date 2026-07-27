@@ -7,6 +7,22 @@ generator client {
   provider = "prisma-client-js"
 }
 
+/// Whether a workspace is allowed to operate.
+///
+/// This is the first Prisma-level enum in the schema — `UserRole` and the
+/// various status fields are TypeScript enums over String columns. The
+/// difference is deliberate: this value is closed, platform-controlled and
+/// never user-supplied, and it gates login for an entire workspace. A bad
+/// value here silently locks out or lets in a whole tenant, so the constraint
+/// is worth having in the database rather than only in application code.
+///
+/// SUSPENDED retains all data. There is no value here meaning "deleted" —
+/// hard deletion is deliberately not a thing this model can express.
+enum SubscriptionStatus {
+  ACTIVE
+  SUSPENDED
+}
+
 model Tenant {
   id                        String  @id
   name                      String
@@ -39,6 +55,16 @@ model Tenant {
   // WRITTEN in. Also the only language source available for invitation emails,
   // whose recipients have no account yet.
   defaultLanguage String @default("en")
+
+  // Whether the workspace may operate at all. Like the localization fields
+  // above this drives real behaviour — it gates login and every tenant-scoped
+  // request — so it lives on the domain entity too.
+  //
+  // Defaulting to ACTIVE is what makes the migration safe: every tenant that
+  // exists today is by definition operating, and a nullable or SUSPENDED
+  // default would either introduce a third "unknown" state for every read site
+  // to handle or lock out live customers on deploy.
+  subscriptionStatus SubscriptionStatus @default(ACTIVE)
 
   createdAt DateTime @default(now())
 

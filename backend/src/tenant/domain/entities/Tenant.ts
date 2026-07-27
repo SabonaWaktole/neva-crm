@@ -36,6 +36,9 @@ export type Language = (typeof SUPPORTED_LANGUAGES)[number];
 
 export const DEFAULT_LANGUAGE: Language = 'en';
 
+export { SubscriptionStatus } from '../enums/SubscriptionStatus';
+import { SubscriptionStatus } from '../enums/SubscriptionStatus';
+
 export const DEFAULT_CURRENCY = 'USD';
 export const DEFAULT_LOCALE: SupportedLocale = 'en-US';
 export const DEFAULT_TIMEZONE = 'UTC';
@@ -51,6 +54,7 @@ interface TenantProps {
   timezone?: string;
   dateFormat?: string;
   defaultLanguage?: string;
+  subscriptionStatus?: SubscriptionStatus;
   createdAt: Date;
 }
 
@@ -78,6 +82,13 @@ export class Tenant {
    */
   public readonly defaultLanguage: string;
 
+  /**
+   * Whether the workspace may operate. Behaviour-bearing like the localization
+   * fields above, not presentation: it is the value `LoginUseCase` and
+   * `resolveTenant` read to decide whether to let anyone in at all.
+   */
+  public readonly subscriptionStatus: SubscriptionStatus;
+
   public readonly createdAt: Date;
 
   private constructor(props: TenantProps) {
@@ -92,10 +103,25 @@ export class Tenant {
     this.timezone = props.timezone ?? DEFAULT_TIMEZONE;
     this.dateFormat = props.dateFormat ?? DEFAULT_DATE_FORMAT;
     this.defaultLanguage = props.defaultLanguage ?? DEFAULT_LANGUAGE;
+    // Mirrors the column default. A tenant constructed in memory is ACTIVE, so
+    // no code path can accidentally treat "not stated" as suspended.
+    this.subscriptionStatus = props.subscriptionStatus ?? SubscriptionStatus.ACTIVE;
     this.createdAt = props.createdAt;
   }
 
   public static create(props: TenantProps): Tenant {
     return new Tenant(props);
+  }
+
+  /**
+   * The single expression of "this workspace is cut off".
+   *
+   * Read by `LoginUseCase`, `resolveTenant` and `getMe`. Having one predicate
+   * rather than three separate `=== 'SUSPENDED'` comparisons means adding a
+   * future status (PAST_DUE, TRIAL_EXPIRED) is one edit here, not a hunt for
+   * every site that compared against a literal.
+   */
+  public isSuspended(): boolean {
+    return this.subscriptionStatus === SubscriptionStatus.SUSPENDED;
   }
 }

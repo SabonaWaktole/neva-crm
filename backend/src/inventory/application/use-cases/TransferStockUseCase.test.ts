@@ -120,8 +120,9 @@ describe('TransferStockUseCase', () => {
     // The use case's constructor takes IStockTransactionManager, not PrismaClient or any Prisma type.
     // This is a structural assertion: the use case file should NOT import anything from Prisma.
     const fs = require('fs');
+    const path = require('path');
     const source = fs.readFileSync(
-      'd:\\nevacrm\\backend\\src\\inventory\\application\\use-cases\\TransferStockUseCase.ts',
+      path.join(__dirname, 'TransferStockUseCase.ts'),
       'utf-8'
     );
     expect(source).not.toContain('prisma');

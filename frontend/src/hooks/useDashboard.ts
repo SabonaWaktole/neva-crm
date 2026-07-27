@@ -1,7 +1,12 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { dashboardService } from '../services/dashboardService';
-import type { DashboardMetrics, ActivityFeedItem, Tenant } from '../services/dashboardService';
+import type {
+  DashboardMetrics,
+  ActivityFeedItem,
+  Tenant,
+  CreateTenantInput,
+} from '../services/dashboardService';
 
 export const useDashboardMetrics = () => {
   const { tenantSlug } = useParams();
@@ -86,4 +91,56 @@ export const useTenants = (skip: number = 0, take: number = 50) => {
   }, [skip, take, fetchTenants]);
 
   return { tenants, total, isLoading, error, fetchTenants };
+};
+
+/**
+ * The Super Admin's write actions against tenants.
+ *
+ * Separate from `useTenants` because reading the list and mutating it have
+ * different lifecycles: the list owns its own loading state and refetch, while
+ * these report per-action progress and errors. Each returns the updated tenant
+ * so a caller can patch its row without a full refetch, and `error` is the
+ * server's message rather than a generic one — a 409 on a duplicate slug is
+ * something the operator needs to read.
+ */
+export const useTenantAdmin = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const run = useCallback(async <T,>(action: () => Promise<T>): Promise<T | null> => {
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      return await action();
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Something went wrong. Please try again.');
+      return null;
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, []);
+
+  const createTenant = useCallback(
+    (input: CreateTenantInput) => run(() => dashboardService.createTenant(input)),
+    [run]
+  );
+
+  const suspendTenant = useCallback(
+    (tenantId: string) => run(() => dashboardService.suspendTenant(tenantId)),
+    [run]
+  );
+
+  const reactivateTenant = useCallback(
+    (tenantId: string) => run(() => dashboardService.reactivateTenant(tenantId)),
+    [run]
+  );
+
+  return {
+    createTenant,
+    suspendTenant,
+    reactivateTenant,
+    isSubmitting,
+    error,
+    clearError: useCallback(() => setError(null), []),
+  };
 };

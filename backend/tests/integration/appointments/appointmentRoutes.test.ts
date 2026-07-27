@@ -48,6 +48,7 @@ const stubTenantRepo: ITenantRepository = {
   create: async (t: any) => t,
   findAll: async () => ({ items: [], total: 0 }),
   updateSettings: async () => {},
+  setSubscriptionStatus: async () => {},
 };
 
 const app = express();

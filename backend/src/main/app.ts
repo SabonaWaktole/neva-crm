@@ -28,7 +28,11 @@ import { BcryptPasswordHasher } from '@auth/infrastructure/BcryptPasswordHasher'
 import { JwtTokenService } from '@auth/infrastructure/JwtTokenService';
 import { ConsoleEmailSender } from '@auth/infrastructure/ConsoleEmailSender';
 import { EmailJsSender } from '@auth/infrastructure/EmailJsSender';
-import { PrismaUnitOfWork } from '@shared/infrastructure/prisma/PrismaUnitOfWork';
+import { PrismaTenantProvisioningTransaction } from '@tenant/infrastructure/PrismaTenantProvisioningTransaction';
+import { CreateTenantWithOwnerUseCase } from '@tenant/application/use-cases/CreateTenantWithOwnerUseCase';
+import { SetTenantSubscriptionStatusUseCase } from '@tenant/application/use-cases/SetTenantSubscriptionStatusUseCase';
+import { SubscriptionStatus } from '@tenant/domain/enums/SubscriptionStatus';
+import { ITenantProvisioningTransaction } from '@tenant/application/ports/ITenantProvisioningTransaction';
 import { IUserRepository } from '@auth/domain/repositories/IUserRepository';
 import { ITenantRepository } from '@tenant/domain/repositories/ITenantRepository';
 import { IInvitationRepository } from '@auth/domain/repositories/IInvitationRepository';
@@ -36,7 +40,6 @@ import { IPasswordResetTokenRepository } from '@auth/domain/repositories/IPasswo
 import { IPasswordHasher } from '@auth/application/ports/IPasswordHasher';
 import { ITokenService } from '@auth/application/ports/ITokenService';
 import { IEmailSender } from '@auth/application/ports/IEmailSender';
-import { IUnitOfWork } from '@shared/application/ports/IUnitOfWork';
 
 import { createClientRouter } from '../clients/interfaces/http/routes/clientRoutes';
 import { PrismaNotificationRepository } from '../notifications/infrastructure/PrismaNotificationRepository';
@@ -55,7 +58,12 @@ export interface AppDependencies {
   passwordHasher: IPasswordHasher;
   tokenService: ITokenService;
   emailSender: IEmailSender;
-  unitOfWork: IUnitOfWork;
+  /**
+   * Replaces the former `unitOfWork` override. `PrismaUnitOfWork` was a no-op
+   * that made two independent writes look atomic (TD-032); this is the port
+   * that actually binds its repositories to the transaction.
+   */
+  tenantProvisioningTransaction: ITenantProvisioningTransaction;
   integrationRepository?: any;
 }
 
@@ -90,10 +98,19 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const passwordHasher = overrides?.passwordHasher ?? new BcryptPasswordHasher();
   const tokenService = overrides?.tokenService ?? new JwtTokenService();
   const emailSender = overrides?.emailSender ?? new EmailJsSender();
-  const unitOfWork = overrides?.unitOfWork ?? new PrismaUnitOfWork();
+  const tenantProvisioningTransaction =
+    overrides?.tenantProvisioningTransaction ?? new PrismaTenantProvisioningTransaction();
 
   // Use Cases
-  const registerUseCase = new RegisterBusinessOwnerUseCase(userRepository, tenantRepository, passwordHasher, unitOfWork);
+  //
+  // One provisioning use case, two callers: public self-registration below and
+  // the SUPER_ADMIN create endpoint on /api/tenants. They differ in who may
+  // call them, not in what they do.
+  const createTenantWithOwnerUseCase = new CreateTenantWithOwnerUseCase(
+    tenantProvisioningTransaction,
+    passwordHasher
+  );
+  const registerUseCase = new RegisterBusinessOwnerUseCase(createTenantWithOwnerUseCase);
   const loginUseCase = new LoginUseCase(userRepository, tenantRepository, passwordHasher, tokenService);
   const inviteStaffUseCase = new InviteStaffUseCase(invitationRepository, emailSender);
   const notificationRepository = new PrismaNotificationRepository();
@@ -156,7 +173,21 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const { GetTenantsUseCase } = require('../tenant/application/use-cases/GetTenantsUseCase');
   const getTenantsUseCase = new GetTenantsUseCase(tenantRepository);
   const { createTenantRouter } = require('../tenant/interfaces/http/routes/tenantRoutes');
-  const tenantRoutes = createTenantRouter(getTenantsUseCase, tokenService);
+  const tenantRoutes = createTenantRouter({
+    getTenantsUseCase,
+    createTenantWithOwnerUseCase,
+    // Same class, opposite directions. The target status is fixed here at
+    // construction so no request body can ever choose it.
+    suspendTenantUseCase: new SetTenantSubscriptionStatusUseCase(
+      tenantRepository,
+      SubscriptionStatus.SUSPENDED
+    ),
+    reactivateTenantUseCase: new SetTenantSubscriptionStatusUseCase(
+      tenantRepository,
+      SubscriptionStatus.ACTIVE
+    ),
+    tokenService,
+  });
   app.use('/api/tenants', tenantRoutes);
 
   // Dashboard Routes

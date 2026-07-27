@@ -48,6 +48,7 @@ describe('AcceptInvitationUseCase', () => {
       findBySlug: jest.fn(),
       findAll: jest.fn(),
       updateSettings: jest.fn(),
+      setSubscriptionStatus: jest.fn(),
     };
 
     useCase = new AcceptInvitationUseCase(invitationRepository, userRepository, passwordHasher, tenantRepository);

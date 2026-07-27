@@ -1,5 +1,6 @@
 
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import styles from './SuperAdminDashboard.module.css';
 import { 
   Users, 
@@ -70,6 +71,7 @@ const mockGlobalEvents = [
 
 export const SuperAdminDashboard = () => {
   const { t } = useTranslation('dashboard');
+  const navigate = useNavigate();
   const { tenants, total, isLoading: isLoadingTenants } = useTenants();
 
   return (
@@ -81,7 +83,9 @@ export const SuperAdminDashboard = () => {
           <h1 className={styles.title}>{t('superAdmin.title')}</h1>
           <p className={styles.subtitle}>{t('superAdmin.subtitle')}</p>
         </div>
-        <Button icon={<Plus size={20} />} disabled title={t('superAdmin.provisionSoon')}>
+        {/* Provisioning lives on the Tenants page, which owns the form and the
+            list it updates. This is a route to it, not a second copy. */}
+        <Button icon={<Plus size={20} />} onClick={() => navigate('/admin/tenants')}>
           {t('superAdmin.newTenant')}
         </Button>
       </header>
@@ -126,7 +130,14 @@ export const SuperAdminDashboard = () => {
         
         {/* Left Column: Tenant Table */}
         <div className={styles.leftColumn}>
-          <TenantManagementTable tenants={tenants} isLoading={isLoadingTenants} />
+          {/* Read-only here by design: the dashboard summarises, the Tenants
+              page acts. Passing no handlers renders the table without its
+              actions menu. */}
+          <TenantManagementTable
+            tenants={tenants}
+            isLoading={isLoadingTenants}
+            onViewAll={() => navigate('/admin/tenants')}
+          />
         </div>
 
         {/* Right Column: Platform Activity Feed (PLACEHOLDER) */}
