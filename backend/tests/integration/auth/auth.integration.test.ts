@@ -36,6 +36,11 @@ class InMemoryUserRepository implements IUserRepository {
   async findByTenantId(tenantId: string): Promise<User[]> {
     return this.users.filter(u => u.tenantId === tenantId);
   }
+  async findActiveByTenantAndRole(tenantId: string, role: string): Promise<User[]> {
+    // Mirrors the Prisma implementation, including the isActive filter that
+    // keeps deactivated members out of notification fan-out (TD-010).
+    return this.users.filter(u => u.tenantId === tenantId && u.role === role && u.isActive);
+  }
   async findSuperAdminByEmail(email: string): Promise<User | null> {
     return this.users.find(u => u.email === email && u.role === UserRole.SUPER_ADMIN) ?? null;
   }

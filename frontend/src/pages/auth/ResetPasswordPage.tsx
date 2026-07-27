@@ -69,7 +69,7 @@ export const ResetPasswordPage = () => {
             label={t('resetPassword.newPassword')} 
             placeholder="••••••••" 
             id="new-password"
-            helperText={t('resetPassword.helper')}
+            helperText={t('passwordHelper')}
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             required

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
-import { dayKeyInZone, isSameDayInZone } from '../utils/tenantDay';
+import { dayKeyInZone, isSameDayInZone, dayBoundsInZone } from '../utils/tenantDay';
 
 /**
  * Date and time formatting bound to the workspace's settings.
@@ -80,6 +80,15 @@ export function useDateFormat() {
       /** Grouping helpers, so callers never reach for browser-local dates. */
       dayKey: (value: DateInput) => dayKeyInZone(toDate(value), timeZone),
       isSameDay: (a: DateInput, b: DateInput) => isSameDayInZone(toDate(a), toDate(b), timeZone),
+      /**
+       * The `[start, end)` instants of a tenant-local day. `offsetDays` is
+       * relative to now: `0` today, `-1` yesterday.
+       *
+       * Use this for any "today" range query instead of `setHours(0,0,0,0)`,
+       * which resolves midnight in the *browser's* zone and so disagrees with
+       * every server-computed figure beside it. TD-029.
+       */
+      dayBounds: (offsetDays = 0) => dayBoundsInZone(timeZone, offsetDays),
     }),
     [locale, timeZone]
   );

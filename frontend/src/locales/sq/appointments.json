@@ -33,7 +33,6 @@
     "searchClient": "Kërko klientin",
     "searchClientPlaceholder": "Filloni të shkruani emrin e klientit...",
     "clientRequired": "Zgjidhni një klient për këtë takim",
-    "appointmentType": "Lloji i takimit",
     "scheduleAndStaff": "Orari & Stafi",
     "date": "Data",
     "dateRequired": "Zgjidhni një datë",
@@ -43,9 +42,12 @@
     "myself": "Unë vetë",
     "purpose": "Qëllimi i takimit",
     "purposePlaceholder": "Përshkruani shkurt objektivin e këtij takimi...",
-    "highPriority": "Përparësi e lartë",
-    "highPriorityDesc": "E shënon këtë në kalendarin global",
-    "backToCalendar": "Kthehu te kalendari"
+    "backToCalendar": "Kthehu te kalendari",
+    "clientIdentity": "Identiteti i klientit",
+    "unknownClient": "Klient i panjohur",
+    "cancel": "Anulo",
+    "confirming": "Duke konfirmuar...",
+    "confirmAppointment": "Konfirmo takimin"
   },
   "detail": {
     "title": "Detajet e takimit",

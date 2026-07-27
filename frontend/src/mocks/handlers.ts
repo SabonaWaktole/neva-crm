@@ -1,6 +1,9 @@
 
 import { clientHandlers } from './clientHandlers';
+import { teamHandlers, notificationHandlers } from './teamHandlers';
 
 export const handlers = [
-  ...clientHandlers
+  ...clientHandlers,
+  ...teamHandlers,
+  ...notificationHandlers,
 ];

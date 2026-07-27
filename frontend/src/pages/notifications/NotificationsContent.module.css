@@ -1,0 +1,99 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-title-lg);
+  font-weight: 600;
+  color: var(--color-on-surface);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: none;
+  border-bottom: 1px solid var(--border-hairline);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.item:hover {
+  background-color: var(--color-surface-container-high);
+}
+
+/* Unread is marked by a border and weight as well as a badge, so it does not
+   depend on colour perception alone. */
+.itemUnread {
+  border-left: 3px solid var(--color-primary);
+  background-color: var(--color-surface-container);
+}
+
+.itemUnread .itemText {
+  font-weight: 600;
+}
+
+.itemBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.itemText {
+  font-size: var(--font-size-body-md);
+  color: var(--color-on-surface);
+  line-height: 1.4;
+}
+
+.itemMeta {
+  font-size: var(--font-size-label-sm, 12px);
+  color: var(--color-on-surface-variant);
+}
+
+.emptyState {
+  padding: var(--spacing-xl);
+  text-align: center;
+}
+
+.emptyIcon {
+  color: var(--color-on-surface-variant);
+  margin-bottom: var(--spacing-sm);
+}
+
+.emptyTitle {
+  margin: 0 0 var(--spacing-xs);
+  font-weight: 600;
+  color: var(--color-on-surface);
+}
+
+.muted {
+  margin: 0;
+  padding: var(--spacing-md);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-on-surface-variant);
+}

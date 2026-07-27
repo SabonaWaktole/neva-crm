@@ -221,7 +221,22 @@ export const inventoryService = {
     await apiClient.delete(`/${tenantSlug}/inventory/categories/${categoryId}`);
   },
 
-  cleanupCategories: async (tenantSlug: string): Promise<{ count: number }> => {
+  /**
+   * What cleanup would archive, without archiving it. The count shown next to
+   * the button must come from here rather than being derived separately in the
+   * UI — that divergence is how a fabricated "3" ended up labelling a real
+   * destructive action. See TD-027.
+   */
+  previewCategoryCleanup: async (
+    tenantSlug: string
+  ): Promise<{ count: number; categories: { id: string; name: string }[] }> => {
+    const response = await apiClient.get(`/${tenantSlug}/inventory/categories/cleanup/preview`);
+    return response.data;
+  },
+
+  cleanupCategories: async (
+    tenantSlug: string
+  ): Promise<{ count: number; categories: { id: string; name: string }[] }> => {
     const response = await apiClient.post(`/${tenantSlug}/inventory/categories/cleanup`);
     return response.data;
   },

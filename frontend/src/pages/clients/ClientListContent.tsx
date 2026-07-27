@@ -28,7 +28,6 @@ import { useStatusLabel } from '../../hooks/useStatusLabel';
 
 export const ClientListContent: React.FC = () => {
   const { t } = useTranslation('clients');
-  const { t: tc } = useTranslation('common');
   const statusLabel = useStatusLabel();
   const [searchTerm, setSearchTerm] = useState('');
   const { tenantSlug } = useParams();
@@ -103,13 +102,15 @@ export const ClientListContent: React.FC = () => {
         );
       },
     },
-    {
-      id: 'activity',
-      header: t('list.columnRecentActivity'),
-      // Every row renders the not-set dash: this column has never been wired to
-      // any data. Kept as-is rather than quietly removed — see TD-020.
-      render: () => <span className={styles.recentActivity}>{tc('state.notSet')}</span>,
-    },
+    /*
+      REMOVED: a "Recent Activity" column that rendered the not-set dash on
+      every row, always — it was never wired to any source. Removed rather than
+      disclosed, because a column header promises a per-row value and there is
+      nothing a "coming soon" marker could usefully occupy a whole table column
+      with. Interaction history already has a real home on the client detail
+      page. The list endpoint would need a last-interaction aggregate before
+      this column could return. TD-020.
+    */
     {
       id: 'actions',
       header: '',

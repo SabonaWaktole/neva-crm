@@ -86,6 +86,7 @@ describe('Staff deactivation', () => {
     const ids = [tenantId, otherTenantId];
     await prisma.appointment.deleteMany({ where: { tenantId: { in: ids } } });
     await prisma.client.deleteMany({ where: { tenantId: { in: ids } } });
+    await prisma.notification.deleteMany({ where: { tenantId: { in: ids } } });
     await prisma.user.deleteMany({ where: { tenantId: { in: ids } } });
     await prisma.tenant.deleteMany({ where: { id: { in: ids } } });
   });

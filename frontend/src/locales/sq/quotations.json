@@ -59,7 +59,10 @@
     "byUser": "Nga {{user}}",
     "reason": "Arsyeja: {{reason}}",
     "warehouse": "Magazina: {{warehouse}}",
-    "breadcrumb": "CRM > Ofertat > {{reference}}"
+    "breadcrumb": "CRM > Ofertat > {{reference}}",
+    "unknownUser": "Përdorues i panjohur",
+    "unknownClient": "I panjohur",
+    "notes": "Shënime"
   },
   "form": {
     "breadcrumbNew": "E re",

@@ -45,6 +45,7 @@ describe('DeactivateUserUseCase', () => {
       updateRoleAndWarehouse: jest.fn(),
       setActive: jest.fn(),
       countAssignedWork: jest.fn(),
+      findActiveByTenantAndRole: jest.fn().mockResolvedValue([]),
     };
     useCase = new DeactivateUserUseCase(userRepository);
   });

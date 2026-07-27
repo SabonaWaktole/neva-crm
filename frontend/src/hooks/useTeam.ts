@@ -99,6 +99,22 @@ export const useTeam = () => {
     }
   };
 
+  /**
+   * The counterpart to deactivateStaff. Until TD-030 there was no caller
+   * anywhere that set a user active again — `setActive` existed on the
+   * repository but only ever received `false`.
+   */
+  const reactivateStaff = async (userId: string) => {
+    if (!tenantSlug) throw new Error('Missing tenant context');
+    try {
+      await api.post(`/${tenantSlug}/auth/staff/${userId}/reactivate`);
+      await fetchStaff();
+    } catch (error) {
+      console.error('Failed to reactivate staff member', error);
+      throw error;
+    }
+  };
+
   const cancelInvitation = async (invitationId: string) => {
     if (!tenantSlug) return;
     try {
@@ -122,5 +138,6 @@ export const useTeam = () => {
     cancelInvitation,
     fetchDeactivationImpact,
     deactivateStaff,
+    reactivateStaff,
   };
 };

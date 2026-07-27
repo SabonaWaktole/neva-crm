@@ -35,6 +35,7 @@ describe('AcceptInvitationUseCase', () => {
       updateRoleAndWarehouse: jest.fn(),
       setActive: jest.fn(),
       countAssignedWork: jest.fn(),
+      findActiveByTenantAndRole: jest.fn().mockResolvedValue([]),
     };
     passwordHasher = {
       hash: jest.fn(),

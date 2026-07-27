@@ -96,6 +96,7 @@ describe('PrismaInteractionRepository Integration', () => {
   afterAll(async () => {
     await prisma.interaction.deleteMany({ where: { tenantId: { in: [tenant1Id, tenant2Id] } } });
     await prisma.client.deleteMany({ where: { tenantId: { in: [tenant1Id, tenant2Id] } } });
+    await prisma.notification.deleteMany({ where: { tenantId: { in: [tenant1Id, tenant2Id] } } });
     await prisma.user.deleteMany({ where: { tenantId: { in: [tenant1Id, tenant2Id] } } });
     await prisma.tenant.deleteMany({ where: { id: { in: [tenant1Id, tenant2Id] } } });
     await prisma.$disconnect();

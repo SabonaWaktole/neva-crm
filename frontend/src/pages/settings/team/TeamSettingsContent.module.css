@@ -183,3 +183,10 @@
   color: var(--color-error) !important;
   border-color: color-mix(in srgb, var(--color-error) 32%, transparent) !important;
 }
+
+/* Marks a member whose access is revoked. The list is inclusive by design —
+   deactivated members stay visible so they can be reactivated. TD-030. */
+.statusBadge {
+  margin-left: var(--spacing-xs);
+  vertical-align: middle;
+}

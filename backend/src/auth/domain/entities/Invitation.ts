@@ -9,6 +9,8 @@ interface InvitationProps {
   expiresAt: Date;
   acceptedAt: Date | null;
   warehouseId?: string | null;
+  /** Who sent it. Null for invitations predating the column. */
+  invitedByUserId?: string | null;
 }
 
 export class Invitation {
@@ -20,6 +22,7 @@ export class Invitation {
   public readonly expiresAt: Date;
   public readonly acceptedAt: Date | null;
   public readonly warehouseId: string | null;
+  public readonly invitedByUserId: string | null;
 
   private constructor(props: InvitationProps) {
     this.id = props.id;
@@ -30,6 +33,7 @@ export class Invitation {
     this.expiresAt = props.expiresAt;
     this.acceptedAt = props.acceptedAt;
     this.warehouseId = props.warehouseId || null;
+    this.invitedByUserId = props.invitedByUserId || null;
   }
 
   public static create(props: InvitationProps): Invitation {

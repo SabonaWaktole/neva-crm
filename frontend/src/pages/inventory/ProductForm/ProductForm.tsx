@@ -35,6 +35,7 @@ import type { ProductStatus } from '../../../types/inventory';
 
 import styles from './ProductForm.module.css';
 import { useDateFormat } from '../../../hooks/useDateFormat';
+import { getUserDisplayName } from '../../../utils/userUtils';
 
 interface FormState {
   name: string;
@@ -627,7 +628,7 @@ export const ProductForm: React.FC = () => {
     navigate('/login');
   };
 
-  const userName = user?.userId ? `User ${user.userId.substring(0, 8)}` : 'Business Owner';
+  const userName = getUserDisplayName(user, 'Business Owner');
   const roleName = user?.role === 'STAFF' ? 'Sales Representative' : 'Enterprise Tier';
 
   return (

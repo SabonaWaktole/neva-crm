@@ -53,6 +53,9 @@ export class AppointmentController {
       const appointment = await this.createAppointmentUseCase.execute({
         tenantId,
         ...validatedData,
+        // From the token, never the body: the actor is who is calling, and a
+        // client must not be able to attribute an appointment to someone else.
+        actingUserId: req.user!.userId,
       });
 
       res.status(201).json(mapToDTO(appointment));

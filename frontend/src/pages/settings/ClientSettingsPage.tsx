@@ -5,6 +5,7 @@ import type { NavItem } from '../../components/layout/Sidebar/Sidebar';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useLogout } from '../../hooks/useLogout';
 import { ClientSettingsContent } from './ClientSettingsContent';
+import { getUserDisplayName } from '../../utils/userUtils';
 
 const mockNavItems: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
@@ -27,7 +28,7 @@ export const ClientSettingsPage: React.FC = () => {
     navigate('/login');
   };
 
-  const userName = user?.userId ? `User ${user.userId.substring(0, 8)}` : 'Business Owner';
+  const userName = getUserDisplayName(user, 'Business Owner');
   const roleName = user?.role === 'SUPER_ADMIN' ? 'Super Admin' : user?.role === 'BUSINESS_OWNER' ? 'Business Owner' : 'Staff';
 
   const handleNavClick = (id: string) => {

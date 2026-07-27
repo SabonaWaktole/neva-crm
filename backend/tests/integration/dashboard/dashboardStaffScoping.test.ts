@@ -82,6 +82,7 @@ describe('Dashboard role-based data scoping', () => {
     await prisma.interaction.deleteMany({ where: { tenantId } });
     await prisma.appointment.deleteMany({ where: { tenantId } });
     await prisma.client.deleteMany({ where: { tenantId } });
+    await prisma.notification.deleteMany({ where: { tenantId } });
     await prisma.user.deleteMany({ where: { tenantId } });
     await prisma.tenant.deleteMany({ where: { id: tenantId } });
   });

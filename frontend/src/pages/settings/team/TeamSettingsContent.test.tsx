@@ -33,11 +33,16 @@ describe('TeamSettingsContent', () => {
     });
   });
 
-  it('renders active members and pending invitations headers', () => {
+  it('renders the members and pending invitations headers', () => {
     render(<TeamSettingsContent />);
-    
+
+    // The page title. The list heading below it is "All Members", not a second
+    // "Team Members" — the list includes deactivated members, so calling it
+    // "Active Members" was wrong, and reusing the page title read as a
+    // duplicated heading. TD-030.
     expect(screen.getByText('Team Members')).toBeDefined();
-    expect(screen.getByText('Active Members')).toBeDefined();
+    expect(screen.getByText('All Members')).toBeDefined();
+    expect(screen.queryByText('Active Members')).toBeNull();
     expect(screen.getByText('Pending Invitations')).toBeDefined();
     expect(mockFetchStaff).toHaveBeenCalledTimes(1);
     expect(mockFetchPendingInvitations).toHaveBeenCalledTimes(1);

@@ -59,7 +59,10 @@
     "byUser": "By {{user}}",
     "reason": "Reason: {{reason}}",
     "warehouse": "Warehouse: {{warehouse}}",
-    "breadcrumb": "CRM > Quotations > {{reference}}"
+    "breadcrumb": "CRM > Quotations > {{reference}}",
+    "unknownUser": "Unknown user",
+    "unknownClient": "Unknown",
+    "notes": "Notes"
   },
   "form": {
     "breadcrumbNew": "New",

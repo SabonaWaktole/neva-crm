@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { ReactNode, ReactElement } from 'react';
-import { Search, Bell, HelpCircle, Settings, LogOut, Menu, X } from 'lucide-react';
+import { Search, HelpCircle, Settings, LogOut, Menu, X } from 'lucide-react';
 import { Avatar } from '../../ui/Avatar/Avatar';
 import { ThemeToggle } from '../../ui/ThemeToggle';
 import { DropdownMenu } from '../../ui/DropdownMenu/DropdownMenu';
@@ -8,6 +8,7 @@ import type { DropdownMenuItemType } from '../../ui/DropdownMenu/DropdownMenu';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { resolveMediaUrl, srcSetFor } from '../../../services/mediaService';
 import styles from './AppLayout.module.css';
+import { NotificationBell } from '../../notifications/NotificationBell';
 
 export interface AppLayoutProps {
   children: ReactNode;
@@ -81,9 +82,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             {isMobileSearchOpen ? <X size={20} /> : <Search size={20} />}
           </button>
           <ThemeToggle className={styles.iconBtn} />
-          <button className={styles.iconBtn} aria-label="Notifications">
-            <Bell size={20} />
-          </button>
+          {/*
+            Was a dead <button> with a bell icon and no handler — a control that
+            looked live and did nothing, the TD-020 family. It is now the real
+            notification bell.
+          */}
+          <NotificationBell />
           <button className={`${styles.iconBtn} ${styles.helpBtn}`} aria-label="Help">
             <HelpCircle size={20} />
           </button>

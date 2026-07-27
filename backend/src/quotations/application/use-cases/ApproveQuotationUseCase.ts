@@ -1,12 +1,14 @@
-import { IQuotationRepository } from '../../domain/IQuotationRepository';
-import { IQuotationStatusHistoryRepository } from '../../domain/IQuotationStatusHistoryRepository';
 import { QuotationStatusHistory } from '../../domain/QuotationStatusHistory';
 import { UserRole } from '../../../auth/domain/enums/UserRole';
+import { IQuotationWriteTransaction } from '../ports/IQuotationWriteTransaction';
+import { NotificationService } from '../../../notifications/application/NotificationService';
+import { IUserRepository } from '../../../auth/domain/repositories/IUserRepository';
+import { quotationReference } from '../../domain/quotationReference';
 
 export class ApproveQuotationUseCase {
   constructor(
-    private quotationRepo: IQuotationRepository,
-    private historyRepo: IQuotationStatusHistoryRepository
+    private writeTx: IQuotationWriteTransaction,
+    private userRepo: IUserRepository
   ) {}
 
   async execute(input: {
@@ -15,30 +17,57 @@ export class ApproveQuotationUseCase {
     actingUserId: string;
     actingUserRole: string;
   }) {
+    // Authorisation before the transaction opens: an unauthorised caller must
+    // not cause a database round trip, and the error must not depend on
+    // whether the quotation they named happens to exist.
     if (input.actingUserRole !== UserRole.BUSINESS_OWNER) {
       throw new Error('Unauthorized: Only Business Owners can approve quotations');
     }
 
-    const quotation = await this.quotationRepo.findById(input.tenantId, input.quotationId);
-    if (!quotation) {
-      throw new Error('Quotation not found');
-    }
+    return this.writeTx.run(async (repos) => {
+      const quotation = await repos.quotationRepo.findById(input.tenantId, input.quotationId);
+      if (!quotation) {
+        throw new Error('Quotation not found');
+      }
 
-    const fromStatus = quotation.status;
-    quotation.approve();
+      const fromStatus = quotation.status;
+      quotation.approve();
 
-    const history = QuotationStatusHistory.create({
-      id: crypto.randomUUID(),
-      tenantId: input.tenantId,
-      quotationId: input.quotationId,
-      fromStatus,
-      toStatus: quotation.status,
-      changedByUserId: input.actingUserId
+      const history = QuotationStatusHistory.create({
+        id: crypto.randomUUID(),
+        tenantId: input.tenantId,
+        quotationId: input.quotationId,
+        fromStatus,
+        toStatus: quotation.status,
+        changedByUserId: input.actingUserId
+      });
+
+      await repos.quotationRepo.save(quotation);
+      await repos.historyRepo.save(history);
+
+      /*
+       * The creator asked for this approval; they are the one waiting on it.
+       *
+       * Inside the transaction: quotation, history and notification commit
+       * together or not at all. The two writes above were previously
+       * independent awaits, so a failure between them left a quotation whose
+       * own history did not record how it got there.
+       *
+       * `emit` drops a recipient who is the actor, so a Business Owner acting
+       * on their own quotation does not notify themselves.
+       */
+      const notifications = new NotificationService(repos.notificationRepo, this.userRepo);
+      await notifications.emit({
+        tenantId: input.tenantId,
+        recipientUserIds: [quotation.createdByUserId],
+        type: 'QUOTATION_APPROVED',
+        params: { reference: quotationReference(quotation.id) },
+        actorUserId: input.actingUserId,
+        entityType: 'QUOTATION',
+        entityId: quotation.id,
+      });
+
+      return { quotation };
     });
-
-    await this.quotationRepo.save(quotation);
-    await this.historyRepo.save(history);
-
-    return { quotation };
   }
 }

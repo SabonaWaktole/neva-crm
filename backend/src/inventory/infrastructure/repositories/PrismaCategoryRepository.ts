@@ -70,9 +70,33 @@ export class PrismaCategoryRepository implements ICategoryRepository {
     }));
   }
 
-  async findLeastRecentlyUsedCategories(tenantId: string, limit: number): Promise<Category[]> {
-    // Raw SQL to find categories ordered by the most recent product/stock interaction.
-    // If a category has no products, or products have no stock movements, we fall back to product or category updatedAt.
+  /**
+   * See ICategoryRepository.findUnusedCategories for the agreed definition.
+   *
+   * Two independent conditions, both expressed as NOT EXISTS:
+   *
+   *  1. No **active** product is assigned. Archived products deliberately do
+   *     NOT keep a category in use — archiving a product is how a catalogue
+   *     retires it, and a category holding only retired products is exactly
+   *     what cleanup is for.
+   *
+   *  2. No QuotationLineItem references **any** product still carrying this
+   *     category, archived or not. This is the historical guard: a category
+   *     whose only product is archived but was quoted at some point stays out
+   *     of the candidate list, because archiving the category would obscure
+   *     the lineage of a real quotation.
+   *
+   * Known limitation, worth stating rather than discovering later: the link
+   * from a line item to a category runs through `Product.categoryId`, which is
+   * *current* state. If a product is reassigned to a different category, the
+   * evidence that it was ever quoted under the old one is gone from the
+   * database entirely. Closing that would mean snapshotting the category on
+   * QuotationLineItem at write time. Until then, "historically" means "as far
+   * back as the current product-to-category assignment can attest".
+   *
+   * Archived categories are excluded because archiving them again is a no-op.
+   */
+  async findUnusedCategories(tenantId: string): Promise<Category[]> {
     const rows = await this.prisma.$queryRaw<Array<{
       id: string,
       name: string,
@@ -81,19 +105,21 @@ export class PrismaCategoryRepository implements ICategoryRepository {
       createdAt: Date,
       updatedAt: Date
     }>>`
-      SELECT c.id, c.name, c.description, c."isArchived", c."createdAt", c."updatedAt",
-             GREATEST(
-               c."updatedAt",
-               COALESCE(MAX(p."updatedAt"), '1970-01-01'::timestamp),
-               COALESCE(MAX(sm."createdAt"), '1970-01-01'::timestamp)
-             ) as last_used_at
+      SELECT c.id, c.name, c.description, c."isArchived", c."createdAt", c."updatedAt"
       FROM "Category" c
-      LEFT JOIN "Product" p ON p."categoryId" = c.id
-      LEFT JOIN "StockMovement" sm ON sm."productId" = p.id
-      WHERE c."tenantId" = ${tenantId} AND c."isArchived" = false
-      GROUP BY c.id
-      ORDER BY last_used_at ASC
-      LIMIT ${limit};
+      WHERE c."tenantId" = ${tenantId}
+        AND c."isArchived" = false
+        AND NOT EXISTS (
+          SELECT 1 FROM "Product" p
+          WHERE p."categoryId" = c.id
+            AND p."isArchived" = false
+        )
+        AND NOT EXISTS (
+          SELECT 1 FROM "QuotationLineItem" qli
+          JOIN "Product" p2 ON p2.id = qli."productId"
+          WHERE p2."categoryId" = c.id
+        )
+      ORDER BY c.name ASC;
     `;
 
     return rows.map((record) =>

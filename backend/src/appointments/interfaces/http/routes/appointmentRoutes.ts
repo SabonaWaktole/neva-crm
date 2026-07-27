@@ -18,6 +18,9 @@ import { authorize } from '../../../../main/interfaces/http/middlewares/authoriz
 import { UserRole } from '../../../../auth/domain/enums/UserRole';
 import { ITokenService } from '../../../../auth/application/ports/ITokenService';
 import { ITenantRepository } from '../../../../tenant/domain/repositories/ITenantRepository';
+import { NotificationService } from '../../../../notifications/application/NotificationService';
+import { PrismaNotificationRepository } from '../../../../notifications/infrastructure/PrismaNotificationRepository';
+
 
 export const createAppointmentRouter = (
   prisma: PrismaClient,
@@ -31,11 +34,15 @@ export const createAppointmentRouter = (
   const clientRepo = new PrismaClientRepository(prisma);
   const userRepo = new PrismaUserRepository(); // PrismaUserRepository creates its own PrismaClient inside, or we can use it directly depending on implementation
 
+  // Notifications are optional on these use cases so unit tests can construct
+  // them without a notification stack; here they are always provided.
+  const notifications = new NotificationService(new PrismaNotificationRepository(prisma), userRepo);
+
   // Use Cases
-  const createAppointmentUseCase = new CreateAppointmentUseCase(appointmentRepo, clientRepo, userRepo);
+  const createAppointmentUseCase = new CreateAppointmentUseCase(appointmentRepo, clientRepo, userRepo, notifications);
   const updateAppointmentUseCase = new UpdateAppointmentUseCase(appointmentRepo, clientRepo, userRepo);
-  const rescheduleAppointmentUseCase = new RescheduleAppointmentUseCase(appointmentRepo);
-  const cancelAppointmentUseCase = new CancelAppointmentUseCase(appointmentRepo);
+  const rescheduleAppointmentUseCase = new RescheduleAppointmentUseCase(appointmentRepo, notifications);
+  const cancelAppointmentUseCase = new CancelAppointmentUseCase(appointmentRepo, notifications);
   const updateAppointmentStatusUseCase = new UpdateAppointmentStatusUseCase(appointmentRepo);
   const searchAppointmentsUseCase = new SearchAppointmentsUseCase(appointmentRepo);
   const getUpcomingAppointmentsUseCase = new GetUpcomingAppointmentsUseCase(appointmentRepo);

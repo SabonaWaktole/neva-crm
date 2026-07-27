@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card } from '../../../components/ui/Card/Card';
+import { Badge } from '../../../components/ui/Badge/Badge';
 import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
 import { Button } from '../../../components/ui/Button/Button';
 import { useTeam, type StaffMember } from '../../../hooks/useTeam';
 import { InviteMemberModal } from './InviteMemberModal';
 import { EditMemberModal } from './EditMemberModal';
-import { Mail, Shield, Clock, Edit2, Trash2, UserMinus } from 'lucide-react';
+import { Mail, Shield, Clock, Edit2, Trash2, UserMinus, UserPlus } from 'lucide-react';
 import { useAuthStore } from '../../../store/useAuthStore';
 import styles from './TeamSettingsContent.module.css';
 import { useDateFormat } from '../../../hooks/useDateFormat';
@@ -14,7 +15,7 @@ import { useDateFormat } from '../../../hooks/useDateFormat';
 export const TeamSettingsContent: React.FC = () => {
   const dates = useDateFormat();
   const { t } = useTranslation('settings');
-  const { staff, pendingInvitations, loadingStaff, loadingInvitations, fetchStaff, fetchPendingInvitations, inviteStaff, updateStaffRole, cancelInvitation, fetchDeactivationImpact, deactivateStaff } = useTeam();
+  const { staff, pendingInvitations, loadingStaff, loadingInvitations, fetchStaff, fetchPendingInvitations, inviteStaff, updateStaffRole, cancelInvitation, fetchDeactivationImpact, deactivateStaff, reactivateStaff } = useTeam();
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<StaffMember | null>(null);
   const [memberToDeactivate, setMemberToDeactivate] = useState<StaffMember | null>(null);
@@ -42,6 +43,17 @@ export const TeamSettingsContent: React.FC = () => {
     await inviteStaff(email, role, warehouseId);
   };
 
+  /**
+   * Confirmed, but without the impact dialog deactivation uses. There is
+   * nothing to warn about: reactivation restores sign-in and touches no
+   * assignments. TD-030.
+   */
+  const handleReactivate = async (member: StaffMember) => {
+    const name = [member.firstName, member.lastName].filter(Boolean).join(' ') || member.email;
+    if (!window.confirm(t('team.confirmReactivate', { name }))) return;
+    await reactivateStaff(member.id);
+  };
+
   const handleCancelInvitation = async (invitationId: string) => {
     if (window.confirm(t('team.confirmCancelInvitation'))) {
       await cancelInvitation(invitationId);
@@ -63,7 +75,13 @@ export const TeamSettingsContent: React.FC = () => {
       </div>
 
       <Card padding="md">
-        <h3 className={styles.cardTitle}>{t('team.activeMembers')}</h3>
+        {/*
+          "Team Members", not "Active Members". The staff endpoint has always
+          returned deactivated members too, so the old heading described the
+          list incorrectly. Renaming rather than filtering is deliberate:
+          deactivated members must stay visible to be reactivated. TD-030.
+        */}
+        <h3 className={styles.cardTitle}>{t('team.members')}</h3>
         {loadingStaff ? (
           <p className={styles.mutedText}>{t('team.loadingMembers')}</p>
         ) : staff.length === 0 ? (
@@ -77,7 +95,14 @@ export const TeamSettingsContent: React.FC = () => {
                     {member.firstName ? member.firstName[0] : member.email[0].toUpperCase()}
                   </div>
                   <div className={styles.memberInfo}>
-                    <div className={styles.memberName}>{member.firstName} {member.lastName}</div>
+                    <div className={styles.memberName}>
+                      {member.firstName} {member.lastName}
+                      {member.isActive === false && (
+                        <Badge variant="secondary" className={styles.statusBadge}>
+                          {t('team.deactivatedBadge')}
+                        </Badge>
+                      )}
+                    </div>
                     <div className={styles.memberEmail}>{member.email}</div>
                   </div>
                 </div>
@@ -94,14 +119,25 @@ export const TeamSettingsContent: React.FC = () => {
                       {/* A Business Owner cannot be deactivated, and nobody can
                           deactivate themselves — both enforced server-side too. */}
                       {member.role !== 'BUSINESS_OWNER' && member.id !== user?.userId && (
-                        <Button
-                          variant="outline"
-                          onClick={() => openDeactivateDialog(member)}
-                          className={styles.iconButton}
-                          aria-label={t('team.deactivateAria', { email: member.email })}
-                        >
-                          <UserMinus size={14} />
-                        </Button>
+                        member.isActive === false ? (
+                          <Button
+                            variant="outline"
+                            onClick={() => handleReactivate(member)}
+                            className={styles.iconButton}
+                            aria-label={t('team.reactivateAria', { email: member.email })}
+                          >
+                            <UserPlus size={14} />
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            onClick={() => openDeactivateDialog(member)}
+                            className={styles.iconButton}
+                            aria-label={t('team.deactivateAria', { email: member.email })}
+                          >
+                            <UserMinus size={14} />
+                          </Button>
+                        )
                       )}
                     </>
                   )}

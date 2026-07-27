@@ -15,6 +15,7 @@ import { useClients } from '../../hooks/useClients';
 import { useStaff } from '../../hooks/useStaff';
 import { useCreateAppointment } from '../../hooks/useAppointments';
 import styles from './CreateAppointmentPage.module.css';
+import { getUserDisplayName } from '../../utils/userUtils';
 
 const CreateAppointmentContent: React.FC = () => {
   const { t } = useTranslation('appointments');
@@ -171,7 +172,7 @@ export const CreateAppointmentPage: React.FC = () => {
     navigate('/login');
   };
 
-  const userName = user?.userId ? `User ${user.userId.substring(0, 8)}` : 'Business Owner';
+  const userName = getUserDisplayName(user, 'Business Owner');
   const roleName = user?.role === 'STAFF' ? 'Sales Representative' : 'Enterprise Tier';
 
   return (

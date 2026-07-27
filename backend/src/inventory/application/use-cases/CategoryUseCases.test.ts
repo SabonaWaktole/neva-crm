@@ -15,7 +15,7 @@ describe('Category Use Cases (Business Owner only)', () => {
       findById: jest.fn(),
       findAllByTenantId: jest.fn(),
       findAllWithItemCount: jest.fn(),
-      findLeastRecentlyUsedCategories: jest.fn(),
+      findUnusedCategories: jest.fn(),
       save: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),

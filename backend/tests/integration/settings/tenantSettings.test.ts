@@ -69,6 +69,7 @@ describe('Tenant settings', () => {
 
   afterEach(async () => {
     const ids = [tenantId, otherTenantId];
+    await prisma.notification.deleteMany({ where: { tenantId: { in: ids } } });
     await prisma.user.deleteMany({ where: { tenantId: { in: ids } } });
     await prisma.tenant.deleteMany({ where: { id: { in: ids } } });
   });

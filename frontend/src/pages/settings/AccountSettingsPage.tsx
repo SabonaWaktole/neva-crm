@@ -17,6 +17,7 @@ import { LanguagePicker } from '../../components/settings/LanguagePicker';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './AccountSettingsPage.module.css';
+import { getUserDisplayName } from '../../utils/userUtils';
 
 const mockNavItems: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
@@ -197,7 +198,7 @@ export const AccountSettingsPage = () => {
     if (saved) setForm(toFormState(saved));
   };
 
-  const userName = user?.userId ? `User ${user.userId.substring(0, 8)}` : 'Settings User';
+  const userName = getUserDisplayName(user, 'Settings User');
   const roleName =
     user?.role === 'SUPER_ADMIN'
       ? 'Super Admin'

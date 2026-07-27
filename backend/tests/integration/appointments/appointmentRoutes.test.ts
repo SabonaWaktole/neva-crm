@@ -85,6 +85,7 @@ describe('Appointment Routes (Integration)', () => {
     // Clean up our specific clients
     await prisma.client.delete({ where: { id: 'c2-t2' } }).catch(() => {});
     await prisma.client.delete({ where: { id: 'c1-t1' } }).catch(() => {});
+    await prisma.notification.deleteMany({ where: { recipient: { email: { in: ['owner@t1.com', 'staff@t1.com', 'owner@t2.com'] } } } });
     await prisma.user.deleteMany({ where: { email: { in: ['owner@t1.com', 'staff@t1.com', 'owner@t2.com'] } } });
     await prisma.$disconnect();
   });

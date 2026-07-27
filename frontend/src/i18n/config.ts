@@ -42,6 +42,7 @@ export const NAMESPACES = [
   'quotations',
   'settings',
   'dashboard',
+  'notifications',
 ] as const;
 
 export type Namespace = (typeof NAMESPACES)[number];

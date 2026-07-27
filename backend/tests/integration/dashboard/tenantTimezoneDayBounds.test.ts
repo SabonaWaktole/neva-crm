@@ -73,6 +73,7 @@ describe('Dashboard metrics use the tenant timezone for day bounds', () => {
   const cleanup = async () => {
     await prisma.appointment.deleteMany({ where: { tenantId } });
     await prisma.client.deleteMany({ where: { tenantId } });
+    await prisma.notification.deleteMany({ where: { tenantId } });
     await prisma.user.deleteMany({ where: { tenantId } });
     await prisma.tenant.deleteMany({ where: { id: tenantId } });
   };

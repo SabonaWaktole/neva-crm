@@ -436,12 +436,30 @@ export class InventoryController {
     }
   };
 
+  /**
+   * What cleanup would archive, without archiving anything. The UI reads this
+   * so the number it shows and the button's effect come from one query — they
+   * used to be computed independently, which is how a fabricated "3" ended up
+   * above a real destructive action. TD-027.
+   */
+  previewCategoryCleanup = async (req: Request, res: Response) => {
+    try {
+      const result = await this.deps.archiveUnusedCategoriesUseCase.preview({
+        tenantId: requireTenantId(req),
+        authorRole: req.user!.role as any,
+      });
+      res.json(result);
+    } catch (error: any) {
+      this.fail(res, error);
+    }
+  };
+
   cleanupCategories = async (req: Request, res: Response) => {
     try {
+      // No `limit`. The previous call passed a hard-coded 3 "matching UI mock".
       const result = await this.deps.archiveUnusedCategoriesUseCase.execute({
         tenantId: requireTenantId(req),
         authorRole: req.user!.role as any,
-        limit: 3 // Fixed limit matching UI mock
       });
       res.json(result);
     } catch (error: any) {

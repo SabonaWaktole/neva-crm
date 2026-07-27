@@ -39,7 +39,7 @@
   },
   "superAdmin": {
     "title": "Platform Overview",
-    "subtitle": "Real-time health and tenant distribution metrics.",
+    "subtitle": "Tenant distribution. Platform health metrics are not wired up yet.",
     "provisionSoon": "Tenant provisioning is coming soon",
     "platformActivity": "Platform Activity",
     "viewEventLog": "View Global Event Log",
@@ -49,7 +49,19 @@
     "realtimeTraffic": "Real-time Traffic",
     "tenantManagement": "Tenant Management",
     "tenantDetailSoon": "Tenant detail view coming soon",
-    "showingTenants": "Showing {{count}} tenants"
+    "showingTenants": "Showing {{count}} tenants",
+    "viewAllTenants": "View all tenants",
+    "newTenant": "New Tenant",
+    "activeTenants": "Active Tenants",
+    "globalMrr": "Global MRR",
+    "systemHealth": "System Health",
+    "columnOrganization": "Organization",
+    "columnDateJoined": "Date Joined",
+    "tenantActionsSoon": "More options coming soon",
+    "tenantActionsAria": "Tenant actions (coming soon)",
+    "tableCaption": "Tenant organizations",
+    "emptyTitle": "No tenants yet",
+    "emptyDescription": "Organizations that sign up will be listed here."
   },
   "reports": {
     "title": "Reports & Analytics",
@@ -70,5 +82,11 @@
     "loadingAria": "Loading reports"
   },
   "viewSchedule": "View Schedule",
-  "newAppointmentFull": "New Appointment"
+  "newAppointmentFull": "New Appointment",
+  "comingPhase5": "Coming in Phase 5",
+  "kpiNewClients": "New clients",
+  "kpiAssignedClients": "My assigned clients",
+  "kpiOpenFollowUps": "Open follow-ups",
+  "kpiVsLastWeek": "vs last week",
+  "loadingAppointments": "Loading appointments..."
 }

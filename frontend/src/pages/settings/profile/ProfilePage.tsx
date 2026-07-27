@@ -17,6 +17,7 @@ import { LanguagePicker } from '../../../components/settings/LanguagePicker';
 import type { Language } from '../../../i18n/config';
 import { ChevronRight } from 'lucide-react';
 import styles from './ProfilePage.module.css';
+import { getUserDisplayName } from '../../../utils/userUtils';
 
 export const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
@@ -62,7 +63,7 @@ export const ProfilePage: React.FC = () => {
     navigate(`/${tenantSlug || ''}/${id === 'dashboard' ? '' : id}`);
   };
 
-  const userName = user?.userId ? `User ${user.userId.substring(0, 8)}` : 'Settings User';
+  const userName = getUserDisplayName(user, 'Settings User');
   const roleName = user?.role === 'SUPER_ADMIN' ? 'Super Admin' : user?.role === 'BUSINESS_OWNER' ? 'Business Owner' : 'Staff';
 
   const handleSubmit = async (e: React.FormEvent) => {

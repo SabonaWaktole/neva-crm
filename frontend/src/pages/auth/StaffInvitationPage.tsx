@@ -71,7 +71,7 @@ export const StaffInvitationPage = () => {
             label={t('acceptInvitation.createPassword')}
             placeholder="••••••••"
             id="new-password"
-            helperText={t('staffInvitation.helper')}
+            helperText={t('passwordHelper')}
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             required

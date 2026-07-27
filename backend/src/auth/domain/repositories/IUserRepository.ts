@@ -8,6 +8,17 @@ export interface IUserRepository {
   create(user: User): Promise<User>;
   updatePassword(userId: string, hashedPassword: string): Promise<void>;
   findByTenantId(tenantId: string): Promise<User[]>;
+  /**
+   * Active users in a tenant holding a given role.
+   *
+   * Deliberately separate from `findByTenantId`, which returns EVERY user
+   * including deactivated ones (Team Settings needs them in order to
+   * reactivate). Notification recipients must never include someone who is
+   * off-boarded: their token stays valid for up to an hour after deactivation
+   * (TD-010), so filtering on the token alone is not enough — the filter has
+   * to be on the record.
+   */
+  findActiveByTenantAndRole(tenantId: string, role: string): Promise<User[]>;
   updateProfile(userId: string, data: { firstName?: string | null; lastName?: string | null; phone?: string | null; email?: string; language?: string | null }): Promise<void>;
   updateRoleAndWarehouse(userId: string, role: string, warehouseId: string | null): Promise<void>;
   /**

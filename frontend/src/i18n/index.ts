@@ -17,6 +17,7 @@ import enInventory from '../locales/en/inventory.json';
 import enQuotations from '../locales/en/quotations.json';
 import enSettings from '../locales/en/settings.json';
 import enDashboard from '../locales/en/dashboard.json';
+import enNotifications from '../locales/en/notifications.json';
 
 import sqCommon from '../locales/sq/common.json';
 import sqAuth from '../locales/sq/auth.json';
@@ -26,6 +27,7 @@ import sqInventory from '../locales/sq/inventory.json';
 import sqQuotations from '../locales/sq/quotations.json';
 import sqSettings from '../locales/sq/settings.json';
 import sqDashboard from '../locales/sq/dashboard.json';
+import sqNotifications from '../locales/sq/notifications.json';
 
 /**
  * Catalogues are imported statically rather than fetched at runtime.
@@ -46,6 +48,7 @@ export const resources = {
     quotations: enQuotations,
     settings: enSettings,
     dashboard: enDashboard,
+    notifications: enNotifications,
   },
   sq: {
     common: sqCommon,
@@ -56,6 +59,7 @@ export const resources = {
     quotations: sqQuotations,
     settings: sqSettings,
     dashboard: sqDashboard,
+    notifications: sqNotifications,
   },
 } as const;
 

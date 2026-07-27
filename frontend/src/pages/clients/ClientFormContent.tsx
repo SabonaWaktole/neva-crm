@@ -61,6 +61,7 @@ export const ClientFormContent: React.FC = () => {
     control,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm<ClientFormValues>({
     defaultValues: {
@@ -80,6 +81,18 @@ export const ClientFormContent: React.FC = () => {
       fetchClient();
     }
   }, [fetchSettings, fetchStaff, isEdit, fetchClient]);
+
+  /**
+   * Deactivated members are hidden — assigning new work to someone who can no
+   * longer sign in is never the intent — but a client *already* assigned to a
+   * deactivated member keeps them as a visible option. Without that exception,
+   * opening and saving such a client would silently reassign it, because the
+   * select would have no matching option for the stored value.
+   */
+  const assignedUserId = watch('assignedUserId');
+  const assignableStaff = staff.filter(
+    (member) => member.isActive !== false || member.id === assignedUserId
+  );
 
   // Populate form when editing
   useEffect(() => {
@@ -197,7 +210,7 @@ export const ClientFormContent: React.FC = () => {
             */}
             <SelectInput label={t('form.assignedTo')} {...register('assignedUserId')}>
               <option value="">{t('form.unassigned')}</option>
-              {staff.map((member) => (
+              {assignableStaff.map((member) => (
                 <option key={member.id} value={member.id}>
                   {getStaffDisplayName(member)}
                 </option>

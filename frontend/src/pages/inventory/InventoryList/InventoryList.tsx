@@ -41,6 +41,7 @@ import { useLogout } from '../../../hooks/useLogout';
 import { useNavigation } from '../../../hooks/useNavigation';
 import { useStatusLabel } from '../../../hooks/useStatusLabel';
 import type { BulkProductAction, Product, ProductStatus } from '../../../types/inventory';
+import { getUserDisplayName } from '../../../utils/userUtils';
 
 const STATUS_OPTIONS: ProductStatus[] = ['IN_STOCK', 'LOW_STOCK', 'OUT_OF_STOCK', 'ARCHIVED'];
 
@@ -511,7 +512,7 @@ export const InventoryList: React.FC = () => {
     navigate('/login');
   };
 
-  const userName = user?.userId ? `User ${user.userId.substring(0, 8)}` : 'Business Owner';
+  const userName = getUserDisplayName(user, 'Business Owner');
   const roleName = user?.role === 'STAFF' ? 'Sales Representative' : 'Enterprise Tier';
 
   return (

@@ -101,7 +101,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           icon={<Plus size={18} />}
           onClick={onNewEntryClick}
         >
-          New Entry
+          {t('actions.newEntry')}
         </Button>
       </div>
 

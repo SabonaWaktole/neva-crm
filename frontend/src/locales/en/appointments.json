@@ -33,7 +33,6 @@
     "searchClient": "Search Client",
     "searchClientPlaceholder": "Start typing client name...",
     "clientRequired": "Select a client for this appointment",
-    "appointmentType": "Appointment Type",
     "scheduleAndStaff": "Schedule & Staff",
     "date": "Date",
     "dateRequired": "Choose a date",
@@ -43,9 +42,12 @@
     "myself": "Myself",
     "purpose": "Purpose of Appointment",
     "purposePlaceholder": "Briefly describe the objective of this meeting...",
-    "highPriority": "High Priority",
-    "highPriorityDesc": "Flags this in the global calendar",
-    "backToCalendar": "Back to Calendar"
+    "backToCalendar": "Back to Calendar",
+    "clientIdentity": "Client Identity",
+    "unknownClient": "Unknown Client",
+    "cancel": "Cancel",
+    "confirming": "Confirming...",
+    "confirmAppointment": "Confirm Appointment"
   },
   "detail": {
     "title": "Appointment Detail",

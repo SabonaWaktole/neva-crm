@@ -8,12 +8,15 @@ import { QuotationLineItem } from '../../domain/QuotationLineItem';
 import { StockLevel } from '../../../inventory/domain/StockLevel';
 import { StockMovementType } from '../../../inventory/domain/StockMovement';
 import { UserRole } from '../../../auth/domain/enums/UserRole';
+import { makeQuotationWriteHarness } from '../../../../tests/support/fakeQuotationWriteTransaction';
 
 describe('MarkQuotationAcceptedUseCase', () => {
   let useCase: MarkQuotationAcceptedUseCase;
   let quotationRepo: jest.Mocked<IQuotationRepository>;
   let lineItemRepo: jest.Mocked<IQuotationLineItemRepository>;
   let historyRepo: jest.Mocked<IQuotationStatusHistoryRepository>;
+  let writeTx: ReturnType<typeof makeQuotationWriteHarness>['writeTx'];
+  let userRepo: ReturnType<typeof makeQuotationWriteHarness>['userRepo'];
   let stockLevelRepo: jest.Mocked<IStockLevelRepository>;
   let stockMovementRepo: jest.Mocked<IStockMovementRepository>;
   let transactionManager: jest.Mocked<IStockTransactionManager>;
@@ -21,9 +24,12 @@ describe('MarkQuotationAcceptedUseCase', () => {
   let transactionStockMovementRepo: jest.Mocked<IStockMovementRepository>;
 
   beforeEach(() => {
-    quotationRepo = { findById: jest.fn(), findPendingApprovals: jest.fn(), search: jest.fn(), save: jest.fn() };
+    const harness = makeQuotationWriteHarness();
+    quotationRepo = harness.quotationRepo;
+    historyRepo = harness.historyRepo;
+    writeTx = harness.writeTx;
+    userRepo = harness.userRepo;
     lineItemRepo = { findByQuotationId: jest.fn(), save: jest.fn(), saveMany: jest.fn(), deleteManyByQuotationId: jest.fn() };
-    historyRepo = { findByQuotationId: jest.fn(), save: jest.fn() };
     
     stockLevelRepo = { findById: jest.fn(), findByProductAndWarehouse: jest.fn(), findByProductId: jest.fn(), save: jest.fn(), countByWarehouseId: jest.fn() };
     stockMovementRepo = { save: jest.fn() };
@@ -40,9 +46,7 @@ describe('MarkQuotationAcceptedUseCase', () => {
       }),
     };
 
-    useCase = new MarkQuotationAcceptedUseCase(
-      quotationRepo, lineItemRepo, historyRepo, stockLevelRepo, transactionManager
-    );
+    useCase = new MarkQuotationAcceptedUseCase(quotationRepo, lineItemRepo, historyRepo, stockLevelRepo, transactionManager, writeTx, userRepo);
   });
 
   function makeQuotation(status: QuotationStatus, createdByUserId: string): Quotation {

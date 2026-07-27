@@ -95,17 +95,40 @@ export const useDeleteCategory = () => {
   return { deleteCategory, isPending, error };
 };
 
+export interface CleanupCandidate {
+  id: string;
+  name: string;
+}
+
 export const useArchiveCategories = () => {
   const { tenantSlug } = useParams();
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [candidates, setCandidates] = useState<CleanupCandidate[]>([]);
+
+  /**
+   * Asks the server what cleanup would archive. The UI shows this count, so the
+   * number on screen and the effect of the button are the same query. TD-027.
+   */
+  const fetchCleanupCandidates = useCallback(async () => {
+    if (!tenantSlug) return;
+    try {
+      const result = await inventoryService.previewCategoryCleanup(tenantSlug);
+      setCandidates(result.categories);
+    } catch {
+      // A failed preview must not imply "nothing to clean up" — it leaves the
+      // previous list alone and the button reflects whatever was last known.
+    }
+  }, [tenantSlug]);
 
   const cleanupCategories = async () => {
     if (!tenantSlug) throw new Error('Missing tenant context');
     setIsPending(true);
     setError(null);
     try {
-      return await inventoryService.cleanupCategories(tenantSlug);
+      const result = await inventoryService.cleanupCategories(tenantSlug);
+      setCandidates([]);
+      return result;
     } catch (err: any) {
       const msg = err.response?.data?.error || 'Failed to cleanup categories';
       setError(msg);
@@ -115,5 +138,5 @@ export const useArchiveCategories = () => {
     }
   };
 
-  return { cleanupCategories, isPending, error };
+  return { cleanupCategories, fetchCleanupCandidates, candidates, isPending, error };
 };

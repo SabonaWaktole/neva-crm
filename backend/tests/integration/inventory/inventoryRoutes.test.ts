@@ -36,6 +36,7 @@ describe('Inventory Routes Integration - GetWarehouses & GetCategories', () => {
     await prisma.product.deleteMany();
     await prisma.warehouse.deleteMany();
     await prisma.category.deleteMany();
+    await prisma.notification.deleteMany();
     await prisma.user.deleteMany();
     // Integrations hold a RESTRICT reference to Tenant; without clearing them
     // first the tenant delete aborts and every test in this file fails setup.

@@ -8,10 +8,10 @@ generator client {
 }
 
 model Tenant {
-  id                        String   @id
+  id                        String  @id
   name                      String
-  urlSlug                   String   @unique
-  requiresQuotationApproval Boolean  @default(true)
+  urlSlug                   String  @unique
+  requiresQuotationApproval Boolean @default(true)
   // Workspace branding, surfaced in the sidebar, settings and customer-facing pages.
   logoUrl                   String?
   coverImageUrl             String?
@@ -40,7 +40,7 @@ model Tenant {
   // whose recipients have no account yet.
   defaultLanguage String @default("en")
 
-  createdAt                 DateTime @default(now())
+  createdAt DateTime @default(now())
 
   users                  User[]
   invitations            Invitation[]
@@ -60,6 +60,8 @@ model Tenant {
 
   // Quotations
   quotations Quotation[]
+
+  notifications Notification[]
 
   // Integrations
   integrations Integration[]
@@ -99,20 +101,27 @@ model User {
   inventoryMovements   StockMovement[]
   quotations           Quotation[]
   statusChanges        QuotationStatusHistory[]
+  notifications        Notification[]           @relation("NotificationRecipient")
+  causedNotifications  Notification[]           @relation("NotificationActor")
+  sentInvitations      Invitation[]             @relation("InvitationSender")
 }
 
 model Invitation {
-  id         String    @id
-  tenantId   String
-  email      String
-  role       String
-  token      String    @unique
-  expiresAt  DateTime
-  acceptedAt DateTime?
-  warehouseId String?
+  id              String    @id
+  tenantId        String
+  email           String
+  role            String
+  token           String    @unique
+  expiresAt       DateTime
+  acceptedAt      DateTime?
+  warehouseId     String?
+  // Who sent it. Nullable because invitations predating this column exist and
+  // cannot be attributed retroactively; new ones always carry a sender.
+  invitedByUserId String?
 
   tenant    Tenant     @relation(fields: [tenantId], references: [id])
   warehouse Warehouse? @relation("InvitationWarehouse", fields: [warehouseId], references: [id])
+  invitedBy User?      @relation("InvitationSender", fields: [invitedByUserId], references: [id])
 }
 
 model PasswordResetToken {
@@ -429,8 +438,8 @@ model QuotationStatusHistory {
 model Integration {
   id        String   @id
   tenantId  String
-  provider  String   // e.g., 'GOOGLE_CALENDAR'
-  status    String   // 'CONNECTED', 'DISCONNECTED'
+  provider  String // e.g., 'GOOGLE_CALENDAR'
+  status    String // 'CONNECTED', 'DISCONNECTED'
   config    Json?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -438,4 +447,45 @@ model Integration {
   tenant Tenant @relation(fields: [tenantId], references: [id])
 
   @@unique([tenantId, provider])
+}
+
+/// In-app notification, one row per recipient.
+///
+/// `type` is an i18n KEY and `params` its interpolation values — never a
+/// rendered sentence. Notifications are read days after they are written and
+/// outlive any single session, so a stored English string would be permanently
+/// wrong for an Albanian reader (the problem TD-016 describes for error
+/// messages, but far more visible and durable here).
+///
+/// Within `params`, entity labels are SNAPSHOTS (the client name as it was when
+/// the event happened, which is what the notification is describing) while
+/// people are referenced BY ID and resolved at render time (a colleague's name
+/// should read as it is now).
+model Notification {
+  id              String @id @default(uuid())
+  tenantId        String
+  recipientUserId String
+
+  type   String
+  params Json
+
+  /// Null for system-originated events, e.g. expiry.
+  actorUserId String?
+
+  /// Deep-link target: QUOTATION | APPOINTMENT | CLIENT.
+  entityType String?
+  entityId   String?
+
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  tenant    Tenant @relation(fields: [tenantId], references: [id])
+  recipient User   @relation("NotificationRecipient", fields: [recipientUserId], references: [id])
+  actor     User?  @relation("NotificationActor", fields: [actorUserId], references: [id])
+
+  /// Serves both the unread badge and the list, which are always scoped to one
+  /// recipient within one tenant and ordered newest-first.
+  @@index([tenantId, recipientUserId, readAt, createdAt])
+  /// Retention pruning scans by age.
+  @@index([tenantId, createdAt])
 }

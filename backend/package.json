@@ -13,7 +13,8 @@
     "test:coverage": "jest --coverage --forceExit --detectOpenHandles",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:migrate:test": "dotenv -e .env.test -- prisma migrate deploy"
+    "prisma:migrate:test": "dotenv -e .env.test -- prisma migrate deploy",
+    "typecheck": "tsc -p tsconfig.test.json"
   },
   "dependencies": {
     "@emailjs/nodejs": "^5.0.2",

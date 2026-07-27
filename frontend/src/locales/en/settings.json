@@ -112,11 +112,10 @@
   "team": {
     "title": "Team Members",
     "subtitle": "Manage your team, their roles, and pending invitations.",
-    "activeMembers": "Active Members",
     "pendingInvitations": "Pending Invitations",
     "loadingMembers": "Loading members...",
     "loadingInvitations": "Loading invitations...",
-    "noMembers": "No active staff members found.",
+    "noMembers": "No team members yet.",
     "noInvitations": "No pending invitations.",
     "inviteMember": "Invite Member",
     "cancelInvitation": "Cancel Invitation",
@@ -162,7 +161,11 @@
       "and": " and ",
       "residualAccess": "If they are signed in right now, their session ends the next time the app reloads, and within an hour at the latest."
     },
-    "breadcrumb": "Team Settings"
+    "breadcrumb": "Team Settings",
+    "members": "All Members",
+    "deactivatedBadge": "Deactivated",
+    "reactivateAria": "Reactivate {{email}}",
+    "confirmReactivate": "Restore access for {{name}}? They will be able to sign in again."
   },
   "integrations": {
     "breadcrumb": "Integrations",

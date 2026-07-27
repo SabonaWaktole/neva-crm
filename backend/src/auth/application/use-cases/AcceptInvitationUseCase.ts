@@ -7,13 +7,15 @@ import { Password } from '../../domain/value-objects/Password';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ITenantRepository } from '../../../tenant/domain/repositories/ITenantRepository';
+import { NotificationService } from '../../../notifications/application/NotificationService';
 
 export class AcceptInvitationUseCase {
   constructor(
     private invitationRepository: IInvitationRepository,
     private userRepository: IUserRepository,
     private passwordHasher: IPasswordHasher,
-    private tenantRepository: ITenantRepository
+    private tenantRepository: ITenantRepository,
+    private notifications?: NotificationService
   ) {}
 
   async execute(input: any) {
@@ -40,6 +42,27 @@ export class AcceptInvitationUseCase {
     await this.invitationRepository.markAccepted(invitation.id, new Date());
 
     const tenant = await this.tenantRepository.findById(invitation.tenantId);
+
+    /*
+     * Tells the person who sent the invitation that it landed.
+     *
+     * `invitedByUserId` is nullable — invitations created before the column
+     * existed cannot be attributed — so this is conditional rather than
+     * assumed. It is NOT redirected to all Business Owners in that case:
+     * guessing a recipient would make an unattributable event look attributed.
+     *
+     * The actor is the new user, who has just been created and is active, and
+     * is never the recipient, so no self-notification is possible here.
+     */
+    if (invitation.invitedByUserId) {
+      await this.notifications?.emitSafe({
+        tenantId: invitation.tenantId,
+        recipientUserIds: [invitation.invitedByUserId],
+        type: 'INVITATION_ACCEPTED',
+        params: { email: user.email },
+        actorUserId: user.id,
+      });
+    }
 
     return { user, tenantSlug: tenant?.urlSlug };
   }

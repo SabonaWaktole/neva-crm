@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { useCreateAppointment } from '../../../hooks/useAppointments';
+import { useTeam } from '../../../hooks/useTeam';
+import { getStaffDisplayName } from '../../../utils/userUtils';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { 
   Search, 
@@ -9,8 +11,7 @@ import {
   Calendar, 
   Clock, 
   Building2, 
-  Lock, 
-  AlertCircle, 
+  Lock,
   CalendarCheck,
   UserSearch
 } from 'lucide-react';
@@ -34,8 +35,6 @@ interface AppointmentFormValues {
   date: string;
   time: string;
   notes: string;
-  /* NON-FUNCTIONAL: see the note on the High Priority toggle below. */
-  isHighPriority: boolean;
 }
 
 export const AppointmentForm: React.FC<AppointmentFormProps> = ({
@@ -46,9 +45,23 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
 }) => {
   const { t } = useTranslation('appointments');
   const { createAppointment, isLoading, error } = useCreateAppointment();
+  const { staff, fetchStaff } = useTeam();
   const { user } = useAuthStore();
 
   const isLockedContext = !!lockedClientId;
+
+  /**
+   * Assignable colleagues: everyone except the current user, who already has a
+   * dedicated "Myself" option, and except deactivated members.
+   *
+   * `/auth/staff` returns deactivated members too (they carry `isActive: false`
+   * so Team Settings can still manage them), so the filter has to happen here.
+   * Assigning new work to someone who can no longer sign in would guarantee the
+   * appointment is never actioned.
+   */
+  const assignableStaff = staff.filter(
+    (member) => member.id !== user?.userId && member.isActive !== false
+  );
 
   const {
     register,
@@ -63,9 +76,12 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
       date: '',
       time: '',
       notes: '',
-      isHighPriority: false,
     },
   });
+
+  useEffect(() => {
+    fetchStaff();
+  }, [fetchStaff]);
 
   useEffect(() => {
     if (user?.userId) {
@@ -108,10 +124,10 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
 
         {isLockedContext ? (
           <div className={styles.formGroup}>
-            <label className={styles.lockedLabel}>Client Identity</label>
+            <label className={styles.lockedLabel}>{t('form.clientIdentity')}</label>
             <div className={styles.lockedClientField}>
               <Building2 size={20} className={styles.headerIcon} />
-              <span className={styles.lockedClientName}>{lockedClientName || 'Unknown Client'}</span>
+              <span className={styles.lockedClientName}>{lockedClientName || t('form.unknownClient')}</span>
               <Lock size={18} className={styles.lockIcon} />
             </div>
           </div>
@@ -128,14 +144,14 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
           </div>
         )}
 
-        <div className={styles.formGroup}>
-          <SelectInput label={t('form.appointmentType')}>
-            <option value="initial">Initial Consultation</option>
-            <option value="review">Quarterly Review</option>
-            <option value="support">Technical Integration Support</option>
-            <option value="strategy">Strategic Planning Session</option>
-          </SelectInput>
-        </div>
+        {/*
+          REMOVED: an "Appointment Type" select offering four options. It was
+          bound to nothing — no register(), no value, no onChange — and the
+          Appointment entity has no `type` field to hold a choice, so whatever
+          the user picked was discarded on submit. Removed rather than labelled
+          "coming soon", because there is no pending work to wire it to. If
+          appointment types are wanted, they start with a domain field. TD-020.
+        */}
       </Card>
 
       {/* SECTION 2: Schedule & Staff */}
@@ -171,11 +187,19 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
         </div>
 
         <div className={styles.formGroup}>
+          {/*
+            These options were three invented people with ids "1", "2" and "3".
+            `assignedUserId` is a non-nullable foreign key to User, so choosing
+            any of them made Postgres reject the insert — only "Myself" ever
+            worked. They are now the tenant's real staff. See TD-022.
+          */}
           <SelectInput label={t('form.assignedStaff')} {...register('assignedUserId')}>
             {user && <option value={user.userId}>{t('form.myself')}</option>}
-            <option value="1">Marcus Thorne (Lead Architect)</option>
-            <option value="2">Elena Vance (Senior Consultant)</option>
-            <option value="3">Riley Matthews (Account Manager)</option>
+            {assignableStaff.map((member) => (
+              <option key={member.id} value={member.id}>
+                {getStaffDisplayName(member)}
+              </option>
+            ))}
           </SelectInput>
         </div>
 
@@ -188,31 +212,14 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
           />
         </div>
 
-        {/* NON-FUNCTIONAL / DECORATIVE: This "High Priority" toggle is a visual element
-            from the Stitch HTML design. There is NO corresponding `priority` field on the
-            backend Appointment entity (approved fields: id, tenantId, clientId, assignedUserId,
-            scheduledAt, status, notes). This toggle state is local-only and is NOT submitted
-            or persisted. Do NOT wire this to any API call in Step 4 without first adding a
-            priority field to the domain model and running it through the full TDD cycle. */}
-        <div className={styles.priorityToggleContainer}>
-          <div className={styles.priorityToggleInfo}>
-            <AlertCircle size={24} className={styles.priorityIcon} />
-            <div>
-              <div className={styles.priorityTitle}>{t('form.highPriority')}</div>
-              <div className={styles.priorityDesc}>{t('form.highPriorityDesc')}</div>
-            </div>
-          </div>
-          
-          <label className={styles.toggleSwitch}>
-            <span className={styles.visuallyHidden}>{t('form.highPriority')}</span>
-            <input
-              type="checkbox"
-              className={styles.toggleInput}
-              {...register('isHighPriority')}
-            />
-            <div className={styles.toggleTrack}></div>
-          </label>
-        </div>
+        {/*
+          REMOVED: a "High Priority" toggle. Its own comment already recorded
+          that the Appointment entity has no `priority` field and that the value
+          was never submitted or persisted — so it was a switch the user could
+          flip that changed nothing, and the disclosure lived in the source
+          where no user reads it. Removed for the same reason as the type
+          select above: wiring it up starts with a domain field. TD-020.
+        */}
       </Card>
 
       {/* FOOTER ACTIONS */}
@@ -220,7 +227,7 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
         {error && <div className={styles.errorText}>{error}</div>}
         {onCancel && (
           <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
-            Cancel
+            {t('form.cancel')}
           </Button>
         )}
         <Button 
@@ -230,7 +237,7 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
           fullWidth={isLockedContext}
           disabled={isLoading}
         >
-          {isLoading ? 'Confirming...' : 'Confirm Appointment'}
+          {isLoading ? t('form.confirming') : t('form.confirmAppointment')}
         </Button>
       </div>
 

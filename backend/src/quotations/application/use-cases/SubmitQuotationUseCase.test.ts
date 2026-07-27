@@ -4,17 +4,23 @@ import { IQuotationStatusHistoryRepository } from '../../domain/IQuotationStatus
 import { Quotation, QuotationStatus } from '../../domain/Quotation';
 import { QuotationLineItem } from '../../domain/QuotationLineItem';
 import { UserRole } from '../../../auth/domain/enums/UserRole';
+import { makeQuotationWriteHarness } from '../../../../tests/support/fakeQuotationWriteTransaction';
 
 describe('SubmitQuotationUseCase', () => {
   let useCase: SubmitQuotationUseCase;
   let quotationRepo: jest.Mocked<IQuotationRepository>;
   let historyRepo: jest.Mocked<IQuotationStatusHistoryRepository>;
+  let writeTx: ReturnType<typeof makeQuotationWriteHarness>['writeTx'];
+  let userRepo: ReturnType<typeof makeQuotationWriteHarness>['userRepo'];
 
   beforeEach(() => {
-    quotationRepo = { findById: jest.fn(), findPendingApprovals: jest.fn(), search: jest.fn(), save: jest.fn() };
-    historyRepo = { findByQuotationId: jest.fn(), save: jest.fn() };
+    const harness = makeQuotationWriteHarness();
+    quotationRepo = harness.quotationRepo;
+    historyRepo = harness.historyRepo;
+    writeTx = harness.writeTx;
+    userRepo = harness.userRepo;
 
-    useCase = new SubmitQuotationUseCase(quotationRepo, historyRepo);
+    useCase = new SubmitQuotationUseCase(writeTx, userRepo);
   });
 
   function makeQuotation(status: QuotationStatus, createdByUserId: string): Quotation {

@@ -7,6 +7,14 @@ import { useNavigation } from './useNavigation';
  * they drift the symptom is a visible link that dead-ends on /unauthorized.
  */
 describe('useNavigation', () => {
+  /*
+   * `useNavigation` is a pure function of its arguments — it calls no React
+   * hooks — so invoking it directly is correct and no renderer is needed.
+   * The linter cannot see that and flags the anonymous arrow as a component
+   * calling a hook. Disabled here rather than downgrading the rule, which is
+   * genuinely useful everywhere else. See TD-018.
+   */
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const idsFor = (user: any) => useNavigation(user, '/acme/dashboard').map((i) => i.id);
 
   const OWNER = { role: 'BUSINESS_OWNER' };

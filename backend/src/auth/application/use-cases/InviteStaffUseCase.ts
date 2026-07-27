@@ -29,6 +29,11 @@ export class InviteStaffUseCase {
       expiresAt,
       acceptedAt: null,
       warehouseId: input.warehouseId || null,
+      // The controller has always passed invitingUserId; until the column
+      // existed there was nowhere to put it, so the system had no record of
+      // who invited whom. Without it, "your invitation was accepted" has
+      // no-one to notify.
+      invitedByUserId: input.invitingUserId || null,
     });
 
     await this.invitationRepository.create(invitation);

@@ -24,6 +24,7 @@ import { ProductForm } from '../pages/inventory/ProductForm/ProductForm';
 import { WarehouseList } from '../pages/inventory/WarehouseList/WarehouseList';
 import { CategoryList } from '../pages/inventory/CategoryList/CategoryList';
 import { QuotationList } from '../pages/quotations/QuotationList';
+import { NotificationsPage } from '../pages/notifications/NotificationsPage';
 import { QuotationDetail } from '../pages/quotations/QuotationDetail';
 import { CreateQuotation } from '../pages/quotations/CreateQuotation';
 import { EditQuotation } from '../pages/quotations/EditQuotation';
@@ -246,6 +247,16 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <CategoryList />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        // No role gate: every role has notifications, and each row is scoped
+        // to its recipient server-side.
+        path: 'notifications',
+        element: (
+          <ProtectedRoute>
+            <NotificationsPage />
           </ProtectedRoute>
         ),
       },
