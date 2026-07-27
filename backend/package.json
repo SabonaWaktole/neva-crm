@@ -4,7 +4,7 @@
   "description": "Multi-tenant CRM SaaS backend",
   "main": "dist/main/server.js",
   "scripts": {
-    "build": "tsc && tsc-alias",
+    "build": "prisma generate && tsc && tsc-alias",
     "start": "node dist/main/server.js",
     "dev": "ts-node -r tsconfig-paths/register src/main/server.ts",
     "test": "jest --forceExit --detectOpenHandles",
