@@ -9,6 +9,7 @@ import { Sidebar } from '../components/layout/Sidebar/Sidebar';
 import { SettingsLayout } from '../components/layout/SettingsLayout/SettingsLayout';
 import { useTranslation } from 'react-i18next';
 import { useDateFormat } from '../hooks/useDateFormat';
+import { getUserDisplayName } from '../utils/userUtils';
 
 const AVAILABLE_INTEGRATIONS = [
   {
@@ -40,7 +41,7 @@ export const IntegrationsPage: React.FC = () => {
   const navItems = useNavigation(user, location.pathname);
 
   const isBusinessOwner = user?.role === 'BUSINESS_OWNER';
-  const userName = user?.userId ? `User ${user.userId.substring(0, 8)}` : 'Settings User';
+  const userName = getUserDisplayName(user, 'Settings User');
   const roleName = user?.role === 'SUPER_ADMIN' ? 'Super Admin' : user?.role === 'BUSINESS_OWNER' ? 'Business Owner' : 'Staff';
 
   const handleLogout = async () => {

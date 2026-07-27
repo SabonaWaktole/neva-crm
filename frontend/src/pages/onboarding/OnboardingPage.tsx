@@ -133,7 +133,7 @@ export const OnboardingPage = () => {
                 <PasswordInput
                   label={t('onboarding.passwordLabel')}
                   placeholder={t('passwordPlaceholder')}
-                  helperText={t('onboarding.passwordHelper')}
+                  helperText={t('passwordHelper')}
                   value={ownerPassword}
                   onChange={(e) => setOwnerPassword(e.target.value)}
                   required

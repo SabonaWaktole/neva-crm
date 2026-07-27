@@ -1,0 +1,20 @@
+{
+  // Typechecks the test suite, which the main tsconfig deliberately excludes.
+  //
+  // That exclusion is why hand-written test doubles have drifted from their
+  // interfaces three separate times without `npm run build` noticing: the only
+  // thing that ever compiled `tests/**` was ts-jest, at run time, so a broken
+  // double surfaced as a suite that had silently stopped running rather than as
+  // a build failure. Each time, the affected suites included tenant-isolation
+  // middleware tests.
+  //
+  // `noEmit` because this config exists purely to typecheck — `npm run build`
+  // still uses tsconfig.json and still ships only `src`. See TD-002.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": "."
+  },
+  "include": ["src/**/*", "tests/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

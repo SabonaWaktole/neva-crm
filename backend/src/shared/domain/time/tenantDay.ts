@@ -14,7 +14,14 @@
  *   frontend/src/utils/tenantDay.test.ts
  *
  * If you change the logic here, change it there, and both suites will tell you
- * if you did not.
+ * if you did not. That is not a hope: the fixture table was verified to catch a
+ * deliberately drifted copy — replacing the day-end calculation with a naive
+ * `start + 24h` fails exactly the two DST rows, on the drifted side only.
+ *
+ * THREE functions are now mirrored: dayKeyInZone, isSameDayInZone and
+ * dayBoundsInZone (plus the private zoneOffsetMs). Each addition raises the
+ * cost of the duplication — see TD-026 for the conditions under which this
+ * should become a shared package instead.
  * ---------------------------------------------------------------------------
  *
  * Why this exists at all: before it, three different notions of "day" were in

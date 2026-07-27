@@ -12,6 +12,7 @@ import { UpdateUserProfileUseCase } from '@auth/application/use-cases/UpdateUser
 import { GetUserProfileUseCase } from '@auth/application/use-cases/GetUserProfileUseCase';
 import { UpdateUserRoleUseCase } from '@auth/application/use-cases/UpdateUserRoleUseCase';
 import { CancelInvitationUseCase } from '@auth/application/use-cases/CancelInvitationUseCase';
+import { ReactivateUserUseCase } from '../../../application/use-cases/ReactivateUserUseCase';
 import { DeactivateUserUseCase } from '@auth/application/use-cases/DeactivateUserUseCase';
 import { GetDeactivationImpactUseCase } from '@auth/application/use-cases/GetDeactivationImpactUseCase';
 import { ITenantRepository } from '@tenant/domain/repositories/ITenantRepository';
@@ -32,7 +33,8 @@ export class AuthController {
     private updateUserRoleUseCase: UpdateUserRoleUseCase,
     private cancelInvitationUseCase?: CancelInvitationUseCase,
     private deactivateUserUseCase?: DeactivateUserUseCase,
-    private getDeactivationImpactUseCase?: GetDeactivationImpactUseCase
+    private getDeactivationImpactUseCase?: GetDeactivationImpactUseCase,
+    private reactivateUserUseCase?: ReactivateUserUseCase
   ) {}
 
   register = async (req: Request, res: Response) => {
@@ -228,6 +230,20 @@ export class AuthController {
         userIdToDeactivate: req.params.id as string,
       });
       res.status(200).json({ message: 'Team member deactivated' });
+    } catch (error: any) {
+      if (error.message.includes('Unauthorized')) return res.status(403).json({ error: error.message });
+      res.status(400).json({ error: error.message });
+    }
+  };
+
+  reactivateStaff = async (req: Request, res: Response) => {
+    try {
+      await this.reactivateUserUseCase!.execute({
+        requestingUserRole: req.user!.role,
+        tenantId: requireTenantId(req),
+        userIdToReactivate: req.params.id as string,
+      });
+      res.status(200).json({ message: 'Team member reactivated' });
     } catch (error: any) {
       if (error.message.includes('Unauthorized')) return res.status(403).json({ error: error.message });
       res.status(400).json({ error: error.message });

@@ -1,8 +1,43 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
+  "plugins": [
+    "react",
+    "typescript",
+    "oxc"
+  ],
   "rules": {
     "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
+    "react-hooks/exhaustive-deps": "error",
+    "react/only-export-components": [
+      "warn",
+      {
+        "allowConstantExport": true
+      }
+    ],
+    "react/jsx-no-literals": [
+      "error",
+      {
+        "allowedStrings": [
+          "/",
+          "\u2014",
+          "-",
+          "\u00b7",
+          ">",
+          "neva.crm/",
+          "@",
+          "+",
+          "%"
+        ],
+        "ignoreProps": true
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["**/*.stories.tsx", "**/*.stories.ts"],
+      "rules": {
+        "react/jsx-no-literals": "off"
+      }
+    }
+  ]
 }

@@ -8,6 +8,7 @@ import { useAuthStore } from '../../../store/useAuthStore';
 import { useLogout } from '../../../hooks/useLogout';
 import { useNavigation } from '../../../hooks/useNavigation';
 import { TeamSettingsContent } from './TeamSettingsContent';
+import { getUserDisplayName } from '../../../utils/userUtils';
 
 export const TeamSettingsPage = () => {
   const { t } = useTranslation('settings');
@@ -23,7 +24,7 @@ export const TeamSettingsPage = () => {
     navigate('/login');
   };
 
-  const userName = user?.userId ? `User ${user.userId.substring(0, 8)}` : 'Settings User';
+  const userName = getUserDisplayName(user, 'Settings User');
   const roleName = user?.role === 'SUPER_ADMIN' ? 'Super Admin' : user?.role === 'BUSINESS_OWNER' ? 'Business Owner' : 'Staff';
 
   const handleNavClick = (id: string) => {

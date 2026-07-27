@@ -17,6 +17,13 @@ import { TenantManagementTable } from '../../components/widgets/TenantManagement
 import { TimelineItem } from '../../components/ui/TimelineItem';
 import { useTenants } from '../../hooks/useDashboard';
 
+/**
+ * The value shown where a metric is not implemented yet. Matches what the KPI
+ * cards on this page already display, so "not measured" looks the same
+ * everywhere on the console rather than varying by panel. TD-013.
+ */
+const PLACEHOLDER_VALUE = '---';
+
 // Completely fake placeholder data for the activity log
 const mockGlobalEvents = [
   {
@@ -75,38 +82,42 @@ export const SuperAdminDashboard = () => {
           <p className={styles.subtitle}>{t('superAdmin.subtitle')}</p>
         </div>
         <Button icon={<Plus size={20} />} disabled title={t('superAdmin.provisionSoon')}>
-          New Tenant
+          {t('superAdmin.newTenant')}
         </Button>
       </header>
 
       {/* KPI Bento Grid */}
       <section className={styles.kpiGrid}>
-        <KPICard 
-          title="Active Tenants"
+        {/*
+          The tenant count is real. Its trend was not: "+12% vs last month" and
+          the 72% progress bar were hard-coded, so a genuine figure was wearing
+          invented movement — the most credible kind of fabrication on the page,
+          because the number beside it is true. No month-over-month tenant
+          series is computed anywhere, so the trend props are gone rather than
+          replaced. TD-013.
+        */}
+        <KPICard
+          title={t('superAdmin.activeTenants')}
           value={isLoadingTenants ? '...' : total}
           icon={<Users size={24} />}
-          trendValue="+12%"
-          trendLabel="vs last month"
-          trendDirection="up"
-          progress={72}
         />
-        <KPICard 
-          title="Global MRR"
-          value="---"
+        <KPICard
+          title={t('superAdmin.globalMrr')}
+          value={PLACEHOLDER_VALUE}
           icon={<Banknote size={24} />}
           iconColor="var(--color-secondary)"
           iconBgColor="var(--color-secondary-fixed)"
           isPlaceholder={true}
-          placeholderText="Coming in Phase 5"
+          placeholderText={t('superAdmin.comingPhase5')}
         />
-        <KPICard 
-          title="System Health"
-          value="---"
+        <KPICard
+          title={t('superAdmin.systemHealth')}
+          value={PLACEHOLDER_VALUE}
           icon={<CheckCircle2 size={24} />}
           iconColor="var(--color-success)"
           iconBgColor="var(--color-success-container)"
           isPlaceholder={true}
-          placeholderText="Coming in Phase 5"
+          placeholderText={t('superAdmin.comingPhase5')}
         />
       </section>
 
@@ -148,27 +159,39 @@ export const SuperAdminDashboard = () => {
             
             {/* Overlay to indicate this is a placeholder */}
             <div className={styles.placeholderOverlay}>
-               <div className={styles.placeholderBadge}>Coming in Phase 5</div>
+               <div className={styles.placeholderBadge}>{t('superAdmin.comingPhase5')}</div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* System Latency Visualizer (PLACEHOLDER) */}
+      {/*
+        System Latency Visualizer (PLACEHOLDER).
+
+        This panel already carried the "Coming in Phase 5" overlay, but the
+        overlay is transparent, so the figures beneath it stayed fully legible:
+        a Super Admin read "24ms" and "14.2k/s" as live platform telemetry with
+        a small pill floating over them. A badge does not neutralise a specific
+        number rendered next to a live-looking pulse dot.
+
+        The values are now the same "---" this page's own KPI cards use for
+        their unimplemented metrics, so the panel shows its shape without
+        asserting a measurement. The bars below remain decorative; they carry no
+        readable figure. Wire to real telemetry to replace both. TD-013.
+      */}
       <div className={styles.latencyVisualizerWrapper}>
         <div className={styles.latencyVisualizer}>
           <div className={styles.latencyStats}>
             <div>
               <p className={styles.latencyLabel}>{t('superAdmin.globalLatency')}</p>
               <div className={styles.latencyValueGroup}>
-                <div className={styles.pulseDot}></div>
-                <span className={styles.latencyValue}>24ms</span>
+                <span className={styles.latencyValue}>{PLACEHOLDER_VALUE}</span>
               </div>
             </div>
             <div className={styles.latencyDivider}></div>
             <div>
               <p className={styles.latencyLabel}>{t('superAdmin.activeRequests')}</p>
-              <span className={styles.latencyValue}>14.2k/s</span>
+              <span className={styles.latencyValue}>{PLACEHOLDER_VALUE}</span>
             </div>
           </div>
           <div className={styles.trafficChart}>
@@ -189,7 +212,7 @@ export const SuperAdminDashboard = () => {
         
         {/* Overlay to indicate this is a placeholder */}
         <div className={styles.placeholderOverlay}>
-           <div className={styles.placeholderBadge}>Coming in Phase 5</div>
+           <div className={styles.placeholderBadge}>{t('superAdmin.comingPhase5')}</div>
         </div>
       </div>
       

@@ -98,6 +98,14 @@ export const createTenantAuthRoutes = (
     authController.deactivateStaff
   );
 
+  router.post(
+    '/staff/:id/reactivate',
+    authMw,
+    resolveTenantMw,
+    authorize([UserRole.BUSINESS_OWNER]),
+    authController.reactivateStaff
+  );
+
   router.put(
     '/staff/:id',
     authMw,

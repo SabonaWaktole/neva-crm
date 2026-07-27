@@ -9,6 +9,8 @@ import type { BadgeProps } from '../../components/ui/Badge/Badge';
 import styles from './QuotationDetailContent.module.css';
 
 import { useQuotations, useQuotationActions } from '../../hooks/useQuotations';
+import { useTeam } from '../../hooks/useTeam';
+import { findPersonById, getStaffDisplayName } from '../../utils/userUtils';
 import { useMoneyFormat } from '../../hooks/useMoneyFormat';
 import { useStatusLabel } from '../../hooks/useStatusLabel';
 import { useDateFormat } from '../../hooks/useDateFormat';
@@ -22,8 +24,31 @@ export const QuotationDetailContent: React.FC = () => {
   const { tenantSlug, id } = useParams();
   
   const { fetchQuotationDetail, loading } = useQuotations();
+  const { staff, fetchStaff } = useTeam();
   const actionHooks = useQuotationActions();
-  
+
+  useEffect(() => {
+    fetchStaff();
+  }, [fetchStaff]);
+
+  /**
+   * Turns a stored userId into a person's name.
+   *
+   * "Created By" was rendering the bare UUID and the status timeline was
+   * rendering its first eight hex characters after the words "By User:", which
+   * reads as a page that failed to load rather than as an identifier. TD-021.
+   *
+   * The staff endpoint returns deactivated members too, so someone who has left
+   * still resolves to their name here. The short-id fallback therefore only
+   * applies to a genuinely unknown id, and is kept so history never renders
+   * blank.
+   */
+  const displayUser = (userId: string | null | undefined): string => {
+    if (!userId) return t('detail.unknownUser');
+    const person = findPersonById(staff, userId);
+    return person ? getStaffDisplayName(person) : `${userId.substring(0, 8)}`;
+  };
+
   const [data, setData] = useState<any>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -129,8 +154,22 @@ export const QuotationDetailContent: React.FC = () => {
             <Button variant="outline" icon={<Archive size={16} />} onClick={() => handleAction('EXPIRE')}>{t('detail.expire')}</Button>
           )}
           
-          {/* Always show Download PDF as a placeholder */}
-          <Button variant="outline" icon={<Download size={16} />} onClick={() => alert(t('detail.pdfComingSoon'))}>{t('detail.downloadPdf')}</Button>
+          {/*
+            PDF export is not implemented. The button used to look live and only
+            revealed itself through an alert() after the click. It now states its
+            own state up front and cannot be pressed, which is the same honest
+            treatment used for the unimplemented controls elsewhere in the app
+            (Client Settings' edit actions, the interaction timeline filters).
+            Remove the `disabled` and the title when export lands. TD-020.
+          */}
+          <Button
+            variant="outline"
+            icon={<Download size={16} />}
+            disabled
+            title={t('detail.pdfComingSoon')}
+          >
+            {t('detail.downloadPdf')}
+          </Button>
         </div>
       </div>
       
@@ -148,7 +187,7 @@ export const QuotationDetailContent: React.FC = () => {
             <div className={styles.summaryGrid}>
               <div>
                 <div className={styles.summaryLabel}>{t('detail.client')}</div>
-                <div className={styles.summaryValue}>{quotation.clientName || 'Unknown'}</div>
+                <div className={styles.summaryValue}>{quotation.clientName || t('detail.unknownClient')}</div>
               </div>
               <div>
                 <div className={styles.summaryLabel}>{t('detail.dateCreated')}</div>
@@ -156,12 +195,12 @@ export const QuotationDetailContent: React.FC = () => {
               </div>
               <div>
                 <div className={styles.summaryLabel}>{t('detail.createdBy')}</div>
-                <div className={styles.summaryValue}>{quotation.createdByUserId}</div>
+                <div className={styles.summaryValue}>{displayUser(quotation.createdByUserId)}</div>
               </div>
             </div>
             {quotation.notes && (
               <div style={{ marginTop: 'var(--spacing-md)' }}>
-                <div className={styles.summaryLabel}>Notes</div>
+                <div className={styles.summaryLabel}>{t('detail.notes')}</div>
                 <div className={styles.summaryValue}>{quotation.notes}</div>
               </div>
             )}
@@ -229,7 +268,7 @@ export const QuotationDetailContent: React.FC = () => {
                     <span className={styles.timelineStatus}>{statusLabel.quotation(event.status)}</span>
                     <span className={styles.timelineDate}>{dates.dateTime(event.changedAt)}</span>
                     <span className={styles.timelineUser}>
-                      {t('detail.byUser', { user: event.changedByUserId.substring(0, 8) })}
+                      {t('detail.byUser', { user: displayUser(event.changedByUserId) })}
                     </span>
                     {event.reason && <span style={{ fontSize: '12px', fontStyle: 'italic', color: 'var(--color-on-surface-variant)' }}>
                         {t('detail.reason', { reason: event.reason })}

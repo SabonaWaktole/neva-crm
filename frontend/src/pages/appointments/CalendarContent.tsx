@@ -293,6 +293,11 @@ const CalendarMobileAgenda = ({
           </div>
           <div className={styles.dateCards}>
             {weekDays.map((d) => {
+              // Swept during TD-029 and deliberately left as browser-local:
+              // both sides derive from the same `today`, so this only decides
+              // which pill is highlighted. Which appointments belong to the
+              // selected day is answered by isSameDayInZone above, in the
+              // tenant's zone. Do not "fix" this into a tenant-day comparison.
               const isActive = d.toDateString() === selectedDate.toDateString();
               return (
                 <button

@@ -19,6 +19,7 @@ import styles from './AppointmentDetailPanel.module.css';
 import type { Appointment } from '../../../types/appointment';
 import { useCancelAppointment, useUpdateAppointmentStatus } from '../../../hooks/useAppointments';
 import { useDateFormat } from '../../../hooks/useDateFormat';
+import { useStatusLabel } from '../../../hooks/useStatusLabel';
 
 export interface AppointmentDetailPanelProps {
   isOpen: boolean;
@@ -48,6 +49,7 @@ export const AppointmentDetailPanel: React.FC<AppointmentDetailPanelProps> = ({
   onReschedule,
 }) => {
   const dates = useDateFormat();
+  const statusLabel = useStatusLabel();
   const { t } = useTranslation('appointments');
   const { cancelAppointment, isLoading: isCancelling } = useCancelAppointment();
   const { updateStatus, isLoading: isUpdating } = useUpdateAppointmentStatus();
@@ -134,7 +136,8 @@ export const AppointmentDetailPanel: React.FC<AppointmentDetailPanelProps> = ({
         <div className={styles.statusRow}>
           <Badge variant={getStatusToken(appointment.status) as any} className={styles.statusBadge}>
             <span className={styles.pulseDot}></span>
-            {appointment.status}
+            {/* Was the raw enum — this panel was missed by the Stage 2 sweep. */}
+            {statusLabel.appointment(appointment.status)}
           </Badge>
           <span className={styles.refCode}>
             {t('detail.reference', { reference: appointment.id.split('-')[0] })}

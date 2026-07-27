@@ -18,7 +18,8 @@
     "retry": "Provo përsëri",
     "viewAll": "Shiko të gjitha",
     "logOut": "Dil",
-    "support": "Mbështetje"
+    "support": "Mbështetje",
+    "newEntry": "Hyrje e re"
   },
   "state": {
     "loading": "Duke u ngarkuar…",

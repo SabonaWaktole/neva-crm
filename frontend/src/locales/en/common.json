@@ -18,7 +18,8 @@
     "retry": "Try again",
     "viewAll": "View all",
     "logOut": "Log Out",
-    "support": "Support"
+    "support": "Support",
+    "newEntry": "New Entry"
   },
   "state": {
     "loading": "Loading…",

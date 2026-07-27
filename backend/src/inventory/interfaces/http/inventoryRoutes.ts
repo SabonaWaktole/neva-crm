@@ -95,6 +95,7 @@ export const createInventoryRouter = (
   // Categories
   router.get('/categories', authorize([UserRole.BUSINESS_OWNER, UserRole.STAFF]), controller.getCategories);
   router.post('/categories', authorize([UserRole.BUSINESS_OWNER]), controller.createCategory);
+  router.get('/categories/cleanup/preview', authorize([UserRole.BUSINESS_OWNER]), controller.previewCategoryCleanup);
   router.post('/categories/cleanup', authorize([UserRole.BUSINESS_OWNER]), controller.cleanupCategories);
   router.put('/categories/:id', authorize([UserRole.BUSINESS_OWNER]), controller.updateCategory);
   router.delete('/categories/:id', authorize([UserRole.BUSINESS_OWNER]), controller.deleteCategory);

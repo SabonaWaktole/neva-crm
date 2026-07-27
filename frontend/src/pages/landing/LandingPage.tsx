@@ -241,7 +241,7 @@ export const LandingPage: React.FC = () => {
                 onClick={() => navigate('/register-business')}
                 className={styles.ctaButton}
               >
-                Create Your Workspace
+                {t('landing.createWorkspace')}
               </Button>
             </motion.div>
           </motion.div>

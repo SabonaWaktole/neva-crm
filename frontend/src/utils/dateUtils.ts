@@ -1,11 +1,18 @@
 /**
- * Checks if a given UTC timestamp falls on the exact same local date as a target local Date object.
- * This is timezone-sensitive and correctly handles boundary crossings (e.g. an appointment
- * scheduled for 2:00 AM UTC might actually be 10:00 PM the previous day locally).
+ * SUPERSEDED — do not use `isSameDayLocal` in new code.
  *
- * @param utcString - The ISO string from the database/API (e.g., '2023-10-15T02:00:00Z')
- * @param localDate - The target local date to check against (e.g., new Date())
- * @returns boolean indicating if the UTC timestamp falls on the local target day
+ * It compares BROWSER-LOCAL date components, which made "which day is this?"
+ * a property of the viewer's machine rather than of the data. That disagreed
+ * with the server, whose dashboard KPI bucketed by the SERVER host's timezone:
+ * with the host on UTC+3 and a user on UTC+2, a 21:30Z appointment was counted
+ * "today" by the dashboard and drawn on the next day by the calendar.
+ *
+ * Use `isSameDayInZone` / `dayKeyInZone` from `utils/tenantDay.ts`, which
+ * resolve through the tenant's configured timezone, or the `isSameDay` /
+ * `dayKey` helpers on `useDateFormat()`.
+ *
+ * Kept only because its boundary tests still document the semantics; it has no
+ * remaining callers in application code.
  */
 export function isSameDayLocal(utcString: string, localDate: Date): boolean {
   const utcDate = new Date(utcString);

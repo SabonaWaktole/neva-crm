@@ -39,7 +39,7 @@
   },
   "superAdmin": {
     "title": "Përmbledhje e platformës",
-    "subtitle": "Metrika në kohë reale të shëndetit dhe shpërndarjes së qiramarrësve.",
+    "subtitle": "Shpërndarja e qiramarrësve. Matjet e shëndetit të platformës nuk janë lidhur ende.",
     "provisionSoon": "Krijimi i qiramarrësve vjen së shpejti",
     "platformActivity": "Aktiviteti i platformës",
     "viewEventLog": "Shiko regjistrin global të ngjarjeve",
@@ -49,7 +49,19 @@
     "realtimeTraffic": "Trafiku në kohë reale",
     "tenantManagement": "Menaxhimi i qiramarrësve",
     "tenantDetailSoon": "Pamja e detajeve të qiramarrësit vjen së shpejti",
-    "showingTenants": "Duke shfaqur {{count}} qiramarrës"
+    "showingTenants": "Duke shfaqur {{count}} qiramarrës",
+    "viewAllTenants": "Shiko të gjithë qiramarrësit",
+    "newTenant": "Qiramarrës i ri",
+    "activeTenants": "Qiramarrës aktivë",
+    "globalMrr": "MRR global",
+    "systemHealth": "Shëndeti i sistemit",
+    "columnOrganization": "Organizata",
+    "columnDateJoined": "Data e regjistrimit",
+    "tenantActionsSoon": "Opsione të tjera vijnë së shpejti",
+    "tenantActionsAria": "Veprimet e qiramarrësit (së shpejti)",
+    "tableCaption": "Organizatat qiramarrëse",
+    "emptyTitle": "Ende asnjë qiramarrës",
+    "emptyDescription": "Organizatat që regjistrohen do të listohen këtu."
   },
   "reports": {
     "title": "Raportet & Analizat",
@@ -70,5 +82,11 @@
     "loadingAria": "Duke ngarkuar raportet"
   },
   "viewSchedule": "Shiko orarin",
-  "newAppointmentFull": "Takim i ri"
+  "newAppointmentFull": "Takim i ri",
+  "comingPhase5": "Vjen në Fazën 5",
+  "kpiNewClients": "Klientë të rinj",
+  "kpiAssignedClients": "Klientët e mi të caktuar",
+  "kpiOpenFollowUps": "Ndjekje të hapura",
+  "kpiVsLastWeek": "krahasuar me javën e kaluar",
+  "loadingAppointments": "Duke ngarkuar takimet..."
 }

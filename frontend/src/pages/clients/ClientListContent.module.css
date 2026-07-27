@@ -166,13 +166,6 @@
   color: var(--text-secondary);
 }
 
-.recentActivity {
-  font-family: var(--font-family-base);
-  font-size: var(--font-size-body-md);
-  color: var(--text-tertiary);
-  font-variant-numeric: tabular-nums;
-}
-
 /* Row actions stay hidden until the row is hovered or the button is focused,
    which keeps a long list free of repeated visual noise. */
 .actionButton {

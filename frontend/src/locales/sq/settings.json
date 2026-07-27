@@ -112,11 +112,10 @@
   "team": {
     "title": "Anëtarët e ekipit",
     "subtitle": "Menaxhoni ekipin, rolet e tyre dhe ftesat në pritje.",
-    "activeMembers": "Anëtarët aktivë",
     "pendingInvitations": "Ftesat në pritje",
     "loadingMembers": "Duke ngarkuar anëtarët...",
     "loadingInvitations": "Duke ngarkuar ftesat...",
-    "noMembers": "Nuk u gjet asnjë anëtar aktiv i stafit.",
+    "noMembers": "Ende asnjë anëtar ekipi.",
     "noInvitations": "Nuk ka ftesa në pritje.",
     "inviteMember": "Fto anëtar",
     "cancelInvitation": "Anulo ftesën",
@@ -162,7 +161,11 @@
       "and": " dhe ",
       "residualAccess": "Nëse janë të kyçur tani, sesioni i tyre përfundon herën tjetër që aplikacioni ringarkohet, dhe brenda një ore më së voni."
     },
-    "breadcrumb": "Cilësimet e ekipit"
+    "breadcrumb": "Cilësimet e ekipit",
+    "members": "Të gjithë anëtarët",
+    "deactivatedBadge": "I çaktivizuar",
+    "reactivateAria": "Riaktivizo {{email}}",
+    "confirmReactivate": "Të rikthehet qasja për {{name}}? Ata do të mund të hyjnë përsëri."
   },
   "integrations": {
     "breadcrumb": "Integrimet",

@@ -6,6 +6,7 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { useLogout } from '../../hooks/useLogout';
 import { ClientFormContent } from './ClientFormContent';
 import { useNavigation } from '../../hooks/useNavigation';
+import { getUserDisplayName } from '../../utils/userUtils';
 
 export const ClientFormPage: React.FC = () => {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ export const ClientFormPage: React.FC = () => {
     navigate('/login');
   };
 
-  const userName = user?.userId ? `User ${user.userId.substring(0, 8)}` : 'Business Owner';
+  const userName = getUserDisplayName(user, 'Business Owner');
   const roleName = user?.role === 'STAFF' ? 'Sales Representative' : 'Enterprise Tier';
 
   return (

@@ -17,6 +17,7 @@ import { UpdateUserProfileUseCase } from '@auth/application/use-cases/UpdateUser
 import { GetUserProfileUseCase } from '@auth/application/use-cases/GetUserProfileUseCase';
 import { UpdateUserRoleUseCase } from '@auth/application/use-cases/UpdateUserRoleUseCase';
 import { CancelInvitationUseCase } from '@auth/application/use-cases/CancelInvitationUseCase';
+import { ReactivateUserUseCase } from '@auth/application/use-cases/ReactivateUserUseCase';
 import { DeactivateUserUseCase } from '@auth/application/use-cases/DeactivateUserUseCase';
 import { GetDeactivationImpactUseCase } from '@auth/application/use-cases/GetDeactivationImpactUseCase';
 import { PrismaUserRepository } from '@auth/infrastructure/repositories/PrismaUserRepository';
@@ -99,6 +100,7 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const cancelInvitationUseCase = new CancelInvitationUseCase(invitationRepository);
   const deactivateUserUseCase = new DeactivateUserUseCase(userRepository);
   const getDeactivationImpactUseCase = new GetDeactivationImpactUseCase(userRepository);
+  const reactivateUserUseCase = new ReactivateUserUseCase(userRepository);
 
   // Controller
   const authController = new AuthController(
@@ -116,7 +118,8 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
     updateUserRoleUseCase,
     cancelInvitationUseCase,
     deactivateUserUseCase,
-    getDeactivationImpactUseCase
+    getDeactivationImpactUseCase,
+    reactivateUserUseCase
   );
 
   // Auth Routes

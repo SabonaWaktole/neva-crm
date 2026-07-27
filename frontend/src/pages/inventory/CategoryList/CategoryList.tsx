@@ -20,19 +20,47 @@ import { SettingsLayout } from '../../../components/layout/SettingsLayout/Settin
 import { useAuthStore } from '../../../store/useAuthStore';
 
 const CategoryListContent: React.FC = () => {
+  const { t } = useTranslation('inventory');
   const [showArchived, setShowArchived] = React.useState(false);
   const { categories: realCategories, fetchCategories } = useCategories(showArchived);
   const { createCategory } = useCreateCategory();
   const { updateCategory } = useUpdateCategory();
   const { deleteCategory } = useDeleteCategory();
-  const { cleanupCategories, isPending: isCleaningUp } = useArchiveCategories();
-  
+  const {
+    cleanupCategories,
+    fetchCleanupCandidates,
+    candidates: cleanupCandidates,
+    isPending: isCleaningUp,
+  } = useArchiveCategories();
+
   const { user } = useAuthStore();
   const isBusinessOwner = user?.role === 'BUSINESS_OWNER';
 
   React.useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);
+
+  React.useEffect(() => {
+    if (isBusinessOwner) {
+      fetchCleanupCandidates();
+    }
+  }, [isBusinessOwner, fetchCleanupCandidates]);
+
+  const handleRunCleanup = async () => {
+    // Names the categories rather than just counting them. This action archives
+    // real data, and the previous version asked for confirmation of nothing at
+    // all while displaying a fabricated count. TD-027.
+    const names = cleanupCandidates.map((c) => c.name).join(', ');
+    if (!window.confirm(t('categories.confirmCleanup', { names }))) return;
+    try {
+      const result = await cleanupCategories();
+      await fetchCategories();
+      await fetchCleanupCandidates();
+      window.alert(t('categories.cleanupDone', { count: result?.count ?? 0 }));
+    } catch {
+      window.alert(t('categories.cleanupFailed'));
+    }
+  };
 
   const [isFormModalOpen, setIsFormModalOpen] = React.useState(false);
   const [editingCategory, setEditingCategory] = React.useState<CategoryRowData | null>(null);
@@ -76,18 +104,8 @@ const CategoryListContent: React.FC = () => {
   const navigate = useNavigate();
   const { tenantSlug } = useParams();
 
-  const handleRunCleanup = async () => {
-    try {
-      const result = await cleanupCategories();
-      alert(t('categories.cleanupDone', { count: result.count }));
-      await fetchCategories();
-    } catch (err) {
-      alert('Failed to cleanup categories.');
-    }
-  };
-
-  // MOCK DATA - item counts and icons are decorative. useMemo prevents them from changing on re-renders.
-  // Real Item Counts with deterministic decorative icons
+  // Item counts are real; only the icons are decorative. useMemo prevents them
+  // from changing on re-renders.
   const categories = React.useMemo(() => {
     return realCategories.map((c, i) => ({
       id: c.category.id,
@@ -99,7 +117,9 @@ const CategoryListContent: React.FC = () => {
     }));
   }, [realCategories]);
 
-  const { t } = useTranslation('inventory');
+  // The unused-category count deliberately does NOT come from itemCount here.
+  // "Unused" also requires no historical quotation reference, which only the
+  // server can answer — see fetchCleanupCandidates and TD-027.
 
   const getIcon = (type: CategoryRowData['iconType']) => {
     switch (type) {
@@ -222,31 +242,14 @@ const CategoryListContent: React.FC = () => {
             </div>
           </div>
 
-          {/* Secondary Widgets - ALL MOCK DATA */}
+          {/*
+            REMOVED: a "Hierarchy Health" widget reporting 14 root categories
+            and 82 sub-categories over fixed 65%/88% bars. Categories have no
+            `parentId` — there is no hierarchy in the data model at all — so
+            the widget described a structure that does not exist and could not
+            be wired without a schema change. TD-020.
+          */}
           <div className={styles.widgetsGrid}>
-            <div className={styles.widgetCard}>
-              <div className={styles.widgetHeader}>
-                <h3>{t('categories.hierarchyHealth')}</h3>
-                <Activity size={20} className={styles.iconPrimary} />
-              </div>
-              <div className={styles.progressSection}>
-                <div className={styles.progressRow}>
-                  <span>{t('categories.rootCategories')}</span>
-                  <strong>14</strong>
-                </div>
-                <div className={styles.progressBarBg}>
-                  <div className={styles.progressBarFillPrimary} style={{ width: '65%' }} />
-                </div>
-                <div className={styles.progressRow}>
-                  <span>{t('categories.subCategories')}</span>
-                  <strong>82</strong>
-                </div>
-                <div className={styles.progressBarBg}>
-                  <div className={styles.progressBarFillTertiary} style={{ width: '88%' }} />
-                </div>
-              </div>
-            </div>
-
             <div className={`${styles.widgetCard} ${styles.widgetCardHigh}`}>
               <h3 className={styles.widgetTitle}>{t('categories.quickAudit')}</h3>
               <div className={styles.auditAlert}>
@@ -254,11 +257,23 @@ const CategoryListContent: React.FC = () => {
                   <AlertTriangle size={20} />
                 </div>
                 <div>
-                  <div className={styles.auditMain}>3 {t('categories.unusedCategories')}</div>
+                  {/*
+                    Was a hard-coded 3. This is the server's own answer now,
+                    from the very same query the button acts on — the two used
+                    to be computed independently, which is how a fabricated
+                    number came to label a real destructive action. TD-027.
+                  */}
+                  <div className={styles.auditMain}>
+                    {t('categories.unusedCategories', { count: cleanupCandidates.length })}
+                  </div>
                   <div className={styles.auditSub}>{t('categories.unusedHint')}</div>
                 </div>
               </div>
-              <button className={styles.auditBtn} onClick={handleRunCleanup} disabled={isCleaningUp}>
+              <button
+                className={styles.auditBtn}
+                onClick={handleRunCleanup}
+                disabled={isCleaningUp || cleanupCandidates.length === 0}
+              >
                 {isCleaningUp ? t('categories.cleaningUp') : t('categories.runCleanup')}
               </button>
             </div>

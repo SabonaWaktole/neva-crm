@@ -1,0 +1,100 @@
+name: CI
+
+# Gates that were previously only ever run by hand. Three separate silent
+# breakages of the backend test suite got through because nothing compiled
+# `tests/**` except ts-jest at run time (TD-002), and three stale-dependency
+# bugs shipped because `npm run lint` warnings were never read (TD-018).
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: nevacrm_test
+        ports: ['5432:5432']
+        # Without the healthcheck the first migration races container startup.
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/nevacrm_test?schema=public
+      JWT_SECRET: ci-only-secret-not-used-outside-this-job
+      JWT_EXPIRATION: 1h
+      PORT: '3000'
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - run: npm ci
+      - run: npx prisma generate
+
+      # The whole point of TD-002: this compiles tests/**, which tsconfig.json
+      # excludes, so a double that has drifted from its interface fails here
+      # rather than by silently not running. There is deliberately only ONE
+      # typecheck script per package — a weaker src-only variant existing under
+      # a similar name is how the wrong one gets run.
+      - name: Typecheck (src + tests)
+        run: npm run typecheck
+
+      - name: Migrate test database
+        run: npx prisma migrate deploy
+
+      # Both orderings, because per-worker schema isolation is what makes the
+      # parallel run trustworthy and a serial-only pass would hide a leak
+      # between workers.
+      - name: Test (parallel)
+        run: npm test
+      - name: Test (serial)
+        run: npm test -- --runInBand
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+
+      # `npm run typecheck` is `tsc -b`. It must stay that way: tsconfig.json
+      # here is a solution file with "files": [], so a plain `tsc --noEmit`
+      # compiles zero files and exits 0 — a check that cannot fail. TD-028.
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Translation catalogues
+        run: npm run check:translations
+
+      - name: Test
+        run: npx vitest run

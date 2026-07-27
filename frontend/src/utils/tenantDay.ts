@@ -14,7 +14,14 @@
  *   backend/tests/unit/shared/tenantDay.test.ts
  *
  * If you change the logic here, change it there, and both suites will tell you
- * if you did not.
+ * if you did not. That is not a hope: the fixture table was verified to catch a
+ * deliberately drifted copy — replacing this file's day-end calculation with a
+ * naive `start + 24h` fails exactly the two DST rows, on this side only.
+ *
+ * THREE functions are now mirrored: dayKeyInZone, isSameDayInZone and
+ * dayBoundsInZone (plus the private zoneOffsetMs). Each addition raises the
+ * cost of the duplication — see TD-026 for the conditions under which this
+ * should become a shared package instead.
  * ---------------------------------------------------------------------------
  *
  * This replaces `isSameDayLocal`, which compared browser-local date components.
@@ -49,4 +56,76 @@ export function isSameDayInZone(
   timeZone: string
 ): boolean {
   return dayKeyInZone(a, timeZone) === dayKeyInZone(b, timeZone);
+}
+
+/**
+ * How far `timeZone` is ahead of UTC at a given instant, in milliseconds.
+ *
+ * Derived by formatting the instant into the zone's wall-clock fields and
+ * re-reading them as if they were UTC; the difference is the offset. This is
+ * the standard technique for doing zone maths with `Intl` alone.
+ */
+function zoneOffsetMs(instant: Date, timeZone: string): number {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    hour12: false,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  }).formatToParts(instant);
+
+  const field = (type: string) => Number(parts.find((p) => p.type === type)?.value ?? '0');
+
+  const asIfUtc = Date.UTC(
+    field('year'),
+    field('month') - 1,
+    field('day'),
+    // `hour12: false` renders midnight as 24 in some engines; normalise it.
+    field('hour') % 24,
+    field('minute'),
+    field('second')
+  );
+
+  return asIfUtc - instant.getTime();
+}
+
+/**
+ * The UTC instants bounding a tenant-local calendar day: `[start, end)`.
+ *
+ * `offsetDays` is relative to `now` — `0` is today in the tenant's zone, `-1`
+ * yesterday. The returned bounds are real instants, so they can be handed
+ * straight to an API range query.
+ *
+ * Added for TD-029: the staff dashboard was building its "today" range with
+ * `setHours(0,0,0,0)` / `setHours(23,59,59,999)`, i.e. midnight in the
+ * *browser's* zone, while the KPI directly above it used the tenant's. That is
+ * the same disagreement TD-025 closed elsewhere, and it survived because the
+ * frontend copy of this file had no bounds function to reach for.
+ */
+export function dayBoundsInZone(
+  timeZone: string,
+  offsetDays = 0,
+  now: Date = new Date()
+): { start: Date; end: Date } {
+  const [year, month, day] = dayKeyInZone(now, timeZone).split('-').map(Number);
+
+  // Midnight of the target day, expressed as if the zone were UTC.
+  const midnightAsIfUtc = Date.UTC(year, month - 1, day + offsetDays, 0, 0, 0, 0);
+
+  // Shift by the offset in effect *at that moment* rather than at `now`, so a
+  // day that crosses a DST boundary still starts at the correct instant.
+  const provisional = new Date(midnightAsIfUtc);
+  const start = new Date(midnightAsIfUtc - zoneOffsetMs(provisional, timeZone));
+
+  // The next day's start, computed the same way rather than by adding 24h —
+  // a DST day is 23 or 25 hours long.
+  const nextMidnightAsIfUtc = Date.UTC(year, month - 1, day + offsetDays + 1, 0, 0, 0, 0);
+  const end = new Date(
+    nextMidnightAsIfUtc - zoneOffsetMs(new Date(nextMidnightAsIfUtc), timeZone)
+  );
+
+  return { start, end };
 }

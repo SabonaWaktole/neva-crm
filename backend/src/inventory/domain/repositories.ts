@@ -108,7 +108,19 @@ export interface ICategoryRepository {
   findById(tenantId: string, id: string): Promise<Category | null>;
   findAllByTenantId(tenantId: string, includeArchived?: boolean): Promise<Category[]>;
   findAllWithItemCount(tenantId: string, includeArchived?: boolean): Promise<CategoryWithItemCount[]>;
-  findLeastRecentlyUsedCategories(tenantId: string, limit: number): Promise<Category[]>;
+  /**
+   * Categories that are genuinely unused, in the two-part sense agreed in
+   * TD-027: **no active product currently assigned**, and **never referenced by
+   * any QuotationLineItem** through any product that still carries the
+   * category, archived or not.
+   *
+   * Returns every match. There is deliberately no `limit` parameter — the
+   * predecessor, `findLeastRecentlyUsedCategories(tenantId, limit)`, took one
+   * because the controller passed a hard-coded `3` to match a number invented
+   * in a UI mock. That query also had no notion of "unused" at all: it ordered
+   * by last-touched and took the top N, so it archived real, in-use categories.
+   */
+  findUnusedCategories(tenantId: string): Promise<Category[]>;
   save(category: Category): Promise<void>;
   update(category: Category): Promise<void>;
   delete(tenantId: string, id: string): Promise<void>;

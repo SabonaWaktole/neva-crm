@@ -21,11 +21,10 @@ interface TenantManagementTableProps {
 export const TenantManagementTable: React.FC<TenantManagementTableProps> = ({ tenants, isLoading }) => {
   const dates = useDateFormat();
   const { t } = useTranslation('dashboard');
-  const { t: tc } = useTranslation('common');
   const columns: DataTableColumn<Tenant>[] = [
     {
       id: 'organization',
-      header: 'Organization',
+      header: t('superAdmin.columnOrganization'),
       cardLabel: null,
       render: (tenant) => (
         <div className={styles.orgCell}>
@@ -37,25 +36,18 @@ export const TenantManagementTable: React.FC<TenantManagementTableProps> = ({ te
         </div>
       ),
     },
-    {
-      id: 'plan',
-      header: 'Plan',
-      /* Honest placeholder for Plan since the backend doesn't track this yet */
-      // Permanently a dash: these two columns have never been wired to data.
-  // See TD-020.
-  render: () => <span className={styles.placeholderText}>{tc('state.notSet')}</span>,
-    },
-    {
-      id: 'status',
-      header: 'Status',
-      /* Honest placeholder for Status since the backend doesn't track this yet */
-      // Permanently a dash: these two columns have never been wired to data.
-  // See TD-020.
-  render: () => <span className={styles.placeholderText}>{tc('state.notSet')}</span>,
-    },
+    /*
+      REMOVED: "Plan" and "Status" columns. Both rendered the not-set dash on
+      every row because the Tenant model tracks neither — so the console's
+      tenant table gave two full columns of table width to values that could
+      never arrive. Removed for the same reason as the client list's Recent
+      Activity column: a header is a promise of a per-row value, and a
+      permanently empty one is worse than an absent one. Reinstate alongside
+      the billing/subscription fields they would read from. TD-020.
+    */
     {
       id: 'joined',
-      header: 'Date Joined',
+      header: t('superAdmin.columnDateJoined'),
       nowrap: true,
       render: (tenant) => (
         <span className={styles.dateCell}>
@@ -77,8 +69,8 @@ export const TenantManagementTable: React.FC<TenantManagementTableProps> = ({ te
         <button
           className={styles.actionButton}
           disabled
-          title="More options coming soon"
-          aria-label="Tenant actions (coming soon)"
+          title={t('superAdmin.tenantActionsSoon')}
+          aria-label={t('superAdmin.tenantActionsAria')}
         >
           <MoreVertical size={16} />
         </button>
@@ -90,7 +82,7 @@ export const TenantManagementTable: React.FC<TenantManagementTableProps> = ({ te
     <div className={styles.tableContainer}>
       <div className={styles.header}>
         <h2 className={styles.title}>{t('superAdmin.tenantManagement')}</h2>
-        <button className={styles.viewAllButton} disabled title={t('superAdmin.tenantDetailSoon')}>View all tenants</button>
+        <button className={styles.viewAllButton} disabled title={t('superAdmin.tenantDetailSoon')}>{t('superAdmin.viewAllTenants')}</button>
       </div>
 
       <DataTable
@@ -98,12 +90,12 @@ export const TenantManagementTable: React.FC<TenantManagementTableProps> = ({ te
         rows={tenants}
         rowKey={(tenant) => tenant.id}
         isLoading={isLoading}
-        caption="Tenant organizations"
+        caption={t('superAdmin.tableCaption')}
         className={styles.table}
         empty={{
           icon: <Building2 size={20} />,
-          title: 'No tenants yet',
-          description: 'Organizations that sign up will be listed here.',
+          title: t('superAdmin.emptyTitle'),
+          description: t('superAdmin.emptyDescription'),
         }}
       />
 
