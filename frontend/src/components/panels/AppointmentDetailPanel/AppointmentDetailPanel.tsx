@@ -153,7 +153,7 @@ export const AppointmentDetailPanel: React.FC<AppointmentDetailPanelProps> = ({
               <h4 className={styles.personName}>{appointment.clientName || 'Unknown'}</h4>
               <div className={styles.personEmail}>
                 <Mail size={14} />
-                <span>{t('detail.noEmail')}</span>
+                <span>{appointment.clientEmail || t('detail.noEmail')}</span>
               </div>
             </div>
           </div>
