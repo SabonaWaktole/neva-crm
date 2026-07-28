@@ -10,7 +10,8 @@ export class PrismaQuotationRepository implements IQuotationRepository {
     const raw = await this.prisma.quotation.findUnique({
       where: { id },
       include: {
-        lineItems: true
+        lineItems: true,
+        client: { select: { name: true } }
       }
     });
 
@@ -32,8 +33,10 @@ export class PrismaQuotationRepository implements IQuotationRepository {
       id: raw.id,
       tenantId: raw.tenantId,
       clientId: raw.clientId,
+      clientName: raw.client?.name,
       createdByUserId: raw.createdByUserId,
       status: raw.status as QuotationStatus,
+      createdAt: raw.createdAt,
       sentAt: raw.sentAt,
       respondedAt: raw.respondedAt,
       shareToken: raw.shareToken,
@@ -49,7 +52,8 @@ export class PrismaQuotationRepository implements IQuotationRepository {
         status: QuotationStatus.PendingApproval
       },
       include: {
-        lineItems: true
+        lineItems: true,
+        client: { select: { name: true } }
       },
       orderBy: {
         createdAt: 'desc'
@@ -71,8 +75,10 @@ export class PrismaQuotationRepository implements IQuotationRepository {
         id: raw.id,
         tenantId: raw.tenantId,
         clientId: raw.clientId,
+        clientName: raw.client?.name,
         createdByUserId: raw.createdByUserId,
         status: raw.status as QuotationStatus,
+        createdAt: raw.createdAt,
         sentAt: raw.sentAt,
         respondedAt: raw.respondedAt,
         shareToken: raw.shareToken,
@@ -121,7 +127,8 @@ export class PrismaQuotationRepository implements IQuotationRepository {
       this.prisma.quotation.findMany({
         where,
         include: {
-          lineItems: true
+          lineItems: true,
+          client: { select: { name: true } }
         },
         skip,
         take: limit,
@@ -146,8 +153,10 @@ export class PrismaQuotationRepository implements IQuotationRepository {
         id: raw.id,
         tenantId: raw.tenantId,
         clientId: raw.clientId,
+        clientName: raw.client?.name,
         createdByUserId: raw.createdByUserId,
         status: raw.status as QuotationStatus,
+        createdAt: raw.createdAt,
         sentAt: raw.sentAt,
         respondedAt: raw.respondedAt,
         shareToken: raw.shareToken,
