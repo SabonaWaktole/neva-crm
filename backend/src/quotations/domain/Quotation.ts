@@ -21,6 +21,13 @@ export class Quotation {
   lineItems: QuotationLineItem[];
 
   /**
+   * Display name of the client, hydrated from the joined Client row on read.
+   * Not persisted from here — the quotation owns `clientId`, nothing more.
+   * Undefined on entities built by a write path that never loaded the join.
+   */
+  clientName?: string;
+
+  /**
    * Capability token for the customer-facing view.
    *
    * Private with a getter because there is exactly one legitimate way to set
@@ -41,6 +48,7 @@ export class Quotation {
     sentAt: Date | null;
     respondedAt: Date | null;
     lineItems: QuotationLineItem[];
+    clientName?: string;
     shareToken?: string | null;
     shareTokenIssuedAt?: Date | null;
   }) {
@@ -53,8 +61,36 @@ export class Quotation {
     this.sentAt = props.sentAt;
     this.respondedAt = props.respondedAt;
     this.lineItems = props.lineItems;
+    this.clientName = props.clientName;
     this._shareToken = props.shareToken ?? null;
     this._shareTokenIssuedAt = props.shareTokenIssuedAt ?? null;
+  }
+
+  /**
+   * Explicit serialization for the HTTP layer.
+   *
+   * Without this, `res.json(quotation)` drops everything behind a getter —
+   * `subtotal` most importantly — and leaks the `_shareToken` field name. The
+   * money total is exposed as `grandTotal` because that is what the clients
+   * read; there is no tax or discount stage, so it equals the subtotal.
+   */
+  toJSON() {
+    return {
+      id: this.id,
+      tenantId: this.tenantId,
+      clientId: this.clientId,
+      clientName: this.clientName,
+      createdByUserId: this.createdByUserId,
+      status: this.status,
+      createdAt: this.createdAt,
+      sentAt: this.sentAt,
+      respondedAt: this.respondedAt,
+      lineItems: this.lineItems,
+      subtotal: this.subtotal,
+      grandTotal: this.subtotal,
+      shareToken: this._shareToken,
+      shareTokenIssuedAt: this._shareTokenIssuedAt,
+    };
   }
 
   get shareToken(): string | null {
@@ -106,6 +142,7 @@ export class Quotation {
     createdAt?: Date;
     sentAt?: Date | null;
     respondedAt?: Date | null;
+    clientName?: string;
     shareToken?: string | null;
     shareTokenIssuedAt?: Date | null;
   }): Quotation {
@@ -129,6 +166,7 @@ export class Quotation {
       sentAt: props.sentAt ?? null,
       respondedAt: props.respondedAt ?? null,
       lineItems: props.lineItems,
+      clientName: props.clientName,
       shareToken: props.shareToken ?? null,
       shareTokenIssuedAt: props.shareTokenIssuedAt ?? null
     });
