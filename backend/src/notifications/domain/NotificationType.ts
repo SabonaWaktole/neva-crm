@@ -27,6 +27,14 @@ export const NOTIFICATION_TYPES = [
   'APPOINTMENT_RESCHEDULED',
   'APPOINTMENT_CANCELLED',
 
+  /*
+   * The two scheduled types. Unlike every value above, these are not produced
+   * by someone doing something — they are produced by time passing, so they
+   * have no actor and the scheduler emits them with `actorUserId: null`.
+   */
+  'APPOINTMENT_REMINDER',
+  'QUOTATION_FOLLOW_UP',
+
   // Clients.
   'CLIENT_ASSIGNED',
 

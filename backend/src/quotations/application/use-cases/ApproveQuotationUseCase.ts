@@ -4,11 +4,16 @@ import { IQuotationWriteTransaction } from '../ports/IQuotationWriteTransaction'
 import { NotificationService } from '../../../notifications/application/NotificationService';
 import { IUserRepository } from '../../../auth/domain/repositories/IUserRepository';
 import { quotationReference } from '../../domain/quotationReference';
+import { runWithPostCommitEmail, IPostCommitEmailDispatcher } from '../runWithPostCommitEmail';
+import { generateShareToken } from '../../domain/shareToken';
+import { IQuotationDeliveryService } from '../QuotationDeliveryService';
 
 export class ApproveQuotationUseCase {
   constructor(
     private writeTx: IQuotationWriteTransaction,
-    private userRepo: IUserRepository
+    private userRepo: IUserRepository,
+    private emailDispatcher?: IPostCommitEmailDispatcher,
+    private delivery?: IQuotationDeliveryService
   ) {}
 
   async execute(input: {
@@ -24,7 +29,7 @@ export class ApproveQuotationUseCase {
       throw new Error('Unauthorized: Only Business Owners can approve quotations');
     }
 
-    return this.writeTx.run(async (repos) => {
+    const result = await runWithPostCommitEmail(this.writeTx, this.emailDispatcher, async (repos, notify) => {
       const quotation = await repos.quotationRepo.findById(input.tenantId, input.quotationId);
       if (!quotation) {
         throw new Error('Quotation not found');
@@ -32,6 +37,11 @@ export class ApproveQuotationUseCase {
 
       const fromStatus = quotation.status;
       quotation.approve();
+
+      // Approval is the other route into SENT, so it mints the customer link
+      // too. Both routes call the same guarded method rather than one of them
+      // being the place the link "really" comes from.
+      quotation.issueShareToken(generateShareToken());
 
       const history = QuotationStatusHistory.create({
         id: crypto.randomUUID(),
@@ -57,17 +67,26 @@ export class ApproveQuotationUseCase {
        * on their own quotation does not notify themselves.
        */
       const notifications = new NotificationService(repos.notificationRepo, this.userRepo);
-      await notifications.emit({
-        tenantId: input.tenantId,
-        recipientUserIds: [quotation.createdByUserId],
-        type: 'QUOTATION_APPROVED',
-        params: { reference: quotationReference(quotation.id) },
-        actorUserId: input.actingUserId,
-        entityType: 'QUOTATION',
-        entityId: quotation.id,
-      });
+      notify(
+        await notifications.emit({
+          tenantId: input.tenantId,
+          recipientUserIds: [quotation.createdByUserId],
+          type: 'QUOTATION_APPROVED',
+          params: { reference: quotationReference(quotation.id) },
+          actorUserId: input.actingUserId,
+          entityType: 'QUOTATION',
+          entityId: quotation.id,
+        })
+      );
 
       return { quotation };
     });
+
+    // Approval is the moment the customer is meant to receive it, so this is
+    // where the approval branch delivers. `approve()` has already guaranteed
+    // the status is Sent, so there is nothing to check.
+    await this.delivery?.deliverToClient(result.quotation.shareToken);
+
+    return result;
   }
 }

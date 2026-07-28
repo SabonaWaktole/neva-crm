@@ -26,6 +26,8 @@ import { CategoryList } from '../pages/inventory/CategoryList/CategoryList';
 import { QuotationList } from '../pages/quotations/QuotationList';
 import { NotificationsPage } from '../pages/notifications/NotificationsPage';
 import { QuotationDetail } from '../pages/quotations/QuotationDetail';
+import { PublicQuotationPage } from '../pages/quotations/PublicQuotationPage';
+import { NotificationSettingsPage } from '../pages/settings/NotificationSettingsPage';
 import { CreateQuotation } from '../pages/quotations/CreateQuotation';
 import { EditQuotation } from '../pages/quotations/EditQuotation';
 import { IntegrationsPage } from '../pages/IntegrationsPage';
@@ -69,6 +71,21 @@ export const router = createBrowserRouter([
   {
     path: '/login',
     element: <LoginPage />,
+  },
+  /*
+   * The customer-facing quotation (§6.5).
+   *
+   * Sits above `/:tenantSlug` on purpose. A tenant-prefixed path would make the
+   * URL longer, leak the workspace slug, and — worse — collide with the tenant
+   * shell's guards, which redirect anyone unauthenticated to a login the
+   * recipient of a quotation has no account for.
+   *
+   * `/q/` rather than `/quotations/` because this URL gets pasted into emails
+   * and read aloud on phone calls.
+   */
+  {
+    path: '/q/:token',
+    element: <PublicQuotationPage />,
   },
   {
     path: '/:tenantSlug/forgot-password',
@@ -205,6 +222,21 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <ClientSettingsPage />
+          </ProtectedRoute>
+        ),
+      },
+      /*
+       * No RoleGuard: Staff may READ the policy, because it governs mail
+       * landing in their own inbox, and "why am I getting these?" should be
+       * answerable from inside the product. Every control on the page is
+       * disabled for them, and the server refuses a non-owner PUT regardless —
+       * the guard that matters is on the write, not the route.
+       */
+      {
+        path: 'settings/notifications',
+        element: (
+          <ProtectedRoute>
+            <NotificationSettingsPage />
           </ProtectedRoute>
         ),
       },

@@ -87,10 +87,59 @@ model Tenant {
   // Quotations
   quotations Quotation[]
 
-  notifications Notification[]
+  notifications        Notification[]
+  notificationSettings NotificationSettings?
 
   // Integrations
   integrations Integration[]
+}
+
+/// Per-workspace notification policy.
+///
+/// §6.6 of the SRS makes every notification behaviour configurable per
+/// business: which events fire, who receives email, how far ahead a reminder
+/// goes out, how long to wait before chasing a quotation. All of that lives
+/// here, in one row per tenant, rather than as a scatter of booleans on Tenant.
+///
+/// The row is OPTIONAL. A tenant with no row gets `NotificationSettings.defaults()`
+/// — see the domain entity. That is what makes this migration safe: no backfill
+/// is required and no existing workspace changes behaviour on deploy.
+model NotificationSettings {
+  tenantId String @id
+
+  /// Master switch. When false, no business event sends email at all,
+  /// regardless of `emailEventTypes`. Transactional auth mail (invitations,
+  /// password resets) is NOT governed by this — a workspace cannot switch off
+  /// the mail that lets people into it.
+  emailEnabled Boolean @default(true)
+
+  /// Which NotificationType values also send email. Empty means "in-app only".
+  /// Stored as strings rather than a Prisma enum for the same reason
+  /// NotificationType is a TS const array: adding a type must not require a
+  /// migration, and an unknown value here is inert rather than fatal.
+  emailEventTypes String[] @default([])
+
+  /// Which roles receive event email. A workspace can keep owners informed by
+  /// mail while leaving staff on in-app only.
+  emailRecipientRoles String[] @default(["BUSINESS_OWNER"])
+
+  /// Appointment reminders.
+  appointmentRemindersEnabled    Boolean @default(true)
+  /// Lead time in minutes. 1440 = one day before, which is the SRS's own example.
+  appointmentReminderLeadMinutes Int     @default(1440)
+
+  /// Follow-up on a sent quotation that nobody has responded to.
+  quotationFollowUpEnabled Boolean @default(true)
+  quotationFollowUpDays    Int     @default(3)
+
+  /// Automatic expiry of quotations that were never answered. Distinct from the
+  /// follow-up above: the follow-up nudges, this closes.
+  quotationAutoExpireEnabled Boolean @default(false)
+  quotationExpiryDays        Int     @default(30)
+
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 }
 
 model User {
@@ -241,6 +290,14 @@ model Appointment {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
+  /// When the pre-appointment reminder was sent. NULL means "not yet reminded".
+  ///
+  /// Set to NULL again by a reschedule: moving an appointment makes the old
+  /// reminder describe a time that no longer exists, so the new time earns a
+  /// new reminder. This is the whole dedup mechanism — the sweep selects on
+  /// `remindedAt IS NULL`, so a reminder can never go twice for one time.
+  remindedAt DateTime?
+
   tenant       Tenant                @relation(fields: [tenantId], references: [id])
   client       Client                @relation(fields: [clientId], references: [id])
   assignedUser User                  @relation("AssignedAppointments", fields: [assignedUserId], references: [id])
@@ -249,6 +306,9 @@ model Appointment {
   @@index([tenantId, scheduledAt])
   @@index([tenantId, assignedUserId])
   @@index([tenantId, clientId])
+  /// Drives the reminder sweep, which scans upcoming appointments by status and
+  /// time across all tenants rather than within one.
+  @@index([status, scheduledAt])
 }
 
 model AppointmentAuditLog {
@@ -414,6 +474,24 @@ model Quotation {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
+  /// Unguessable capability token for the customer-facing view.
+  ///
+  /// Issued when the quotation first reaches SENT and never reissued, so the
+  /// link in a customer's inbox keeps working. NULL for everything that has not
+  /// been sent — which is what makes an unsent quotation unreachable rather
+  /// than merely unadvertised.
+  ///
+  /// Globally unique rather than unique-per-tenant on purpose: the public route
+  /// has no tenant context to scope by, so the token IS the lookup key.
+  shareToken         String?   @unique
+  shareTokenIssuedAt DateTime?
+
+  /// When the unanswered-quotation follow-up was sent. NULL means "not yet
+  /// chased". A column rather than a query over Notification because the
+  /// notification table is pruned on a retention policy and a chase must never
+  /// repeat because its record aged out.
+  followUpSentAt DateTime?
+
   tenant    Tenant @relation(fields: [tenantId], references: [id])
   client    Client @relation(fields: [clientId], references: [id])
   createdBy User   @relation(fields: [createdByUserId], references: [id])
@@ -423,6 +501,9 @@ model Quotation {
 
   @@index([tenantId, clientId])
   @@index([tenantId, status])
+  /// Drives the follow-up and auto-expiry sweeps, which both scan SENT
+  /// quotations by age across all tenants.
+  @@index([status, sentAt])
 }
 
 model QuotationLineItem {
@@ -447,12 +528,29 @@ model QuotationStatusHistory {
   quotationId     String
   fromStatus      String
   toStatus        String
-  changedByUserId String
+
+  /// NULL means the scheduler made this change, not a person.
+  ///
+  /// Automatic expiry has no acting user, and the two available alternatives
+  /// were both worse: attributing it to the quotation's creator would put a
+  /// change in the audit trail under the name of someone who did not make it,
+  /// and inventing a "system" User row would put a login-shaped record in a
+  /// table where every other row can authenticate. NULL says exactly what
+  /// happened.
+  changedByUserId String?
   note            String?
   createdAt       DateTime @default(now())
 
   quotation Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
-  changedBy User      @relation(fields: [changedByUserId], references: [id])
+
+  /// `onDelete: Restrict` is stated explicitly, not left to the default.
+  ///
+  /// Making this relation optional flipped Prisma's implicit default from
+  /// RESTRICT to SET NULL — which would mean deleting a User silently rewrote
+  /// their past status changes as "done by the scheduler". NULL here has one
+  /// meaning and it is not "we lost the name". Deleting a user with history
+  /// stays blocked; off-boarding is `User.isActive`, as it already was.
+  changedBy User?     @relation(fields: [changedByUserId], references: [id], onDelete: Restrict)
 
   @@index([tenantId, quotationId])
 }

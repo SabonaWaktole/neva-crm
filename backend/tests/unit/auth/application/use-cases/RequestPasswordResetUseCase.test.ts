@@ -34,6 +34,7 @@ describe('RequestPasswordResetUseCase', () => {
       // without awaiting and attaches .catch(), so the doubles must resolve.
       sendInvitationEmail: jest.fn().mockResolvedValue(undefined),
       sendPasswordResetEmail: jest.fn().mockResolvedValue(undefined),
+      sendTransactionalEmail: jest.fn().mockResolvedValue(undefined),
     };
 
     useCase = new RequestPasswordResetUseCase(userRepository, prtRepository, emailSender);

@@ -75,6 +75,12 @@ describe('ReportsPage currency', () => {
       revenue: [{ month: '2026-01', revenue: 1234.56 }],
       clients: [],
       inventory: [{ warehouseName: 'Main', totalValue: 1_200_000, totalItems: 40 }],
+      // These panels are not what this suite is about — it asserts currency
+      // formatting on the money axes — but the page reads them unconditionally,
+      // so the double has to supply the same shape the hook does.
+      clientTrend: [],
+      appointments: { byStatus: [], byStaff: [], total: 0 },
+      lowStock: { items: [], outOfStockCount: 0, lowStockCount: 0 },
       loading: false,
       error: null,
       refresh: vi.fn(),

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Download, Edit, CheckCircle, XCircle, Send, ArrowLeft, Archive } from 'lucide-react';
+import { Download, Edit, CheckCircle, XCircle, Send, ArrowLeft, Archive, Link as LinkIcon } from 'lucide-react';
 import { Button } from '../../components/ui/Button/Button';
 import { Card } from '../../components/ui/Card/Card';
 import { Badge } from '../../components/ui/Badge/Badge';
@@ -51,6 +51,7 @@ export const QuotationDetailContent: React.FC = () => {
 
   const [data, setData] = useState<any>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   /*
    * useCallback is load-bearing, not decoration. `loadData` is used by the
@@ -78,7 +79,34 @@ export const QuotationDetailContent: React.FC = () => {
     return <div className={styles.loadingState}>{t('detail.loading')}</div>;
   }
 
-  const { quotation, lineItems, history, permittedActions } = data;
+  const { quotation, lineItems, history, permittedActions, shareUrl, shareToken } = data;
+
+  /**
+   * The customer's PDF, built against this app's own API base.
+   *
+   * Not returned by the server: it knows FRONTEND_URL but has no configured
+   * notion of its own public origin, and deriving one from the Host header
+   * breaks behind a proxy. The client already knows where its API lives.
+   */
+  const pdfUrl = shareToken
+    ? `${import.meta.env.VITE_API_URL || '/api'}/public/quotations/${shareToken}/pdf`
+    : null;
+
+  const handleCopyLink = async () => {
+    if (!shareUrl) return;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      // Reverts the label so the button does not read "Copied" forever and
+      // leave the next click looking like it did nothing.
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard access can be denied (insecure origin, permissions policy).
+      // Surfacing the URL is more useful than a failure toast the user cannot
+      // act on — they can still select and copy it by hand.
+      setActionError(shareUrl);
+    }
+  };
 
   const handleAction = async (action: string) => {
     if (!id) return;
@@ -155,21 +183,37 @@ export const QuotationDetailContent: React.FC = () => {
           )}
           
           {/*
-            PDF export is not implemented. The button used to look live and only
-            revealed itself through an alert() after the click. It now states its
-            own state up front and cannot be pressed, which is the same honest
-            treatment used for the unimplemented controls elsewhere in the app
-            (Client Settings' edit actions, the interaction timeline filters).
-            Remove the `disabled` and the title when export lands. TD-020.
+            Both actions exist only once the quotation has been sent, because
+            that is when the server mints the share token — before then there is
+            no customer-facing document to link to or render. This replaces the
+            disabled placeholder that TD-020 tracked.
+
+            The PDF opens in a new tab rather than downloading through the API
+            client: it is a public URL needing no auth header, and letting the
+            browser fetch it directly means the customer and the staff member
+            are looking at byte-identical output.
           */}
-          <Button
-            variant="outline"
-            icon={<Download size={16} />}
-            disabled
-            title={t('detail.pdfComingSoon')}
-          >
-            {t('detail.downloadPdf')}
-          </Button>
+          {shareUrl && (
+            <>
+              <Button
+                variant="outline"
+                icon={<LinkIcon size={16} />}
+                onClick={handleCopyLink}
+                title={t('share.hint')}
+              >
+                {copied ? t('share.copied') : t('share.copyLink')}
+              </Button>
+              {pdfUrl && (
+                <Button
+                  variant="outline"
+                  icon={<Download size={16} />}
+                  onClick={() => window.open(pdfUrl, '_blank', 'noopener')}
+                >
+                  {t('share.downloadPdf')}
+                </Button>
+              )}
+            </>
+          )}
         </div>
       </div>
       

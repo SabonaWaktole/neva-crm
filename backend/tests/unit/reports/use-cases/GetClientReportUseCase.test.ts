@@ -9,7 +9,11 @@ describe('GetClientReportUseCase', () => {
         { status: 'ACTIVE', count: 10 },
         { status: 'PROSPECT', count: 5 }
       ]),
-      getInventoryValueByWarehouse: jest.fn()
+      getInventoryValueByWarehouse: jest.fn(),
+      getNewClientsTrend: jest.fn(),
+      getAppointmentStatusDistribution: jest.fn(),
+      getAppointmentsByStaff: jest.fn(),
+      getLowStockItems: jest.fn()
     };
 
     const useCase = new GetClientReportUseCase(mockRepo);
@@ -24,7 +28,11 @@ describe('GetClientReportUseCase', () => {
     const mockRepo: IReportRepository = {
       getMonthlyRevenue: jest.fn(),
       getClientStatusDistribution: jest.fn(),
-      getInventoryValueByWarehouse: jest.fn()
+      getInventoryValueByWarehouse: jest.fn(),
+      getNewClientsTrend: jest.fn(),
+      getAppointmentStatusDistribution: jest.fn(),
+      getAppointmentsByStaff: jest.fn(),
+      getLowStockItems: jest.fn()
     };
 
     const useCase = new GetClientReportUseCase(mockRepo);

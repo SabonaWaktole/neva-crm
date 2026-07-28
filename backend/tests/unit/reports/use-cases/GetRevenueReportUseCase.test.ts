@@ -9,7 +9,11 @@ describe('GetRevenueReportUseCase', () => {
         { month: '2026-07', revenue: 7500 }
       ]),
       getClientStatusDistribution: jest.fn(),
-      getInventoryValueByWarehouse: jest.fn()
+      getInventoryValueByWarehouse: jest.fn(),
+      getNewClientsTrend: jest.fn(),
+      getAppointmentStatusDistribution: jest.fn(),
+      getAppointmentsByStaff: jest.fn(),
+      getLowStockItems: jest.fn()
     };
 
     const useCase = new GetRevenueReportUseCase(mockRepo);
@@ -24,7 +28,11 @@ describe('GetRevenueReportUseCase', () => {
     const mockRepo: IReportRepository = {
       getMonthlyRevenue: jest.fn(),
       getClientStatusDistribution: jest.fn(),
-      getInventoryValueByWarehouse: jest.fn()
+      getInventoryValueByWarehouse: jest.fn(),
+      getNewClientsTrend: jest.fn(),
+      getAppointmentStatusDistribution: jest.fn(),
+      getAppointmentsByStaff: jest.fn(),
+      getLowStockItems: jest.fn()
     };
 
     const useCase = new GetRevenueReportUseCase(mockRepo);
@@ -35,7 +43,11 @@ describe('GetRevenueReportUseCase', () => {
     const mockRepo: IReportRepository = {
       getMonthlyRevenue: jest.fn(),
       getClientStatusDistribution: jest.fn(),
-      getInventoryValueByWarehouse: jest.fn()
+      getInventoryValueByWarehouse: jest.fn(),
+      getNewClientsTrend: jest.fn(),
+      getAppointmentStatusDistribution: jest.fn(),
+      getAppointmentsByStaff: jest.fn(),
+      getLowStockItems: jest.fn()
     };
 
     const useCase = new GetRevenueReportUseCase(mockRepo);

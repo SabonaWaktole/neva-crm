@@ -49,6 +49,16 @@ import { GetNotificationsUseCase } from '../notifications/application/GetNotific
 import { MarkNotificationReadUseCase, MarkAllNotificationsReadUseCase } from '../notifications/application/MarkNotificationReadUseCase';
 import { NotificationController } from '../notifications/interfaces/http/NotificationController';
 import { createNotificationRouter } from '../notifications/interfaces/http/notificationRoutes';
+import { PrismaNotificationSettingsRepository } from '../notifications/infrastructure/PrismaNotificationSettingsRepository';
+import { GetNotificationSettingsUseCase } from '../notifications/application/GetNotificationSettingsUseCase';
+import { UpdateNotificationSettingsUseCase } from '../notifications/application/UpdateNotificationSettingsUseCase';
+import { NotificationEmailComposer } from '../notifications/application/NotificationEmailComposer';
+import { NotificationEmailDispatcher } from '../notifications/application/NotificationEmailDispatcher';
+import { PrismaPublicQuotationReader } from '../quotations/infrastructure/PrismaPublicQuotationReader';
+import { QuotationPdfRenderer } from '../quotations/infrastructure/QuotationPdfRenderer';
+import { QuotationDeliveryService } from '../quotations/application/QuotationDeliveryService';
+import { GetPublicQuotationUseCase } from '../quotations/application/GetPublicQuotationUseCase';
+import { createPublicQuotationRouter } from '../quotations/interfaces/http/publicQuotationRoutes';
 
 export interface AppDependencies {
   userRepository: IUserRepository;
@@ -114,7 +124,29 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const loginUseCase = new LoginUseCase(userRepository, tenantRepository, passwordHasher, tokenService);
   const inviteStaffUseCase = new InviteStaffUseCase(invitationRepository, emailSender);
   const notificationRepository = new PrismaNotificationRepository();
-  const notificationService = new NotificationService(notificationRepository, userRepository);
+  const notificationSettingsRepository = new PrismaNotificationSettingsRepository();
+
+  /*
+   * The email half of notifications (§6.6).
+   *
+   * Built once and shared: every emitting site in the application goes through
+   * either `NotificationService.emitSafe` (which dispatches for non-
+   * transactional callers) or `runWithPostCommitEmail` (which dispatches after
+   * a quotation transition commits). Nothing composes its own.
+   */
+  const notificationEmailDispatcher = new NotificationEmailDispatcher(
+    notificationSettingsRepository,
+    userRepository,
+    tenantRepository,
+    emailSender,
+    new NotificationEmailComposer(process.env.FRONTEND_URL || 'http://localhost:5173')
+  );
+
+  const notificationService = new NotificationService(
+    notificationRepository,
+    userRepository,
+    notificationEmailDispatcher
+  );
   const quotationWriteTx = new PrismaQuotationWriteTransaction();
   const acceptInvitationUseCase = new AcceptInvitationUseCase(invitationRepository, userRepository, passwordHasher, tenantRepository, notificationService);
   const requestPasswordResetUseCase = new RequestPasswordResetUseCase(userRepository, prtRepository, emailSender);
@@ -159,12 +191,12 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
 
   // Client routes require PrismaClient, TokenService, TenantRepository
   const { prisma } = require('@shared/infrastructure/prisma/client');
-  const clientRoutes = createClientRouter(prisma, tokenService, tenantRepository);
+  const clientRoutes = createClientRouter(prisma, tokenService, tenantRepository, notificationService);
   app.use('/api/:tenantSlug/clients', clientRoutes);
 
   // Appointment routes
   const { createAppointmentRouter } = require('../appointments/interfaces/http/routes/appointmentRoutes');
-  const appointmentRoutes = createAppointmentRouter(prisma, tokenService, tenantRepository);
+  const appointmentRoutes = createAppointmentRouter(prisma, tokenService, tenantRepository, notificationService);
   app.use('/api/:tenantSlug/appointments', appointmentRoutes);
 
   // Tenant Routes
@@ -319,15 +351,34 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   
   const settingsService = new SettingsService(tenantRepository);
 
+  /*
+   * Customer-facing quotation delivery (§6.5).
+   *
+   * The reader is shared between three consumers — the public JSON view, the
+   * PDF renderer and the email that carries the link — so all three describe
+   * the same document. A separate query per consumer is how a PDF total ends up
+   * disagreeing with the web page it was downloaded from.
+   */
+  const publicQuotationReader = new PrismaPublicQuotationReader(prisma);
+  const quotationDelivery = new QuotationDeliveryService(
+    publicQuotationReader,
+    emailSender,
+    process.env.FRONTEND_URL || 'http://localhost:5173'
+  );
+
   const quotationsController = new QuotationsController(
     new CreateQuotationUseCase(quotationRepo, quotationLineItemRepo, quotationHistoryRepo, prismaClientRepository, productRepo, warehouseRepo),
     new UpdateQuotationUseCase(quotationRepo, quotationLineItemRepo, productRepo, warehouseRepo),
-    new SubmitQuotationUseCase(quotationWriteTx, userRepository),
-    new ApproveQuotationUseCase(quotationWriteTx, userRepository),
-    new ReturnQuotationToDraftUseCase(quotationWriteTx, userRepository),
-    new MarkQuotationAcceptedUseCase(quotationRepo, quotationLineItemRepo, quotationHistoryRepo, stockLevelRepo, stockTxManager, quotationWriteTx, userRepository),
-    new MarkQuotationRejectedUseCase(quotationWriteTx, userRepository),
-    new ExpireQuotationUseCase(quotationWriteTx, userRepository),
+    // Each transition takes the email dispatcher so it can send AFTER its
+    // transaction commits — see runWithPostCommitEmail.
+    // Submit and Approve are the two routes into SENT, so they are the two
+    // that deliver to the customer.
+    new SubmitQuotationUseCase(quotationWriteTx, userRepository, notificationEmailDispatcher, quotationDelivery),
+    new ApproveQuotationUseCase(quotationWriteTx, userRepository, notificationEmailDispatcher, quotationDelivery),
+    new ReturnQuotationToDraftUseCase(quotationWriteTx, userRepository, notificationEmailDispatcher),
+    new MarkQuotationAcceptedUseCase(quotationRepo, quotationLineItemRepo, quotationHistoryRepo, stockLevelRepo, stockTxManager, quotationWriteTx, userRepository, notificationEmailDispatcher),
+    new MarkQuotationRejectedUseCase(quotationWriteTx, userRepository, notificationEmailDispatcher),
+    new ExpireQuotationUseCase(quotationWriteTx, userRepository, notificationEmailDispatcher),
     new SearchQuotationsUseCase(quotationRepo),
     new GetQuotationDetailUseCase(quotationRepo, quotationLineItemRepo, quotationHistoryRepo),
     new GetPendingApprovalsUseCase(quotationRepo),
@@ -336,6 +387,22 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
 
   const quotationRoutes = createQuotationRouter(quotationsController, tokenService, tenantRepository);
   app.use('/api/:tenantSlug/quotations', quotationRoutes);
+
+  /*
+   * The customer-facing quotation view — no tenant prefix and no auth.
+   *
+   * Mounted before nothing in particular but kept next to its sibling above so
+   * the pair is legible: /api/:tenantSlug/quotations is the staff view of a
+   * quotation, /api/public/quotations is the recipient's. See
+   * publicQuotationRoutes for what stands in for authentication.
+   */
+  app.use(
+    '/api/public/quotations',
+    createPublicQuotationRouter(
+      new GetPublicQuotationUseCase(publicQuotationReader),
+      new QuotationPdfRenderer()
+    )
+  );
 
   // Media Routes (profile photos + workspace branding)
   const { MediaController } = require('../media/interfaces/http/MediaController');
@@ -401,11 +468,18 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const { ReportsController } = require('../reports/interfaces/http/ReportsController');
   const { createReportRouter } = require('../reports/interfaces/http/reportRoutes');
 
+  const { GetAppointmentReportUseCase } = require('../reports/application/use-cases/GetAppointmentReportUseCase');
+  const { GetClientTrendUseCase } = require('../reports/application/use-cases/GetClientTrendUseCase');
+  const { GetLowStockReportUseCase } = require('../reports/application/use-cases/GetLowStockReportUseCase');
+
   const reportRepo = new PrismaReportRepository(prisma);
   const reportsController = new ReportsController(
     new GetRevenueReportUseCase(reportRepo),
     new GetClientReportUseCase(reportRepo),
-    new GetInventoryReportUseCase(reportRepo)
+    new GetInventoryReportUseCase(reportRepo),
+    new GetAppointmentReportUseCase(reportRepo),
+    new GetClientTrendUseCase(reportRepo),
+    new GetLowStockReportUseCase(reportRepo)
   );
 
   const reportRoutes = createReportRouter(reportsController, tokenService, tenantRepository);
@@ -415,7 +489,9 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const notificationController = new NotificationController(
     new GetNotificationsUseCase(notificationRepository),
     new MarkNotificationReadUseCase(notificationRepository),
-    new MarkAllNotificationsReadUseCase(notificationRepository)
+    new MarkAllNotificationsReadUseCase(notificationRepository),
+    new GetNotificationSettingsUseCase(notificationSettingsRepository),
+    new UpdateNotificationSettingsUseCase(notificationSettingsRepository)
   );
   app.use(
     '/api/:tenantSlug/notifications',

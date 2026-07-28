@@ -112,6 +112,70 @@
   min-width: 0;
 }
 
+/*
+ * Tables read badly in a half-width column — six numeric columns squeezed into
+ * 420px wrap into unreadable stacks. `1 / -1` spans whatever the auto-fit grid
+ * resolved to, so these panels are full width at every breakpoint without
+ * hard-coding a column count.
+ */
+.wideCard {
+  grid-column: 1 / -1;
+}
+
+/*
+ * The table scrolls inside its own card rather than pushing the page sideways.
+ * On a phone the staff breakdown is six columns wide no matter what, so the
+ * choice is a horizontal scroll here or a horizontal scroll on <body>.
+ */
+.tableWrap {
+  overflow-x: auto;
+  margin: 0 calc(-1 * var(--spacing-sm));
+  padding: 0 var(--spacing-sm);
+}
+
+.reportTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-body-sm);
+}
+
+.reportTable th,
+.reportTable td {
+  padding: var(--spacing-sm) var(--spacing-md);
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.reportTable th {
+  font-weight: 600;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-body-xs, 0.75rem);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.reportTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Numeric columns right-align so magnitudes line up down the column. */
+.reportTable td:not(:first-child):not(:last-child),
+.reportTable th:not(:first-child):not(:last-child) {
+  text-align: right;
+}
+
+.reportTable td:first-child {
+  /* The product name is the one column allowed to wrap and take the space. */
+  white-space: normal;
+  min-width: 12rem;
+}
+
+.sku {
+  color: var(--text-tertiary);
+  font-size: var(--font-size-body-xs, 0.75rem);
+}
+
 /* Recharts renders axis/legend text as SVG <text>, which does not inherit
    the cascade the way HTML does — so type is set explicitly here. */
 .chartBody :global(.recharts-cartesian-axis-tick-value),

@@ -1,5 +1,15 @@
 import { PrismaClient } from '@prisma/client';
-import { IReportRepository, MonthlyRevenue, ClientStatusCount, WarehouseInventoryValue } from '../domain/IReportRepository';
+import {
+  IReportRepository,
+  MonthlyRevenue,
+  ClientStatusCount,
+  WarehouseInventoryValue,
+  NewClientsPoint,
+  AppointmentStatusCount,
+  AppointmentsByStaff,
+  AppointmentReportFilters,
+  LowStockItem,
+} from '../domain/IReportRepository';
 
 export class PrismaReportRepository implements IReportRepository {
   constructor(private readonly prisma: PrismaClient) {}
@@ -101,4 +111,173 @@ export class PrismaReportRepository implements IReportRepository {
       };
     });
   }
+
+  /**
+   * New clients per month (§6.7, "trend view of new clients added").
+   *
+   * Grouped in SQL rather than by pulling rows and bucketing in JS, unlike
+   * `getMonthlyRevenue` above. That method's comment chose "simplicity and DB
+   * agnosticism"; this project is committed to Postgres (§10) and a growth
+   * chart that loads every client the workspace has ever had in order to count
+   * them is the shape of query §4.7 warns about.
+   *
+   * Months with no signups are filled in below rather than omitted, so the
+   * chart shows a flat stretch instead of silently compressing time.
+   */
+  async getNewClientsTrend(tenantId: string, limitMonths: number): Promise<NewClientsPoint[]> {
+    const start = startOfMonthsAgo(limitMonths - 1);
+
+    const rows = await this.prisma.$queryRaw<{ month: string; count: bigint }[]>`
+      SELECT to_char(date_trunc('month', "createdAt"), 'YYYY-MM') AS month,
+             COUNT(*)                                             AS count
+      FROM "Client"
+      WHERE "tenantId" = ${tenantId}
+        AND "createdAt" >= ${start}
+      GROUP BY 1
+      ORDER BY 1
+    `;
+
+    const counts = new Map(rows.map((r) => [r.month, Number(r.count)]));
+
+    const series: NewClientsPoint[] = [];
+    for (let i = limitMonths - 1; i >= 0; i--) {
+      const month = monthKey(startOfMonthsAgo(i));
+      series.push({ month, count: counts.get(month) ?? 0 });
+    }
+    return series;
+  }
+
+  async getAppointmentStatusDistribution(
+    tenantId: string,
+    filters: AppointmentReportFilters
+  ): Promise<AppointmentStatusCount[]> {
+    const counts = await this.prisma.appointment.groupBy({
+      by: ['status'],
+      where: this.appointmentWhere(tenantId, filters),
+      _count: { id: true },
+    });
+
+    return counts.map((c) => ({ status: c.status, count: c._count.id }));
+  }
+
+  async getAppointmentsByStaff(
+    tenantId: string,
+    filters: AppointmentReportFilters
+  ): Promise<AppointmentsByStaff[]> {
+    const counts = await this.prisma.appointment.groupBy({
+      by: ['assignedUserId', 'status'],
+      where: this.appointmentWhere(tenantId, filters),
+      _count: { id: true },
+    });
+
+    if (counts.length === 0) return [];
+
+    // One lookup for the names rather than a join per group: groupBy cannot
+    // include a relation, and N queries for N staff is the classic version of
+    // this mistake.
+    const userIds = [...new Set(counts.map((c) => c.assignedUserId))];
+    const users = await this.prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true, firstName: true, lastName: true, email: true },
+    });
+    const nameById = new Map(
+      users.map((u) => [
+        u.id,
+        [u.firstName, u.lastName].filter(Boolean).join(' ').trim() || u.email,
+      ])
+    );
+
+    const byUser = new Map<string, AppointmentsByStaff>();
+    for (const row of counts) {
+      const entry =
+        byUser.get(row.assignedUserId) ??
+        {
+          userId: row.assignedUserId,
+          staffName: nameById.get(row.assignedUserId) ?? 'Unknown',
+          scheduled: 0,
+          confirmed: 0,
+          completed: 0,
+          cancelled: 0,
+          total: 0,
+        };
+
+      const n = row._count.id;
+      if (row.status === 'SCHEDULED') entry.scheduled += n;
+      else if (row.status === 'CONFIRMED') entry.confirmed += n;
+      else if (row.status === 'COMPLETED') entry.completed += n;
+      else if (row.status === 'CANCELLED') entry.cancelled += n;
+      entry.total += n;
+
+      byUser.set(row.assignedUserId, entry);
+    }
+
+    return [...byUser.values()].sort((a, b) => b.total - a.total);
+  }
+
+  /**
+   * Products short at a specific location (§6.7 list, §6.4 per-location rule).
+   *
+   * Evaluated per StockLevel row, so a product held in three warehouses can
+   * appear three times — once for each place it is actually short. The
+   * dashboard's own low-stock card still sums across warehouses, which answers
+   * a different question ("how many products need attention"); this answers
+   * "where do I need to restock".
+   *
+   * Products with no StockLevel rows at all are absent by construction. That is
+   * correct here: a service with no stock anywhere is not "short at a
+   * warehouse", and listing it under every location would be noise.
+   */
+  async getLowStockItems(tenantId: string): Promise<LowStockItem[]> {
+    const rows = await this.prisma.stockLevel.findMany({
+      where: { tenantId },
+      select: {
+        quantity: true,
+        warehouseId: true,
+        warehouse: { select: { name: true } },
+        productId: true,
+        product: { select: { name: true, sku: true, lowStockThreshold: true } },
+      },
+    });
+
+    return rows
+      .filter((r) => r.quantity <= r.product.lowStockThreshold)
+      .map((r) => ({
+        productId: r.productId,
+        productName: r.product.name,
+        sku: r.product.sku,
+        warehouseId: r.warehouseId,
+        warehouseName: r.warehouse.name,
+        quantity: r.quantity,
+        threshold: r.product.lowStockThreshold,
+        status: (r.quantity <= 0 ? 'OUT_OF_STOCK' : 'LOW_STOCK') as LowStockItem['status'],
+      }))
+      // Emptiest first: the list is a work queue, so what is already out of
+      // stock belongs above what is merely running low.
+      .sort((a, b) => a.quantity - b.quantity || a.productName.localeCompare(b.productName));
+  }
+
+  /** Shared filter for both appointment reports, so they cannot diverge. */
+  private appointmentWhere(tenantId: string, filters: AppointmentReportFilters) {
+    const where: Record<string, unknown> = { tenantId };
+
+    if (filters.from || filters.to) {
+      where.scheduledAt = {
+        ...(filters.from ? { gte: filters.from } : {}),
+        ...(filters.to ? { lte: filters.to } : {}),
+      };
+    }
+    if (filters.assignedUserId) where.assignedUserId = filters.assignedUserId;
+
+    return where;
+  }
+}
+
+/** UTC month boundary `n` months back. Matches getMonthlyRevenue's UTC choice. */
+function startOfMonthsAgo(n: number): Date {
+  const now = new Date();
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - n, 1));
+}
+
+function monthKey(date: Date): string {
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
 }

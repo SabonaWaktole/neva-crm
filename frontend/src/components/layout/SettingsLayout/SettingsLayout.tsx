@@ -2,7 +2,7 @@ import React from 'react';
 import type { ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useAuthStore } from '../../../store/useAuthStore';
-import { User, Building2, Sliders, UsersRound, Puzzle, PackageOpen, FolderTree } from 'lucide-react';
+import { User, Building2, Sliders, UsersRound, Puzzle, PackageOpen, FolderTree, Bell } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import styles from './SettingsLayout.module.css';
 
@@ -21,6 +21,9 @@ const navItems: NavItem[] = [
   { id: 'profile', label: 'Profile', icon: User },
   { id: 'company', label: 'Company', icon: Building2 },
   { id: 'client-management', label: 'Client Management', icon: Sliders },
+  // Next to Company because it is workspace-wide policy, not a personal
+  // preference — the page itself is Business Owner-only for the same reason.
+  { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'team', label: 'Team', icon: UsersRound },
   { id: 'integrations', label: 'Integrations', icon: Puzzle },
   { id: 'warehouses', label: 'Warehouses', icon: PackageOpen },

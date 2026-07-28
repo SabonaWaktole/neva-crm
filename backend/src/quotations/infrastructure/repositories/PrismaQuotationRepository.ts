@@ -36,6 +36,8 @@ export class PrismaQuotationRepository implements IQuotationRepository {
       status: raw.status as QuotationStatus,
       sentAt: raw.sentAt,
       respondedAt: raw.respondedAt,
+      shareToken: raw.shareToken,
+      shareTokenIssuedAt: raw.shareTokenIssuedAt,
       lineItems
     });
   }
@@ -73,6 +75,8 @@ export class PrismaQuotationRepository implements IQuotationRepository {
         status: raw.status as QuotationStatus,
         sentAt: raw.sentAt,
         respondedAt: raw.respondedAt,
+        shareToken: raw.shareToken,
+        shareTokenIssuedAt: raw.shareTokenIssuedAt,
         lineItems
       });
     });
@@ -146,6 +150,8 @@ export class PrismaQuotationRepository implements IQuotationRepository {
         status: raw.status as QuotationStatus,
         sentAt: raw.sentAt,
         respondedAt: raw.respondedAt,
+        shareToken: raw.shareToken,
+        shareTokenIssuedAt: raw.shareTokenIssuedAt,
         lineItems
       });
     });
@@ -160,6 +166,12 @@ export class PrismaQuotationRepository implements IQuotationRepository {
         status: quotation.status,
         sentAt: quotation.sentAt,
         respondedAt: quotation.respondedAt,
+        // The share token is written here rather than by a dedicated method so
+        // it lands in the same statement as the SENT status that justifies it.
+        // The entity refuses to reissue, so an update can only ever set it from
+        // NULL to a value — never overwrite a link a customer already holds.
+        shareToken: quotation.shareToken,
+        shareTokenIssuedAt: quotation.shareTokenIssuedAt,
         // Other fields shouldn't change
       },
       create: {
@@ -169,7 +181,9 @@ export class PrismaQuotationRepository implements IQuotationRepository {
         createdByUserId: quotation.createdByUserId,
         status: quotation.status,
         sentAt: quotation.sentAt,
-        respondedAt: quotation.respondedAt
+        respondedAt: quotation.respondedAt,
+        shareToken: quotation.shareToken,
+        shareTokenIssuedAt: quotation.shareTokenIssuedAt
       }
     });
   }

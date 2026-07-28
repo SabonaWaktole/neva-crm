@@ -4,7 +4,8 @@ export class QuotationStatusHistory {
   quotationId: string;
   fromStatus: string;
   toStatus: string;
-  changedByUserId: string;
+  /** NULL when the scheduler made the change rather than a person. */
+  changedByUserId: string | null;
   changedAt: Date;
   note: string | null;
 
@@ -14,7 +15,7 @@ export class QuotationStatusHistory {
     quotationId: string;
     fromStatus: string;
     toStatus: string;
-    changedByUserId: string;
+    changedByUserId: string | null;
     changedAt: Date;
     note: string | null;
   }) {
@@ -34,7 +35,7 @@ export class QuotationStatusHistory {
     quotationId: string;
     fromStatus: string;
     toStatus: string;
-    changedByUserId: string;
+    changedByUserId: string | null;
     note?: string | null;
   }): QuotationStatusHistory {
     return new QuotationStatusHistory({

@@ -13,6 +13,8 @@ import { useAuthStore } from '../store/useAuthStore';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useNavigation } from '../hooks/useNavigation';
 import { useMoneyFormat } from '../hooks/useMoneyFormat';
+import { useStatusLabel } from '../hooks/useStatusLabel';
+import { Badge } from '../components/ui/Badge/Badge';
 import styles from './ReportsPage.module.css';
 
 /**
@@ -82,7 +84,19 @@ export const ReportsPage: React.FC = () => {
   // Both the tooltip amounts and the axis ticks come from here, so the tenant's
   // currency drives the whole page rather than just the tooltips.
   const { formatWhole: formatCurrency, formatCompact: compactCurrency } = useMoneyFormat();
-  const { revenue, clients, inventory, loading, error, refresh } = useReports();
+  const { revenue, clients, inventory, clientTrend, appointments, lowStock, loading, error, refresh } =
+    useReports();
+  const statusLabel = useStatusLabel();
+
+  /*
+   * Recharts needs a display label on the datum itself — it has no hook into
+   * the translation layer — so the status codes are mapped up front rather
+   * than inside the render.
+   */
+  const appointmentsByStatus = appointments.byStatus.map((entry) => ({
+    ...entry,
+    label: statusLabel.appointment(entry.status),
+  }));
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -293,9 +307,178 @@ export const ReportsPage: React.FC = () => {
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <EmptyChart message="No inventory data yet" />
+                  <EmptyChart message={t('reports.noInventory')} />
                 )}
               </div>
+            </div>
+
+            {/*
+              Appointment statistics (§6.7) — a named MVP deliverable that had
+              no backend at all until now, so no chart could exist for it.
+            */}
+            <div className={styles.chartCard}>
+              <div className={styles.chartHeader}>
+                <h2 className={styles.chartTitle}>{t('reports.appointmentStats')}</h2>
+                <p className={styles.chartCaption}>{t('reports.appointmentStatsCaption')}</p>
+              </div>
+              <div className={styles.chartBody}>
+                {appointmentsByStatus.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={appointmentsByStatus} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+                      <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
+                      <XAxis dataKey="label" {...axisProps} />
+                      {/* Counts are whole appointments, so no fractional ticks. */}
+                      <YAxis width={48} allowDecimals={false} {...axisProps} />
+                      <Tooltip content={<ChartTooltip />} cursor={{ fill: 'var(--color-primary-a10)' }} />
+                      <Bar
+                        dataKey="count"
+                        name={t('reports.appointments')}
+                        radius={[4, 4, 0, 0]}
+                        maxBarSize={44}
+                      >
+                        {appointmentsByStatus.map((_, index) => (
+                          <Cell key={`appt-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <EmptyChart message={t('reports.noAppointments')} />
+                )}
+              </div>
+            </div>
+
+            {/* New clients over time (§6.7). */}
+            <div className={styles.chartCard}>
+              <div className={styles.chartHeader}>
+                <h2 className={styles.chartTitle}>{t('reports.clientTrend')}</h2>
+                <p className={styles.chartCaption}>{t('reports.clientTrendCaption')}</p>
+              </div>
+              <div className={styles.chartBody}>
+                {clientTrend.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={clientTrend} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+                      <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
+                      <XAxis dataKey="month" {...axisProps} />
+                      <YAxis width={48} allowDecimals={false} {...axisProps} />
+                      <Tooltip
+                        content={<ChartTooltip />}
+                        cursor={{ stroke: 'var(--border-strong)', strokeWidth: 1 }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="count"
+                        name={t('reports.newClients')}
+                        stroke="var(--chart-3)"
+                        strokeWidth={2}
+                        dot={{ r: 3, strokeWidth: 0, fill: 'var(--chart-3)' }}
+                        activeDot={{ r: 5, strokeWidth: 2, stroke: 'var(--color-surface-container-lowest)' }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <EmptyChart message={t('reports.noClientTrend')} />
+                )}
+              </div>
+            </div>
+
+            {/*
+              Two tables rather than charts. A staff breakdown and a restock
+              list are both things an owner reads row by row and acts on — a
+              bar chart of "who has how many appointments" looks analytical and
+              answers less than the numbers do.
+            */}
+            {appointments.byStaff.length > 0 && (
+              <div className={`${styles.chartCard} ${styles.wideCard}`}>
+                <div className={styles.chartHeader}>
+                  <h2 className={styles.chartTitle}>{t('reports.appointmentsByStaff')}</h2>
+                  <p className={styles.chartCaption}>{t('reports.appointmentsByStaffCaption')}</p>
+                </div>
+                <div className={styles.tableWrap}>
+                  <table className={styles.reportTable}>
+                    <thead>
+                      <tr>
+                        <th scope="col">{t('reports.colStaff')}</th>
+                        <th scope="col">{t('reports.colScheduled')}</th>
+                        <th scope="col">{t('reports.colConfirmed')}</th>
+                        <th scope="col">{t('reports.colCompleted')}</th>
+                        <th scope="col">{t('reports.colCancelled')}</th>
+                        <th scope="col">{t('reports.colTotal')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {appointments.byStaff.map((row) => (
+                        <tr key={row.userId}>
+                          <td>{row.staffName}</td>
+                          <td>{row.scheduled}</td>
+                          <td>{row.confirmed}</td>
+                          <td>{row.completed}</td>
+                          <td>{row.cancelled}</td>
+                          <td><strong>{row.total}</strong></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Low stock / unavailable list (§6.7), located per warehouse (§6.4). */}
+            <div className={`${styles.chartCard} ${styles.wideCard}`}>
+              <div className={styles.chartHeader}>
+                <h2 className={styles.chartTitle}>{t('reports.lowStock')}</h2>
+                <p className={styles.chartCaption}>
+                  {lowStock.items.length > 0
+                    ? t('reports.lowStockSummary', {
+                        outOfStock: lowStock.outOfStockCount,
+                        low: lowStock.lowStockCount,
+                      })
+                    : t('reports.lowStockCaption')}
+                </p>
+              </div>
+              {lowStock.items.length > 0 ? (
+                <div className={styles.tableWrap}>
+                  <table className={styles.reportTable}>
+                    <thead>
+                      <tr>
+                        <th scope="col">{t('reports.colProduct')}</th>
+                        <th scope="col">{t('reports.colWarehouse')}</th>
+                        <th scope="col">{t('reports.colQuantity')}</th>
+                        <th scope="col">{t('reports.colThreshold')}</th>
+                        <th scope="col">{t('reports.colStatus')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {lowStock.items.map((item) => (
+                        // Keyed on the pair, not the product: the same product
+                        // legitimately appears once per warehouse it is short at.
+                        <tr key={`${item.productId}-${item.warehouseId}`}>
+                          <td>
+                            {item.productName}
+                            {item.sku && <span className={styles.sku}> · {item.sku}</span>}
+                          </td>
+                          <td>{item.warehouseName}</td>
+                          <td>{item.quantity}</td>
+                          <td>{item.threshold}</td>
+                          <td>
+                            <Badge
+                              variant={item.status === 'OUT_OF_STOCK' ? 'error' : 'warning'}
+                            >
+                              {item.status === 'OUT_OF_STOCK'
+                                ? t('reports.statusOutOfStock')
+                                : t('reports.statusLowStock')}
+                            </Badge>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className={styles.chartBody}>
+                  <EmptyChart message={t('reports.lowStockEmpty')} />
+                </div>
+              )}
             </div>
           </div>
         </main>

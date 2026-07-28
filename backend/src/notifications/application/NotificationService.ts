@@ -37,7 +37,17 @@ export interface EmitInput {
 export class NotificationService {
   constructor(
     private readonly notificationRepo: INotificationRepository,
-    private readonly userRepo: IUserRepository
+    private readonly userRepo: IUserRepository,
+    /**
+     * Optional, and only used by `emitSafe`.
+     *
+     * `emit` deliberately does NOT dispatch email, because it is the form used
+     * inside database transactions — see NotificationEmailDispatcher for why
+     * sending from in there is wrong. Transactional callers pass the returned
+     * notifications to the dispatcher themselves once their transaction has
+     * committed.
+     */
+    private readonly emailDispatcher?: { dispatch(notifications: Notification[]): Promise<void> }
   ) {}
 
   async emit(input: EmitInput): Promise<Notification[]> {
@@ -62,17 +72,22 @@ export class NotificationService {
   }
 
   /**
-   * `emit` that swallows its own failures.
+   * `emit` that swallows its own failures, and also sends the email half.
    *
    * Used at every emitting site that is NOT inside a transaction. A quotation
    * approval must not fail because the notification insert did — the business
    * action is the point, the notification is a side effect. Inside a unit of
    * work the opposite holds and `emit` is used directly, so the notification
-   * commits or rolls back with the change it describes.
+   * commits or rolls back with the change it describes — and email is dispatched
+   * by that caller after the commit instead of from in here.
    */
   async emitSafe(input: EmitInput): Promise<void> {
     try {
-      await this.emit(input);
+      const notifications = await this.emit(input);
+      // Email is part of "emitting" for non-transactional callers, so they get
+      // it without every call site having to remember. The dispatcher is
+      // itself best-effort and never throws.
+      await this.emailDispatcher?.dispatch(notifications);
     } catch (error) {
       console.error('Failed to emit notification', { type: input.type, error });
     }

@@ -20,7 +20,12 @@ export const createReportRouter = (
 
   router.get('/revenue', reportsController.getRevenue);
   router.get('/clients', reportsController.getClients);
+  // Before nothing in particular, but kept adjacent to /clients so the pair
+  // reads as two views of the same subject.
+  router.get('/clients/trend', reportsController.getClientTrend);
   router.get('/inventory', reportsController.getInventory);
+  router.get('/inventory/low-stock', reportsController.getLowStock);
+  router.get('/appointments', reportsController.getAppointments);
 
   return router;
 };

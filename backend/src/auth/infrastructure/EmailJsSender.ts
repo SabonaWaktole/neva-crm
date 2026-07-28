@@ -14,6 +14,32 @@ export class EmailJsSender implements IEmailSender {
     this.privateKey = process.env.EMAILJS_PRIVATE_KEY || '';
   }
 
+  /**
+   * The one place this class actually talks to EmailJS.
+   *
+   * All three public methods funnel through here, so the service/template/key
+   * wiring and the error handling exist once. `sendTransactionalEmail` is
+   * simply this with no body of its own to build.
+   */
+  private async send(to: string, subject: string, htmlContent: string, kind: string): Promise<void> {
+    try {
+      await emailjs.send(
+        this.serviceId,
+        this.templateId,
+        { to_email: to, subject, html_content: htmlContent },
+        { publicKey: this.publicKey, privateKey: this.privateKey }
+      );
+      console.log(`${kind} email sent successfully to ${to} via EmailJS`);
+    } catch (error: any) {
+      console.error(`Error sending ${kind} email via EmailJS:`, error);
+      throw new Error(`Failed to send ${kind} email`);
+    }
+  }
+
+  async sendTransactionalEmail(to: string, subject: string, html: string): Promise<void> {
+    await this.send(to, subject, html, 'notification');
+  }
+
   async sendInvitationEmail(to: string, token: string, tenantName: string): Promise<void> {
     const inviteLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/invitations/accept?token=${token}&email=${encodeURIComponent(to)}`;
     

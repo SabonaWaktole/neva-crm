@@ -28,6 +28,19 @@ export const createNotificationRouter = (
   router.use(authMw, resolveTenantMw);
 
   router.get('/', controller.list);
+
+  /*
+   * The workspace policy (§6.6). Mounted here rather than under /settings
+   * because it is the notifications module's own state — the settings module
+   * owns the Tenant row, and splitting one feature's storage across two modules
+   * to match one screen's layout would be organising the backend by URL.
+   *
+   * Before /:id/read for the same reason /read-all is: a literal path segment
+   * must be matched before a parameterised one.
+   */
+  router.get('/settings', controller.readSettings);
+  router.put('/settings', controller.writeSettings);
+
   router.patch('/read-all', controller.markEverythingRead);
   // After /read-all, so the literal path is not swallowed by :id.
   router.patch('/:id/read', controller.markOneRead);
