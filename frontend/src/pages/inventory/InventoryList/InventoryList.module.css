@@ -2,10 +2,12 @@
  * InventoryList — KPI strip, filter bar, then the table.
  * ========================================================================= */
 
+/* The page grows with its content and lets AppLayout's main region scroll —
+   pinning it to height:100% clipped the table instead of scrolling it. */
 .container {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  width: 100%;
   gap: var(--spacing-lg);
   padding: var(--spacing-lg);
   background-color: var(--color-background);
@@ -78,11 +80,10 @@
 }
 
 .content {
-  flex: 1;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
-  min-height: 0;
+  min-width: 0;
 }
 
 /* ------------------------------------------------------------ tag filters */

@@ -242,7 +242,7 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const appointmentRepository = new PrismaAppointmentRepository(prisma);
   
   const getTenantClientMetricsUseCase = new GetTenantClientMetricsUseCase(prismaClientRepository);
-  const getTenantActivityFeedUseCase = new GetTenantActivityFeedUseCase(prismaClientRepository, interactionRepository, appointmentRepository);
+  const getTenantActivityFeedUseCase = new GetTenantActivityFeedUseCase(prismaClientRepository, interactionRepository, appointmentRepository, userRepository);
   
   const { createDashboardRouter } = require('../dashboard/interfaces/http/routes/dashboardRoutes');
   const dashboardRoutes = createDashboardRouter(getTenantClientMetricsUseCase, getTenantActivityFeedUseCase, tokenService, tenantRepository);

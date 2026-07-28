@@ -25,6 +25,12 @@ export interface AppointmentProps {
   // Validation props (not persisted directly to this entity)
   clientTenantId?: string;
   assignedUserTenantId?: string;
+
+  // Read-only display fields hydrated from joined Client/User records.
+  // Not persisted on this entity and never written back to the DB.
+  clientName?: string;
+  clientEmail?: string;
+  staffName?: string;
 }
 
 export class Appointment {
@@ -38,6 +44,9 @@ export class Appointment {
   private _history: RescheduleLog[];
   private _createdAt: Date;
   private _updatedAt: Date;
+  private _clientName?: string;
+  private _clientEmail?: string;
+  private _staffName?: string;
 
   private constructor(props: AppointmentProps) {
     this._id = props.id;
@@ -50,6 +59,9 @@ export class Appointment {
     this._history = props.history ?? [];
     this._createdAt = props.createdAt ?? new Date();
     this._updatedAt = props.updatedAt ?? new Date();
+    this._clientName = props.clientName;
+    this._clientEmail = props.clientEmail;
+    this._staffName = props.staffName;
   }
 
   static create(props: AppointmentProps): Appointment {
@@ -73,6 +85,9 @@ export class Appointment {
   get history(): RescheduleLog[] { return [...this._history]; }
   get createdAt(): Date { return this._createdAt; }
   get updatedAt(): Date { return this._updatedAt; }
+  get clientName(): string | undefined { return this._clientName; }
+  get clientEmail(): string | undefined { return this._clientEmail; }
+  get staffName(): string | undefined { return this._staffName; }
 
   confirm(): void {
     this.assertNotTerminal();

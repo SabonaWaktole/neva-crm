@@ -17,7 +17,7 @@ export class PrismaAppointmentRepository implements IAppointmentRepository {
     }));
 
     // Reconstitute the Appointment using the static create method.
-    // For reconstitution, we trust the DB state, so we pass the appointment's tenantId 
+    // For reconstitution, we trust the DB state, so we pass the appointment's tenantId
     // as the clientTenantId and assignedUserTenantId to bypass cross-tenant validation errors.
     return Appointment.create({
       id: record.id,
@@ -32,13 +32,22 @@ export class PrismaAppointmentRepository implements IAppointmentRepository {
       updatedAt: record.updatedAt,
       clientTenantId: record.tenantId,
       assignedUserTenantId: record.tenantId,
+      clientName: record.client?.name,
+      clientEmail: record.client?.email ?? undefined,
+      staffName: record.assignedUser
+        ? [record.assignedUser.firstName, record.assignedUser.lastName].filter(Boolean).join(' ') || record.assignedUser.email
+        : undefined,
     });
   }
 
   async findById(id: string, tenantId: string): Promise<Appointment | null> {
     const record = await this.prisma.appointment.findFirst({
       where: { id, tenantId },
-      include: { auditLogs: { orderBy: { createdAt: 'asc' } } }
+      include: {
+        auditLogs: { orderBy: { createdAt: 'asc' } },
+        client: { select: { name: true, email: true } },
+        assignedUser: { select: { firstName: true, lastName: true, email: true } },
+      }
     });
     if (!record) return null;
     return this.mapToDomain(record);
@@ -47,7 +56,11 @@ export class PrismaAppointmentRepository implements IAppointmentRepository {
   async findByClientId(clientId: string, tenantId: string): Promise<Appointment[]> {
     const records = await this.prisma.appointment.findMany({
       where: { clientId, tenantId },
-      include: { auditLogs: { orderBy: { createdAt: 'asc' } } },
+      include: {
+        auditLogs: { orderBy: { createdAt: 'asc' } },
+        client: { select: { name: true, email: true } },
+        assignedUser: { select: { firstName: true, lastName: true, email: true } },
+      },
       orderBy: { scheduledAt: 'desc' }
     });
     return records.map(r => this.mapToDomain(r));
@@ -68,7 +81,11 @@ export class PrismaAppointmentRepository implements IAppointmentRepository {
 
     const records = await this.prisma.appointment.findMany({
       where,
-      include: { auditLogs: { orderBy: { createdAt: 'asc' } } },
+      include: {
+        auditLogs: { orderBy: { createdAt: 'asc' } },
+        client: { select: { name: true, email: true } },
+        assignedUser: { select: { firstName: true, lastName: true, email: true } },
+      },
       orderBy: { scheduledAt: 'asc' }
     });
 
@@ -89,7 +106,11 @@ export class PrismaAppointmentRepository implements IAppointmentRepository {
     const records = await this.prisma.appointment.findMany({
       where,
       take: limit,
-      include: { auditLogs: { orderBy: { createdAt: 'asc' } } },
+      include: {
+        auditLogs: { orderBy: { createdAt: 'asc' } },
+        client: { select: { name: true, email: true } },
+        assignedUser: { select: { firstName: true, lastName: true, email: true } },
+      },
       orderBy: { scheduledAt: 'asc' }
     });
 
@@ -98,7 +119,7 @@ export class PrismaAppointmentRepository implements IAppointmentRepository {
 
   async findRecentByTenant(tenantId: string, limit: number, assignedUserId?: string): Promise<Appointment[]> {
     const where: Prisma.AppointmentWhereInput = { tenantId };
-    
+
     if (assignedUserId) {
       where.assignedUserId = assignedUserId;
     }
@@ -106,7 +127,11 @@ export class PrismaAppointmentRepository implements IAppointmentRepository {
     const records = await this.prisma.appointment.findMany({
       where,
       take: limit,
-      include: { auditLogs: { orderBy: { createdAt: 'asc' } } },
+      include: {
+        auditLogs: { orderBy: { createdAt: 'asc' } },
+        client: { select: { name: true, email: true } },
+        assignedUser: { select: { firstName: true, lastName: true, email: true } },
+      },
       orderBy: { updatedAt: 'desc' }
     });
 

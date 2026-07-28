@@ -24,6 +24,7 @@ export interface Appointment {
   }>;
   // Included from API responses
   clientName?: string;
+  clientEmail?: string;
   staffName?: string;
 }
 
