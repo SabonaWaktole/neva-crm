@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { requireTenant, requireTenantId } from "@main/interfaces/http/tenantContext";
+import { authCookieOptions, AUTH_COOKIE_MAX_AGE_MS } from "@main/interfaces/http/authCookie";
 import { RegisterBusinessOwnerUseCase } from '@auth/application/use-cases/RegisterBusinessOwnerUseCase';
 import { LoginUseCase } from '@auth/application/use-cases/LoginUseCase';
 import { InviteStaffUseCase } from '@auth/application/use-cases/InviteStaffUseCase';
@@ -53,12 +54,7 @@ export class AuthController {
   loginTenant = async (req: Request, res: Response) => {
     try {
       const result = await this.loginUseCase.execute({ ...req.body, tenantSlug: requireTenant(req).urlSlug });
-      res.cookie('jwt', result.token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 24 * 60 * 60 * 1000 // 1 day
-      });
+      res.cookie('jwt', result.token, { ...authCookieOptions(), maxAge: AUTH_COOKIE_MAX_AGE_MS });
       res.status(200).json({ message: 'Login successful', token: result.token });
     } catch (error: any) {
       res.status(401).json({ error: error.message });
@@ -68,12 +64,7 @@ export class AuthController {
   loginGlobal = async (req: Request, res: Response) => {
     try {
       const result = await this.loginUseCase.execute({ ...req.body, tenantSlug: null });
-      res.cookie('jwt', result.token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 24 * 60 * 60 * 1000 // 1 day
-      });
+      res.cookie('jwt', result.token, { ...authCookieOptions(), maxAge: AUTH_COOKIE_MAX_AGE_MS });
       res.status(200).json({ message: 'Login successful', token: result.token, tenantSlug: result.tenantSlug });
     } catch (error: any) {
       res.status(401).json({ error: error.message });
@@ -81,7 +72,7 @@ export class AuthController {
   };
 
   logout = async (req: Request, res: Response) => {
-    res.clearCookie('jwt');
+    res.clearCookie('jwt', authCookieOptions());
     res.status(200).json({ message: 'Logged out successfully' });
   };
 
@@ -103,7 +94,7 @@ export class AuthController {
       // here drops the browser session on the next load; it is a practical
       // shortening of exposure, not true revocation. See TD-010.
       if (!user.isActive) {
-        res.clearCookie('jwt');
+        res.clearCookie('jwt', authCookieOptions());
         return res.status(401).json({ error: 'This account has been deactivated.' });
       }
 
@@ -153,7 +144,7 @@ export class AuthController {
        * they have no tenantId.
        */
       if (tenantBranding?.subscriptionStatus === 'SUSPENDED') {
-        res.clearCookie('jwt');
+        res.clearCookie('jwt', authCookieOptions());
         return res.status(403).json({
           error: 'This workspace is suspended — contact support',
           code: 'TENANT_SUSPENDED',
