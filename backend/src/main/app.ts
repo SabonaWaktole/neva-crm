@@ -79,6 +79,11 @@ export interface AppDependencies {
 
 export const createApp = (overrides?: Partial<AppDependencies>) => {
   const app = express();
+  // Render (and most PaaS hosts) put the app behind a reverse proxy, so
+  // X-Forwarded-For is always present. Without this, express-rate-limit
+  // throws ERR_ERL_UNEXPECTED_X_FORWARDED_FOR on every rate-limited request
+  // (e.g. login) instead of ever reaching the route handler.
+  app.set('trust proxy', 1);
   // Sensible security headers (HSTS, X-Content-Type-Options, frame denial, and
   // referrer policy among others). This is a JSON API, so the default CSP is
   // not load-bearing here; the frontend is served separately.
