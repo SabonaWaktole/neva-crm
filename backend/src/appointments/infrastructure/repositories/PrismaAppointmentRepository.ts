@@ -146,6 +146,27 @@ export class PrismaAppointmentRepository implements IAppointmentRepository {
 
   async update(appointment: Appointment): Promise<void> {
     await this.prisma.$transaction(async (tx) => {
+      /*
+       * Re-arm the reminder when the appointment moves.
+       *
+       * `remindedAt` means "the assignee has been told about THIS time". Once
+       * the time changes that is no longer true, so leaving the marker set
+       * would silently suppress the reminder for the new slot — the reschedule
+       * notification fires immediately, and then nothing arrives the day
+       * before. Clearing it here rather than in the use case keeps the marker's
+       * meaning tied to the column it qualifies.
+       *
+       * The current value is read inside the same transaction rather than
+       * trusted from the entity, because the entity was loaded before any of
+       * this and its `scheduledAt` is the NEW value by the time we are called.
+       */
+      const stored = await tx.appointment.findUnique({
+        where: { id: appointment.id },
+        select: { scheduledAt: true },
+      });
+      const moved =
+        stored !== null && stored.scheduledAt.getTime() !== appointment.scheduledAt.getTime();
+
       await tx.appointment.update({
         where: { id: appointment.id },
         data: {
@@ -155,6 +176,7 @@ export class PrismaAppointmentRepository implements IAppointmentRepository {
           status: appointment.status,
           notes: appointment.notes,
           updatedAt: appointment.updatedAt,
+          ...(moved ? { remindedAt: null } : {}),
         }
       });
 

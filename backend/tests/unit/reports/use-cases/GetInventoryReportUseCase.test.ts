@@ -9,7 +9,11 @@ describe('GetInventoryReportUseCase', () => {
       getInventoryValueByWarehouse: jest.fn().mockResolvedValue([
         { warehouseName: 'Main WH', totalItems: 100, totalValue: 5000 },
         { warehouseName: 'Store 1', totalItems: 50, totalValue: 2500 }
-      ])
+      ]),
+      getNewClientsTrend: jest.fn(),
+      getAppointmentStatusDistribution: jest.fn(),
+      getAppointmentsByStaff: jest.fn(),
+      getLowStockItems: jest.fn()
     };
 
     const useCase = new GetInventoryReportUseCase(mockRepo);
@@ -24,7 +28,11 @@ describe('GetInventoryReportUseCase', () => {
     const mockRepo: IReportRepository = {
       getMonthlyRevenue: jest.fn(),
       getClientStatusDistribution: jest.fn(),
-      getInventoryValueByWarehouse: jest.fn()
+      getInventoryValueByWarehouse: jest.fn(),
+      getNewClientsTrend: jest.fn(),
+      getAppointmentStatusDistribution: jest.fn(),
+      getAppointmentsByStaff: jest.fn(),
+      getLowStockItems: jest.fn()
     };
 
     const useCase = new GetInventoryReportUseCase(mockRepo);

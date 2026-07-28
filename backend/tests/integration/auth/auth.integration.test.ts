@@ -286,6 +286,15 @@ class FakeEmailSender implements IEmailSender {
     this.sentEmails.push({ to, type: 'invitation', token, tenantName });
   }
 
+  /**
+   * Business-event mail (§6.6). Recorded with an empty token because, unlike
+   * the two above, it carries no capability — these assertions are about who
+   * was mailed, not about a link they can act on.
+   */
+  async sendTransactionalEmail(to: string, _subject: string, _html: string): Promise<void> {
+    this.sentEmails.push({ to, type: 'transactional', token: '' });
+  }
+
   clear(): void { this.sentEmails = []; }
 }
 

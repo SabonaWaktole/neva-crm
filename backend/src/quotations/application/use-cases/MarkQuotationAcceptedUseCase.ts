@@ -9,6 +9,7 @@ import { IQuotationWriteTransaction } from '../ports/IQuotationWriteTransaction'
 import { NotificationService } from '../../../notifications/application/NotificationService';
 import { IUserRepository } from '../../../auth/domain/repositories/IUserRepository';
 import { quotationReference } from '../../domain/quotationReference';
+import { runWithPostCommitEmail, IPostCommitEmailDispatcher } from '../runWithPostCommitEmail';
 
 export class MarkQuotationAcceptedUseCase {
   constructor(
@@ -18,7 +19,8 @@ export class MarkQuotationAcceptedUseCase {
     private stockLevelRepo: IStockLevelRepository,
     private transactionManager: IStockTransactionManager,
     private writeTx: IQuotationWriteTransaction,
-    private userRepo: IUserRepository
+    private userRepo: IUserRepository,
+    private emailDispatcher?: IPostCommitEmailDispatcher
   ) {}
 
   async execute(input: {
@@ -99,20 +101,22 @@ export class MarkQuotationAcceptedUseCase {
      * boundary *within* the quotation writes, which used to be two independent
      * awaits. Noted in TD-032.
      */
-    await this.writeTx.run(async (repos) => {
+    await runWithPostCommitEmail(this.writeTx, this.emailDispatcher, async (repos, notify) => {
       await repos.quotationRepo.save(quotation);
       await repos.historyRepo.save(history);
 
       const notifications = new NotificationService(repos.notificationRepo, this.userRepo);
-      await notifications.emit({
-        tenantId: input.tenantId,
-        recipientUserIds: [quotation.createdByUserId],
-        type: 'QUOTATION_ACCEPTED',
-        params: { reference: quotationReference(quotation.id) },
-        actorUserId: input.actingUserId,
-        entityType: 'QUOTATION',
-        entityId: quotation.id,
-      });
+      notify(
+        await notifications.emit({
+          tenantId: input.tenantId,
+          recipientUserIds: [quotation.createdByUserId],
+          type: 'QUOTATION_ACCEPTED',
+          params: { reference: quotationReference(quotation.id) },
+          actorUserId: input.actingUserId,
+          entityType: 'QUOTATION',
+          entityId: quotation.id,
+        })
+      );
     });
 
     return { quotation };

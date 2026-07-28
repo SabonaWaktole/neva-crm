@@ -176,5 +176,50 @@
     "connect": "Lidh {{name}}",
     "disconnecting": "Duke shkëputur...",
     "disconnect": "Shkëput"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "Choose what this workspace sends, to whom, and when.",
+    "breadcrumb": "Notifications",
+    "emailSection": "Email notifications",
+    "emailSectionHint": "In-app notifications are always on. These settings control which of them also send an email.",
+    "emailEnabled": "Send notification emails",
+    "emailEnabledHint": "Turn this off to keep every notification in-app only.",
+    "eventsLabel": "Events that send email",
+    "rolesLabel": "Roles that receive email",
+    "remindersSection": "Appointment reminders",
+    "remindersEnabled": "Remind staff before an appointment",
+    "leadTimeLabel": "How far in advance",
+    "followUpSection": "Quotation follow-ups",
+    "followUpEnabled": "Remind staff about unanswered quotations",
+    "followUpDaysLabel": "Days to wait before reminding",
+    "expirySection": "Automatic expiry",
+    "expiryEnabled": "Expire quotations that are never answered",
+    "expiryEnabledHint": "This changes quotation records on a schedule. Leave it off to expire quotations by hand.",
+    "expiryDaysLabel": "Days before a quotation expires",
+    "minutes": "minutes",
+    "hours": "hours",
+    "days": "days",
+    "ownerOnly": "Only a Business Owner can change these settings.",
+    "followUpAfterExpiry": "The follow-up must happen before expiry. Reduce the waiting period or extend the expiry window.",
+    "eventType": {
+      "QUOTATION_SUBMITTED_FOR_APPROVAL": "Quotation submitted for approval",
+      "QUOTATION_APPROVED": "Quotation approved",
+      "QUOTATION_RETURNED_TO_DRAFT": "Quotation returned to draft",
+      "QUOTATION_ACCEPTED": "Quotation accepted",
+      "QUOTATION_REJECTED": "Quotation rejected",
+      "QUOTATION_EXPIRED": "Quotation expired",
+      "APPOINTMENT_ASSIGNED": "Appointment assigned",
+      "APPOINTMENT_RESCHEDULED": "Appointment rescheduled",
+      "APPOINTMENT_CANCELLED": "Appointment cancelled",
+      "APPOINTMENT_REMINDER": "Appointment reminder",
+      "QUOTATION_FOLLOW_UP": "Quotation follow-up",
+      "CLIENT_ASSIGNED": "Client assigned",
+      "INVITATION_ACCEPTED": "Invitation accepted"
+    },
+    "role": {
+      "BUSINESS_OWNER": "Business Owners",
+      "STAFF": "Staff and Sales Representatives"
+    }
   }
 }

@@ -14,8 +14,70 @@ export interface WarehouseInventoryValue {
   totalValue: number;
 }
 
+/** One bucket of the new-client trend (§6.7, "new clients added over a period"). */
+export interface NewClientsPoint {
+  month: string; // '2026-07'
+  count: number;
+}
+
+/** §6.7: "count of appointments by status". */
+export interface AppointmentStatusCount {
+  status: string;
+  count: number;
+}
+
+/** §6.7: "basic breakdown by staff member". */
+export interface AppointmentsByStaff {
+  userId: string;
+  staffName: string;
+  scheduled: number;
+  confirmed: number;
+  completed: number;
+  cancelled: number;
+  total: number;
+}
+
+/**
+ * One product that is short at one location.
+ *
+ * Per-warehouse rather than per-product, because §6.4 asks for availability to
+ * be evaluated per location "so a business can see exactly where a shortage
+ * exists" — a company-wide total hides a warehouse with nothing on the shelf
+ * behind another that is overstocked.
+ */
+export interface LowStockItem {
+  productId: string;
+  productName: string;
+  sku: string | null;
+  warehouseId: string;
+  warehouseName: string;
+  quantity: number;
+  threshold: number;
+  status: 'OUT_OF_STOCK' | 'LOW_STOCK';
+}
+
+export interface AppointmentReportFilters {
+  from?: Date;
+  to?: Date;
+  assignedUserId?: string;
+}
+
 export interface IReportRepository {
   getMonthlyRevenue(tenantId: string, limitMonths?: number): Promise<MonthlyRevenue[]>;
   getClientStatusDistribution(tenantId: string): Promise<ClientStatusCount[]>;
   getInventoryValueByWarehouse(tenantId: string): Promise<WarehouseInventoryValue[]>;
+
+  getNewClientsTrend(tenantId: string, limitMonths: number): Promise<NewClientsPoint[]>;
+
+  getAppointmentStatusDistribution(
+    tenantId: string,
+    filters: AppointmentReportFilters
+  ): Promise<AppointmentStatusCount[]>;
+
+  getAppointmentsByStaff(
+    tenantId: string,
+    filters: AppointmentReportFilters
+  ): Promise<AppointmentsByStaff[]>;
+
+  getLowStockItems(tenantId: string): Promise<LowStockItem[]>;
 }

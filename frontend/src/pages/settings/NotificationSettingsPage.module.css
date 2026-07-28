@@ -1,0 +1,220 @@
+/*
+ * Notification settings (§6.6).
+ *
+ * Layout mirrors AccountSettingsPage deliberately — same container width, same
+ * card column, same sticky footer — because they are two tabs of one settings
+ * area and a different rhythm between them reads as a different product.
+ */
+
+.container {
+  max-width: 56rem;
+  margin: 0 auto;
+  padding-bottom: var(--spacing-2xl);
+}
+
+.headerBlock {
+  margin-bottom: var(--spacing-xl);
+}
+
+.breadcrumb {
+  margin-bottom: var(--spacing-sm);
+}
+
+.breadcrumbList {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--font-size-body-sm);
+  color: var(--text-tertiary);
+}
+
+.breadcrumbLink {
+  color: var(--text-tertiary);
+}
+
+.breadcrumbCurrent {
+  color: var(--text-secondary);
+}
+
+.title {
+  margin: 0 0 4px;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-headline-md);
+  font-weight: 620;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-body-md);
+}
+
+.readOnlyNotice {
+  margin: var(--spacing-md) 0 0;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-container);
+  color: var(--text-secondary);
+  font-size: var(--font-size-body-sm);
+}
+
+.sectionsColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.cardHeaderWithIcon {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--color-outline-variant);
+  color: var(--text-secondary);
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: var(--font-size-title-md);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.helperText {
+  margin: 0 0 var(--spacing-md);
+  font-size: var(--font-size-body-sm);
+  color: var(--text-tertiary);
+}
+
+/* Aligns with the checkbox label above it rather than the card edge. */
+.helperTextIndented {
+  margin: 4px 0 var(--spacing-md) 26px;
+  font-size: var(--font-size-body-sm);
+  color: var(--text-tertiary);
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-body-md);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+/* A disabled fieldset greys its legend too, which is the intended signal. */
+.fieldset:disabled .checkboxLabel {
+  cursor: default;
+  color: var(--text-tertiary);
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.fieldset {
+  margin: var(--spacing-lg) 0 0;
+  padding: 0;
+  border: none;
+}
+
+.legend {
+  padding: 0;
+  margin-bottom: var(--spacing-sm);
+  font-size: var(--font-size-body-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/*
+ * Two columns on anything wider than a phone: thirteen event checkboxes in a
+ * single column is a lot of scrolling for a list people scan rather than read.
+ */
+.checkGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
+  gap: var(--spacing-sm) var(--spacing-lg);
+}
+
+.fieldGroup {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-lg);
+}
+
+.fieldLabel {
+  font-size: var(--font-size-body-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  /* Pushes the control to a consistent column across all four cards. */
+  min-width: 14rem;
+}
+
+.nativeSelect,
+.numberInput {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-outline-variant);
+  background-color: var(--color-surface-container-lowest);
+  color: var(--text-primary);
+  font-size: var(--font-size-body-md);
+  font-family: inherit;
+}
+
+.numberInput {
+  width: 6rem;
+}
+
+.nativeSelect:disabled,
+.numberInput:disabled {
+  color: var(--text-tertiary);
+  cursor: not-allowed;
+}
+
+.unit {
+  font-size: var(--font-size-body-sm);
+  color: var(--text-tertiary);
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--color-outline-variant);
+}
+
+.skeletonColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.skeletonCard {
+  height: 220px;
+  border-radius: var(--radius-xl);
+}
+
+@media (max-width: 640px) {
+  /* Stack label above control; 14rem of label leaves nothing for the input. */
+  .fieldLabel {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .footer {
+    flex-direction: column-reverse;
+  }
+}

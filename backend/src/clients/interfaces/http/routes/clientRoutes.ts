@@ -30,7 +30,16 @@ import { PrismaUserRepository } from '../../../../auth/infrastructure/repositori
 export const createClientRouter = (
   prisma: PrismaClient,
   tokenService: ITokenService,
-  tenantRepository: ITenantRepository
+  tenantRepository: ITenantRepository,
+  /**
+   * Supplied by `createApp` so client events reach the email dispatcher too.
+   *
+   * Optional with a local fallback because the router is also constructed
+   * directly by integration tests, which have no interest in wiring an email
+   * stack. The fallback emits in-app notifications and sends no mail — the
+   * previous behaviour, now explicit rather than accidental.
+   */
+  notificationService?: NotificationService
 ): Router => {
   const router = Router({ mergeParams: true });
 
@@ -41,10 +50,9 @@ export const createClientRouter = (
   const outcomeCategoryRepo = new PrismaOutcomeCategoryRepository(prisma);
   const appointmentRepo = new PrismaAppointmentRepository(prisma);
 
-  const notifications = new NotificationService(
-    new PrismaNotificationRepository(prisma),
-    new PrismaUserRepository()
-  );
+  const notifications =
+    notificationService ??
+    new NotificationService(new PrismaNotificationRepository(prisma), new PrismaUserRepository());
 
   // Use Cases
   const createClientUseCase = new CreateClientUseCase(clientRepo, customFieldRepo, notifications);

@@ -6,6 +6,12 @@ import {
 } from '../../application/MarkNotificationReadUseCase';
 import { requireTenantId } from "@main/interfaces/http/tenantContext";
 import { Notification } from '../../domain/Notification';
+import { GetNotificationSettingsUseCase } from '../../application/GetNotificationSettingsUseCase';
+import { UpdateNotificationSettingsUseCase } from '../../application/UpdateNotificationSettingsUseCase';
+import { InvalidNotificationSettingsError } from '../../domain/NotificationSettings';
+import { UnauthorizedError } from '../../../auth/domain/errors';
+import { notificationSettingsSchema } from './schemas/notificationSettingsSchemas';
+import { ZodError } from 'zod';
 
 /**
  * Notifications are addressed to a person, so every handler reads the
@@ -18,7 +24,9 @@ export class NotificationController {
   constructor(
     private readonly getNotifications: GetNotificationsUseCase,
     private readonly markRead: MarkNotificationReadUseCase,
-    private readonly markAllRead: MarkAllNotificationsReadUseCase
+    private readonly markAllRead: MarkAllNotificationsReadUseCase,
+    private readonly getSettings: GetNotificationSettingsUseCase,
+    private readonly updateSettings: UpdateNotificationSettingsUseCase
   ) {}
 
   list = async (req: Request, res: Response) => {
@@ -67,6 +75,55 @@ export class NotificationController {
       });
       res.json({ updated: result.updated });
     } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  };
+
+  /**
+   * The workspace's notification policy (§6.6).
+   *
+   * Readable by everyone in the tenant, writable by Business Owners only — the
+   * role check lives in the use case rather than as router middleware, because
+   * GET and PUT on this resource have different answers and a router-level
+   * `authorize` would have to gate the stricter one.
+   */
+  readSettings = async (req: Request, res: Response) => {
+    try {
+      const settings = await this.getSettings.execute(requireTenantId(req));
+      res.json(settings.toJSON());
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  };
+
+  writeSettings = async (req: Request, res: Response) => {
+    try {
+      /*
+       * Parsed here rather than through the shared `validateRequest`
+       * middleware, for the reason UpdateTenantSettingsUseCase documents: that
+       * middleware throws away the parse RESULT, so every default and coercion
+       * in a schema is inert and the handler still sees the raw body. This
+       * schema strips unknown keys and coerces numbers, both of which have to
+       * actually land. See TD-011.
+       */
+      const patch = notificationSettingsSchema.parse(req.body);
+
+      const settings = await this.updateSettings.execute({
+        tenantId: requireTenantId(req),
+        requestingUserRole: req.user!.role,
+        patch,
+      });
+      res.json(settings.toJSON());
+    } catch (error: any) {
+      if (error instanceof UnauthorizedError) {
+        return res.status(403).json({ error: error.message });
+      }
+      if (error instanceof InvalidNotificationSettingsError) {
+        return res.status(400).json({ error: error.message });
+      }
+      if (error instanceof ZodError) {
+        return res.status(400).json({ issues: error.issues });
+      }
       res.status(400).json({ error: error.message });
     }
   };

@@ -8,4 +8,11 @@ export class ConsoleEmailSender implements IEmailSender {
   async sendInvitationEmail(to: string, token: string, tenantName: string): Promise<void> {
     console.log(`[EMAIL] To: ${to} | You are invited to join ${tenantName} | Token: ${token}`);
   }
+
+  async sendTransactionalEmail(to: string, subject: string, html: string): Promise<void> {
+    // The body is logged as a length rather than in full: business-event mail
+    // quotes client names and quotation references, and a development log is
+    // the last place that should become a second copy of customer data.
+    console.log(`[EMAIL] To: ${to} | ${subject} | ${html.length} bytes`);
+  }
 }

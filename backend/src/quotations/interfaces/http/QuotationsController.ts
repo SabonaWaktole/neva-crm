@@ -261,7 +261,31 @@ export class QuotationsController {
         actingUserId: req.user!.userId,
         actingUserRole: req.user!.role
       });
-      res.json(result);
+
+      /*
+       * The customer link, assembled here rather than stored.
+       *
+       * The database holds the token; the URL around it depends on where the
+       * frontend is deployed, which is configuration, not data. Storing the
+       * full URL would freeze today's hostname into every historical row.
+       *
+       * Null until the quotation has been sent, which is what lets the UI show
+       * a Share action only when there is something to share.
+       */
+      const shareUrl = result.quotation.shareToken
+        ? `${process.env.FRONTEND_URL || 'http://localhost:5173'}/q/${result.quotation.shareToken}`
+        : null;
+
+      /*
+       * The token travels too, so the UI can build the PDF URL against its own
+       * API base. The server knows FRONTEND_URL but has no configured notion of
+       * its own public origin, and guessing one from the request Host header is
+       * how a proxied deployment ends up handing out internal hostnames.
+       *
+       * Safe to expose here: this endpoint already required authentication,
+       * tenant resolution and — for STAFF — ownership of the quotation.
+       */
+      res.json({ ...result, shareUrl, shareToken: result.quotation.shareToken });
     } catch (error: any) {
       if (error.message.includes('not found')) return res.status(404).json({ error: error.message });
       if (error.message.includes('Unauthorized')) return res.status(403).json({ error: error.message });

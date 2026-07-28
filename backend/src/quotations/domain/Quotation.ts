@@ -20,6 +20,17 @@ export class Quotation {
   respondedAt: Date | null;
   lineItems: QuotationLineItem[];
 
+  /**
+   * Capability token for the customer-facing view.
+   *
+   * Private with a getter because there is exactly one legitimate way to set
+   * it — `issueShareToken`, on the transition to Sent — and a public field
+   * would let any caller mint or overwrite a link that is already in a
+   * customer's inbox.
+   */
+  private _shareToken: string | null;
+  private _shareTokenIssuedAt: Date | null;
+
   private constructor(props: {
     id: string;
     tenantId: string;
@@ -30,6 +41,8 @@ export class Quotation {
     sentAt: Date | null;
     respondedAt: Date | null;
     lineItems: QuotationLineItem[];
+    shareToken?: string | null;
+    shareTokenIssuedAt?: Date | null;
   }) {
     this.id = props.id;
     this.tenantId = props.tenantId;
@@ -40,6 +53,43 @@ export class Quotation {
     this.sentAt = props.sentAt;
     this.respondedAt = props.respondedAt;
     this.lineItems = props.lineItems;
+    this._shareToken = props.shareToken ?? null;
+    this._shareTokenIssuedAt = props.shareTokenIssuedAt ?? null;
+  }
+
+  get shareToken(): string | null {
+    return this._shareToken;
+  }
+
+  get shareTokenIssuedAt(): Date | null {
+    return this._shareTokenIssuedAt;
+  }
+
+  /**
+   * Mint the customer link, once.
+   *
+   * Called by the use cases that put a quotation into Sent — whether directly
+   * from Draft or via approval — so both routes to "the customer can see this"
+   * produce a link, and neither has to remember to.
+   *
+   * Two guards, both load-bearing:
+   *
+   *  - **Only when Sent.** A token on a draft would make an unfinished
+   *    quotation publicly readable by anyone holding the URL.
+   *  - **Never reissued.** Both routes into Sent call this unconditionally, so
+   *    the second call has to be a no-op: a customer may already hold the first
+   *    link, and silently replacing it would break a URL they were told to use.
+   *    The link resolves to current state rather than to a snapshot, so keeping
+   *    it costs nothing in accuracy.
+   *
+   * Note there is no Sent → Draft transition to worry about — `returnToDraft`
+   * only accepts Pending Approval, which never had a token in the first place.
+   */
+  issueShareToken(token: string): void {
+    if (this.status !== QuotationStatus.Sent) return;
+    if (this._shareToken !== null) return;
+    this._shareToken = token;
+    this._shareTokenIssuedAt = new Date();
   }
 
   get subtotal(): number {
@@ -56,6 +106,8 @@ export class Quotation {
     createdAt?: Date;
     sentAt?: Date | null;
     respondedAt?: Date | null;
+    shareToken?: string | null;
+    shareTokenIssuedAt?: Date | null;
   }): Quotation {
     if (!props.lineItems || props.lineItems.length === 0) {
       throw new Error('A quotation must have at least one line item');
@@ -76,7 +128,9 @@ export class Quotation {
       createdAt: props.createdAt ?? new Date(),
       sentAt: props.sentAt ?? null,
       respondedAt: props.respondedAt ?? null,
-      lineItems: props.lineItems
+      lineItems: props.lineItems,
+      shareToken: props.shareToken ?? null,
+      shareTokenIssuedAt: props.shareTokenIssuedAt ?? null
     });
   }
 

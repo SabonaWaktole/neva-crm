@@ -79,5 +79,29 @@
     "subtotal": "Nëntotali",
     "grandTotal": "Totali i përgjithshëm",
     "addRow": "Shto rresht"
+  },
+  "share": {
+    "title": "Share with the client",
+    "copyLink": "Copy client link",
+    "copied": "Link copied",
+    "downloadPdf": "Download PDF",
+    "notSentYet": "The client link appears once the quotation is sent.",
+    "hint": "This link is private. Anyone who has it can view the quotation."
+  },
+  "public": {
+    "loading": "Loading quotation…",
+    "notFound": "This quotation link is no longer valid.",
+    "notFoundHint": "It may have been withdrawn. Please contact the sender for an up-to-date copy.",
+    "preparedFor": "Prepared for",
+    "issued": "Issued",
+    "sent": "Sent",
+    "reference": "Reference",
+    "description": "Description",
+    "quantity": "Qty",
+    "unitPrice": "Unit price",
+    "lineTotal": "Total",
+    "subtotal": "Subtotal",
+    "download": "Download PDF",
+    "privateNotice": "This is a private link. Please do not forward it."
   }
 }

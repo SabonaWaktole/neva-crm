@@ -4,11 +4,17 @@ import { IQuotationWriteTransaction } from '../ports/IQuotationWriteTransaction'
 import { NotificationService } from '../../../notifications/application/NotificationService';
 import { IUserRepository } from '../../../auth/domain/repositories/IUserRepository';
 import { quotationReference } from '../../domain/quotationReference';
+import { runWithPostCommitEmail, IPostCommitEmailDispatcher } from '../runWithPostCommitEmail';
+import { generateShareToken } from '../../domain/shareToken';
+import { IQuotationDeliveryService } from '../QuotationDeliveryService';
+import { QuotationStatus } from '../../domain/Quotation';
 
 export class SubmitQuotationUseCase {
   constructor(
     private writeTx: IQuotationWriteTransaction,
-    private userRepo: IUserRepository
+    private userRepo: IUserRepository,
+    private emailDispatcher?: IPostCommitEmailDispatcher,
+    private delivery?: IQuotationDeliveryService
   ) {}
 
   async execute(input: {
@@ -18,7 +24,7 @@ export class SubmitQuotationUseCase {
     actingUserRole: string;
     requiresQuotationApproval: boolean;
   }) {
-    return this.writeTx.run(async (repos) => {
+    const result = await runWithPostCommitEmail(this.writeTx, this.emailDispatcher, async (repos, notify) => {
       const quotation = await repos.quotationRepo.findById(input.tenantId, input.quotationId);
       if (!quotation) {
         throw new Error('Quotation not found');
@@ -30,6 +36,12 @@ export class SubmitQuotationUseCase {
 
       const fromStatus = quotation.status;
       quotation.submit({ requiresApproval: input.requiresQuotationApproval });
+
+      // Mints the customer link, but only on the branch that actually reaches
+      // SENT — the entity refuses on any other status, so this is safe to call
+      // unconditionally and there is no second `if` to keep in sync with
+      // `submit`'s own branching.
+      quotation.issueShareToken(generateShareToken());
 
       const history = QuotationStatusHistory.create({
         id: crypto.randomUUID(),
@@ -56,19 +68,38 @@ export class SubmitQuotationUseCase {
        */
       if (quotation.status === 'PENDING_APPROVAL') {
         const notifications = new NotificationService(repos.notificationRepo, this.userRepo);
-        await notifications.emit({
-          tenantId: input.tenantId,
-          toRole: UserRole.BUSINESS_OWNER,
-          type: 'QUOTATION_SUBMITTED_FOR_APPROVAL',
-          // Snapshot: the reference as shown on the quotation page.
-          params: { reference: quotationReference(quotation.id) },
-          actorUserId: input.actingUserId,
-          entityType: 'QUOTATION',
-          entityId: quotation.id,
-        });
+        notify(
+          await notifications.emit({
+            tenantId: input.tenantId,
+            toRole: UserRole.BUSINESS_OWNER,
+            type: 'QUOTATION_SUBMITTED_FOR_APPROVAL',
+            // Snapshot: the reference as shown on the quotation page.
+            params: { reference: quotationReference(quotation.id) },
+            actorUserId: input.actingUserId,
+            entityType: 'QUOTATION',
+            entityId: quotation.id,
+          })
+        );
       }
 
       return { quotation };
     });
+
+    /*
+     * Deliver to the customer, but only on the branch that actually sent.
+     *
+     * With approval enabled, `submit` stops at PENDING_APPROVAL and nothing
+     * should leave the building — that is the entire purpose of the approval
+     * step. `ApproveQuotationUseCase` delivers for that path instead.
+     *
+     * After the transaction, and not awaited-into-it: an SMTP round trip has no
+     * business holding a database transaction open, and the quotation is
+     * legitimately sent whether or not the mail lands.
+     */
+    if (result.quotation.status === QuotationStatus.Sent) {
+      await this.delivery?.deliverToClient(result.quotation.shareToken);
+    }
+
+    return result;
   }
 }

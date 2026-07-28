@@ -25,7 +25,13 @@ import { PrismaNotificationRepository } from '../../../../notifications/infrastr
 export const createAppointmentRouter = (
   prisma: PrismaClient,
   tokenService: ITokenService,
-  tenantRepository: ITenantRepository
+  tenantRepository: ITenantRepository,
+  /**
+   * Supplied by `createApp` so appointment events reach the email dispatcher.
+   * Optional with a local fallback for integration tests — see the same
+   * parameter on `createClientRouter`.
+   */
+  notificationService?: NotificationService
 ): Router => {
   const router = Router({ mergeParams: true });
 
@@ -36,7 +42,9 @@ export const createAppointmentRouter = (
 
   // Notifications are optional on these use cases so unit tests can construct
   // them without a notification stack; here they are always provided.
-  const notifications = new NotificationService(new PrismaNotificationRepository(prisma), userRepo);
+  const notifications =
+    notificationService ??
+    new NotificationService(new PrismaNotificationRepository(prisma), userRepo);
 
   // Use Cases
   const createAppointmentUseCase = new CreateAppointmentUseCase(appointmentRepo, clientRepo, userRepo, notifications);
