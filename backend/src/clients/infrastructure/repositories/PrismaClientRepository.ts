@@ -95,14 +95,14 @@ export class PrismaClientRepository implements IClientRepository {
       // Mirrors the raw-SQL branch above — keep both in step.
       if (filters.search) {
         where.OR = [
-          { name: { contains: filters.search, mode: 'insensitive' } },
-          { email: { contains: filters.search, mode: 'insensitive' } },
-          { phone: { contains: filters.search, mode: 'insensitive' } },
+          { name: { contains: filters.search } },
+          { email: { contains: filters.search } },
+          { phone: { contains: filters.search } },
         ];
       }
-      if (filters.name) where.name = { contains: filters.name, mode: 'insensitive' };
-      if (filters.email) where.email = { contains: filters.email, mode: 'insensitive' };
-      if (filters.phone) where.phone = { contains: filters.phone, mode: 'insensitive' };
+      if (filters.name) where.name = { contains: filters.name };
+      if (filters.email) where.email = { contains: filters.email };
+      if (filters.phone) where.phone = { contains: filters.phone };
       if (filters.status) where.status = filters.status;
       if (filters.assignedUserId) where.assignedUserId = filters.assignedUserId;
 

@@ -429,6 +429,8 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
       // different content type out of one.
       setHeaders: (res: any) => {
         res.setHeader('X-Content-Type-Options', 'nosniff');
+        // Override Helmet's default CORP to allow cross-origin image loading
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
       },
     })
   );

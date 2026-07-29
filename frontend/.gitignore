@@ -32,3 +32,8 @@ design/
 # Local env files
 .env.*
 .env
+
+
+
+
+*.zip
