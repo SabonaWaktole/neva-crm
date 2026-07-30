@@ -1,0 +1,38 @@
+# SPA routing for Apache/LiteSpeed (Hostinger).
+#
+# `vercel.json` next to this file expresses the same rule, but only Vercel
+# reads it. On Apache a reload of /bole-electronics-depot/ is a request for a
+# directory that does not exist on disk — the router that knows about it is in
+# JavaScript that has not loaded yet — so the server 404s before the SPA ever
+# runs. Client-side navigation works because no request is made at all.
+#
+# Lives in public/ rather than dist/ so Vite copies it into every build; dist
+# is gitignored and rebuilt from scratch.
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Real files and directories are served as-is. Without these two conditions
+  # the rule below would swallow /assets/*.js and hand back index.html with a
+  # 200, which surfaces as "Unexpected token '<'" rather than as a 404.
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Everything else is a client-side route: serve the shell and let the router
+  # resolve the path.
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# index.html must not be cached: it names the hashed bundles, so a stale copy
+# points at assets that no longer exist after a redeploy. The hashed assets
+# themselves are immutable and safe to cache hard.
+<IfModule mod_headers.c>
+  <FilesMatch "index\.html$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+  <FilesMatch "\.(js|css|woff2?|svg|png|jpe?g|gif|webp|avif)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+</IfModule>
