@@ -43,7 +43,15 @@ export class NotificationController {
         unreadCount: result.unreadCount,
       });
     } catch (error: any) {
-      res.status(400).json({ error: error.message });
+      /*
+       * Logged, and reported as 500 rather than 400. This handler takes no
+       * meaningful input beyond two bounded query params, so nothing the caller
+       * sent can make it fail — a throw here is the server's fault, and the
+       * blanket 400 this used to return sent every future debugging session
+       * looking at the request instead of at the logs.
+       */
+      console.error('Failed to list notifications', error);
+      res.status(500).json({ error: 'Failed to load notifications' });
     }
   };
 

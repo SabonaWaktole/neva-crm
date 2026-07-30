@@ -1,4 +1,5 @@
 import { apiClient } from '../api';
+import { API_BASE_URL } from '../api/baseUrl';
 
 /**
  * Uploads for profile photos and workspace branding.
@@ -124,11 +125,10 @@ export const resolveMediaUrl = (url: string | null | undefined): string | undefi
   if (!url) return undefined;
   if (/^https?:\/\//i.test(url)) return url;
 
-  const base = (import.meta.env.VITE_API_URL as string | undefined) ?? '/api';
-  if (base.startsWith('/')) return url; // same origin — a proxy handles it
+  if (API_BASE_URL.startsWith('/')) return url; // same origin — a proxy handles it
 
   try {
-    return new URL(url, base).toString();
+    return new URL(url, API_BASE_URL).toString();
   } catch {
     return url;
   }

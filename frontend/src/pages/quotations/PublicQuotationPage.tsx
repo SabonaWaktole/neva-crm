@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Download, FileWarning } from 'lucide-react';
 import styles from './PublicQuotationPage.module.css';
+import { API_BASE_URL } from '../../api/baseUrl';
 
 interface PublicLine {
   description: string;
@@ -30,7 +31,7 @@ interface PublicQuotation {
   subtotal: number;
 }
 
-const apiBase = import.meta.env.VITE_API_URL || '/api';
+const apiBase = API_BASE_URL;
 
 /**
  * The quotation as the customer sees it (§6.5).

@@ -7,6 +7,7 @@ import { Card } from '../../components/ui/Card/Card';
 import { Badge } from '../../components/ui/Badge/Badge';
 import type { BadgeProps } from '../../components/ui/Badge/Badge';
 import styles from './QuotationDetailContent.module.css';
+import { API_BASE_URL } from '../../api/baseUrl';
 
 import { useQuotations, useQuotationActions } from '../../hooks/useQuotations';
 import { useTeam } from '../../hooks/useTeam';
@@ -89,7 +90,7 @@ export const QuotationDetailContent: React.FC = () => {
    * breaks behind a proxy. The client already knows where its API lives.
    */
   const pdfUrl = shareToken
-    ? `${import.meta.env.VITE_API_URL || '/api'}/public/quotations/${shareToken}/pdf`
+    ? `${API_BASE_URL}/public/quotations/${shareToken}/pdf`
     : null;
 
   const handleCopyLink = async () => {
