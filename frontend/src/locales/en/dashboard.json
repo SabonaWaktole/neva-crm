@@ -138,7 +138,10 @@
   "comingPhase5": "Coming in Phase 5",
   "kpiNewClients": "New clients",
   "kpiAssignedClients": "My assigned clients",
+  "kpiAssignedClientsTrend": "In your portfolio",
   "kpiOpenFollowUps": "Open follow-ups",
+  "kpiFollowUpThreshold_one": "Unanswered over {{count}} day",
+  "kpiFollowUpThreshold_other": "Unanswered over {{count}} days",
   "kpiVsLastWeek": "vs last week",
   "loadingAppointments": "Loading appointments..."
 }

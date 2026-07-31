@@ -7,6 +7,15 @@ export class QuotationLineItem {
   quantity: number;
   unitPrice: number;
 
+  /**
+   * Display names of the product and warehouse, hydrated from the joined rows
+   * on read. Not persisted from here — the line item owns the two ids, nothing
+   * more. Undefined on entities built by a write path that never loaded the
+   * joins, which is why every consumer falls back to the id.
+   */
+  productName?: string;
+  warehouseName?: string;
+
   private constructor(props: {
     id: string;
     tenantId: string;
@@ -15,6 +24,8 @@ export class QuotationLineItem {
     warehouseId: string;
     quantity: number;
     unitPrice: number;
+    productName?: string;
+    warehouseName?: string;
   }) {
     this.id = props.id;
     this.tenantId = props.tenantId;
@@ -23,6 +34,8 @@ export class QuotationLineItem {
     this.warehouseId = props.warehouseId;
     this.quantity = props.quantity;
     this.unitPrice = props.unitPrice;
+    this.productName = props.productName;
+    this.warehouseName = props.warehouseName;
   }
 
   get lineTotal(): number {
@@ -37,6 +50,8 @@ export class QuotationLineItem {
     warehouseId: string;
     quantity: number;
     unitPrice: number;
+    productName?: string;
+    warehouseName?: string;
   }): QuotationLineItem {
     if (props.quantity <= 0) {
       throw new Error('Quantity must be greater than zero');

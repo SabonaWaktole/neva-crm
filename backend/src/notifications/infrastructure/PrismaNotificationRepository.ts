@@ -109,16 +109,16 @@ export class PrismaNotificationRepository implements INotificationRepository {
     readAt: Date | null;
     createdAt: Date;
   }): Notification {
-    return Notification.create({
+    // Rebuilt from storage rather than created fresh, so this goes through
+    // `fromPersistence`: the "actor is not the recipient" guard belongs to
+    // creation and must not be able to reject a row that is already stored.
+    // `saveMany` never writes such a row, but direct SQL — the demo seed — has.
+    return Notification.fromPersistence({
       id: record.id,
       tenantId: record.tenantId,
       recipientUserId: record.recipientUserId,
       type: record.type as NotificationType,
       params: (record.params ?? {}) as NotificationParams,
-      // Rebuilt from storage rather than created fresh, so the "actor is not
-      // the recipient" guard in Notification.create must not reject a row that
-      // is already persisted. It cannot: the guard only fires when both are
-      // set and equal, which saveMany never writes.
       actorUserId: record.actorUserId,
       entityType: record.entityType as NotificationEntityType | null,
       entityId: record.entityId,

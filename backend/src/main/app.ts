@@ -241,7 +241,7 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const interactionRepository = new PrismaInteractionRepository(prisma);
   const appointmentRepository = new PrismaAppointmentRepository(prisma);
   
-  const getTenantClientMetricsUseCase = new GetTenantClientMetricsUseCase(prismaClientRepository);
+  const getTenantClientMetricsUseCase = new GetTenantClientMetricsUseCase(prismaClientRepository, notificationSettingsRepository);
   const getTenantActivityFeedUseCase = new GetTenantActivityFeedUseCase(prismaClientRepository, interactionRepository, appointmentRepository, userRepository);
   
   const { createDashboardRouter } = require('../dashboard/interfaces/http/routes/dashboardRoutes');
@@ -429,6 +429,8 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
       // different content type out of one.
       setHeaders: (res: any) => {
         res.setHeader('X-Content-Type-Options', 'nosniff');
+        // Override Helmet's default CORP to allow cross-origin image loading
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
       },
     })
   );

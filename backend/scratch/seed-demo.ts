@@ -1,20 +1,30 @@
 /**
- * Demo data seeder for the remote (Render) Postgres database.
+ * Demo data GENERATOR for MySQL.
  *
- * Creates a set of fully-populated workspaces ("stores"): staff, warehouses,
- * categories, products, stock levels + movements, clients with custom fields,
- * interactions, appointments, quotations and notifications.
+ * Emits `prisma/nevacrm_demo_seed.sql` — a data-only import containing a set of
+ * fully-populated workspaces ("stores"): staff, warehouses, categories,
+ * products, stock levels + movements, clients with custom fields, interactions,
+ * appointments, quotations and notifications.
  *
- * Idempotent-ish: it skips any tenant whose urlSlug already exists, so existing
- * workspaces are never touched. Re-running only adds what is missing.
+ * It writes no database of its own; run it, then import the file:
  *
- *   DATABASE_URL=$(grep DATABASE_URL .env.prod | cut -d'"' -f2) npx tsx scratch/seed-demo.ts
+ *   npx tsx scratch/seed-demo.ts
+ *   mysql -h HOST -u USER -p DBNAME < prisma/nevacrm_demo_seed.sql
+ *
+ * The schema must already exist (`prisma/nevacrm_full_import.sql`, or
+ * `prisma migrate deploy`). The file assumes those tables are EMPTY of these
+ * tenants — it is plain INSERTs, not upserts, so re-importing over itself will
+ * fail on the primary keys rather than silently duplicating.
+ *
+ * Row contents are deterministic (see `seed` below) except for the bcrypt hash,
+ * which is salted fresh on every run.
  */
-import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
+import { writeFileSync } from 'fs';
+import * as path from 'path';
 
-const prisma = new PrismaClient();
+const OUT_FILE = path.resolve(__dirname, '..', 'prisma', 'nevacrm_demo_seed.sql');
 
 const PASSWORD = 'S@b0n@W@';
 
@@ -35,19 +45,114 @@ const daysFromNow = (d: number, hour = 9) => {
 };
 
 // ---------------------------------------------------------------------------
+// SQL emission
+//
+// Rows are collected per table and flushed at the end in dependency order, so
+// one store's rows sit next to the previous store's rather than interleaving.
+// ---------------------------------------------------------------------------
+
+type Row = Record<string, unknown>;
+
+/** Insert order. Parents first; also the order the file is written in. */
+const TABLE_ORDER = [
+  'Tenant',
+  'Warehouse',
+  'User',
+  'Category',
+  'Product',
+  'StockLevel',
+  'StockMovement',
+  'CustomFieldDefinition',
+  'OutcomeCategory',
+  'Client',
+  'Interaction',
+  'Appointment',
+  'AppointmentAuditLog',
+  'Quotation',
+  'QuotationLineItem',
+  'QuotationStatusHistory',
+  'Notification',
+  'Invitation',
+  'Integration',
+] as const;
+
+const tables = new Map<string, Row[]>(TABLE_ORDER.map((t) => [t, []]));
+
+const emit = (table: string, rows: Row[]) => {
+  const bucket = tables.get(table);
+  if (!bucket) throw new Error(`${table} is missing from TABLE_ORDER`);
+  bucket.push(...rows);
+};
+
+/** MySQL string literal, escaped for the default (backslash-aware) sql_mode. */
+const quote = (s: string) =>
+  `'${s.replace(/[\\'\0\n\r\x1a]/g, (c) =>
+    ({ '\\': '\\\\', "'": "\\'", '\0': '\\0', '\n': '\\n', '\r': '\\r', '\x1a': '\\Z' }[c]!),
+  )}'`;
+
+/** `DATETIME(3)` in UTC — Prisma reads and writes these columns as UTC. */
+const datetime = (d: Date) => quote(d.toISOString().replace('T', ' ').replace('Z', ''));
+
+const literal = (v: unknown): string => {
+  if (v === null || v === undefined) return 'NULL';
+  if (v instanceof Date) return datetime(v);
+  if (typeof v === 'boolean') return v ? '1' : '0';
+  if (typeof v === 'number') {
+    if (!Number.isFinite(v)) throw new Error(`Non-finite number: ${v}`);
+    return String(v);
+  }
+  if (typeof v === 'string') return quote(v);
+  // Arrays and plain objects are JSON columns (tags, options, params, config,
+  // customFieldValues), emitted as a plain string literal.
+  //
+  // Deliberately NOT `CAST(... AS JSON)`: MariaDB — which Hostinger serves — has
+  // no native JSON type (it is an alias for LONGTEXT with a json_valid() check)
+  // and rejects that cast outright with a syntax error. A bare string literal
+  // works on both engines: MariaDB stores the text, MySQL 8 parses it into the
+  // JSON column on the way in.
+  return quote(JSON.stringify(v));
+};
+
+/** Rows per INSERT — small enough to stay well inside max_allowed_packet. */
+const BATCH = 200;
+
+function renderTable(table: string, rows: Row[]): string {
+  if (rows.length === 0) return '';
+  // Every row for a table is built from one object literal, so the first row's
+  // keys are the column list; anything else means a shape drifted.
+  const columns = Object.keys(rows[0]);
+  for (const r of rows) {
+    if (Object.keys(r).length !== columns.length || columns.some((c) => !(c in r))) {
+      throw new Error(`Inconsistent columns for ${table}`);
+    }
+  }
+  const colList = columns.map((c) => `\`${c}\``).join(', ');
+
+  const out: string[] = [`-- ${table} (${rows.length} rows)`];
+  for (let i = 0; i < rows.length; i += BATCH) {
+    const values = rows
+      .slice(i, i + BATCH)
+      .map((r) => `  (${columns.map((c) => literal(r[c])).join(', ')})`)
+      .join(',\n');
+    out.push(`INSERT INTO \`${table}\` (${colList}) VALUES\n${values};`);
+  }
+  return out.join('\n') + '\n';
+}
+
+// ---------------------------------------------------------------------------
 // People — the mailboxes the user actually owns, with a name for each.
 // ---------------------------------------------------------------------------
 
 const PEOPLE = [
-  { email: 'sabonawaktole01@gmail.com', firstName: 'Sabona', lastName: 'Waktole' },
-  { email: 'sabonawaktole02@gmail.com', firstName: 'Liya', lastName: 'Bekele' },
-  { email: 'sabonawaktole03@gmail.com', firstName: 'Dawit', lastName: 'Hailu' },
-  { email: 'sabonawaktole04@gmail.com', firstName: 'Meron', lastName: 'Tesfaye' },
-  { email: 'sabonawaktole05@gmail.com', firstName: 'Yonas', lastName: 'Girma' },
-  { email: 'sabonawaktole06@gmail.com', firstName: 'Hanna', lastName: 'Abera' },
-  { email: 'sabonawaktole07@gmail.com', firstName: 'Kaleb', lastName: 'Mengistu' },
-  { email: 'sabonawaktole08@gmail.com', firstName: 'Selam', lastName: 'Desta' },
-  { email: 'sabonawaktole09@gmail.com', firstName: 'Nahom', lastName: 'Alemu' },
+  { email: 'sabonawaktole1@gmail.com', firstName: 'Sabona', lastName: 'Waktole' },
+  { email: 'sabonawaktole2@gmail.com', firstName: 'Liya', lastName: 'Bekele' },
+  { email: 'sabonawaktole3@gmail.com', firstName: 'Dawit', lastName: 'Hailu' },
+  { email: 'sabonawaktole4@gmail.com', firstName: 'Meron', lastName: 'Tesfaye' },
+  { email: 'sabonawaktole5@gmail.com', firstName: 'Yonas', lastName: 'Girma' },
+  { email: 'sabonawaktole6@gmail.com', firstName: 'Hanna', lastName: 'Abera' },
+  { email: 'sabonawaktole7@gmail.com', firstName: 'Kaleb', lastName: 'Mengistu' },
+  { email: 'sabonawaktole8@gmail.com', firstName: 'Selam', lastName: 'Desta' },
+  { email: 'sabonawaktole9@gmail.com', firstName: 'Nahom', lastName: 'Alemu' },
   { email: 'sabonawaktole11@gmail.com', firstName: 'Ruth', lastName: 'Kebede' },
   { email: 'sabonawaktole12@gmail.com', firstName: 'Abel', lastName: 'Tadesse' },
   { email: 'sabonawaktole13@gmail.com', firstName: 'Eden', lastName: 'Mulugeta' },
@@ -56,16 +161,42 @@ const PEOPLE = [
   { email: 'sabonawaktole16@gmail.com', firstName: 'Samuel', lastName: 'Worku' },
   { email: 'sabonawaktole17@gmail.com', firstName: 'Bethel', lastName: 'Getachew' },
   { email: 'sanonawaktole14@gmail.com', firstName: 'Naol', lastName: 'Chala' },
-  { email: 'tafesesabona@gmai.com', firstName: 'Tafese', lastName: 'Sabona' },
+  { email: 'tafesesabona@gmail.com', firstName: 'Tafese', lastName: 'Sabona' },
   { email: 'waktolesabona@gmail.com', firstName: 'Waktole', lastName: 'Sabona' },
   { email: 'zpiratelifeog@gmail.com', firstName: 'Fikru', lastName: 'Lemma' },
   { email: 'zseesailor@gmail.com', firstName: 'Marta', lastName: 'Solomon' },
   { email: 'zunforsaken@gmail.com', firstName: 'Henok', lastName: 'Yilma' },
 ] as const;
 
+/**
+ * How the roster is split across the seeded workspaces.
+ *
+ * Each address belongs to exactly ONE workspace. It has to: `findAnyByEmail`
+ * (PrismaUserRepository) looks a user up by email with no tenant filter, so an
+ * address that exists in several workspaces resolves to an arbitrary one of
+ * them — password reset would land in whichever row MySQL returned first.
+ *
+ * Slices are contiguous over PEOPLE, and the first person in each slice is that
+ * workspace's BUSINESS_OWNER.
+ */
+const ROSTER_SPLIT = [8, 7, 7];
+
+/**
+ * Which of the store specs below actually get seeded, in order.
+ *
+ * Three, one per roster slice. These three are chosen for contrast — ETB/EUR/USD,
+ * English and Albanian, both date formats, three and two warehouses — so the
+ * localization paths all have a workspace exercising them.
+ */
+const SEEDED_SLUGS = [
+  'bole-electronics-depot',
+  'moonwalk-pharma-distribution',
+  'kazanchis-office-interiors',
+];
+
 // ---------------------------------------------------------------------------
-// Stores. Each one gets the full roster above, so every mailbox can sign in to
-// every workspace; the owner rotates so each address owns at least one store.
+// Stores. Only the SEEDED_SLUGS above are emitted; the rest are kept as ready
+// -made specs to swap in.
 // ---------------------------------------------------------------------------
 
 type StoreSpec = {
@@ -573,20 +704,23 @@ const TRANSFER_REASONS = [
 const skuFor = (name: string, i: number) =>
   `${name.replace(/[^A-Za-z0-9 ]/g, '').split(/\s+/).slice(0, 2).map((w) => w.slice(0, 3).toUpperCase()).join('-')}-${String(i + 1).padStart(3, '0')}`;
 
-async function seedStore(spec: StoreSpec, storeIndex: number, hashedPassword: string) {
-  const existing = await prisma.tenant.findUnique({ where: { urlSlug: spec.slug } });
-  if (existing) {
-    console.log(`  ~ ${spec.name} already exists, skipping`);
-    return;
-  }
+type Person = (typeof PEOPLE)[number];
 
+function seedStore(
+  spec: StoreSpec,
+  storeIndex: number,
+  hashedPassword: string,
+  roster: readonly Person[],
+) {
   const tenantId = randomUUID();
-  await prisma.tenant.create({
-    data: {
+  emit('Tenant', [
+    {
       id: tenantId,
       name: spec.name,
       urlSlug: spec.slug,
       requiresQuotationApproval: spec.requiresQuotationApproval,
+      logoUrl: null,
+      coverImageUrl: null,
       registrationNumber: spec.regNo,
       addressLine: spec.street,
       addressCity: spec.city,
@@ -602,7 +736,7 @@ async function seedStore(spec: StoreSpec, storeIndex: number, hashedPassword: st
       subscriptionStatus: spec.suspended ? 'SUSPENDED' : 'ACTIVE',
       createdAt: daysFromNow(-(420 - storeIndex * 40)),
     },
-  });
+  ]);
 
   // --- Warehouses -----------------------------------------------------------
   const warehouses = spec.warehouses.map((w) => ({
@@ -613,16 +747,21 @@ async function seedStore(spec: StoreSpec, storeIndex: number, hashedPassword: st
     createdAt: daysFromNow(-(400 - storeIndex * 40)),
     updatedAt: new Date(),
   }));
-  await prisma.warehouse.createMany({ data: warehouses });
+  emit('Warehouse', warehouses);
 
-  // --- Users: the whole roster, owner rotates per store ----------------------
-  const ownerIdx = storeIndex % PEOPLE.length;
-  const users = PEOPLE.map((p, i) => {
-    const isOwner = i === ownerIdx;
-    // Roughly a third of staff manage a specific warehouse; the rest are
-    // floaters. Spread by a counter rather than `i` so every warehouse gets
-    // managers — `i % 3` would land every third staffer on warehouse 0.
-    const managed = !isOwner && i % 3 === 0 ? warehouses[Math.floor(i / 3) % warehouses.length].id : null;
+  // --- Users: this workspace's slice of the roster, nobody shared ------------
+  // First in the slice owns the business; everyone else is staff.
+  //
+  // Warehouse assignment: the owner gets none (owners are not scoped to a
+  // location) and exactly ONE staff member is left unassigned, so the "no
+  // warehouse" state is visible on the team page. The rest are dealt round
+  // robin, which guarantees every warehouse has managers — indexing by the
+  // roster position instead would leave the later warehouses empty in the
+  // smaller slices.
+  const lastStaffIdx = roster.length - 1;
+  const users = roster.map((p, i) => {
+    const isOwner = i === 0;
+    const unassigned = isOwner || i === lastStaffIdx;
     return {
       id: randomUUID(),
       email: p.email,
@@ -631,15 +770,18 @@ async function seedStore(spec: StoreSpec, storeIndex: number, hashedPassword: st
       lastName: p.lastName,
       phone: `+251 9${String(10 + storeIndex)} ${String(100000 + i * 4321).slice(0, 3)} ${String(100000 + i * 7919).slice(0, 3)}`,
       role: isOwner ? 'BUSINESS_OWNER' : 'STAFF',
-      isActive: i !== PEOPLE.length - 1, // one deactivated account per store
+      // Every account stays active. Each address now exists in exactly one
+      // workspace, so deactivating one would lock that mailbox out of the demo
+      // entirely rather than just out of one store.
+      isActive: true,
       language: null as string | null,
       tenantId,
-      warehouseId: managed,
+      warehouseId: unassigned ? null : warehouses[(i - 1) % warehouses.length].id,
       createdAt: daysFromNow(-(395 - storeIndex * 40) + i),
     };
   });
-  await prisma.user.createMany({ data: users });
-  const owner = users[ownerIdx];
+  emit('User', users);
+  const owner = users[0];
   const activeUsers = users.filter((u) => u.isActive);
 
   // --- Categories -----------------------------------------------------------
@@ -652,7 +794,7 @@ async function seedStore(spec: StoreSpec, storeIndex: number, hashedPassword: st
     createdAt: daysFromNow(-380),
     updatedAt: new Date(),
   }));
-  await prisma.category.createMany({ data: categories });
+  emit('Category', categories);
   const catByName = new Map(categories.map((c) => [c.name, c.id]));
 
   // --- Products -------------------------------------------------------------
@@ -673,7 +815,7 @@ async function seedStore(spec: StoreSpec, storeIndex: number, hashedPassword: st
     createdAt: daysFromNow(-370 + i * 2),
     updatedAt: new Date(),
   }));
-  await prisma.product.createMany({ data: products });
+  emit('Product', products);
 
   // --- Stock levels: every product in every warehouse -----------------------
   const stockLevels: any[] = [];
@@ -698,7 +840,7 @@ async function seedStore(spec: StoreSpec, storeIndex: number, hashedPassword: st
       });
     }
   }
-  await prisma.stockLevel.createMany({ data: stockLevels });
+  emit('StockLevel', stockLevels);
 
   // --- Stock movements: the history behind those levels ---------------------
   const movements: any[] = [];
@@ -738,7 +880,7 @@ async function seedStore(spec: StoreSpec, storeIndex: number, hashedPassword: st
       }
     }
   }
-  await prisma.stockMovement.createMany({ data: movements });
+  emit('StockMovement', movements);
 
   // --- Custom field definitions & outcome categories ------------------------
   const cfds = [
@@ -749,10 +891,10 @@ async function seedStore(spec: StoreSpec, storeIndex: number, hashedPassword: st
     { id: randomUUID(), tenantId, fieldName: 'VAT Registered', fieldType: 'BOOLEAN', options: [] },
     { id: randomUUID(), tenantId, fieldName: 'Onboarded On', fieldType: 'DATE', options: [] },
   ];
-  await prisma.customFieldDefinition.createMany({ data: cfds });
+  emit('CustomFieldDefinition', cfds);
 
   const outcomes = OUTCOME_LABELS.map((label) => ({ id: randomUUID(), tenantId, label }));
-  await prisma.outcomeCategory.createMany({ data: outcomes });
+  emit('OutcomeCategory', outcomes);
 
   // --- Clients --------------------------------------------------------------
   const clientCount = 18;
@@ -781,7 +923,7 @@ async function seedStore(spec: StoreSpec, storeIndex: number, hashedPassword: st
       updatedAt: daysFromNow(-int(0, 19)),
     };
   });
-  await prisma.client.createMany({ data: clients });
+  emit('Client', clients);
 
   // --- Interactions ---------------------------------------------------------
   const interactions: any[] = [];
@@ -800,7 +942,7 @@ async function seedStore(spec: StoreSpec, storeIndex: number, hashedPassword: st
       });
     }
   }
-  await prisma.interaction.createMany({ data: interactions });
+  emit('Interaction', interactions);
 
   // --- Appointments (past + upcoming) + reschedule audit trail --------------
   const appointments: any[] = [];
@@ -837,8 +979,8 @@ async function seedStore(spec: StoreSpec, storeIndex: number, hashedPassword: st
       });
     }
   }
-  await prisma.appointment.createMany({ data: appointments });
-  await prisma.appointmentAuditLog.createMany({ data: auditLogs });
+  emit('Appointment', appointments);
+  emit('AppointmentAuditLog', auditLogs);
 
   // --- Quotations, line items and status history ---------------------------
   const sellable = products.filter((p) => !p.isArchived);
@@ -922,9 +1064,9 @@ async function seedStore(spec: StoreSpec, storeIndex: number, hashedPassword: st
       });
     });
   }
-  await prisma.quotation.createMany({ data: quotations });
-  await prisma.quotationLineItem.createMany({ data: lineItems });
-  await prisma.quotationStatusHistory.createMany({ data: history });
+  emit('Quotation', quotations);
+  emit('QuotationLineItem', lineItems);
+  emit('QuotationStatusHistory', history);
 
   // --- Remaining notifications: appointments and client assignments ---------
   for (const a of appointments.slice(0, 10)) {
@@ -956,11 +1098,12 @@ async function seedStore(spec: StoreSpec, storeIndex: number, hashedPassword: st
       createdAt: c.createdAt,
     });
   }
-  await prisma.notification.createMany({ data: notifications });
+  emit('Notification', notifications);
 
   // --- Pending invitations (the team page's "invited" state) ----------------
-  await prisma.invitation.createMany({
-    data: [0, 1].map((n) => ({
+  emit(
+    'Invitation',
+    [0, 1].map((n) => ({
       id: randomUUID(),
       tenantId,
       email: `new.hire${n + 1}.${spec.slug}@example.com`,
@@ -971,11 +1114,11 @@ async function seedStore(spec: StoreSpec, storeIndex: number, hashedPassword: st
       warehouseId: warehouses[n % warehouses.length].id,
       invitedByUserId: owner.id,
     })),
-  });
+  );
 
   // --- Integrations ---------------------------------------------------------
-  await prisma.integration.create({
-    data: {
+  emit('Integration', [
+    {
       id: randomUUID(),
       tenantId,
       provider: 'GOOGLE_CALENDAR',
@@ -984,7 +1127,7 @@ async function seedStore(spec: StoreSpec, storeIndex: number, hashedPassword: st
       createdAt: daysFromNow(-200),
       updatedAt: new Date(),
     },
-  });
+  ]);
 
   console.log(
     `  + ${spec.name} (/${spec.slug})  ` +
@@ -995,37 +1138,67 @@ async function seedStore(spec: StoreSpec, storeIndex: number, hashedPassword: st
 }
 
 async function main() {
-  const target = process.env.DATABASE_URL ?? '';
-  console.log(`Seeding ${target.replace(/:\/\/([^:]+):[^@]+@/, '://$1:****@')}\n`);
-
   const hashedPassword = await bcrypt.hash(PASSWORD, 10);
 
-  for (const [i, spec] of STORES.entries()) {
-    await seedStore(spec, i, hashedPassword);
+  if (ROSTER_SPLIT.length !== SEEDED_SLUGS.length) {
+    throw new Error('ROSTER_SPLIT and SEEDED_SLUGS must line up one-to-one');
+  }
+  const rostered = ROSTER_SPLIT.reduce((a, b) => a + b, 0);
+  if (rostered !== PEOPLE.length) {
+    throw new Error(`ROSTER_SPLIT covers ${rostered} people, PEOPLE has ${PEOPLE.length}`);
   }
 
-  console.log('\nTotals now in the database:');
-  for (const [label, n] of [
-    ['tenants', await prisma.tenant.count()],
-    ['users', await prisma.user.count()],
-    ['warehouses', await prisma.warehouse.count()],
-    ['products', await prisma.product.count()],
-    ['stock levels', await prisma.stockLevel.count()],
-    ['stock movements', await prisma.stockMovement.count()],
-    ['clients', await prisma.client.count()],
-    ['interactions', await prisma.interaction.count()],
-    ['appointments', await prisma.appointment.count()],
-    ['quotations', await prisma.quotation.count()],
-    ['quotation line items', await prisma.quotationLineItem.count()],
-    ['notifications', await prisma.notification.count()],
-  ] as [string, number][]) {
-    console.log(`  ${label.padEnd(22)} ${n}`);
+  let cursor = 0;
+  for (const [i, slug] of SEEDED_SLUGS.entries()) {
+    const spec = STORES.find((s) => s.slug === slug);
+    if (!spec) throw new Error(`No store spec for slug ${slug}`);
+    const roster = PEOPLE.slice(cursor, cursor + ROSTER_SPLIT[i]);
+    cursor += ROSTER_SPLIT[i];
+    // One warehouse per staff member is not required, but a workspace with more
+    // warehouses than staff would leave some unmanaged and read as a bug.
+    if (roster.length - 2 < spec.warehouses.length) {
+      throw new Error(`${slug}: ${roster.length} people cannot manage ${spec.warehouses.length} warehouses`);
+    }
+    seedStore(spec, i, hashedPassword, roster);
   }
+
+  const header = [
+    '-- NevaCRM demo data for MySQL.',
+    '--',
+    '-- Generated by scratch/seed-demo.ts. Data only — run this AFTER the schema',
+    '-- exists (prisma/nevacrm_full_import.sql, or `prisma migrate deploy`).',
+    '--',
+    `--   mysql -h HOST -u USER -p DBNAME < prisma/${path.basename(OUT_FILE)}`,
+    '--',
+    `-- Every seeded account signs in with the password: ${PASSWORD}`,
+    '--',
+    '-- One transaction: a failure part-way through leaves the database untouched',
+    '-- rather than half-seeded. Foreign key checks are deliberately left ON —',
+    '-- tables are written parents-first (see TABLE_ORDER in the generator), so a',
+    '-- dangling reference fails the import loudly instead of landing silently.',
+    '',
+    'SET NAMES utf8mb4;',
+    'START TRANSACTION;',
+    '',
+  ].join('\n');
+
+  const body = TABLE_ORDER.map((t) => renderTable(t, tables.get(t)!)).filter(Boolean).join('\n');
+
+  const footer = ['COMMIT;', ''].join('\n');
+
+  writeFileSync(OUT_FILE, header + body + '\n' + footer, 'utf8');
+
+  console.log(`Wrote ${OUT_FILE}\n`);
+  let total = 0;
+  for (const t of TABLE_ORDER) {
+    const n = tables.get(t)!.length;
+    total += n;
+    console.log(`  ${t.padEnd(24)} ${String(n).padStart(6)}`);
+  }
+  console.log(`  ${'TOTAL'.padEnd(24)} ${String(total).padStart(6)}`);
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exitCode = 1;
-  })
-  .finally(() => prisma.$disconnect());
+main().catch((e) => {
+  console.error(e);
+  process.exitCode = 1;
+});

@@ -1,9 +1,10 @@
 import axios from 'axios';
+import { API_BASE_URL } from './baseUrl';
 
-// The base URL can be an environment variable. 
+// The base URL can be an environment variable.
 // For now, we point it to the local backend.
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: API_BASE_URL,
   withCredentials: true, // This ensures httpOnly cookies are sent with every request
 });
 

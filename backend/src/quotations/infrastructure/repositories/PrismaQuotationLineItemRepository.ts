@@ -10,6 +10,19 @@ export class PrismaQuotationLineItemRepository implements IQuotationLineItemRepo
       where: {
         tenantId,
         quotationId
+      },
+      /*
+       * Names, not just ids. The detail view renders one row per line item and
+       * has nothing else to label it with — without these it printed raw UUIDs
+       * where the product name belongs.
+       *
+       * Resolved on read rather than snapshotted at write time, matching the
+       * customer-facing reader: a renamed product should read the same on both
+       * sides of the quotation.
+       */
+      include: {
+        product: { select: { name: true } },
+        warehouse: { select: { name: true } }
       }
     });
 
@@ -20,7 +33,9 @@ export class PrismaQuotationLineItemRepository implements IQuotationLineItemRepo
       productId: li.productId,
       warehouseId: li.warehouseId,
       quantity: li.quantity,
-      unitPrice: li.unitPrice
+      unitPrice: li.unitPrice,
+      productName: li.product?.name,
+      warehouseName: li.warehouse?.name
     }));
   }
 

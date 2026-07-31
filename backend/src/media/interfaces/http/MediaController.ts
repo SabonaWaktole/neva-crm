@@ -68,6 +68,7 @@ export class MediaController {
               error: 'Unsupported format. Use a JPEG, PNG, WebP, GIF or AVIF image.',
             });
           }
+          console.error('Multer error:', err);
           return res.status(400).json({ error: 'That upload could not be read.' });
         });
       },
@@ -152,6 +153,7 @@ export class MediaController {
         bytes: stored.bytes,
       });
     } catch (error: any) {
+      console.error('Media upload error:', error);
       res.status(400).json({ error: error.message ?? 'That image could not be processed.' });
     }
   }

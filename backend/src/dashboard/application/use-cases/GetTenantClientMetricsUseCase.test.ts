@@ -2,9 +2,12 @@ import { GetTenantClientMetricsUseCase } from './GetTenantClientMetricsUseCase';
 import { IClientRepository } from '../../../clients/domain/repositories/IClientRepository';
 import { Client } from '../../../clients/domain/entities/Client';
 import { ClientStatus } from '../../../clients/domain/enums/ClientStatus';
+import { INotificationSettingsRepository } from '../../../notifications/domain/INotificationSettingsRepository';
+import { NotificationSettings } from '../../../notifications/domain/NotificationSettings';
 
 describe('GetTenantClientMetricsUseCase', () => {
   let mockClientRepository: jest.Mocked<IClientRepository>;
+  let mockSettingsRepository: jest.Mocked<INotificationSettingsRepository>;
   let useCase: GetTenantClientMetricsUseCase;
 
   beforeEach(() => {
@@ -17,7 +20,36 @@ describe('GetTenantClientMetricsUseCase', () => {
       findRecentByTenant: jest.fn(),
     };
 
-    useCase = new GetTenantClientMetricsUseCase(mockClientRepository);
+    // Unconfigured tenant: the repository answers with the domain defaults,
+    // which is what every read site sees in practice.
+    mockSettingsRepository = {
+      get: jest.fn(async (tenantId: string) => NotificationSettings.defaults(tenantId)),
+      save: jest.fn(),
+      listAll: jest.fn(),
+    };
+
+    useCase = new GetTenantClientMetricsUseCase(mockClientRepository, mockSettingsRepository);
+  });
+
+  it('reports the follow-up threshold the workspace is configured with', async () => {
+    mockClientRepository.countByTenant.mockResolvedValue(0);
+    mockClientRepository.search.mockResolvedValue({ items: [], total: 0 });
+
+    const result = await useCase.execute({ tenantId: 'tenant-1', timeZone: 'Europe/Tirane' });
+
+    expect(mockSettingsRepository.get).toHaveBeenCalledWith('tenant-1');
+    expect(result.followUpThresholdDays).toBe(3);
+  });
+
+  it('reports zero assigned clients when the caller is not identified', async () => {
+    mockClientRepository.countByTenant.mockResolvedValue(5);
+    mockClientRepository.search.mockResolvedValue({ items: [], total: 0 });
+
+    // No userId means no personal book of business — the count must not widen
+    // into "every client in the tenant".
+    const result = await useCase.execute({ tenantId: 'tenant-1', timeZone: 'Europe/Tirane' });
+
+    expect(result.assignedClients).toBe(0);
   });
 
   it('should return correct totalClients and totalClientsLastWeek', async () => {
