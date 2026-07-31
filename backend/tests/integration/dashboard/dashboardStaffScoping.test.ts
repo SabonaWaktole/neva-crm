@@ -32,6 +32,10 @@ describe('Dashboard role-based data scoping', () => {
   // behind would otherwise collide with a fixed literal depending on which
   // suites shared this Jest worker. See TD-001.
   let slug = '';
+  let staffClientId: string;
+
+  const DAY_MS = 24 * 60 * 60_000;
+  const daysAgo = (n: number) => new Date(Date.now() - n * DAY_MS);
 
   beforeAll(async () => {
     prisma = new PrismaClient();
@@ -68,9 +72,10 @@ describe('Dashboard role-based data scoping', () => {
 
     // 3 clients in the tenant: 1 owned by our staff member, 2 owned by someone
     // else. A correctly scoped staff view sees exactly 1; the owner sees 3.
+    staffClientId = uuidv4();
     await prisma.client.createMany({
       data: [
-        { id: uuidv4(), tenantId, name: 'Staff Own Client', status: ClientStatus.PROSPECT, assignedUserId: staffId, lastUpdatedByUserId: staffId, customFieldValues: {} },
+        { id: staffClientId, tenantId, name: 'Staff Own Client', status: ClientStatus.PROSPECT, assignedUserId: staffId, lastUpdatedByUserId: staffId, customFieldValues: {} },
         { id: uuidv4(), tenantId, name: 'Other Staff Client', status: ClientStatus.PROSPECT, assignedUserId: otherStaffId, lastUpdatedByUserId: otherStaffId, customFieldValues: {} },
         { id: uuidv4(), tenantId, name: 'Unassigned Client', status: ClientStatus.PROSPECT, lastUpdatedByUserId: ownerId, customFieldValues: {} },
       ],
@@ -81,8 +86,10 @@ describe('Dashboard role-based data scoping', () => {
     // Scoped teardown — only rows this file created (see TD-001).
     await prisma.interaction.deleteMany({ where: { tenantId } });
     await prisma.appointment.deleteMany({ where: { tenantId } });
+    await prisma.quotation.deleteMany({ where: { tenantId } });
     await prisma.client.deleteMany({ where: { tenantId } });
     await prisma.notification.deleteMany({ where: { tenantId } });
+    await prisma.notificationSettings.deleteMany({ where: { tenantId } });
     await prisma.user.deleteMany({ where: { tenantId } });
     await prisma.tenant.deleteMany({ where: { id: tenantId } });
   });
@@ -128,6 +135,119 @@ describe('Dashboard role-based data scoping', () => {
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty('lowStockProducts');
       expect(res.body).toHaveProperty('outOfStockProducts');
+    });
+  });
+
+  /**
+   * "My assigned clients" is personal for EVERY role, unlike totalClients.
+   *
+   * The owner fixture below is the point of the pair: the owner can see all
+   * three clients, but none is assigned to them, so their personal figure is 0
+   * while their tenant-wide one is 3. A regression that wires this card to the
+   * tenant count would pass a staff-only test and fail this one.
+   */
+  describe('GET /dashboard/metrics — assignedClients', () => {
+    it('counts only the clients assigned to the requesting STAFF member', async () => {
+      const res = await request(app)
+        .get(`/api/${slug}/dashboard/metrics`)
+        .set('Cookie', [`jwt=${staffToken}`]);
+
+      expect(res.status).toBe(200);
+      expect(res.body.assignedClients).toBe(1);
+    });
+
+    it('stays personal for BUSINESS_OWNER rather than falling back to the tenant count', async () => {
+      const res = await request(app)
+        .get(`/api/${slug}/dashboard/metrics`)
+        .set('Cookie', [`jwt=${ownerToken}`]);
+
+      expect(res.status).toBe(200);
+      expect(res.body.assignedClients).toBe(0);
+      expect(res.body.totalClients).toBe(3);
+    });
+  });
+
+  describe('GET /dashboard/metrics — openFollowUps', () => {
+    /** Sent, unanswered, and old enough to need chasing under the default 3 days. */
+    const stale = (createdByUserId: string, clientId: string) => ({
+      id: uuidv4(),
+      tenantId,
+      clientId,
+      createdByUserId,
+      status: 'SENT',
+      sentAt: daysAgo(10),
+    });
+
+    beforeEach(async () => {
+      await prisma.quotation.createMany({
+        data: [
+          stale(staffId, staffClientId),
+          // Sent yesterday: inside the 3-day window, so not yet a follow-up.
+          { id: uuidv4(), tenantId, clientId: staffClientId, createdByUserId: staffId, status: 'SENT', sentAt: daysAgo(1) },
+          // Old, but the customer answered — no longer outstanding.
+          { id: uuidv4(), tenantId, clientId: staffClientId, createdByUserId: staffId, status: 'SENT', sentAt: daysAgo(10), respondedAt: daysAgo(9) },
+          // Never sent: a draft cannot be waiting on anyone.
+          { id: uuidv4(), tenantId, clientId: staffClientId, createdByUserId: staffId, status: 'DRAFT' },
+          // Another rep's stale quotation — visible to the owner, not to staff.
+          stale(otherStaffId, staffClientId),
+        ],
+      });
+    });
+
+    it('counts a STAFF member’s own overdue quotations only', async () => {
+      const res = await request(app)
+        .get(`/api/${slug}/dashboard/metrics`)
+        .set('Cookie', [`jwt=${staffToken}`]);
+
+      expect(res.status).toBe(200);
+      expect(res.body.openFollowUps).toBe(1);
+    });
+
+    it('counts the whole tenant’s overdue quotations for BUSINESS_OWNER', async () => {
+      const res = await request(app)
+        .get(`/api/${slug}/dashboard/metrics`)
+        .set('Cookie', [`jwt=${ownerToken}`]);
+
+      expect(res.status).toBe(200);
+      expect(res.body.openFollowUps).toBe(2);
+    });
+
+    it('reports the workspace default threshold when no settings row exists', async () => {
+      const res = await request(app)
+        .get(`/api/${slug}/dashboard/metrics`)
+        .set('Cookie', [`jwt=${staffToken}`]);
+
+      expect(res.body.followUpThresholdDays).toBe(3);
+    });
+
+    it('honours a workspace’s configured follow-up period', async () => {
+      // At 14 days, the 10-day-old quotation is not overdue yet. The count has
+      // to move with the setting or it means something different from the
+      // reminder the workspace actually configured.
+      await prisma.notificationSettings.create({
+        data: { tenantId, quotationFollowUpDays: 14 },
+      });
+
+      const res = await request(app)
+        .get(`/api/${slug}/dashboard/metrics`)
+        .set('Cookie', [`jwt=${staffToken}`]);
+
+      expect(res.body.followUpThresholdDays).toBe(14);
+      expect(res.body.openFollowUps).toBe(0);
+    });
+
+    it('still counts follow-ups when reminder emails are switched off', async () => {
+      // The switch governs mail, not the worklist. Turning it off must not make
+      // outstanding quotations disappear from the dashboard.
+      await prisma.notificationSettings.create({
+        data: { tenantId, quotationFollowUpEnabled: false },
+      });
+
+      const res = await request(app)
+        .get(`/api/${slug}/dashboard/metrics`)
+        .set('Cookie', [`jwt=${staffToken}`]);
+
+      expect(res.body.openFollowUps).toBe(1);
     });
   });
 

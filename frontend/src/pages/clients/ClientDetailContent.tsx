@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ChevronRight, Edit3, Mail, MoreVertical, Phone, Settings, Filter, Search, PhoneCall, Video, FileText, Calendar } from 'lucide-react';
 import { useClientDetail, useClientHistory, useClientSettings } from '../../hooks/useClients';
 import { useClientAppointments } from '../../hooks/useAppointments';
@@ -65,6 +65,7 @@ export const ClientDetailContent: React.FC = () => {
   const statusLabel = useStatusLabel();
   const { clientId, tenantSlug } = useParams();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { client, isLoading: isClientLoading, fetchClient } = useClientDetail(clientId || '');
   const { history, isLoading: isHistoryLoading, fetchHistory } = useClientHistory(clientId || '');
   const { customFields, outcomeCategories, fetchSettings } = useClientSettings();
@@ -82,6 +83,23 @@ export const ClientDetailContent: React.FC = () => {
   const [interactionChannel, setInteractionChannel] = useState('NOTE');
   const [interactionContent, setInteractionContent] = useState('');
   const [interactionOutcomeId, setInteractionOutcomeId] = useState('');
+
+  /*
+   * `?logInteraction=<channel>` opens the interaction slide-over on arrival —
+   * the tail of the staff dashboard's "Log note" quick action, which cannot
+   * name a client itself and so routes through the client list. The param is
+   * stripped once consumed (replace: true) so a refresh or a Back does not
+   * reopen a panel the user already dismissed.
+   */
+  useEffect(() => {
+    const channel = searchParams.get('logInteraction');
+    if (!channel) return;
+    setInteractionChannel(channel);
+    setIsInteractionSlideOverOpen(true);
+    const next = new URLSearchParams(searchParams);
+    next.delete('logInteraction');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   const handleAddInteraction = async () => {
     if (!clientId || !interactionContent) return;

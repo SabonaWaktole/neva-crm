@@ -9,6 +9,9 @@ import * as apptHooks from '../../hooks/useAppointments';
 vi.mock('react-router-dom', () => ({
   useParams: () => ({ clientId: 'client-1' }),
   useNavigate: () => vi.fn(),
+  // The page reads `?logInteraction` to auto-open the interaction slide-over.
+  // These tests render outside a router, so an empty param set is enough.
+  useSearchParams: () => [new URLSearchParams(), vi.fn()],
 }));
 
 vi.mock('../../hooks/useClients', () => ({

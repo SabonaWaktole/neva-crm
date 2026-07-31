@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { 
   Plus, 
   Filter, 
@@ -32,7 +32,20 @@ export const ClientListContent: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { tenantSlug } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { clients, total, isLoading, fetchClients } = useClients();
+
+  /*
+   * The staff dashboard's "Log note" quick action has no client of its own, so
+   * it sends the user here to pick one and passes the intent along in the URL.
+   * We hand it on to the detail page, which opens its interaction slide-over on
+   * the requested channel. Absent the param this is an ordinary client link.
+   */
+  const pendingInteraction = searchParams.get('logInteraction');
+  const clientHref = (clientId: string) =>
+    pendingInteraction
+      ? `/${tenantSlug}/clients/${clientId}?logInteraction=${encodeURIComponent(pendingInteraction)}`
+      : `/${tenantSlug}/clients/${clientId}`;
   // Only the staff list is needed here; fetchPendingInvitations is a
   // Business-Owner-only endpoint and is deliberately not called.
   const { staff, fetchStaff } = useTeam();
@@ -129,7 +142,7 @@ export const ClientListContent: React.FC = () => {
               id: 'view',
               label: t('list.viewDetails'),
               icon: <Edit size={16} />,
-              onClick: () => navigate(`/${tenantSlug}/clients/${client.id}`),
+              onClick: () => navigate(clientHref(client.id)),
             },
           ]}
         />
@@ -177,7 +190,7 @@ export const ClientListContent: React.FC = () => {
           isLoading={isLoading}
           caption={t('list.caption')}
           className={styles.table}
-          onRowClick={(client) => navigate(`/${tenantSlug}/clients/${client.id}`)}
+          onRowClick={(client) => navigate(clientHref(client.id))}
           empty={{
             icon: <Users size={20} />,
             title: searchTerm ? t('list.emptyNoMatch') : t('list.empty'),

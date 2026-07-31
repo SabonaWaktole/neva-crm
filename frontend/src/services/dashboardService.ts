@@ -3,6 +3,12 @@ import { apiClient } from '../api';
 export interface DashboardMetrics {
   totalClients: number;
   totalClientsLastWeek: number;
+  /** Clients assigned to the signed-in user. Personal for every role. */
+  assignedClients: number;
+  /** Sent quotations still unanswered past the workspace's follow-up period. */
+  openFollowUps: number;
+  /** That period, in days, so the card can say what "open" means. */
+  followUpThresholdDays: number;
   /** Appointments scheduled for today, excluding cancelled ones. */
   appointmentsToday: number;
   /** Same window yesterday, for the day-over-day delta. */

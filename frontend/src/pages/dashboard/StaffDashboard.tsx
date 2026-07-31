@@ -9,6 +9,7 @@ import { StaffScheduleTable } from '../../components/widgets/StaffScheduleTable'
 import { getActivityConfig } from '../../utils/activityMapper'; 
 import { useDashboardMetrics, useActivityFeed } from '../../hooks/useDashboard'; 
 import { useAppointmentsByDateRange } from '../../hooks/useAppointments';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useDateFormat } from '../../hooks/useDateFormat';
 
@@ -18,6 +19,8 @@ const PLACEHOLDER_VALUE = '---';
 export const StaffDashboard = () => {
   const dates = useDateFormat();
   const { t } = useTranslation('dashboard');
+  const { tenantSlug } = useParams();
+  const navigate = useNavigate();
   const { user } = useAuthStore();
   const { metrics, isLoading: isLoadingMetrics } = useDashboardMetrics();
   const { activities, isLoading: isLoadingFeed } = useActivityFeed(5);
@@ -74,11 +77,20 @@ export const StaffDashboard = () => {
 
       {/* Mobile-Only Quick Actions */}
       <div className={styles.mobileQuickActions}>
-        <button className={styles.quickActionButtonPrimary}>
+        {/* Same dead-handler problem as the desktop pair below. */}
+        <button
+          type="button"
+          className={styles.quickActionButtonPrimary}
+          onClick={() => navigate(`/${tenantSlug}/clients/new`)}
+        >
           <UserPlus size={24} />
           <span>{t('addClient')}</span>
         </button>
-        <button className={styles.quickActionButtonSecondary}>
+        <button
+          type="button"
+          className={styles.quickActionButtonSecondary}
+          onClick={() => navigate(`/${tenantSlug}/appointments/new`)}
+        >
           <CalendarPlus size={24} />
           <span>{t('newAppointment')}</span>
         </button>
@@ -120,30 +132,42 @@ export const StaffDashboard = () => {
         </div>
         <div className={styles.kpiItem}>
           {/*
-            Was a hard-coded value="156" with the trend label "Active
-            Portfolio", i.e. an invented portfolio size shown to a rep as their
-            own. No per-user assigned-client count is computed anywhere yet, so
-            it gets the disclosure the follow-ups card beside it already uses
-            rather than a number. TD-013.
+            Was a hard-coded value="156" (TD-013), then an honest "Coming in
+            Phase 5" placeholder. It is now the real count of clients whose
+            `assignedUserId` is this user — computed per-user for every role, so
+            the figure matches the card's own title rather than the tenant total
+            already shown one card to the left.
           */}
           <KPICard
             title={t('kpiAssignedClients')}
-            value={PLACEHOLDER_VALUE}
+            value={isLoadingMetrics ? '...' : (metrics?.assignedClients ?? PLACEHOLDER_VALUE)}
             icon={<Users size={24} />}
             iconColor="var(--color-secondary)"
             iconBgColor="var(--color-secondary-container)"
-            isPlaceholder={true}
-            placeholderText={t('comingPhase5')}
+            trendValue={isLoadingMetrics ? undefined : t('kpiAssignedClientsTrend')}
+            trendDirection="neutral"
           />
         </div>
-        {/* Expensive placeholder */}
         <div className={styles.kpiItem}>
+          {/*
+            Real count: quotations this rep sent that the customer has not
+            answered within the workspace's configured follow-up period — the
+            same definition QuotationFollowUpJob chases on, so the card and the
+            reminder email can never disagree about what is overdue.
+
+            The period is shown alongside the number. A bare "4" against an
+            invisible rule is the kind of figure a rep cannot check.
+          */}
           <KPICard
             title={t('kpiOpenFollowUps')}
-            value={PLACEHOLDER_VALUE}
+            value={isLoadingMetrics ? '...' : (metrics?.openFollowUps ?? PLACEHOLDER_VALUE)}
             icon={<AlertTriangle size={24} />}
-            isPlaceholder={true}
-            placeholderText={t('comingPhase5')}
+            trendValue={
+              isLoadingMetrics || !metrics
+                ? undefined
+                : t('kpiFollowUpThreshold', { count: metrics.followUpThresholdDays })
+            }
+            trendDirection="neutral"
           />
         </div>
       </section>
@@ -202,22 +226,44 @@ export const StaffDashboard = () => {
              </div>
           </div>
 
-          {/* Desktop-Only Quick Actions */}
+          {/*
+            Desktop-Only Quick Actions.
+
+            Both of these were bare <div>s with no handler — styled to look and
+            hover like buttons (see .glassButton, which already carries
+            `cursor: pointer` and a `:focus-visible` ring), but inert on click
+            and unreachable by keyboard. They are real <button>s now.
+
+            "Log note" has no destination of its own: an interaction always
+            hangs off a client, and there is no tenant-level note. It therefore
+            hands off to the client list carrying `?logInteraction=NOTE`, which
+            the list forwards on row click and the detail page consumes by
+            opening its note slide-over. Two clicks, but each one lands
+            somewhere real.
+          */}
           <div className={styles.desktopQuickActions}>
-             <div className={styles.glassButton}>
+             <button
+               type="button"
+               className={styles.glassButton}
+               onClick={() => navigate(`/${tenantSlug}/appointments/new`)}
+             >
                 <CalendarPlus size={32} color="var(--color-primary)" />
                 <div className={styles.glassButtonContent}>
                   <h3>{t('scheduleAppointment')}</h3>
                   <p>{t('scheduleAppointmentDesc')}</p>
                 </div>
-             </div>
-             <div className={styles.glassButton}>
+             </button>
+             <button
+               type="button"
+               className={styles.glassButton}
+               onClick={() => navigate(`/${tenantSlug}/clients?logInteraction=NOTE`)}
+             >
                 <FileText size={32} color="var(--color-secondary)" />
                 <div className={styles.glassButtonContent}>
                   <h3>{t('logNote')}</h3>
                   <p>{t('logNoteDesc')}</p>
                 </div>
-             </div>
+             </button>
           </div>
          </div>
          

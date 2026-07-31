@@ -138,7 +138,10 @@
   "comingPhase5": "Vjen në Fazën 5",
   "kpiNewClients": "Klientë të rinj",
   "kpiAssignedClients": "Klientët e mi të caktuar",
+  "kpiAssignedClientsTrend": "Në portofolin tuaj",
   "kpiOpenFollowUps": "Ndjekje të hapura",
+  "kpiFollowUpThreshold_one": "Pa përgjigje mbi {{count}} ditë",
+  "kpiFollowUpThreshold_other": "Pa përgjigje mbi {{count}} ditë",
   "kpiVsLastWeek": "krahasuar me javën e kaluar",
   "loadingAppointments": "Duke ngarkuar takimet..."
 }
