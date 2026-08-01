@@ -120,10 +120,14 @@ export class PrismaReportRepository implements IReportRepository {
    * agnosticism"; a growth chart that loads every client the workspace has ever
    * had in order to count them is the shape of query §4.7 warns about.
    *
-   * MySQL dialect: `DATE_FORMAT` does in one call what Postgres needs
-   * `to_char(date_trunc(...))` for, and identifiers are backtick-quoted —
-   * double quotes are string literals in MySQL, so `"tenantId" = ?` would
-   * compare the constant text 'tenantId' and match nothing.
+   * `date_trunc` then `to_char` rather than a single formatting call: the
+   * truncation is what makes rows in the same month group together, and the
+   * formatting only names the resulting bucket. Identifiers are double-quoted
+   * because Prisma creates them camelCase, which Postgres would otherwise fold
+   * to lowercase and fail to find.
+   *
+   * Bucketed in UTC, matching `getMonthlyRevenue` above — see the long comment
+   * there for why a reporting period must not follow the tenant timezone.
    *
    * Months with no signups are filled in below rather than omitted, so the
    * chart shows a flat stretch instead of silently compressing time.
@@ -132,13 +136,13 @@ export class PrismaReportRepository implements IReportRepository {
     const start = startOfMonthsAgo(limitMonths - 1);
 
     const rows = await this.prisma.$queryRaw<{ month: string; count: bigint }[]>`
-      SELECT DATE_FORMAT(\`createdAt\`, '%Y-%m') AS month,
-             COUNT(*)                            AS count
-      FROM \`Client\`
-      WHERE \`tenantId\` = ${tenantId}
-        AND \`createdAt\` >= ${start}
-      GROUP BY month
-      ORDER BY month
+      SELECT to_char(date_trunc('month', "createdAt" AT TIME ZONE 'UTC'), 'YYYY-MM') AS month,
+             COUNT(*)                                                                AS count
+      FROM "Client"
+      WHERE "tenantId" = ${tenantId}
+        AND "createdAt" >= ${start}
+      GROUP BY 1
+      ORDER BY 1
     `;
 
     const counts = new Map(rows.map((r) => [r.month, Number(r.count)]));

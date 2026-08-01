@@ -122,13 +122,14 @@ export class PrismaUserRepository implements IUserRepository {
     if (filters.role) where.role = filters.role;
     if (filters.isActive !== undefined) where.isActive = filters.isActive;
     if (filters.q) {
-      // No `mode: 'insensitive'` — MySQL rejects it, and the deployed
-      // collation (utf8mb4) already compares case-insensitively. See
-      // PrismaClientRepository.search, which dropped it for the same reason.
+      // Searching for a person by name must not depend on how they capitalised
+      // it, so this is explicitly case-insensitive — Postgres `contains` is
+      // case-SENSITIVE without it. See PrismaClientRepository.search, which
+      // does the same for the client list.
       where.OR = [
-        { email: { contains: filters.q } },
-        { firstName: { contains: filters.q } },
-        { lastName: { contains: filters.q } },
+        { email: { contains: filters.q, mode: 'insensitive' } },
+        { firstName: { contains: filters.q, mode: 'insensitive' } },
+        { lastName: { contains: filters.q, mode: 'insensitive' } },
       ];
     }
 

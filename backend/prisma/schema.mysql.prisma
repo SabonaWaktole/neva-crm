@@ -1,5 +1,5 @@
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -29,8 +29,8 @@ model Tenant {
   urlSlug                   String  @unique
   requiresQuotationApproval Boolean @default(true)
   // Workspace branding, surfaced in the sidebar, settings and customer-facing pages.
-  logoUrl                   String?
-  coverImageUrl             String?
+  logoUrl                   String? @db.Text
+  coverImageUrl             String? @db.Text
 
   // Company profile. Like the branding URLs above, these are presentation-only
   // and are read straight from Prisma rather than through the Tenant entity.
@@ -117,11 +117,11 @@ model NotificationSettings {
   /// Stored as strings rather than a Prisma enum for the same reason
   /// NotificationType is a TS const array: adding a type must not require a
   /// migration, and an unknown value here is inert rather than fatal.
-  emailEventTypes String[] @default([])
+  emailEventTypes Json @default("[]")
 
   /// Which roles receive event email. A workspace can keep owners informed by
   /// mail while leaving staff on in-app only.
-  emailRecipientRoles String[] @default(["BUSINESS_OWNER"])
+  emailRecipientRoles Json @default("[\"BUSINESS_OWNER\"]")
 
   /// Appointment reminders.
   appointmentRemindersEnabled    Boolean @default(true)
@@ -160,8 +160,8 @@ model User {
   language       String?
   // Profile media. Store the public URL of the canonical (1x) asset; the
   // responsive variants are derived from it by convention (see MediaService).
-  avatarUrl      String?
-  coverImageUrl  String?
+  avatarUrl      String?  @db.Text
+  coverImageUrl  String?  @db.Text
   tenantId       String?
   createdAt      DateTime @default(now())
 
@@ -242,7 +242,7 @@ model CustomFieldDefinition {
   // list is src/clients/domain/enums/FieldType.ts and adding a value needs no
   // migration. Currently: TEXT, NUMBER, DATE, BOOLEAN, SINGLE_SELECT.
   fieldType String
-  options   String[] // for SINGLE_SELECT
+  options   Json @default("[]") // for SINGLE_SELECT
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
 
@@ -265,7 +265,7 @@ model Interaction {
   tenantId          String
   clientId          String
   authorUserId      String
-  content           String
+  content           String   @db.Text
   channel           String // 'MEETING', 'CALL', 'NOTE', 'EMAIL'
   outcomeCategoryId String?
   createdAt         DateTime @default(now())
@@ -286,7 +286,7 @@ model Appointment {
   assignedUserId String
   scheduledAt    DateTime
   status         String // 'SCHEDULED', 'CONFIRMED', 'COMPLETED', 'CANCELLED'
-  notes          String?
+  notes          String?  @db.Text
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -375,7 +375,7 @@ model Product {
   price             Float
   // Unit cost. Nullable because a catalogue can be priced before it is costed.
   cost              Float?
-  tags              String[] @default([])
+  tags              Json     @default("[]")
   lowStockThreshold Int      @default(10)
   // Archived products stay queryable (quotations reference them) but drop out
   // of the default catalogue view. Availability is always derived from stock.
@@ -401,8 +401,8 @@ model ProductImage {
   tenantId  String
   productId String
   // Public URL of the @1x rendition; @2x is derived by naming convention.
-  url       String
-  url2x     String
+  url       String   @db.Text
+  url2x     String   @db.Text
   width     Int
   height    Int
   bytes     Int
@@ -441,7 +441,7 @@ model StockMovement {
   toWarehouseId   String? // Used for TRANSFER
   quantity        Int
   type            String // 'ADJUSTMENT', 'TRANSFER'
-  reason          String?
+  reason          String?  @db.Text
   createdBy       String
   createdAt       DateTime @default(now())
 
@@ -538,7 +538,7 @@ model QuotationStatusHistory {
   /// table where every other row can authenticate. NULL says exactly what
   /// happened.
   changedByUserId String?
-  note            String?
+  note            String?  @db.Text
   createdAt       DateTime @default(now())
 
   quotation Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
