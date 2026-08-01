@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './TenantManagementTable.module.css';
-import { Building2, MoreVertical, Ban, CheckCircle2 } from 'lucide-react';
+import { Building2, MoreVertical, Ban, CheckCircle2, LogIn } from 'lucide-react';
 import { DataTable } from '../../ui/DataTable';
 import type { DataTableColumn } from '../../ui/DataTable';
 import { Badge } from '../../ui/Badge';
@@ -17,6 +17,11 @@ interface TenantManagementTableProps {
   /** Omit to render the table read-only, as the dashboard summary does. */
   onSuspend?: (tenant: Tenant) => void;
   onReactivate?: (tenant: Tenant) => void;
+  /**
+   * Enter the workspace and administer it as its owner. Optional like the two
+   * above, so the read-only dashboard summary renders without it.
+   */
+  onManage?: (tenant: Tenant) => void;
   /** Rendered as a header action when provided. */
   onViewAll?: () => void;
   /** The tenant whose action is in flight, so only its row shows as busy. */
@@ -28,6 +33,7 @@ export const TenantManagementTable: React.FC<TenantManagementTableProps> = ({
   isLoading,
   onSuspend,
   onReactivate,
+  onManage,
   onViewAll,
   pendingTenantId,
 }) => {
@@ -116,6 +122,29 @@ export const TenantManagementTable: React.FC<TenantManagementTableProps> = ({
               </button>
             }
             items={[
+              /*
+                Manage is listed first: it is the everyday action, while suspend
+                and reactivate are administrative exceptions.
+
+                Disabled for a suspended workspace rather than hidden. The server
+                refuses to enter one — a suspended workspace serves nothing, so
+                the session would 403 on its first request — and an item that
+                explains why it is unavailable is more use than one that silently
+                vanishes.
+              */
+              ...(onManage
+                ? [
+                    {
+                      id: 'manage',
+                      label: isSuspended
+                        ? t('superAdmin.manageWorkspaceSuspended')
+                        : t('superAdmin.manageWorkspace'),
+                      icon: <LogIn size={16} />,
+                      onClick: () => onManage(tenant),
+                      disabled: isPending || isSuspended,
+                    },
+                  ]
+                : []),
               isSuspended
                 ? {
                     id: 'reactivate',

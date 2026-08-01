@@ -5,8 +5,9 @@ import cookieParser from 'cookie-parser';
 import { errorHandler } from '@main/interfaces/http/middlewares/errorHandler';
 // Removed createAuthRoutes import
 import { AuthController } from '@auth/interfaces/http/controllers/AuthController';
-import { RegisterBusinessOwnerUseCase } from '@auth/application/use-cases/RegisterBusinessOwnerUseCase';
 import { LoginUseCase } from '@auth/application/use-cases/LoginUseCase';
+import { CreateUserUseCase } from '@auth/application/use-cases/CreateUserUseCase';
+import { GetPlatformUsersUseCase } from '@auth/application/use-cases/GetPlatformUsersUseCase';
 import { InviteStaffUseCase } from '@auth/application/use-cases/InviteStaffUseCase';
 import { AcceptInvitationUseCase } from '@auth/application/use-cases/AcceptInvitationUseCase';
 import { RequestPasswordResetUseCase } from '@auth/application/use-cases/RequestPasswordResetUseCase';
@@ -31,6 +32,8 @@ import { EmailJsSender } from '@auth/infrastructure/EmailJsSender';
 import { PrismaTenantProvisioningTransaction } from '@tenant/infrastructure/PrismaTenantProvisioningTransaction';
 import { CreateTenantWithOwnerUseCase } from '@tenant/application/use-cases/CreateTenantWithOwnerUseCase';
 import { SetTenantSubscriptionStatusUseCase } from '@tenant/application/use-cases/SetTenantSubscriptionStatusUseCase';
+import { EnterTenantUseCase } from '@tenant/application/use-cases/EnterTenantUseCase';
+import { ExitTenantUseCase } from '@tenant/application/use-cases/ExitTenantUseCase';
 import { SubscriptionStatus } from '@tenant/domain/enums/SubscriptionStatus';
 import { ITenantProvisioningTransaction } from '@tenant/application/ports/ITenantProvisioningTransaction';
 import { IUserRepository } from '@auth/domain/repositories/IUserRepository';
@@ -118,15 +121,18 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
 
   // Use Cases
   //
-  // One provisioning use case, two callers: public self-registration below and
-  // the SUPER_ADMIN create endpoint on /api/tenants. They differ in who may
-  // call them, not in what they do.
+  // Provisioning a workspace and its first owner. Public self-registration used
+  // to be a second caller; it was removed, so the SUPER_ADMIN endpoint on
+  // /api/tenants is now the only way a workspace comes into existence.
   const createTenantWithOwnerUseCase = new CreateTenantWithOwnerUseCase(
     tenantProvisioningTransaction,
     passwordHasher
   );
-  const registerUseCase = new RegisterBusinessOwnerUseCase(createTenantWithOwnerUseCase);
   const loginUseCase = new LoginUseCase(userRepository, tenantRepository, passwordHasher, tokenService);
+  const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher);
+  const getPlatformUsersUseCase = new GetPlatformUsersUseCase(userRepository);
+  const enterTenantUseCase = new EnterTenantUseCase(tenantRepository, userRepository, tokenService);
+  const exitTenantUseCase = new ExitTenantUseCase(userRepository, tokenService);
   const inviteStaffUseCase = new InviteStaffUseCase(invitationRepository, emailSender);
   const notificationRepository = new PrismaNotificationRepository();
   const notificationSettingsRepository = new PrismaNotificationSettingsRepository();
@@ -168,7 +174,6 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
 
   // Controller
   const authController = new AuthController(
-    registerUseCase,
     loginUseCase,
     inviteStaffUseCase,
     acceptInvitationUseCase,
@@ -183,7 +188,9 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
     cancelInvitationUseCase,
     deactivateUserUseCase,
     getDeactivationImpactUseCase,
-    reactivateUserUseCase
+    reactivateUserUseCase,
+    createUserUseCase,
+    exitTenantUseCase
   );
 
   // Auth Routes
@@ -223,6 +230,9 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
       tenantRepository,
       SubscriptionStatus.ACTIVE
     ),
+    enterTenantUseCase,
+    createUserUseCase,
+    getPlatformUsersUseCase,
     tokenService,
   });
   app.use('/api/tenants', tenantRoutes);

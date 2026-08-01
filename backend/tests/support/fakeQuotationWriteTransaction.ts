@@ -1,4 +1,4 @@
-import {
+﻿import {
   IQuotationWriteTransaction,
   QuotationWriteRepos,
 } from '../../src/quotations/application/ports/IQuotationWriteTransaction';
@@ -58,6 +58,7 @@ export function makeQuotationWriteHarness(): QuotationWriteHarness {
     findSuperAdminByEmail: jest.fn(),
     findByTenantId: jest.fn(),
     findActiveByTenantAndRole: jest.fn().mockResolvedValue([]),
+      findPlatformUsers: jest.fn().mockResolvedValue({ items: [], total: 0 }),
     create: jest.fn(),
     updatePassword: jest.fn(),
     updateProfile: jest.fn(),

@@ -1,4 +1,4 @@
-import { RequestPasswordResetUseCase } from '@auth/application/use-cases/RequestPasswordResetUseCase';
+﻿import { RequestPasswordResetUseCase } from '@auth/application/use-cases/RequestPasswordResetUseCase';
 import { IUserRepository } from '@auth/domain/repositories/IUserRepository';
 import { IPasswordResetTokenRepository } from '@auth/domain/repositories/IPasswordResetTokenRepository';
 import { IEmailSender } from '@auth/application/ports/IEmailSender';
@@ -23,6 +23,7 @@ describe('RequestPasswordResetUseCase', () => {
       setActive: jest.fn(),
       countAssignedWork: jest.fn(),
       findActiveByTenantAndRole: jest.fn().mockResolvedValue([]),
+      findPlatformUsers: jest.fn().mockResolvedValue({ items: [], total: 0 }),
     };
     prtRepository = {
       create: jest.fn(),

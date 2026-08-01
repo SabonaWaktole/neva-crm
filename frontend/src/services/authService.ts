@@ -12,6 +12,28 @@ export const authService = {
     return response.data.user ?? null;
   },
 
+  /**
+   * The full session, including whether it is a platform administrator managing
+   * someone else's workspace.
+   *
+   * Separate from `getMe` above so the many callers that only want the user are
+   * not made to care. Used by session bootstrap, which is the one place that has
+   * to know — the banner must survive a page reload, not just appear right after
+   * the Manage click.
+   */
+  getSession: async (): Promise<{ user: any | null; impersonating: any | null }> => {
+    const response = await apiClient.get('/auth/me');
+    return {
+      user: response.data.user ?? null,
+      impersonating: response.data.impersonating ?? null,
+    };
+  },
+
+  /** Leave a workspace entered from the admin console, back to the platform session. */
+  exitWorkspace: async () => {
+    await apiClient.post('/auth/exit-workspace');
+  },
+
   updateProfile: async (data: { firstName?: string | null; lastName?: string | null; phone?: string | null; email?: string; language?: string | null }) => {
     const response = await apiClient.put('/auth/me', data);
     return response.data;
@@ -31,15 +53,11 @@ export const authService = {
     await apiClient.post('/auth/password-reset/reset', { token, newPassword });
   },
 
-  registerBusiness: async (data: {
-    companyName: string;
-    urlSlug: string;
-    ownerEmail: string;
-    ownerPassword: string;
-  }) => {
-    const response = await apiClient.post('/auth/register', data);
-    return response.data;
-  },
+  /*
+   * `registerBusiness` lived here and posted to /auth/register. Public
+   * self-signup was removed — a workspace is provisioned only by a platform
+   * administrator, through `dashboardService.createTenant`.
+   */
 
   acceptInvitation: async (data: {
     token: string;

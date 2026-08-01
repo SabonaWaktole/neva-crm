@@ -1,4 +1,4 @@
-import { ResetPasswordUseCase } from '@auth/application/use-cases/ResetPasswordUseCase';
+﻿import { ResetPasswordUseCase } from '@auth/application/use-cases/ResetPasswordUseCase';
 import { IPasswordResetTokenRepository } from '@auth/domain/repositories/IPasswordResetTokenRepository';
 import { IUserRepository } from '@auth/domain/repositories/IUserRepository';
 import { IPasswordHasher } from '@auth/application/ports/IPasswordHasher';
@@ -30,6 +30,7 @@ describe('ResetPasswordUseCase', () => {
       setActive: jest.fn(),
       countAssignedWork: jest.fn(),
       findActiveByTenantAndRole: jest.fn().mockResolvedValue([]),
+      findPlatformUsers: jest.fn().mockResolvedValue({ items: [], total: 0 }),
     };
     passwordHasher = {
       hash: jest.fn(),

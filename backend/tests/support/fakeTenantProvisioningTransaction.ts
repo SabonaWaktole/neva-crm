@@ -1,4 +1,4 @@
-import {
+﻿import {
   ITenantProvisioningTransaction,
   TenantProvisioningRepos,
 } from '../../src/tenant/application/ports/ITenantProvisioningTransaction';
@@ -22,7 +22,7 @@ export interface TenantProvisioningHarness {
  * repositories it was given", which this answers without a database.
  *
  * Shared rather than copied into each suite, following
- * `fakeQuotationWriteTransaction` — hand-written copies of the same double are
+ * `fakeQuotationWriteTransaction` â€” hand-written copies of the same double are
  * exactly how the drift in TD-002 happened.
  */
 export function makeTenantProvisioningHarness(): TenantProvisioningHarness {
@@ -42,6 +42,7 @@ export function makeTenantProvisioningHarness(): TenantProvisioningHarness {
     findSuperAdminByEmail: jest.fn(),
     findByTenantId: jest.fn(),
     findActiveByTenantAndRole: jest.fn().mockResolvedValue([]),
+      findPlatformUsers: jest.fn().mockResolvedValue({ items: [], total: 0 }),
     create: jest.fn().mockImplementation(async (user) => user),
     updatePassword: jest.fn(),
     updateProfile: jest.fn(),

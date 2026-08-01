@@ -1,4 +1,4 @@
-import { LoginUseCase } from '@auth/application/use-cases/LoginUseCase';
+﻿import { LoginUseCase } from '@auth/application/use-cases/LoginUseCase';
 import { IUserRepository } from '@auth/domain/repositories/IUserRepository';
 import { ITenantRepository } from '@tenant/domain/repositories/ITenantRepository';
 import { IPasswordHasher } from '@auth/application/ports/IPasswordHasher';
@@ -10,7 +10,7 @@ import { Tenant } from '@tenant/domain/entities/Tenant';
 import { SubscriptionStatus } from '@tenant/domain/enums/SubscriptionStatus';
 
 /**
- * A real Tenant entity rather than an object literal cast to one — the use case
+ * A real Tenant entity rather than an object literal cast to one â€” the use case
  * now asks it `isSuspended()`, which a literal cannot answer.
  */
 const tenantEntity = (
@@ -45,6 +45,7 @@ describe('LoginUseCase', () => {
       setActive: jest.fn(),
       countAssignedWork: jest.fn(),
       findActiveByTenantAndRole: jest.fn().mockResolvedValue([]),
+      findPlatformUsers: jest.fn().mockResolvedValue({ items: [], total: 0 }),
     };
     tenantRepository = {
       create: jest.fn(),
@@ -176,7 +177,7 @@ describe('LoginUseCase', () => {
     it('gives the GENERIC error when the password is also wrong', async () => {
       /*
        * Ordering, pinned. Suspension is checked after the password so the login
-       * endpoint cannot be used to enumerate which workspaces are suspended —
+       * endpoint cannot be used to enumerate which workspaces are suspended â€”
        * "this company was cut off" is inferable business information and a slug
        * is public.
        */

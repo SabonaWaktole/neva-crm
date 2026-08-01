@@ -3,7 +3,6 @@ import { LoginPage } from '../pages/auth/LoginPage';
 import { ForgotPasswordPage } from '../pages/auth/ForgotPasswordPage';
 import { ResetPasswordPage } from '../pages/auth/ResetPasswordPage';
 import { StaffInvitationPage } from '../pages/auth/StaffInvitationPage';
-import { OnboardingPage } from '../pages/onboarding/OnboardingPage';
 import { BusinessOwnerShell } from '../pages/shell/BusinessOwnerShell';
 import { StaffShell } from '../pages/shell/StaffShell';
 import { SuperAdminShell } from '../pages/shell/SuperAdminShell';
@@ -56,10 +55,11 @@ export const router = createBrowserRouter([
     path: '/',
     element: <LandingPage />,
   },
-  {
-    path: '/register-business',
-    element: <OnboardingPage />,
-  },
+  /*
+   * /register-business is gone along with public self-signup. A workspace now
+   * exists only because a platform administrator provisioned it from
+   * /admin/tenants.
+   */
   {
     path: '/invite/:token',
     element: <StaffInvitationPage />,

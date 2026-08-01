@@ -6,6 +6,7 @@ import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { TenantManagementTable } from '../../components/widgets/TenantManagementTable';
 import { CreateTenantModal } from './CreateTenantModal';
 import { useTenants, useTenantAdmin } from '../../hooks/useDashboard';
+import { useWorkspaceSession } from '../../hooks/useWorkspaceSession';
 import type { CreateTenantInput, Tenant } from '../../services/dashboardService';
 import styles from './TenantsPage.module.css';
 
@@ -22,6 +23,12 @@ export const TenantsPage = () => {
   const { tenants, total, isLoading, fetchTenants } = useTenants();
   const { createTenant, suspendTenant, reactivateTenant, isSubmitting, error, clearError } =
     useTenantAdmin();
+  const {
+    enterWorkspace,
+    isSwitching,
+    error: sessionError,
+    clearError: clearSessionError,
+  } = useWorkspaceSession();
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<{
@@ -77,6 +84,15 @@ export const TenantsPage = () => {
         </p>
       )}
 
+      {/* Kept distinct from the tenant-admin error above: a failure to ENTER a
+          workspace is not a failure to change it, and collapsing the two would
+          report "action failed" for a workspace that is merely suspended. */}
+      {sessionError && (
+        <p className={styles.error} role="alert">
+          {sessionError}
+        </p>
+      )}
+
       <TenantManagementTable
         tenants={tenants}
         isLoading={isLoading}
@@ -88,6 +104,11 @@ export const TenantsPage = () => {
         onReactivate={(tenant) => {
           clearError();
           setPendingAction({ tenant, kind: 'reactivate' });
+        }}
+        onManage={(tenant) => {
+          if (isSwitching) return;
+          clearSessionError();
+          enterWorkspace(tenant.id);
         }}
       />
 

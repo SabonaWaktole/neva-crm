@@ -2,6 +2,7 @@ import request from 'supertest';
 import express, { Request, Response } from 'express';
 import { validateRequest } from '@main/interfaces/http/middlewares/validateRequest';
 import { authSchemas } from '../../../../../../src/auth/interfaces/http/schemas/authSchemas';
+import { tenantSchemas } from '../../../../../../src/tenant/interfaces/http/schemas/tenantSchemas';
 
 /**
  * Guards the mass-assignment fix in `validateRequest`.
@@ -35,16 +36,19 @@ describe('validateRequest', () => {
   };
 
   describe('mass assignment — undeclared fields are stripped per route', () => {
-    it('register: drops fields the schema does not declare', async () => {
-      const res = await request(appFor(authSchemas.register))
+    // Formerly exercised against `authSchemas.register`. Public self-signup was
+    // removed; `tenantSchemas.createTenant` now guards the one remaining
+    // provisioning route, POST /api/tenants, with the same fields.
+    it('createTenant: drops fields the schema does not declare', async () => {
+      const res = await request(appFor(tenantSchemas.createTenant))
         .post('/')
         .send({
           companyName: 'Acme',
           urlSlug: 'acme',
           ownerEmail: 'owner@acme.test',
           ownerPassword: 'Passw0rd',
-          // None of these are in the schema. They used to reach
-          // RegisterBusinessOwnerUseCase, which is handed req.body wholesale.
+          // None of these are in the schema. They used to reach the register
+          // use case, which was handed req.body wholesale.
           role: 'SUPER_ADMIN',
           tenantId: 'some-other-tenant',
           isActive: true,
@@ -130,7 +134,7 @@ describe('validateRequest', () => {
       // Previously this returned the raw ZodError, so clients saw one shape
       // from middleware-validated routes and another from controller-validated
       // ones. `{ error, details }` is what the controllers already return.
-      const res = await request(appFor(authSchemas.register))
+      const res = await request(appFor(tenantSchemas.createTenant))
         .post('/')
         .send({ companyName: '', urlSlug: 'BAD SLUG', ownerEmail: 'nope', ownerPassword: 'short' });
 

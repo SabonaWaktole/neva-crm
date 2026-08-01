@@ -20,10 +20,25 @@ export const createGlobalAuthRoutes = (
   const optionalAuthMw = optionalAuthenticate(tokenService);
   const authLimiter = createAuthRateLimiter();
 
-  router.post('/register', authLimiter, validateRequest(authSchemas.register), authController.register);
   router.post('/login', authLimiter, validateRequest(authSchemas.login), authController.loginGlobal);
   router.post('/logout', authController.logout);
-  
+
+  /*
+   * The return leg of POST /api/tenants/:id/enter.
+   *
+   * It lives on the GLOBAL auth router rather than the tenant one for two
+   * reasons. It carries no slug — the caller is leaving a workspace, not acting
+   * within one — and it cannot sit under /api/tenants because that router is
+   * `authorize([SUPER_ADMIN])` and an impersonation token reads
+   * `role: BUSINESS_OWNER`, so the very caller who needs this route would be
+   * turned away at the door.
+   *
+   * `authenticate` alone is the guard here; authorisation is the `impersonatorId`
+   * claim, which only EnterTenantUseCase sets, checked inside ExitTenantUseCase.
+   */
+  router.post('/exit-workspace', authMw, authController.exitWorkspace);
+
+
   router.post('/invitations/accept', validateRequest(authSchemas.acceptInvitation), authController.acceptInvitation);
   router.post('/password-reset/reset', validateRequest(authSchemas.resetPassword), authController.resetPassword);
 
@@ -78,6 +93,26 @@ export const createTenantAuthRoutes = (
     resolveTenantMw,
     authorize([UserRole.BUSINESS_OWNER, UserRole.SUPER_ADMIN]),
     authController.cancelInvitation
+  );
+
+  /*
+   * Create a team member with credentials already set — the primary way a
+   * workspace gains people. The invitation routes above remain for the case
+   * where the recipient should choose their own password.
+   *
+   * BUSINESS_OWNER only, and SUPER_ADMIN is deliberately NOT listed: a platform
+   * administrator reaching this route is doing so with a workspace session
+   * minted by /api/tenants/:id/enter, which reads BUSINESS_OWNER, so they pass.
+   * A platform-session SUPER_ADMIN would be stopped by `resolveTenant` long
+   * before this guard anyway, and has POST /api/tenants/:id/users instead.
+   */
+  router.post(
+    '/users',
+    authMw,
+    resolveTenantMw,
+    authorize([UserRole.BUSINESS_OWNER]),
+    validateRequest(authSchemas.createUser),
+    authController.createUser
   );
 
   router.get(

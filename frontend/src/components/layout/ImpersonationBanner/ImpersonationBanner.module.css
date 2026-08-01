@@ -1,0 +1,72 @@
+/*
+ * Deliberately loud.
+ *
+ * This strip is the only thing distinguishing "administering a client's
+ * workspace" from "using your own", and every other surface on the page is
+ * showing that client's data and branding. A subtle treatment here would be a
+ * safety failure, not a taste one — so it does not use the app's normal
+ * neutral surface tokens.
+ */
+/*
+ * Pinned to the BOTTOM, not the top.
+ *
+ * `.header` in AppLayout is `position: fixed; top: 0`, so an in-flow strip
+ * above it would render underneath the header, and a top-fixed one would need
+ * every layout offset in the app rebased on whether an administrator happens to
+ * be impersonating. The bottom edge is unoccupied, always visible without
+ * scrolling, and costs the rest of the layout nothing.
+ */
+.banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.5rem 1rem;
+  background: #7c2d12;
+  color: #fff7ed;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  border-top: 1px solid #9a3412;
+  box-shadow: 0 -2px 12px rgb(0 0 0 / 25%);
+}
+
+.message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.workspace {
+  font-weight: 600;
+}
+
+.exitButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.3125rem 0.75rem;
+  border: 1px solid rgba(255, 247, 237, 0.5);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.exitButton:hover:not(:disabled) {
+  background: rgba(255, 247, 237, 0.15);
+}
+
+.exitButton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

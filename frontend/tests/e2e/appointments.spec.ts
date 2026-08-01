@@ -1,26 +1,20 @@
 import { test, expect } from '@playwright/test';
+import { provisionTenant } from './support/provision';
 
 test.describe('Appointment Scheduling Flow', () => {
   test.setTimeout(120000);
 
   let tenantSlug = '';
-  let userEmail = `owner@e2e-${Date.now()}.com`;
-  const password = 'Password123!';
+  let userEmail = '';
+  let password = '';
 
   test.beforeAll(async ({ request }) => {
-    // Create a tenant via API to bypass UI flakiness
-    tenantSlug = `e2e-appt-${Date.now()}`;
-    userEmail = `owner@e2e-${Date.now()}.com`;
-    
-    const tenantRes = await request.post('http://localhost:3000/api/auth/register', {
-      data: {
-        companyName: `E2E Appt Test Tenant ${Date.now()}`,
-        urlSlug: tenantSlug,
-        ownerEmail: userEmail,
-        ownerPassword: password,
-      }
-    });
-    expect(tenantRes.ok()).toBeTruthy();
+    // Provisioned through the platform console, the only way a workspace is
+    // created now that public self-signup is gone. See support/provision.ts.
+    const provisioned = await provisionTenant(request, { namePrefix: 'e2e-appt' });
+    tenantSlug = provisioned.tenantSlug;
+    userEmail = provisioned.ownerEmail;
+    password = provisioned.ownerPassword;
   });
 
   test.beforeEach(async ({ page }) => {

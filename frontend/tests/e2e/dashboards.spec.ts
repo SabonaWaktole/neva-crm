@@ -1,32 +1,27 @@
 import { test, expect } from '@playwright/test';
+import { provisionTenant } from './support/provision';
 
 test.describe('Dashboard Dashboards Wiring E2E', () => {
-  const uniqueId = Date.now();
-  const companyName = `DashCorp ${uniqueId}`;
-  const slug = `dashcorp-${uniqueId}`;
-  const email = `owner${uniqueId}@dashcorp.com`;
-  const password = 'Password123!';
+  let slug = '';
+  let email = '';
+  let password = '';
+
+  test.beforeAll(async ({ request }) => {
+    // The onboarding wizard this test used to drive is gone with public
+    // self-signup. Provisioning through the platform console instead keeps the
+    // test about the dashboard, which is what it is named for.
+    const provisioned = await provisionTenant(request, { namePrefix: 'dashcorp' });
+    slug = provisioned.tenantSlug;
+    email = provisioned.ownerEmail;
+    password = provisioned.ownerPassword;
+  });
 
   test('Business Owner Dashboard renders real data', async ({ page }) => {
     page.on('console', msg => console.log(`PAGE LOG: ${msg.text()}`));
     page.on('pageerror', err => console.log(`PAGE ERROR: ${err.message}`));
     page.on('response', response => console.log(`<< ${response.status()} ${response.url()}`));
 
-    // 1. Register a new business owner
-    await page.goto('/register-business');
-    await page.getByPlaceholder('e.g. Acme Corp').fill(companyName);
-    await page.getByPlaceholder('you@company.com').fill(email);
-    await page.getByPlaceholder('••••••••').fill(password);
-    await page.getByRole('button', { name: 'Continue' }).click();
-    await page.getByRole('button', { name: 'Continue' }).click();
-    await page.getByRole('button', { name: 'Complete Setup' }).click();
-    
-    // 2. Go to Login
-    await expect(page.getByText('Workspace Created!')).toBeVisible();
-    await page.getByRole('button', { name: 'Go to Login' }).click();
-
-    // 3. Login
-    await expect(page).toHaveURL(new RegExp(`/${slug}/login`));
+    await page.goto(`/${slug}/login`);
     await page.getByPlaceholder('name@company.com').fill(email);
     await page.getByPlaceholder('••••••••').fill(password);
     await page.getByRole('button', { name: 'Sign In' }).click();

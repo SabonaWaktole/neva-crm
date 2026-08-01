@@ -9,6 +9,7 @@ import { useAuthStore } from '../../../store/useAuthStore';
 import { resolveMediaUrl, srcSetFor } from '../../../services/mediaService';
 import styles from './AppLayout.module.css';
 import { NotificationBell } from '../../notifications/NotificationBell';
+import { ImpersonationBanner } from '../ImpersonationBanner';
 
 export interface AppLayoutProps {
   children: ReactNode;
@@ -51,6 +52,14 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
 
   return (
     <div className={styles.layout}>
+      {/*
+        Mounted here rather than in a shell so it covers every page of an
+        entered workspace, not just the dashboard. It pins itself to the bottom
+        edge, so its position in this tree does not matter. Renders nothing for
+        an ordinary session.
+      */}
+      <ImpersonationBanner />
+
       {/* Top App Bar */}
       <header className={`${styles.header} glass`}>
         <div className={styles.headerLeft}>

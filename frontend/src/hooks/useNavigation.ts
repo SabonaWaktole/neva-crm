@@ -52,6 +52,10 @@ const superAdminNavItems: NavItem[] = [
   // the dashboard icon for anything it does not know, so an unmapped name would
   // silently give two identical icons instead of an error.
   { id: 'tenants', label: 'Tenants', icon: 'domain' },
+  // People is platform-wide and therefore legitimately reachable: it reads from
+  // /api/tenants/users, a SUPER_ADMIN route with no :tenantSlug, so it does not
+  // reintroduce any of the dead tenant-scoped links TD-008 removed.
+  { id: 'people', label: 'People', icon: 'group' },
 ];
 
 /** Stock management is the one item legitimately gated on the staff warehouse. */

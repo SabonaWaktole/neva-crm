@@ -1,4 +1,4 @@
-import { NotificationService } from '../../../src/notifications/application/NotificationService';
+﻿import { NotificationService } from '../../../src/notifications/application/NotificationService';
 import { INotificationRepository } from '../../../src/notifications/domain/INotificationRepository';
 import { IUserRepository } from '../../../src/auth/domain/repositories/IUserRepository';
 import { User } from '../../../src/auth/domain/entities/User';
@@ -39,6 +39,7 @@ describe('NotificationService', () => {
     userRepo = {
       findById: jest.fn().mockImplementation(async (id: string) => makeUser({ id })),
       findActiveByTenantAndRole: jest.fn().mockResolvedValue([]),
+      findPlatformUsers: jest.fn().mockResolvedValue({ items: [], total: 0 }),
     } as unknown as jest.Mocked<IUserRepository>;
 
     service = new NotificationService(notificationRepo, userRepo);
@@ -50,7 +51,7 @@ describe('NotificationService', () => {
     params: { client: 'Acme' },
   };
 
-  describe('rule 1 — never notify the actor about their own action', () => {
+  describe('rule 1 â€” never notify the actor about their own action', () => {
     it('drops the actor from an explicit recipient list', async () => {
       await service.emit({ ...base, recipientUserIds: ['u1'], actorUserId: 'u1' });
 
@@ -77,7 +78,7 @@ describe('NotificationService', () => {
     });
   });
 
-  describe('rule 2 — never notify a deactivated user (TD-010)', () => {
+  describe('rule 2 â€” never notify a deactivated user (TD-010)', () => {
     it('drops an explicitly named recipient who is deactivated', async () => {
       // Their token stays valid for up to an hour after deactivation, so the
       // filter has to be on the record, not on whoever is calling.
@@ -154,7 +155,7 @@ describe('NotificationService', () => {
     });
   });
 
-  describe('rule 3 — emitSafe never breaks its caller', () => {
+  describe('rule 3 â€” emitSafe never breaks its caller', () => {
     it('swallows a repository failure', async () => {
       notificationRepo.saveMany.mockRejectedValue(new Error('database on fire'));
       jest.spyOn(console, 'error').mockImplementation(() => {});

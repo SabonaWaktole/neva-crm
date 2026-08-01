@@ -63,13 +63,12 @@ export const LoginPage = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+          {/*
+            The sign-up prompt is gone: accounts are created by a platform or
+            workspace administrator, never self-serve, so pointing someone at a
+            signup page would send them somewhere that no longer exists.
+          */}
           <div className={styles.metaRow}>
-            <span className={styles.metaText}>
-              {t('login.dontHaveAccount')}{' '}
-              <Link to="/register-business" className={styles.link}>
-                {t('login.signUp')}
-              </Link>
-            </span>
             <Link to={`/${tenantSlug || 'admin'}/forgot-password`} className={styles.link}>
               {t('login.forgotPassword')}
             </Link>

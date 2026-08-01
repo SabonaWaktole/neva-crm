@@ -8,7 +8,8 @@ describe('AuthController', () => {
   beforeEach(() => {
     getTenantStaffUseCaseMock = { execute: jest.fn() };
     authController = new AuthController(
-      {} as any, // registerUseCase
+      // registerUseCase used to lead this list; public self-registration was
+      // removed, so every argument below shifted up one position.
       {} as any, // loginUseCase
       {} as any, // inviteStaffUseCase
       {} as any, // acceptInvitationUseCase

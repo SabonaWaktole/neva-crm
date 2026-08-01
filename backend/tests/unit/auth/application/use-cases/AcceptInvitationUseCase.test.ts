@@ -1,4 +1,4 @@
-import { AcceptInvitationUseCase } from '@auth/application/use-cases/AcceptInvitationUseCase';
+﻿import { AcceptInvitationUseCase } from '@auth/application/use-cases/AcceptInvitationUseCase';
 import { IInvitationRepository } from '@auth/domain/repositories/IInvitationRepository';
 import { IUserRepository } from '@auth/domain/repositories/IUserRepository';
 import { ITenantRepository } from '@tenant/domain/repositories/ITenantRepository';
@@ -36,6 +36,7 @@ describe('AcceptInvitationUseCase', () => {
       setActive: jest.fn(),
       countAssignedWork: jest.fn(),
       findActiveByTenantAndRole: jest.fn().mockResolvedValue([]),
+      findPlatformUsers: jest.fn().mockResolvedValue({ items: [], total: 0 }),
     };
     passwordHasher = {
       hash: jest.fn(),

@@ -156,11 +156,14 @@ export const LandingPage: React.FC = () => {
           transition={{ duration: 0.5, delay: 0.06, ease: marketingEase }}
         >
           <ThemeToggle />
-          <Button variant="outline" onClick={() => navigate('/login')}>
+          {/*
+            The "Get Started" button used to open self-serve signup. Workspaces
+            are now provisioned by a platform administrator, so there is nothing
+            for a visitor to start — sign-in is the only action this page can
+            honestly offer.
+          */}
+          <Button variant="primary" onClick={() => navigate('/login')}>
             {t('landing.signIn')}
-          </Button>
-          <Button variant="primary" onClick={() => navigate('/register-business')}>
-            {t('landing.getStarted')}
           </Button>
         </motion.div>
 
@@ -238,10 +241,10 @@ export const LandingPage: React.FC = () => {
                 variant="primary"
                 icon={<ArrowRight size={18} />}
                 iconPosition="right"
-                onClick={() => navigate('/register-business')}
+                onClick={() => navigate('/login')}
                 className={styles.ctaButton}
               >
-                {t('landing.createWorkspace')}
+                {t('landing.signIn')}
               </Button>
             </motion.div>
           </motion.div>
