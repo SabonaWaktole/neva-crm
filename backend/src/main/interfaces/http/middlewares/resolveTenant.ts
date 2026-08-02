@@ -78,7 +78,7 @@ export const resolveTenant = (
      */
     if (tenant.isSuspended() && !options.allowSuspended) {
       return res.status(403).json({
-        error: 'This workspace is suspended — contact support',
+        error: 'This workspace is suspended :( contact support',
         code: 'TENANT_SUSPENDED',
       });
     }

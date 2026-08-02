@@ -44,7 +44,7 @@ export class EmailJsSender implements IEmailSender {
     to: string,
     params: { companyName: string; urlSlug: string; ownerPassword: string }
   ): Promise<void> {
-    const loginUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/${params.urlSlug}/login`;
+    const loginUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/login`;
 
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">

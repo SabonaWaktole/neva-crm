@@ -23,6 +23,6 @@ export class TenantNotFoundError extends DomainError {
  */
 export class TenantSuspendedError extends DomainError {
   constructor() {
-    super('This workspace is suspended — contact support');
+    super('This workspace is suspended :( contact support');
   }
 }

@@ -198,7 +198,7 @@ export class AuthController {
       if (tenantBranding?.subscriptionStatus === 'SUSPENDED') {
         res.clearCookie('jwt', authCookieOptions());
         return res.status(403).json({
-          error: 'This workspace is suspended — contact support',
+          error: 'This workspace is suspended :( contact support',
           code: 'TENANT_SUSPENDED',
         });
       }
