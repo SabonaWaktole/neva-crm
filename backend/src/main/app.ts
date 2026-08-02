@@ -126,6 +126,20 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   app.use(express.json());
   app.use(cookieParser());
 
+  // Backs the Super Admin dashboard's Global Latency / Active Requests /
+  // Real-time Traffic panel. Registered before any route so it times every
+  // request the app serves, not just tenant routes.
+  const { InMemoryMetricsCollector } = require('../tenant/infrastructure/InMemoryMetricsCollector');
+  const metricsCollector = new InMemoryMetricsCollector();
+  app.use((req, res, next) => {
+    const startedAt = process.hrtime.bigint();
+    res.on('finish', () => {
+      const durationMs = Number(process.hrtime.bigint() - startedAt) / 1_000_000;
+      metricsCollector.recordRequest(durationMs);
+    });
+    next();
+  });
+
   // Dependencies — use overrides if provided, otherwise default to real implementations
   const userRepository = overrides?.userRepository ?? new PrismaUserRepository();
   const tenantRepository = overrides?.tenantRepository ?? new PrismaTenantRepository();
@@ -279,12 +293,15 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const { GetSystemHealthUseCase } = require('../tenant/application/use-cases/GetSystemHealthUseCase');
   const { PrismaDatabaseHealthChecker } = require('../tenant/infrastructure/PrismaDatabaseHealthChecker');
   const getSystemHealthUseCase = new GetSystemHealthUseCase(new PrismaDatabaseHealthChecker(prisma));
+  const { GetSystemMetricsUseCase } = require('../tenant/application/use-cases/GetSystemMetricsUseCase');
+  const getSystemMetricsUseCase = new GetSystemMetricsUseCase(metricsCollector);
   const { createTenantRouter } = require('../tenant/interfaces/http/routes/tenantRoutes');
   const tenantRoutes = createTenantRouter({
     getTenantsUseCase,
     getPlatformActivityUseCase,
     getGlobalMrrUseCase,
     getSystemHealthUseCase,
+    getSystemMetricsUseCase,
     createTenantWithOwnerUseCase,
     // Same class, opposite directions. The target status is fixed here at
     // construction so no request body can ever choose it.

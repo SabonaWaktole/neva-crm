@@ -175,8 +175,6 @@
   box-shadow:
     var(--shadow-xs),
     inset 0 0 0 1px var(--border-hairline);
-  opacity: 0.55; /* Placeholder treatment */
-  filter: saturate(0.5);
 }
 
 @media (min-width: 768px) {
@@ -272,31 +270,4 @@
 .chartLabel {
   font-size: var(--font-size-body-sm);
   color: var(--text-tertiary);
-}
-
-/* ------------------------------------------------------ reusable overlay */
-
-.placeholderOverlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: transparent; /* No tint, just relying on opacity of child */
-  z-index: 10;
-}
-
-.placeholderBadge {
-  background: var(--glass-bg-strong);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  color: var(--text-secondary);
-  padding: 5px 13px;
-  border-radius: var(--radius-full);
-  font-size: var(--font-size-body-sm);
-  font-weight: 600;
-  border: none;
-  box-shadow:
-    var(--shadow-md),
-    inset 0 0 0 1px var(--border-subtle);
 }

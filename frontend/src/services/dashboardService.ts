@@ -145,6 +145,13 @@ export interface SystemHealth {
   };
 }
 
+/** Live request latency/traffic, for the dashboard's Global Latency / Active Requests / Real-time Traffic panel. */
+export interface SystemMetrics {
+  avgLatencyMs: number;
+  requestsPerSecond: number;
+  buckets: number[];
+}
+
 /** One row of the append-only platform audit log, as the Platform Activity feed consumes it. */
 export interface PlatformActivityEvent {
   id: string;
@@ -190,6 +197,11 @@ export const dashboardService = {
 
   getSystemHealth: async (): Promise<SystemHealth> => {
     const response = await apiClient.get<SystemHealth>(`/tenants/health`);
+    return response.data;
+  },
+
+  getSystemMetrics: async (): Promise<SystemMetrics> => {
+    const response = await apiClient.get<SystemMetrics>(`/tenants/metrics`);
     return response.data;
   },
 
