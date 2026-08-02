@@ -49,6 +49,7 @@ describe('AcceptInvitationUseCase', () => {
       findBySlug: jest.fn(),
       findAll: jest.fn(),
       updateSettings: jest.fn(),
+      updateSettingsForMany: jest.fn(),
       setSubscriptionStatus: jest.fn(),
     };
 

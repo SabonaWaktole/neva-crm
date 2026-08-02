@@ -40,6 +40,27 @@ export interface ITenantRepository {
   updateSettings(id: string, settings: TenantSettingsUpdate): Promise<void>;
 
   /**
+   * The platform console's bulk apply: the same fields as `updateSettings`,
+   * written to every id in `tenantIds` in one statement.
+   *
+   * Deliberately `Omit<..., 'name'>` — a company name is that company's
+   * identity, not a policy setting, and writing one name across several
+   * tenants at once can never be what a caller meant. `TenantSettingsUpdate`
+   * stays the single source of truth for which fields are settings at all;
+   * this only narrows it, rather than declaring its own separate list that
+   * could drift from `updateSettings`'s.
+   *
+   * Returns the number of rows actually changed, so a caller who asked for 5
+   * tenants but got back 3 (some ids stale, or already at these exact values —
+   * Prisma's `updateMany` count reflects the WHERE match, not "value changed")
+   * can surface that rather than reporting silent success.
+   */
+  updateSettingsForMany(
+    tenantIds: string[],
+    settings: Omit<TenantSettingsUpdate, 'name'>
+  ): Promise<number>;
+
+  /**
    * Platform-level: set whether the workspace may operate.
    *
    * Separate from `updateSettings` because it is not a tenant-editable setting

@@ -16,13 +16,29 @@ import { DATE_FORMATS, SUPPORTED_LOCALES, SUPPORTED_LANGUAGES } from '../../../.
  * and rebuilding a Set per request would be pure waste.
  */
 const SUPPORTED_CURRENCIES = new Set(Intl.supportedValuesOf('currency'));
-const SUPPORTED_TIMEZONES = new Set(Intl.supportedValuesOf('timeZone'));
 
-const currency = z
+/**
+ * 'UTC' is a valid IANA zone (and the app's own `DEFAULT_TIMEZONE`), but
+ * `Intl.supportedValuesOf('timeZone')` omits it — the ICU data backing that
+ * call lists canonical zones only and treats 'UTC' as an alias, even though
+ * `Intl.DateTimeFormat` happily accepts it. Without this, every workspace
+ * that has never touched its timezone field (i.e. still on the default)
+ * fails validation the moment it saves settings at all.
+ */
+const SUPPORTED_TIMEZONES = new Set([...Intl.supportedValuesOf('timeZone'), 'UTC']);
+
+/**
+ * Exported so the platform-settings schemas (platform defaults, and the
+ * platform console's bulk apply to selected tenants) validate currency and
+ * timezone against the exact same tables rather than a second
+ * `Intl.supportedValuesOf` computation that could theoretically drift if the
+ * two ever imported different Node builds.
+ */
+export const currency = z
   .string()
   .refine((v) => SUPPORTED_CURRENCIES.has(v), { message: 'Unknown currency code.' });
 
-const timezone = z
+export const timezone = z
   .string()
   .refine((v) => SUPPORTED_TIMEZONES.has(v), { message: 'Unknown timezone.' });
 

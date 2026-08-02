@@ -15,6 +15,7 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:test": "dotenv -e .env.test -- prisma migrate deploy",
     "seed:superadmin": "ts-node -r tsconfig-paths/register scratch/seed-super-admin.ts",
+    "seed:demo": "ts-node -r tsconfig-paths/register scratch/seed-demo.ts",
     "typecheck": "tsc -p tsconfig.test.json"
   },
   "dependencies": {

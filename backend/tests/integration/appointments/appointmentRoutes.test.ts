@@ -46,6 +46,7 @@ const stubTenantRepo: ITenantRepository = {
     return null;
   },
   create: async (t: any) => t,
+  updateSettingsForMany: async () => 0,
   findAll: async () => ({ items: [], total: 0 }),
   updateSettings: async () => {},
   setSubscriptionStatus: async () => {},

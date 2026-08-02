@@ -7,6 +7,8 @@ import { Tenant } from '../../../domain/entities/Tenant';
 import { TenantNotFoundError, TenantSuspendedError } from '../../../domain/errors';
 import { CreateUserUseCase } from '../../../../auth/application/use-cases/CreateUserUseCase';
 import { GetPlatformUsersUseCase } from '../../../../auth/application/use-cases/GetPlatformUsersUseCase';
+import { BulkUpdateTenantSettingsUseCase } from '../../../../settings/application/use-cases/BulkUpdateTenantSettingsUseCase';
+import { bulkUpdateTenantSettingsSchema } from '../../../../settings/interfaces/http/schemas/platformSettingsSchemas';
 import {
   authCookieOptions,
   AUTH_COOKIE_MAX_AGE_MS,
@@ -44,6 +46,7 @@ export interface TenantRouterDeps {
   enterTenantUseCase: EnterTenantUseCase;
   createUserUseCase: CreateUserUseCase;
   getPlatformUsersUseCase: GetPlatformUsersUseCase;
+  bulkUpdateTenantSettingsUseCase: BulkUpdateTenantSettingsUseCase;
   tokenService: ITokenService;
 }
 
@@ -56,6 +59,7 @@ export function createTenantRouter(deps: TenantRouterDeps): Router {
     enterTenantUseCase,
     createUserUseCase,
     getPlatformUsersUseCase,
+    bulkUpdateTenantSettingsUseCase,
     tokenService,
   } = deps;
 
@@ -218,6 +222,45 @@ export function createTenantRouter(deps: TenantRouterDeps): Router {
       next(error);
     }
   });
+
+  /**
+   * SUPER_ADMIN only: apply the same settings to several workspaces at once.
+   *
+   * Registered before `/:id/...` for the same reason `/users` above is: a
+   * static segment declared after a `/:id` sibling is a latent bug waiting for
+   * that sibling to be added.
+   *
+   * Writes directly onto each selected tenant's OWN settings — indistinguishable
+   * from that workspace's Business Owner making the same change, just done to
+   * several at once. This is NOT the platform-wide default below: it never
+   * touches a tenant that was not explicitly selected, and it has no future
+   * effect on a tenant created afterward.
+   */
+  router.put(
+    '/bulk-settings',
+    validateRequest(bulkUpdateTenantSettingsSchema),
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const callerRole = callerRoleOf(req);
+        if (!callerRole) {
+          return res.status(401).json({ error: 'Access denied. No token provided.' });
+        }
+
+        const result = await bulkUpdateTenantSettingsUseCase.execute({
+          callerRole,
+          tenantIds: req.body.tenantIds,
+          settings: req.body.settings,
+        });
+
+        res.json(result);
+      } catch (error) {
+        if (error instanceof UnauthorizedError) {
+          return res.status(403).json({ error: error.message });
+        }
+        next(error);
+      }
+    }
+  );
 
   /**
    * SUPER_ADMIN only: create a user directly inside a workspace, credentials

@@ -91,6 +91,27 @@ export interface CreatePlatformUserInput {
   lastName?: string | null;
 }
 
+/**
+ * The six fields both platform-wide defaults and a bulk apply to selected
+ * tenants can set — the same set a workspace's own Settings page edits.
+ * Company identity (name, address, branding) is deliberately absent: it names
+ * one business and cannot mean anything applied to several, or as a "default"
+ * with no business behind it yet.
+ */
+export interface WorkspaceSettingsFields {
+  requiresQuotationApproval?: boolean;
+  currency?: string;
+  locale?: string;
+  timezone?: string;
+  dateFormat?: string;
+  defaultLanguage?: string;
+}
+
+export interface PlatformSettings extends Required<WorkspaceSettingsFields> {
+  /** Null until this row has ever been saved — the platform is on the shipped defaults. */
+  updatedAt: string | null;
+}
+
 export const dashboardService = {
   getTenantClientMetrics: async (tenantSlug: string): Promise<DashboardMetrics> => {
     const response = await apiClient.get<DashboardMetrics>(`/${tenantSlug}/dashboard/metrics`);
@@ -179,5 +200,37 @@ export const dashboardService = {
       input
     );
     return response.data.user;
+  },
+
+  /**
+   * The values a NEWLY provisioned workspace starts with. Never touches an
+   * existing tenant — see `bulkUpdateTenantSettings` for the separate action
+   * that does.
+   */
+  getPlatformSettings: async (): Promise<PlatformSettings> => {
+    const response = await apiClient.get<PlatformSettings>(`/platform-settings`);
+    return response.data;
+  },
+
+  updatePlatformSettings: async (patch: WorkspaceSettingsFields): Promise<PlatformSettings> => {
+    const response = await apiClient.put<PlatformSettings>(`/platform-settings`, patch);
+    return response.data;
+  },
+
+  /**
+   * Writes directly onto each selected tenant's OWN settings — the same effect
+   * as that workspace's Business Owner making the change themselves, just done
+   * to several at once. Returns how many rows actually matched, so a caller
+   * can tell "applied" from "some of those workspaces no longer exist".
+   */
+  bulkUpdateTenantSettings: async (
+    tenantIds: string[],
+    settings: WorkspaceSettingsFields
+  ): Promise<{ updatedCount: number }> => {
+    const response = await apiClient.put<{ updatedCount: number }>(`/tenants/bulk-settings`, {
+      tenantIds,
+      settings,
+    });
+    return response.data;
   },
 };

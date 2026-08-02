@@ -1,20 +1,25 @@
 /**
- * Demo data GENERATOR for MySQL.
+ * Demo data generator for the three sample workspaces.
  *
- * Emits `prisma/nevacrm_demo_seed.sql` — a data-only import containing a set of
- * fully-populated workspaces ("stores"): staff, warehouses, categories,
- * products, stock levels + movements, clients with custom fields, interactions,
- * appointments, quotations and notifications.
+ * Two independent outputs from the same in-memory row data, selected by flag:
  *
- * It writes no database of its own; run it, then import the file:
+ *   npx ts-node -r tsconfig-paths/register scratch/seed-demo.ts
+ *     Loads directly into whatever DATABASE_URL is configured (via Prisma —
+ *     dialect-agnostic, works against the active schema.prisma provider). This
+ *     is the default and what `npm run seed:demo` does, because the usual
+ *     reason to run this is "give me data to look at right now" against a
+ *     local database.
  *
- *   npx tsx scratch/seed-demo.ts
- *   mysql -h HOST -u USER -p DBNAME < prisma/nevacrm_demo_seed.sql
+ *   npx ts-node -r tsconfig-paths/register scratch/seed-demo.ts --sql-only
+ *     Skips the database and only emits `prisma/nevacrm_demo_seed.sql` — a
+ *     MySQL-dialect data-only import, for reseeding the Hostinger deployment:
+ *       mysql -h HOST -u USER -p DBNAME < prisma/nevacrm_demo_seed.sql
+ *     (schema must already exist there: `prisma/nevacrm_full_import.sql`).
  *
- * The schema must already exist (`prisma/nevacrm_full_import.sql`, or
- * `prisma migrate deploy`). The file assumes those tables are EMPTY of these
- * tenants — it is plain INSERTs, not upserts, so re-importing over itself will
- * fail on the primary keys rather than silently duplicating.
+ * Not upserts. A workspace whose slug is already seeded is left alone unless
+ * `--reset` is also passed, which deletes exactly those three workspaces
+ * (tenant-scoped, in dependency order) before reseeding — never anyone else's
+ * data.
  *
  * Row contents are deterministic (see `seed` below) except for the bcrypt hash,
  * which is salted fresh on every run.
@@ -23,6 +28,7 @@ import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
 import { writeFileSync } from 'fs';
 import * as path from 'path';
+import { prisma } from '../src/shared/infrastructure/prisma/client';
 
 const OUT_FILE = path.resolve(__dirname, '..', 'prisma', 'nevacrm_demo_seed.sql');
 
@@ -1138,6 +1144,9 @@ function seedStore(
 }
 
 async function main() {
+  const sqlOnly = process.argv.includes('--sql-only');
+  const reset = process.argv.includes('--reset');
+
   const hashedPassword = await bcrypt.hash(PASSWORD, 10);
 
   if (ROSTER_SPLIT.length !== SEEDED_SLUGS.length) {
@@ -1146,6 +1155,32 @@ async function main() {
   const rostered = ROSTER_SPLIT.reduce((a, b) => a + b, 0);
   if (rostered !== PEOPLE.length) {
     throw new Error(`ROSTER_SPLIT covers ${rostered} people, PEOPLE has ${PEOPLE.length}`);
+  }
+
+  // Guard against silently duplicating a workspace that is already seeded —
+  // this generator writes plain INSERTs/creates, not upserts. Skipped when
+  // --sql-only: that mode never touches the database, so there is nothing to
+  // check.
+  if (!sqlOnly) {
+    const existing = await prisma.tenant.findMany({
+      where: { urlSlug: { in: [...SEEDED_SLUGS] } },
+      select: { id: true, urlSlug: true },
+    });
+    if (existing.length > 0) {
+      if (!reset) {
+        console.error(
+          `Already seeded: ${existing.map((t) => t.urlSlug).join(', ')}.\n` +
+          `Re-run with --reset to delete exactly these workspaces and reseed them, ` +
+          `or --sql-only to just write the SQL file without touching the database.`
+        );
+        process.exitCode = 1;
+        return;
+      }
+      for (const t of existing) {
+        console.log(`Resetting ${t.urlSlug}…`);
+        await resetTenant(t.id);
+      }
+    }
   }
 
   let cursor = 0;
@@ -1188,7 +1223,7 @@ async function main() {
 
   writeFileSync(OUT_FILE, header + body + '\n' + footer, 'utf8');
 
-  console.log(`Wrote ${OUT_FILE}\n`);
+  console.log(`Wrote ${OUT_FILE} (MySQL dialect, for the Hostinger deployment)\n`);
   let total = 0;
   for (const t of TABLE_ORDER) {
     const n = tables.get(t)!.length;
@@ -1196,9 +1231,82 @@ async function main() {
     console.log(`  ${t.padEnd(24)} ${String(n).padStart(6)}`);
   }
   console.log(`  ${'TOTAL'.padEnd(24)} ${String(total).padStart(6)}`);
+
+  if (sqlOnly) {
+    console.log('\n--sql-only: database not touched.');
+    return;
+  }
+
+  console.log(`\nLoading into the database (via Prisma, whichever provider schema.prisma names)…`);
+  await loadIntoDatabase();
+  console.log(`Loaded. Every seeded account signs in with the password: ${PASSWORD}`);
+  console.log(`Log in as an owner at /<slug>/login, e.g. /${SEEDED_SLUGS[0]}/login.`);
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exitCode = 1;
-});
+/** `Tenant` -> `tenant`, matching Prisma's default client-property naming. */
+const accessorFor = (table: string) => table.charAt(0).toLowerCase() + table.slice(1);
+
+/**
+ * Inserts every generated row, in `TABLE_ORDER` (parents first), inside one
+ * transaction — the direct-load counterpart to the "one transaction" guarantee
+ * the emitted SQL file states above. `createMany` rather than `create` per row:
+ * these are first-ever inserts with no relations to connect through, so there
+ * is nothing `create`'s nested-write ergonomics would buy here, and batching
+ * is materially faster for the thousands of rows three workspaces produce.
+ */
+async function loadIntoDatabase(): Promise<void> {
+  await prisma.$transaction(
+    async (tx) => {
+      for (const table of TABLE_ORDER) {
+        const rows = tables.get(table)!;
+        if (rows.length === 0) continue;
+        await (tx as any)[accessorFor(table)].createMany({ data: rows });
+      }
+    },
+    // The default 5s interactive-transaction timeout is comfortably exceeded by
+    // three workspaces' worth of inserts.
+    { timeout: 60_000 }
+  );
+}
+
+/**
+ * Deletes one previously-seeded workspace and everything under it, scoped
+ * strictly to its `tenantId` — never touches another workspace's data, seeded
+ * or otherwise. Only called for a tenant whose slug is in `SEEDED_SLUGS` and
+ * only when `--reset` was passed.
+ *
+ * Order is the reverse of `TABLE_ORDER`: that list is parents-first for
+ * insertion, so walking it backwards deletes every child row before the parent
+ * it references, which is what the foreign keys require.
+ *
+ * `AppointmentAuditLog` is the one table with no `tenantId` column of its
+ * own — it is scoped through `Appointment` instead, so its rows are deleted
+ * explicitly before the loop reaches `Appointment`.
+ */
+async function resetTenant(tenantId: string): Promise<void> {
+  await prisma.$transaction(
+    async (tx) => {
+      const appointmentIds = (
+        await tx.appointment.findMany({ where: { tenantId }, select: { id: true } })
+      ).map((a) => a.id);
+      if (appointmentIds.length > 0) {
+        await tx.appointmentAuditLog.deleteMany({ where: { appointmentId: { in: appointmentIds } } });
+      }
+
+      for (const table of [...TABLE_ORDER].reverse()) {
+        if (table === 'AppointmentAuditLog' || table === 'Tenant') continue;
+        await (tx as any)[accessorFor(table)].deleteMany({ where: { tenantId } });
+      }
+
+      await tx.tenant.delete({ where: { id: tenantId } });
+    },
+    { timeout: 60_000 }
+  );
+}
+
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exitCode = 1;
+  })
+  .finally(() => prisma.$disconnect());

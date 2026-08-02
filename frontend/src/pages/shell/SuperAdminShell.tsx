@@ -8,6 +8,7 @@ import { useNavigation } from '../../hooks/useNavigation';
 import { SuperAdminDashboard } from '../dashboard/SuperAdminDashboard';
 import { TenantsPage } from '../admin/TenantsPage';
 import { PeoplePage } from '../admin/PeoplePage';
+import { PlatformSettingsPage } from '../admin/PlatformSettingsPage';
 
 export const SuperAdminShell = () => {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ export const SuperAdminShell = () => {
     <AppLayout
       userName={userName}
       onLogout={handleLogout}
-      onSettingsClick={() => navigate('/settings')}
+      onSettingsClick={() => navigate('/admin/setting')}
       sidebar={
         <Sidebar 
           orgName="Neva CRM Platform" 
@@ -48,16 +49,26 @@ export const SuperAdminShell = () => {
       }
     >
       <Routes>
-        <Route path="/" element={<Navigate to="dashboard" replace />} />
-        <Route path="/dashboard" element={<SuperAdminDashboard />} />
-        <Route path="/tenants" element={<TenantsPage />} />
-        <Route path="/people" element={<PeoplePage />} />
+        {/*
+          This <Routes> has no ancestor Route with a "*" splat trimming the
+          matched prefix (each entry in routes/index.tsx for /admin/dashboard,
+          /admin/tenants etc. is its own exact-path route rendering this shell
+          directly), so React Router gives it no "remaining path" context.
+          Route paths here are matched against the FULL pathname, not a
+          path relative to /admin — hence absolute /admin/... paths below
+          instead of bare /dashboard, /tenants, etc.
+        */}
+        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="/admin/dashboard" element={<SuperAdminDashboard />} />
+        <Route path="/admin/tenants" element={<TenantsPage />} />
+        <Route path="/admin/people" element={<PeoplePage />} />
+        <Route path="/admin/setting" element={<PlatformSettingsPage />} />
         {/*
           Every sidebar link this shell offers now resolves to a route defined
           here. Anything else lands on the dashboard rather than rendering an
           empty shell with no explanation.
         */}
-        <Route path="*" element={<Navigate to="dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
       </Routes>
     </AppLayout>
   );

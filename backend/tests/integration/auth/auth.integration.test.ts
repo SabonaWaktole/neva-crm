@@ -197,6 +197,27 @@ class InMemoryTenantRepository implements ITenantRepository {
     }
   }
 
+  async updateSettingsForMany(
+    tenantIds: string[],
+    settings: { requiresQuotationApproval?: boolean }
+  ): Promise<number> {
+    let count = 0;
+    for (const id of tenantIds) {
+      const tenant = this.tenants.find((t) => t.id === id);
+      if (!tenant) continue;
+      const idx = this.tenants.indexOf(tenant);
+      this.tenants[idx] = Tenant.create({
+        id: tenant.id,
+        name: tenant.name,
+        urlSlug: tenant.urlSlug,
+        requiresQuotationApproval: settings.requiresQuotationApproval ?? tenant.requiresQuotationApproval,
+        createdAt: tenant.createdAt,
+      });
+      count++;
+    }
+    return count;
+  }
+
   async setSubscriptionStatus(id: string, status: SubscriptionStatus): Promise<void> {
     const tenant = this.tenants.find(t => t.id === id);
     if (tenant) {
