@@ -327,12 +327,69 @@ export const router = createBrowserRouter([
     ],
   },
   /*
-   * `/admin/*`, not `/admin`: SuperAdminShell renders its own nested <Routes>
-   * for /dashboard, /tenants and /people. Without the wildcard, the top-level
-   * router only matches the bare `/admin` path exactly — a request for
-   * `/admin/tenants` never reaches SuperAdminShell at all and falls through to
-   * the catch-all 404 below.
+   * SuperAdminShell renders its own nested <Routes> for /dashboard, /tenants,
+   * /people and /setting. Those four are listed here explicitly — as well as
+   * the wildcard below — because React Router ranks a dynamic segment plus a
+   * matching static child (`/:tenantSlug/dashboard`) ABOVE a static segment
+   * plus a splat (`/admin/*`): a splat is scored deliberately low so that a
+   * more specific route elsewhere can win. Left as only `/admin/*`, a request
+   * for `/admin/dashboard` was actually being matched by `/:tenantSlug`
+   * (tenantSlug="admin") instead of this route, silently treating "admin" as
+   * a tenant slug and 404ing every tenant-scoped API call. Explicit static
+   * routes for each real sub-page outrank the dynamic tenant route the same
+   * way `/admin` alone always did; the wildcard remains only to catch
+   * anything else and redirect it via SuperAdminShell's own `*` route.
    */
+  {
+    path: '/admin',
+    element: (
+      <ProtectedRoute>
+        <RoleGuard allowedRoles={['SUPER_ADMIN']}>
+          <SuperAdminShell />
+        </RoleGuard>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/admin/dashboard',
+    element: (
+      <ProtectedRoute>
+        <RoleGuard allowedRoles={['SUPER_ADMIN']}>
+          <SuperAdminShell />
+        </RoleGuard>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/admin/tenants',
+    element: (
+      <ProtectedRoute>
+        <RoleGuard allowedRoles={['SUPER_ADMIN']}>
+          <SuperAdminShell />
+        </RoleGuard>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/admin/people',
+    element: (
+      <ProtectedRoute>
+        <RoleGuard allowedRoles={['SUPER_ADMIN']}>
+          <SuperAdminShell />
+        </RoleGuard>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/admin/setting',
+    element: (
+      <ProtectedRoute>
+        <RoleGuard allowedRoles={['SUPER_ADMIN']}>
+          <SuperAdminShell />
+        </RoleGuard>
+      </ProtectedRoute>
+    ),
+  },
   {
     path: '/admin/*',
     element: (
