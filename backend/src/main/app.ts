@@ -34,6 +34,9 @@ import { CreateTenantWithOwnerUseCase } from '@tenant/application/use-cases/Crea
 import { SetTenantSubscriptionStatusUseCase } from '@tenant/application/use-cases/SetTenantSubscriptionStatusUseCase';
 import { EnterTenantUseCase } from '@tenant/application/use-cases/EnterTenantUseCase';
 import { ExitTenantUseCase } from '@tenant/application/use-cases/ExitTenantUseCase';
+import { DeleteTenantUseCase } from '@tenant/application/use-cases/DeleteTenantUseCase';
+import { PrismaTenantDeletionTransaction } from '@tenant/infrastructure/PrismaTenantDeletionTransaction';
+import { FsTenantMediaCleaner } from '@tenant/infrastructure/FsTenantMediaCleaner';
 import { PrismaPlatformSettingsRepository } from '../settings/infrastructure/PrismaPlatformSettingsRepository';
 import { IPlatformSettingsRepository } from '../settings/domain/IPlatformSettingsRepository';
 import { GetPlatformSettingsUseCase } from '../settings/application/use-cases/GetPlatformSettingsUseCase';
@@ -146,6 +149,11 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const getPlatformUsersUseCase = new GetPlatformUsersUseCase(userRepository);
   const enterTenantUseCase = new EnterTenantUseCase(tenantRepository, userRepository, tokenService);
   const exitTenantUseCase = new ExitTenantUseCase(userRepository, tokenService);
+  const deleteTenantUseCase = new DeleteTenantUseCase(
+    tenantRepository,
+    new PrismaTenantDeletionTransaction(),
+    new FsTenantMediaCleaner()
+  );
   const inviteStaffUseCase = new InviteStaffUseCase(invitationRepository, emailSender);
   const notificationRepository = new PrismaNotificationRepository();
   const notificationSettingsRepository = new PrismaNotificationSettingsRepository();
@@ -244,6 +252,7 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
       SubscriptionStatus.ACTIVE
     ),
     enterTenantUseCase,
+    deleteTenantUseCase,
     createUserUseCase,
     getPlatformUsersUseCase,
     bulkUpdateTenantSettingsUseCase,

@@ -39,4 +39,14 @@ export const tenantSchemas = {
     phone: z.string().optional().nullable(),
     warehouseId: z.string().optional().nullable(),
   }),
+
+  /**
+   * Super Admin permanently deleting a workspace. `confirmSlug` must equal
+   * the workspace's own `urlSlug`, checked again in `DeleteTenantUseCase`
+   * against the real record — this only guards against an empty or
+   * obviously-wrong body reaching the use case at all.
+   */
+  deleteTenant: z.object({
+    confirmSlug: z.string().min(1),
+  }),
 };

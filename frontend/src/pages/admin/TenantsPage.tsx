@@ -21,8 +21,15 @@ import styles from './TenantsPage.module.css';
 export const TenantsPage = () => {
   const { t } = useTranslation('dashboard');
   const { tenants, total, isLoading, fetchTenants } = useTenants();
-  const { createTenant, suspendTenant, reactivateTenant, isSubmitting, error, clearError } =
-    useTenantAdmin();
+  const {
+    createTenant,
+    suspendTenant,
+    reactivateTenant,
+    deleteTenant,
+    isSubmitting,
+    error,
+    clearError,
+  } = useTenantAdmin();
   const {
     enterWorkspace,
     isSwitching,
@@ -35,6 +42,9 @@ export const TenantsPage = () => {
     tenant: Tenant;
     kind: 'suspend' | 'reactivate';
   } | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<Tenant | null>(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleteMismatch, setDeleteMismatch] = useState(false);
 
   const refresh = () => fetchTenants(0, 50);
 
@@ -57,6 +67,26 @@ export const TenantsPage = () => {
     if (!result) throw new Error(error ?? 'Action failed');
 
     setPendingAction(null);
+    refresh();
+  };
+
+  const closeDeleteDialog = () => {
+    setPendingDelete(null);
+    setDeleteConfirmText('');
+    setDeleteMismatch(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!pendingDelete) return;
+    if (deleteConfirmText !== pendingDelete.urlSlug) {
+      setDeleteMismatch(true);
+      throw new Error('Confirmation text did not match.');
+    }
+
+    const success = await deleteTenant(pendingDelete.id, deleteConfirmText);
+    if (!success) throw new Error(error ?? 'Delete failed');
+
+    closeDeleteDialog();
     refresh();
   };
 
@@ -110,6 +140,12 @@ export const TenantsPage = () => {
           clearSessionError();
           enterWorkspace(tenant.id);
         }}
+        onDelete={(tenant) => {
+          clearError();
+          setPendingDelete(tenant);
+          setDeleteConfirmText('');
+          setDeleteMismatch(false);
+        }}
       />
 
       <CreateTenantModal
@@ -143,6 +179,40 @@ export const TenantsPage = () => {
           pendingAction?.kind === 'suspend'
             ? t('superAdmin.suspendTenant')
             : t('superAdmin.reactivateTenant')
+        }
+      />
+
+      <ConfirmDialog
+        isOpen={pendingDelete !== null}
+        onClose={closeDeleteDialog}
+        onConfirm={handleConfirmDelete}
+        tone="danger"
+        title={t('superAdmin.confirmDeleteTitle')}
+        confirmLabel={t('superAdmin.deleteTenant')}
+        message={
+          <div className={styles.deleteConfirm}>
+            <p>{t('superAdmin.confirmDeleteMessage', { name: pendingDelete?.name })}</p>
+            <p>{t('superAdmin.confirmDeleteInstruction', { slug: pendingDelete?.urlSlug })}</p>
+            <label>
+              <span className={styles.srOnly}>{t('superAdmin.confirmDeleteInputLabel')}</span>
+              <input
+                type="text"
+                className={styles.deleteConfirmInput}
+                value={deleteConfirmText}
+                onChange={(e) => {
+                  setDeleteConfirmText(e.target.value);
+                  setDeleteMismatch(false);
+                }}
+                autoComplete="off"
+                autoFocus
+              />
+            </label>
+            {deleteMismatch && (
+              <p className={styles.error} role="alert">
+                {t('superAdmin.confirmDeleteMismatch')}
+              </p>
+            )}
+          </div>
         }
       />
     </div>

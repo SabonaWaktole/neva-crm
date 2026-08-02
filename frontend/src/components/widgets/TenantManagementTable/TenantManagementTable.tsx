@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './TenantManagementTable.module.css';
-import { Building2, MoreVertical, Ban, CheckCircle2, LogIn } from 'lucide-react';
+import { Building2, MoreVertical, Ban, CheckCircle2, LogIn, Trash2 } from 'lucide-react';
 import { DataTable } from '../../ui/DataTable';
 import type { DataTableColumn } from '../../ui/DataTable';
 import { Badge } from '../../ui/Badge';
@@ -22,6 +22,8 @@ interface TenantManagementTableProps {
    * above, so the read-only dashboard summary renders without it.
    */
   onManage?: (tenant: Tenant) => void;
+  /** Permanently deletes the workspace. Optional, same as the actions above. */
+  onDelete?: (tenant: Tenant) => void;
   /** Rendered as a header action when provided. */
   onViewAll?: () => void;
   /** The tenant whose action is in flight, so only its row shows as busy. */
@@ -34,6 +36,7 @@ export const TenantManagementTable: React.FC<TenantManagementTableProps> = ({
   onSuspend,
   onReactivate,
   onManage,
+  onDelete,
   onViewAll,
   pendingTenantId,
 }) => {
@@ -163,6 +166,18 @@ export const TenantManagementTable: React.FC<TenantManagementTableProps> = ({
                     onClick: () => onSuspend!(tenant),
                     disabled: isPending,
                   },
+              ...(onDelete
+                ? [
+                    {
+                      id: 'delete',
+                      label: t('superAdmin.deleteTenant'),
+                      icon: <Trash2 size={16} />,
+                      danger: true,
+                      onClick: () => onDelete(tenant),
+                      disabled: isPending,
+                    },
+                  ]
+                : []),
             ]}
           />
         );

@@ -3,8 +3,13 @@ import { GetTenantsUseCase } from '../../../application/use-cases/GetTenantsUseC
 import { CreateTenantWithOwnerUseCase } from '../../../application/use-cases/CreateTenantWithOwnerUseCase';
 import { SetTenantSubscriptionStatusUseCase } from '../../../application/use-cases/SetTenantSubscriptionStatusUseCase';
 import { EnterTenantUseCase } from '../../../application/use-cases/EnterTenantUseCase';
+import { DeleteTenantUseCase } from '../../../application/use-cases/DeleteTenantUseCase';
 import { Tenant } from '../../../domain/entities/Tenant';
-import { TenantNotFoundError, TenantSuspendedError } from '../../../domain/errors';
+import {
+  TenantNotFoundError,
+  TenantSuspendedError,
+  ConfirmationMismatchError,
+} from '../../../domain/errors';
 import { CreateUserUseCase } from '../../../../auth/application/use-cases/CreateUserUseCase';
 import { GetPlatformUsersUseCase } from '../../../../auth/application/use-cases/GetPlatformUsersUseCase';
 import { BulkUpdateTenantSettingsUseCase } from '../../../../settings/application/use-cases/BulkUpdateTenantSettingsUseCase';
@@ -45,6 +50,7 @@ export interface TenantRouterDeps {
   suspendTenantUseCase: SetTenantSubscriptionStatusUseCase;
   reactivateTenantUseCase: SetTenantSubscriptionStatusUseCase;
   enterTenantUseCase: EnterTenantUseCase;
+  deleteTenantUseCase: DeleteTenantUseCase;
   createUserUseCase: CreateUserUseCase;
   getPlatformUsersUseCase: GetPlatformUsersUseCase;
   bulkUpdateTenantSettingsUseCase: BulkUpdateTenantSettingsUseCase;
@@ -59,6 +65,7 @@ export function createTenantRouter(deps: TenantRouterDeps): Router {
     suspendTenantUseCase,
     reactivateTenantUseCase,
     enterTenantUseCase,
+    deleteTenantUseCase,
     createUserUseCase,
     getPlatformUsersUseCase,
     bulkUpdateTenantSettingsUseCase,
@@ -360,6 +367,47 @@ export function createTenantRouter(deps: TenantRouterDeps): Router {
       next(error);
     }
   });
+
+  /**
+   * SUPER_ADMIN only: permanently delete a workspace.
+   *
+   * Irreversible, unlike suspend/reactivate above — every row belonging to
+   * the tenant and every file it stored on disk is gone once this returns.
+   * `confirmSlug` in the body must equal the workspace's own `urlSlug`,
+   * enforced in `DeleteTenantUseCase` against the real record so a stale or
+   * copy-pasted-wrong slug in the client cannot slip through.
+   */
+  router.delete(
+    '/:id',
+    validateRequest(tenantSchemas.deleteTenant),
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const callerRole = callerRoleOf(req);
+        if (!callerRole) {
+          return res.status(401).json({ error: 'Access denied. No token provided.' });
+        }
+
+        await deleteTenantUseCase.execute({
+          callerRole,
+          tenantId: String(req.params.id),
+          confirmSlug: req.body.confirmSlug,
+        });
+
+        res.status(204).send();
+      } catch (error) {
+        if (error instanceof TenantNotFoundError) {
+          return res.status(404).json({ error: 'Tenant not found' });
+        }
+        if (error instanceof ConfirmationMismatchError) {
+          return res.status(400).json({ error: error.message });
+        }
+        if (error instanceof UnauthorizedError) {
+          return res.status(403).json({ error: error.message });
+        }
+        next(error);
+      }
+    }
+  );
 
   return router;
 }

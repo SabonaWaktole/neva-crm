@@ -35,6 +35,34 @@
   font-size: 0.875rem;
 }
 
+.deleteConfirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm, 0.75rem);
+}
+
+.deleteConfirmInput {
+  width: 100%;
+  padding: var(--spacing-sm, 0.75rem);
+  border: 1px solid var(--color-outline, #ccc);
+  border-radius: var(--radius-sm, 8px);
+  font-size: 0.9375rem;
+  color: var(--color-on-surface);
+  background: var(--color-surface);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 @media (max-width: 640px) {
   .page {
     padding: var(--spacing-md, 1rem);

@@ -156,6 +156,15 @@ export const dashboardService = {
   },
 
   /**
+   * Permanently deletes a workspace: every row and every uploaded file that
+   * belongs to it. `confirmSlug` must equal the workspace's own `urlSlug` —
+   * enforced server-side, not just a client-side gate.
+   */
+  deleteTenant: async (tenantId: string, confirmSlug: string): Promise<void> => {
+    await apiClient.delete(`/tenants/${tenantId}`, { data: { confirmSlug } });
+  },
+
+  /**
    * Enter a workspace and administer it as its owner.
    *
    * Replaces the session cookie server-side, so the caller must re-read

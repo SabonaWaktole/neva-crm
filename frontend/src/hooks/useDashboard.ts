@@ -135,10 +135,32 @@ export const useTenantAdmin = () => {
     [run]
   );
 
+  /*
+   * Not built on `run`: `run` reports failure as a `null` return, which is
+   * indistinguishable from `deleteTenant`'s own success value — a delete
+   * resolves to `void`, and `void` is `null`-ish too. This returns a real
+   * boolean instead, so a caller can tell success from failure without that
+   * ambiguity.
+   */
+  const deleteTenant = useCallback(async (tenantId: string, confirmSlug: string) => {
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      await dashboardService.deleteTenant(tenantId, confirmSlug);
+      return true;
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Something went wrong. Please try again.');
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, []);
+
   return {
     createTenant,
     suspendTenant,
     reactivateTenant,
+    deleteTenant,
     isSubmitting,
     error,
     clearError: useCallback(() => setError(null), []),
