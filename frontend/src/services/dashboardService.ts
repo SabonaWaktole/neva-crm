@@ -60,6 +60,37 @@ export interface CreateTenantInput {
   ownerPassword: string;
 }
 
+/** A person as the platform console lists them — with their workspace's name. */
+export interface PlatformUser {
+  id: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  role: 'SUPER_ADMIN' | 'BUSINESS_OWNER' | 'STAFF';
+  isActive: boolean;
+  tenantId: string | null;
+  /** Null for a platform administrator, who belongs to no workspace. */
+  tenantName: string | null;
+  createdAt: string;
+}
+
+export interface PlatformUserFilters {
+  tenantId?: string;
+  role?: string;
+  isActive?: boolean;
+  q?: string;
+  skip?: number;
+  take?: number;
+}
+
+export interface CreatePlatformUserInput {
+  email: string;
+  password: string;
+  role: 'BUSINESS_OWNER' | 'STAFF';
+  firstName?: string | null;
+  lastName?: string | null;
+}
+
 export const dashboardService = {
   getTenantClientMetrics: async (tenantSlug: string): Promise<DashboardMetrics> => {
     const response = await apiClient.get<DashboardMetrics>(`/${tenantSlug}/dashboard/metrics`);
@@ -101,5 +132,52 @@ export const dashboardService = {
   reactivateTenant: async (tenantId: string): Promise<Tenant> => {
     const response = await apiClient.patch<{ tenant: Tenant }>(`/tenants/${tenantId}/reactivate`);
     return response.data.tenant;
-  }
+  },
+
+  /**
+   * Enter a workspace and administer it as its owner.
+   *
+   * Replaces the session cookie server-side, so the caller must re-read
+   * /auth/me before navigating — the store still holds the platform session at
+   * the moment this resolves.
+   */
+  enterTenant: async (tenantId: string): Promise<{ tenantSlug: string; tenantName: string }> => {
+    const response = await apiClient.post<{ tenantSlug: string; tenantName: string }>(
+      `/tenants/${tenantId}/enter`
+    );
+    return response.data;
+  },
+
+  /** Every account on the platform. SUPER_ADMIN only. */
+  getPlatformUsers: async (
+    filters: PlatformUserFilters = {}
+  ): Promise<{ items: PlatformUser[]; total: number }> => {
+    const params: Record<string, unknown> = {};
+    if (filters.tenantId) params.tenantId = filters.tenantId;
+    if (filters.role) params.role = filters.role;
+    // Sent only when actually set: omitting it means "any", and `false` is a
+    // real filter value that must survive the trip.
+    if (filters.isActive !== undefined) params.isActive = filters.isActive;
+    if (filters.q) params.q = filters.q;
+    if (filters.skip !== undefined) params.skip = filters.skip;
+    if (filters.take !== undefined) params.take = filters.take;
+
+    const response = await apiClient.get<{ items: PlatformUser[]; total: number }>(
+      `/tenants/users`,
+      { params }
+    );
+    return response.data;
+  },
+
+  /** Create a user inside a workspace, credentials included, from the console. */
+  createPlatformUser: async (
+    tenantId: string,
+    input: CreatePlatformUserInput
+  ): Promise<PlatformUser> => {
+    const response = await apiClient.post<{ user: PlatformUser }>(
+      `/tenants/${tenantId}/users`,
+      input
+    );
+    return response.data.user;
+  },
 };

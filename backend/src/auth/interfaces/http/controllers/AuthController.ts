@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
 import { requireTenant, requireTenantId } from "@main/interfaces/http/tenantContext";
 import { authCookieOptions, AUTH_COOKIE_MAX_AGE_MS } from "@main/interfaces/http/authCookie";
-import { RegisterBusinessOwnerUseCase } from '@auth/application/use-cases/RegisterBusinessOwnerUseCase';
 import { LoginUseCase } from '@auth/application/use-cases/LoginUseCase';
+import { CreateUserUseCase } from '@auth/application/use-cases/CreateUserUseCase';
+import { ExitTenantUseCase } from '@tenant/application/use-cases/ExitTenantUseCase';
 import { InviteStaffUseCase } from '@auth/application/use-cases/InviteStaffUseCase';
 import { AcceptInvitationUseCase } from '@auth/application/use-cases/AcceptInvitationUseCase';
 import { RequestPasswordResetUseCase } from '@auth/application/use-cases/RequestPasswordResetUseCase';
@@ -20,7 +21,6 @@ import { ITenantRepository } from '@tenant/domain/repositories/ITenantRepository
 import { UserRole } from '@auth/domain/enums/UserRole';
 export class AuthController {
   constructor(
-    private registerUseCase: RegisterBusinessOwnerUseCase,
     private loginUseCase: LoginUseCase,
     private inviteStaffUseCase: InviteStaffUseCase,
     private acceptInvitationUseCase: AcceptInvitationUseCase,
@@ -35,21 +35,10 @@ export class AuthController {
     private cancelInvitationUseCase?: CancelInvitationUseCase,
     private deactivateUserUseCase?: DeactivateUserUseCase,
     private getDeactivationImpactUseCase?: GetDeactivationImpactUseCase,
-    private reactivateUserUseCase?: ReactivateUserUseCase
+    private reactivateUserUseCase?: ReactivateUserUseCase,
+    private createUserUseCase?: CreateUserUseCase,
+    private exitTenantUseCase?: ExitTenantUseCase
   ) {}
-
-  register = async (req: Request, res: Response) => {
-    try {
-      const result = await this.registerUseCase.execute(req.body);
-      
-      // Auto-login after registration could happen here if use case returns token.
-      // But currently RegisterBusinessOwnerUseCase doesn't return a token.
-      // Let's just return success for now.
-      res.status(201).json({ message: 'Registration successful', tenantSlug: result.tenant.urlSlug });
-    } catch (error: any) {
-      res.status(400).json({ error: error.message });
-    }
-  };
 
   loginTenant = async (req: Request, res: Response) => {
     try {
@@ -74,6 +63,48 @@ export class AuthController {
   logout = async (req: Request, res: Response) => {
     res.clearCookie('jwt', authCookieOptions());
     res.status(200).json({ message: 'Logged out successfully' });
+  };
+
+  /**
+   * Leave a workspace a platform administrator had entered, returning to the
+   * platform session. Authorised by the token's `impersonatorId` claim rather
+   * than by role — see ExitTenantUseCase.
+   */
+  exitWorkspace = async (req: Request, res: Response) => {
+    try {
+      const result = await this.exitTenantUseCase!.execute({
+        impersonatorId: req.user!.impersonatorId,
+      });
+      res.cookie('jwt', result.token, { ...authCookieOptions(), maxAge: AUTH_COOKIE_MAX_AGE_MS });
+      res.status(200).json({ message: 'Returned to platform console' });
+    } catch (error: any) {
+      res.status(403).json({ error: error.message });
+    }
+  };
+
+  createUser = async (req: Request, res: Response) => {
+    try {
+      const user = await this.createUserUseCase!.execute({
+        callerRole: req.user!.role,
+        callerTenantId: req.user!.tenantId,
+        // The workspace resolved from the URL slug, never req.user.tenantId —
+        // the two diverge for an impersonating administrator. See tenantContext.
+        tenantId: requireTenantId(req),
+        email: req.body.email,
+        password: req.body.password,
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        phone: req.body.phone,
+        role: req.body.role,
+        warehouseId: req.body.warehouseId,
+      });
+      res.status(201).json({ user });
+    } catch (error: any) {
+      if (error.name === 'UnauthorizedError' || error.message.includes('Unauthorized')) {
+        return res.status(403).json({ error: error.message });
+      }
+      res.status(400).json({ error: error.message });
+    }
   };
 
   getMe = async (req: Request, res: Response) => {
@@ -179,7 +210,27 @@ export class AuthController {
           // settings UI can show "Follow company default" as selected.
           userLanguage: user.language ?? null,
           tenantDefaultLanguage: tenantBranding?.defaultLanguage ?? null,
-        }
+        },
+        /*
+         * Non-null while a platform administrator is managing this workspace.
+         *
+         * Returned from the TOKEN rather than re-derived: `user` here is the
+         * administrator's own record, whose stored role is SUPER_ADMIN and whose
+         * tenantId is null, so nothing about the swapped session is visible in
+         * it. The claim is what the session actually is.
+         *
+         * It rides on /auth/me rather than only on the enter response so the
+         * banner survives a page reload — otherwise an administrator who
+         * refreshed would be operating inside a client's workspace with no
+         * indication that they were.
+         */
+        impersonating: req.user.impersonatorId
+          ? {
+              adminEmail: req.user.impersonatorEmail ?? null,
+              tenantSlug: req.user.tenantSlug,
+              tenantName: tenantBranding?.name ?? null,
+            }
+          : null,
       });
     } catch (error: any) {
       // Log internally; never return the raw message to the client.

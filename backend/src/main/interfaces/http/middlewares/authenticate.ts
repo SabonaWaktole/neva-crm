@@ -10,6 +10,12 @@ declare global {
         tenantId: string | null;
         tenantSlug: string | null;
         warehouseId: string | null;
+        /**
+         * Present only while a SUPER_ADMIN is managing a workspace they entered
+         * from the platform console. See TokenPayload for the full contract.
+         */
+        impersonatorId?: string;
+        impersonatorEmail?: string;
       };
     }
   }

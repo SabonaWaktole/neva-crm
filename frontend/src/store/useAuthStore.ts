@@ -46,22 +46,43 @@ export interface User {
   tenantDefaultLanguage?: string | null;
 }
 
+/**
+ * Set while a platform administrator is managing a client's workspace, having
+ * entered it from the admin console.
+ *
+ * Kept alongside `user` rather than on it, because `user` describes the session
+ * as every page already reads it — and during impersonation that session
+ * deliberately reads as the workspace's BUSINESS_OWNER, which is the whole
+ * point. This is the separate fact that the owner in question is not really an
+ * employee of that business, and the only thing that renders the banner.
+ */
+export interface Impersonation {
+  adminEmail: string | null;
+  tenantSlug: string | null;
+  tenantName: string | null;
+}
+
 interface AuthState {
   user: User | null;
+  impersonating: Impersonation | null;
   isAuthenticated: boolean;
   isInitializing: boolean;
-  
-  setUser: (user: User | null) => void;
+
+  setUser: (user: User | null, impersonating?: Impersonation | null) => void;
   logout: () => void;
   setInitializing: (isInitializing: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
+  impersonating: null,
   isAuthenticated: false,
   isInitializing: true, // starts true until we check /me on app load
 
-  setUser: (user) => set({ user, isAuthenticated: !!user }),
-  logout: () => set({ user: null, isAuthenticated: false }),
+  // `impersonating` defaults to null rather than being left untouched when
+  // omitted: every caller that sets a user is establishing a whole session, and
+  // a stale banner surviving a re-login would misreport whose data is on screen.
+  setUser: (user, impersonating = null) => set({ user, impersonating, isAuthenticated: !!user }),
+  logout: () => set({ user: null, impersonating: null, isAuthenticated: false }),
   setInitializing: (isInitializing) => set({ isInitializing }),
 }));

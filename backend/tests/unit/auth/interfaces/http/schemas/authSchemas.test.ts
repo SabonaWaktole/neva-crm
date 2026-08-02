@@ -1,36 +1,42 @@
-import { authSchemas } from '@auth/interfaces/http/schemas/authSchemas';
+import { tenantSchemas } from '@tenant/interfaces/http/schemas/tenantSchemas';
 
-describe('authSchemas', () => {
-  it('should validate valid register payload', () => {
+/*
+ * These cases used to target `authSchemas.register`, the public self-signup
+ * schema. Self-signup was removed — a workspace is now provisioned only by a
+ * platform administrator — and `tenantSchemas.createTenant` validates the
+ * identical fields for that path. The rules under test did not change owner.
+ */
+describe('tenantSchemas.createTenant', () => {
+  it('should validate a valid workspace-provisioning payload', () => {
     const valid = {
       companyName: 'Acme',
       urlSlug: 'acme',
       ownerEmail: 'owner@acme.com',
       ownerPassword: 'Password123',
     };
-    const result = authSchemas.register.safeParse(valid);
+    const result = tenantSchemas.createTenant.safeParse(valid);
     expect(result.success).toBe(true);
   });
 
-  it('should reject invalid email in register payload', () => {
+  it('should reject an invalid owner email', () => {
     const invalid = {
       companyName: 'Acme',
       urlSlug: 'acme',
       ownerEmail: 'not-an-email',
       ownerPassword: 'Password123',
     };
-    const result = authSchemas.register.safeParse(invalid);
+    const result = tenantSchemas.createTenant.safeParse(invalid);
     expect(result.success).toBe(false);
   });
 
-  it('should reject weak password in register payload', () => {
+  it('should reject a weak owner password', () => {
     const invalid = {
       companyName: 'Acme',
       urlSlug: 'acme',
       ownerEmail: 'owner@acme.com',
       ownerPassword: 'pass',
     };
-    const result = authSchemas.register.safeParse(invalid);
+    const result = tenantSchemas.createTenant.safeParse(invalid);
     expect(result.success).toBe(false);
   });
 });

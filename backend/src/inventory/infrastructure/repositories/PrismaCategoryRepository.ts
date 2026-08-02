@@ -105,19 +105,19 @@ export class PrismaCategoryRepository implements ICategoryRepository {
       createdAt: Date,
       updatedAt: Date
     }>>`
-      SELECT c.id, c.name, c.description, c.\`isArchived\`, c.\`createdAt\`, c.\`updatedAt\`
-      FROM \`Category\` c
-      WHERE c.\`tenantId\` = ${tenantId}
-        AND c.\`isArchived\` = false
+      SELECT c.id, c.name, c.description, c."isArchived", c."createdAt", c."updatedAt"
+      FROM "Category" c
+      WHERE c."tenantId" = ${tenantId}
+        AND c."isArchived" = false
         AND NOT EXISTS (
-          SELECT 1 FROM \`Product\` p
-          WHERE p.\`categoryId\` = c.id
-            AND p.\`isArchived\` = false
+          SELECT 1 FROM "Product" p
+          WHERE p."categoryId" = c.id
+            AND p."isArchived" = false
         )
         AND NOT EXISTS (
-          SELECT 1 FROM \`QuotationLineItem\` qli
-          JOIN \`Product\` p2 ON p2.id = qli.\`productId\`
-          WHERE p2.\`categoryId\` = c.id
+          SELECT 1 FROM "QuotationLineItem" qli
+          JOIN "Product" p2 ON p2.id = qli."productId"
+          WHERE p2."categoryId" = c.id
         )
       ORDER BY c.name ASC;
     `;

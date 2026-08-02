@@ -1,11 +1,11 @@
-import { ReactivateUserUseCase } from '@auth/application/use-cases/ReactivateUserUseCase';
+﻿import { ReactivateUserUseCase } from '@auth/application/use-cases/ReactivateUserUseCase';
 import { IUserRepository } from '@auth/domain/repositories/IUserRepository';
 import { User } from '@auth/domain/entities/User';
 import { UserRole } from '@auth/domain/enums/UserRole';
 
 /**
  * Reactivation existed as a repository capability (`setActive(id, boolean)`)
- * but had no caller passing `true` and no route — deactivation was one-way.
+ * but had no caller passing `true` and no route â€” deactivation was one-way.
  * TD-030.
  */
 describe('ReactivateUserUseCase', () => {
@@ -38,6 +38,7 @@ describe('ReactivateUserUseCase', () => {
       setActive: jest.fn(),
       countAssignedWork: jest.fn(),
       findActiveByTenantAndRole: jest.fn().mockResolvedValue([]),
+      findPlatformUsers: jest.fn().mockResolvedValue({ items: [], total: 0 }),
     } as unknown as jest.Mocked<IUserRepository>;
 
     useCase = new ReactivateUserUseCase(userRepository);
@@ -56,7 +57,7 @@ describe('ReactivateUserUseCase', () => {
     expect(userRepository.setActive).toHaveBeenCalledWith('u1', true);
   });
 
-  it('is idempotent — reactivating an active member succeeds and writes nothing', async () => {
+  it('is idempotent â€” reactivating an active member succeeds and writes nothing', async () => {
     userRepository.findById.mockResolvedValue(makeUser({ isActive: true } as any));
 
     const result = await useCase.execute({

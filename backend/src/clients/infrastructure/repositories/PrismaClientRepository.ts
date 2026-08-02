@@ -44,47 +44,46 @@ export class PrismaClientRepository implements IClientRepository {
       // depending on whether a custom-field filter happens to be active.
       const like = (value: string) => `%${value}%`;
 
-      // MySQL dialect throughout. `LIKE` on the utf8mb4_unicode_ci columns this
-      // schema declares is already case-insensitive, so it carries Postgres
-      // `ILIKE`'s meaning without the operator.
+      // Postgres dialect throughout: ILIKE for case-insensitive matching, and
+      // double-quoted identifiers for the camelCase columns Prisma creates.
       //
-      // A NULL email/phone yields NULL from LIKE rather than false, so a client
+      // A NULL email/phone yields NULL from ILIKE rather than false, so a client
       // with no email simply does not match on that column — while still
       // matching on name via the OR.
       const searchFilter = filters.search
-        ? Prisma.sql`AND (\`name\` LIKE ${like(filters.search)} OR \`email\` LIKE ${like(filters.search)} OR \`phone\` LIKE ${like(filters.search)})`
+        ? Prisma.sql`AND (name ILIKE ${like(filters.search)} OR email ILIKE ${like(filters.search)} OR phone ILIKE ${like(filters.search)})`
         : Prisma.empty;
-      const nameFilter = filters.name ? Prisma.sql`AND \`name\` LIKE ${like(filters.name)}` : Prisma.empty;
-      const emailFilter = filters.email ? Prisma.sql`AND \`email\` LIKE ${like(filters.email)}` : Prisma.empty;
-      const phoneFilter = filters.phone ? Prisma.sql`AND \`phone\` LIKE ${like(filters.phone)}` : Prisma.empty;
-      const statusFilter = filters.status ? Prisma.sql`AND \`status\` = ${filters.status}` : Prisma.empty;
-      const assignedUserFilter = filters.assignedUserId ? Prisma.sql`AND \`assignedUserId\` = ${filters.assignedUserId}` : Prisma.empty;
+      const nameFilter = filters.name ? Prisma.sql`AND name ILIKE ${like(filters.name)}` : Prisma.empty;
+      const emailFilter = filters.email ? Prisma.sql`AND email ILIKE ${like(filters.email)}` : Prisma.empty;
+      const phoneFilter = filters.phone ? Prisma.sql`AND phone ILIKE ${like(filters.phone)}` : Prisma.empty;
+      const statusFilter = filters.status ? Prisma.sql`AND status = ${filters.status}` : Prisma.empty;
+      const assignedUserFilter = filters.assignedUserId ? Prisma.sql`AND "assignedUserId" = ${filters.assignedUserId}` : Prisma.empty;
 
-      // JSON_CONTAINS(target, candidate) is MySQL's spelling of Postgres's
-      // `@>`: true when every key/value in the candidate appears in the target.
+      // `@>` is jsonb containment: true when every key/value on the right
+      // appears on the left.
       const whereClause = Prisma.sql`
-        WHERE \`tenantId\` = ${tenantId}
+        WHERE "tenantId" = ${tenantId}
         ${searchFilter}
         ${nameFilter}
         ${emailFilter}
         ${phoneFilter}
         ${statusFilter}
         ${assignedUserFilter}
-        AND JSON_CONTAINS(\`customFieldValues\`, ${customFieldsJson})
+        AND "customFieldValues" @> ${customFieldsJson}::jsonb
       `;
 
       const rawQuery = Prisma.sql`
-        SELECT * FROM \`Client\`
+        SELECT * FROM "Client"
         ${whereClause}
-        ORDER BY \`createdAt\` DESC
+        ORDER BY "createdAt" DESC
         LIMIT ${take} OFFSET ${skip}
       `;
 
-      // CAST(... AS SIGNED) stands in for Postgres's `::int`. MySQL still hands
-      // COUNT back as a BigInt, which JSON.stringify refuses to serialise, so
-      // the Number() below is what actually makes the total safe to return.
+      // `::int` rather than a bare COUNT(*): Postgres returns bigint, which
+      // arrives as a JS BigInt that JSON.stringify refuses to serialise. The
+      // Number() below is a second guard on the same hazard.
       const countQuery = Prisma.sql`
-        SELECT CAST(COUNT(*) AS SIGNED) AS total FROM \`Client\`
+        SELECT COUNT(*)::int as total FROM "Client"
         ${whereClause}
       `;
 
@@ -104,14 +103,14 @@ export class PrismaClientRepository implements IClientRepository {
       // Mirrors the raw-SQL branch above — keep both in step.
       if (filters.search) {
         where.OR = [
-          { name: { contains: filters.search } },
-          { email: { contains: filters.search } },
-          { phone: { contains: filters.search } },
+          { name: { contains: filters.search, mode: 'insensitive' } },
+          { email: { contains: filters.search, mode: 'insensitive' } },
+          { phone: { contains: filters.search, mode: 'insensitive' } },
         ];
       }
-      if (filters.name) where.name = { contains: filters.name };
-      if (filters.email) where.email = { contains: filters.email };
-      if (filters.phone) where.phone = { contains: filters.phone };
+      if (filters.name) where.name = { contains: filters.name, mode: 'insensitive' };
+      if (filters.email) where.email = { contains: filters.email, mode: 'insensitive' };
+      if (filters.phone) where.phone = { contains: filters.phone, mode: 'insensitive' };
       if (filters.status) where.status = filters.status;
       if (filters.assignedUserId) where.assignedUserId = filters.assignedUserId;
 

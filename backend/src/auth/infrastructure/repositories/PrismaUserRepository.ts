@@ -1,5 +1,9 @@
 import { PrismaClient } from '@prisma/client';
-import { IUserRepository } from '../../domain/repositories/IUserRepository';
+import {
+  IUserRepository,
+  PlatformUserFilters,
+  PlatformUserRow,
+} from '../../domain/repositories/IUserRepository';
 import { User } from '../../domain/entities/User';
 import { UserRole } from '../../domain/enums/UserRole';
 import { prisma as defaultPrisma } from '../../../shared/infrastructure/prisma/client';
@@ -108,5 +112,65 @@ export class PrismaUserRepository implements IUserRepository {
     ]);
 
     return { clients, upcomingAppointments };
+  }
+
+  async findPlatformUsers(
+    filters: PlatformUserFilters
+  ): Promise<{ items: PlatformUserRow[]; total: number }> {
+    const where: any = {};
+    if (filters.tenantId) where.tenantId = filters.tenantId;
+    if (filters.role) where.role = filters.role;
+    if (filters.isActive !== undefined) where.isActive = filters.isActive;
+    if (filters.q) {
+      // Searching for a person by name must not depend on how they capitalised
+      // it, so this is explicitly case-insensitive — Postgres `contains` is
+      // case-SENSITIVE without it. See PrismaClientRepository.search, which
+      // does the same for the client list.
+      where.OR = [
+        { email: { contains: filters.q, mode: 'insensitive' } },
+        { firstName: { contains: filters.q, mode: 'insensitive' } },
+        { lastName: { contains: filters.q, mode: 'insensitive' } },
+      ];
+    }
+
+    // `total` is the count under the same filters, not the table size — the
+    // console pages through a filtered list and needs to know how deep it goes.
+    const [rows, total] = await Promise.all([
+      this.prisma.user.findMany({
+        where,
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          role: true,
+          isActive: true,
+          tenantId: true,
+          createdAt: true,
+          tenant: { select: { name: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip: filters.skip,
+        take: filters.take,
+      }),
+      this.prisma.user.count({ where }),
+    ]);
+
+    return {
+      items: rows.map((r) => ({
+        id: r.id,
+        email: r.email,
+        firstName: r.firstName,
+        lastName: r.lastName,
+        role: r.role,
+        isActive: r.isActive,
+        tenantId: r.tenantId,
+        // Null for SUPER_ADMIN, who has no workspace — the console renders that
+        // as "Platform" rather than as a missing value.
+        tenantName: r.tenant?.name ?? null,
+        createdAt: r.createdAt,
+      })),
+      total,
+    };
   }
 }

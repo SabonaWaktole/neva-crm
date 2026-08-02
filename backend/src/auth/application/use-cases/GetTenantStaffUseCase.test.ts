@@ -1,4 +1,4 @@
-import { GetTenantStaffUseCase } from './GetTenantStaffUseCase';
+﻿import { GetTenantStaffUseCase } from './GetTenantStaffUseCase';
 import { IUserRepository } from '../../domain/repositories/IUserRepository';
 import { UserRole } from '../../domain/enums/UserRole';
 
@@ -20,6 +20,7 @@ describe('GetTenantStaffUseCase', () => {
       setActive: jest.fn(),
       countAssignedWork: jest.fn(),
       findActiveByTenantAndRole: jest.fn().mockResolvedValue([]),
+      findPlatformUsers: jest.fn().mockResolvedValue({ items: [], total: 0 }),
     };
     useCase = new GetTenantStaffUseCase(userRepositoryMock);
   });

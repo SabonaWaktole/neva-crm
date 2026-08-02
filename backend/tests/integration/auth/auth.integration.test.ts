@@ -1,7 +1,11 @@
-import request from 'supertest';
+﻿import request from 'supertest';
 import express from 'express';
 import { createApp, AppDependencies } from '@main/app';
-import { IUserRepository } from '@auth/domain/repositories/IUserRepository';
+import {
+  IUserRepository,
+  PlatformUserFilters,
+  PlatformUserRow,
+} from '@auth/domain/repositories/IUserRepository';
 import { ITenantRepository } from '@tenant/domain/repositories/ITenantRepository';
 import { IInvitationRepository } from '@auth/domain/repositories/IInvitationRepository';
 import { IPasswordResetTokenRepository } from '@auth/domain/repositories/IPasswordResetTokenRepository';
@@ -20,7 +24,7 @@ import { PasswordResetToken } from '@auth/domain/entities/PasswordResetToken';
 import { UserRole } from '@auth/domain/enums/UserRole';
 
 // ---------------------------------------------------------------------------
-// In-memory implementations of ports — lightweight fakes that behave like
+// In-memory implementations of ports â€” lightweight fakes that behave like
 // real repositories but keep state in plain arrays, removing the need for
 // a running database.
 // ---------------------------------------------------------------------------
@@ -47,6 +51,32 @@ class InMemoryUserRepository implements IUserRepository {
   }
   async findSuperAdminByEmail(email: string): Promise<User | null> {
     return this.users.find(u => u.email === email && u.role === UserRole.SUPER_ADMIN) ?? null;
+  }
+  async findPlatformUsers(filters: PlatformUserFilters): Promise<{ items: PlatformUserRow[]; total: number }> {
+    // The platform console's cross-workspace listing. `tenantName` is null here
+    // because this fake holds no tenants; the tests that exercise this endpoint
+    // assert on membership and filtering, not on the joined name.
+    const matched = this.users.filter(u =>
+      (filters.tenantId === undefined || u.tenantId === filters.tenantId) &&
+      (filters.role === undefined || u.role === filters.role) &&
+      (filters.isActive === undefined || u.isActive === filters.isActive) &&
+      (filters.q === undefined || u.email.toLowerCase().includes(filters.q.toLowerCase()))
+    );
+    const page = matched.slice(filters.skip ?? 0, (filters.skip ?? 0) + (filters.take ?? matched.length));
+    return {
+      items: page.map(u => ({
+        id: u.id,
+        email: u.email,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        role: u.role,
+        isActive: u.isActive,
+        tenantId: u.tenantId,
+        tenantName: null,
+        createdAt: u.createdAt,
+      })),
+      total: matched.length,
+    };
   }
   async create(user: User): Promise<User> {
     this.users.push(user);
@@ -287,8 +317,8 @@ class FakeEmailSender implements IEmailSender {
   }
 
   /**
-   * Business-event mail (§6.6). Recorded with an empty token because, unlike
-   * the two above, it carries no capability — these assertions are about who
+   * Business-event mail (Â§6.6). Recorded with an empty token because, unlike
+   * the two above, it carries no capability â€” these assertions are about who
    * was mailed, not about a link they can act on.
    */
   async sendTransactionalEmail(to: string, _subject: string, _html: string): Promise<void> {
@@ -356,67 +386,66 @@ describe('Auth Integration Tests', () => {
     });
   });
 
+  /**
+   * Seeds a workspace and its owner straight into the fakes.
+   *
+   * These tests used POST /api/auth/register for this, which was convenient
+   * while a public signup route existed. It no longer does, and reaching for
+   * POST /api/tenants instead would mean minting a SUPER_ADMIN session just to
+   * arrange a fixture â€” coupling every login and invitation test to the
+   * platform console. Seeding the repositories directly says what the tests
+   * actually need: a tenant, and an owner who can log into it.
+   */
+  const provisionTenant = async (opts: {
+    name: string;
+    slug: string;
+    ownerEmail: string;
+    ownerPassword: string;
+  }) => {
+    const tenant = Tenant.create({
+      id: `tenant-${opts.slug}`,
+      name: opts.name,
+      urlSlug: opts.slug,
+      createdAt: new Date(),
+    });
+    await tenantRepo.create(tenant);
+
+    const owner = User.create({
+      id: `user-${opts.slug}-owner`,
+      email: opts.ownerEmail,
+      hashedPassword: await passwordHasher.hash(opts.ownerPassword),
+      role: UserRole.BUSINESS_OWNER,
+      tenantId: tenant.id,
+      createdAt: new Date(),
+    });
+    await userRepo.create(owner);
+
+    return { tenant, owner };
+  };
+
   // -----------------------------------------------------------------------
-  // 1. REGISTRATION
+  // 1. WORKSPACE PROVISIONING
+  //
+  // Public self-registration was removed: a workspace now exists only because a
+  // platform administrator created it. The provisioning behaviour these tests
+  // used to cover through POST /api/auth/register is covered against
+  // POST /api/tenants in tests/integration/tenant/, which is now its only
+  // caller. What remains here is the guarantee that the public route is gone.
   // -----------------------------------------------------------------------
   describe('POST /api/auth/register', () => {
-    const validPayload = {
-      companyName: 'Acme Corp',
-      urlSlug: 'acme',
-      ownerEmail: 'owner@acme.com',
-      ownerPassword: 'Password1',
-    };
-
-    it('should register a new business owner and tenant (201)', async () => {
-      const res = await request(app)
+    it('no longer exists â€” workspaces are provisioned by a platform admin only', async () => {
+      await request(app)
         .post('/api/auth/register')
-        .send(validPayload)
-        .expect(201);
+        .send({
+          companyName: 'Acme Corp',
+          urlSlug: 'acme',
+          ownerEmail: 'owner@acme.com',
+          ownerPassword: 'Password1',
+        })
+        .expect(404);
 
-      expect(res.body.message).toBe('Registration successful');
-      expect(res.body.tenantSlug).toBe('acme');
-
-      // Verify side-effects in repositories
-      const tenants = tenantRepo.getAll();
-      expect(tenants).toHaveLength(1);
-      expect(tenants[0].name).toBe('Acme Corp');
-
-      const users = userRepo.getAll();
-      expect(users).toHaveLength(1);
-      expect(users[0].email).toBe('owner@acme.com');
-      expect(users[0].role).toBe(UserRole.BUSINESS_OWNER);
-      expect(users[0].tenantId).toBe(tenants[0].id);
-    });
-
-    it('should reject duplicate slug (400)', async () => {
-      // Register once
-      await request(app).post('/api/auth/register').send(validPayload).expect(201);
-
-      // Attempt duplicate
-      const res = await request(app)
-        .post('/api/auth/register')
-        .send(validPayload)
-        .expect(400);
-
-      expect(res.body.error).toContain('already taken');
-    });
-
-    it('should reject invalid email (400)', async () => {
-      const res = await request(app)
-        .post('/api/auth/register')
-        .send({ ...validPayload, ownerEmail: 'not-an-email' })
-        .expect(400);
-
-      expect(res.body).toBeDefined();
-    });
-
-    it('should reject weak password (400)', async () => {
-      const res = await request(app)
-        .post('/api/auth/register')
-        .send({ ...validPayload, ownerPassword: '123' })
-        .expect(400);
-
-      expect(res.body).toBeDefined();
+      expect(tenantRepo.getAll()).toHaveLength(0);
+      expect(userRepo.getAll()).toHaveLength(0);
     });
   });
 
@@ -426,12 +455,7 @@ describe('Auth Integration Tests', () => {
   describe('POST /api/auth/login', () => {
     beforeEach(async () => {
       // Seed a tenant and user via registration
-      await request(app).post('/api/auth/register').send({
-        companyName: 'Acme Corp',
-        urlSlug: 'acme',
-        ownerEmail: 'owner@acme.com',
-        ownerPassword: 'Password1',
-      });
+      await provisionTenant({ name: 'Acme Corp', slug: 'acme', ownerEmail: 'owner@acme.com', ownerPassword: 'Password1' });
     });
 
     it('should login with valid credentials and return a token (200)', async () => {
@@ -465,20 +489,15 @@ describe('Auth Integration Tests', () => {
   });
 
   // -----------------------------------------------------------------------
-  // 3. REGISTER → LOGIN → INVITE STAFF (full flow)
+  // 3. REGISTER â†’ LOGIN â†’ INVITE STAFF (full flow)
   // -----------------------------------------------------------------------
-  describe('Full Registration → Login → Invite flow', () => {
+  describe('Full Registration â†’ Login â†’ Invite flow', () => {
     let ownerToken: string;
     let tenantId: string;
 
     beforeEach(async () => {
       // Register
-      await request(app).post('/api/auth/register').send({
-        companyName: 'Acme Corp',
-        urlSlug: 'acme',
-        ownerEmail: 'owner@acme.com',
-        ownerPassword: 'Password1',
-      });
+      await provisionTenant({ name: 'Acme Corp', slug: 'acme', ownerEmail: 'owner@acme.com', ownerPassword: 'Password1' });
 
       tenantId = tenantRepo.getAll()[0].id;
 
@@ -722,7 +741,7 @@ describe('Auth Integration Tests', () => {
         expect(res.body.message).toBe('Password reset successfully');
 
         // Verify the user can now login with the new password
-        // First, we need the login route to work — seed the tenant slug lookup
+        // First, we need the login route to work â€” seed the tenant slug lookup
         const loginRes = await request(app)
           .post('/api/acme/auth/login')
           .send({ email: 'user@acme.com', password: 'NewPassword1' });
@@ -758,20 +777,10 @@ describe('Auth Integration Tests', () => {
 
     beforeEach(async () => {
       // Register Tenant A
-      await request(app).post('/api/auth/register').send({
-        companyName: 'Tenant A',
-        urlSlug: 'tenant-a',
-        ownerEmail: 'owner@tenant-a.com',
-        ownerPassword: 'Password1',
-      });
+      await provisionTenant({ name: 'Tenant A', slug: 'tenant-a', ownerEmail: 'owner@tenant-a.com', ownerPassword: 'Password1' });
 
       // Register Tenant B
-      await request(app).post('/api/auth/register').send({
-        companyName: 'Tenant B',
-        urlSlug: 'tenant-b',
-        ownerEmail: 'owner@tenant-b.com',
-        ownerPassword: 'Password1',
-      });
+      await provisionTenant({ name: 'Tenant B', slug: 'tenant-b', ownerEmail: 'owner@tenant-b.com', ownerPassword: 'Password1' });
 
       // Login as Tenant A owner
       const loginA = await request(app)
@@ -839,13 +848,6 @@ describe('Auth Integration Tests', () => {
   // 7. VALIDATION MIDDLEWARE
   // -----------------------------------------------------------------------
   describe('Request Validation', () => {
-    it('should reject register with missing fields (400)', async () => {
-      await request(app)
-        .post('/api/auth/register')
-        .send({ companyName: 'X' }) // Missing required fields
-        .expect(400);
-    });
-
     it('should reject login with missing email (400)', async () => {
       await request(app)
         .post('/api/auth/login')

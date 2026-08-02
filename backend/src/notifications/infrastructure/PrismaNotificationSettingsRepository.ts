@@ -7,12 +7,10 @@ export class PrismaNotificationSettingsRepository implements INotificationSettin
   constructor(private readonly prisma: PrismaClient = defaultPrisma) {}
 
   async get(tenantId: string): Promise<NotificationSettings> {
+    // The two array columns are native `String[]` on Postgres, so the row maps
+    // straight through. The MySQL build had to cast them out of `Json` here.
     const row = await this.prisma.notificationSettings.findUnique({ where: { tenantId } });
-    return row ? NotificationSettings.fromPersistence({
-      ...row,
-      emailEventTypes: (row.emailEventTypes as string[]) ?? [],
-      emailRecipientRoles: (row.emailRecipientRoles as string[]) ?? [],
-    }) : NotificationSettings.defaults(tenantId);
+    return row ? NotificationSettings.fromPersistence(row) : NotificationSettings.defaults(tenantId);
   }
 
   async save(settings: NotificationSettings): Promise<void> {
@@ -53,11 +51,7 @@ export class PrismaNotificationSettingsRepository implements INotificationSettin
 
     return tenants.map((t) =>
       t.notificationSettings
-        ? NotificationSettings.fromPersistence({
-            ...t.notificationSettings,
-            emailEventTypes: (t.notificationSettings.emailEventTypes as string[]) ?? [],
-            emailRecipientRoles: (t.notificationSettings.emailRecipientRoles as string[]) ?? [],
-          })
+        ? NotificationSettings.fromPersistence(t.notificationSettings)
         : NotificationSettings.defaults(t.id)
     );
   }

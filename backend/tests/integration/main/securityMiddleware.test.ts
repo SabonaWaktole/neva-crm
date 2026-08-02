@@ -62,20 +62,13 @@ describe('security middleware', () => {
       expect(blocked.body).toEqual({ error: 'Too many attempts. Please try again later.' });
     });
 
-    it('returns 429 on POST /api/auth/register once the threshold is exceeded', async () => {
-      const app = buildAppWithLimit(3);
-      // Deliberately invalid so validation rejects it before any DB access;
-      // the limiter runs ahead of validation and still counts the attempt.
-      const payload = { companyName: '' };
-
-      for (let i = 0; i < 3; i++) {
-        const res = await request(app).post('/api/auth/register').send(payload);
-        expect(res.status).not.toBe(429);
-      }
-
-      const blocked = await request(app).post('/api/auth/register').send(payload);
-      expect(blocked.status).toBe(429);
-    });
+    /*
+     * POST /api/auth/register was covered here too. Public self-registration
+     * was removed, so the route no longer exists and there is nothing left to
+     * rate-limit on it. The limiter itself is still covered by the login case
+     * above and the password-reset case below — the two remaining unauthenticated
+     * routes it guards.
+     */
 
     it('returns 429 on POST /api/:tenantSlug/auth/password-reset/request once exceeded', async () => {
       const app = buildAppWithLimit(3);

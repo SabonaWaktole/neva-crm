@@ -20,4 +20,23 @@ export const tenantSchemas = {
     ownerEmail: z.string().email(),
     ownerPassword: z.string().min(8).regex(/[A-Z]/).regex(/[a-z]/).regex(/[0-9]/),
   }),
+
+  /**
+   * Super Admin creating a user inside an existing workspace, from the platform
+   * console rather than from inside that workspace.
+   *
+   * `SUPER_ADMIN` is absent from the role enum on purpose, and not only as
+   * defence in depth: the platform role belongs to no workspace, so creating one
+   * "in" a tenant is not a request that can be honoured. `CreateUserUseCase`
+   * rejects it too, for callers that never pass through this schema.
+   */
+  createUser: z.object({
+    email: z.string().email(),
+    password: z.string().min(8).regex(/[A-Z]/).regex(/[a-z]/).regex(/[0-9]/),
+    role: z.enum(['STAFF', 'BUSINESS_OWNER']),
+    firstName: z.string().min(1).optional().nullable(),
+    lastName: z.string().min(1).optional().nullable(),
+    phone: z.string().optional().nullable(),
+    warehouseId: z.string().optional().nullable(),
+  }),
 };

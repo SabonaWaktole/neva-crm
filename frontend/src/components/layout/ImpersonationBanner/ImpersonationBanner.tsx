@@ -1,0 +1,49 @@
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { ShieldAlert, LogOut } from 'lucide-react';
+import { useAuthStore } from '../../../store/useAuthStore';
+import { useWorkspaceSession } from '../../../hooks/useWorkspaceSession';
+import styles from './ImpersonationBanner.module.css';
+
+/**
+ * Shown while a platform administrator is operating inside a client's
+ * workspace, having entered it from the admin console.
+ *
+ * Rendered by AppLayout rather than by a shell, so it appears on EVERY page of
+ * the entered workspace. A banner that only covered the dashboard would vanish
+ * the moment the administrator navigated to Clients — which is precisely where
+ * knowing whose data is on screen matters most.
+ *
+ * Renders nothing for an ordinary session, so mounting it unconditionally is
+ * free.
+ */
+export const ImpersonationBanner: React.FC = () => {
+  const { t } = useTranslation('dashboard');
+  const impersonating = useAuthStore((state) => state.impersonating);
+  const { exitWorkspace, isSwitching } = useWorkspaceSession();
+
+  if (!impersonating) return null;
+
+  return (
+    <div className={styles.banner} role="status">
+      <span className={styles.message}>
+        <ShieldAlert size={16} aria-hidden="true" />
+        <span>
+          {t('superAdmin.impersonationNotice')}{' '}
+          <span className={styles.workspace}>
+            {impersonating.tenantName ?? impersonating.tenantSlug}
+          </span>
+        </span>
+      </span>
+      <button
+        type="button"
+        className={styles.exitButton}
+        onClick={() => exitWorkspace()}
+        disabled={isSwitching}
+      >
+        <LogOut size={14} aria-hidden="true" />
+        {t('superAdmin.exitWorkspace')}
+      </button>
+    </div>
+  );
+};

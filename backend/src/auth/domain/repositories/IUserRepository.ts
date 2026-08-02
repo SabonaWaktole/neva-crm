@@ -1,5 +1,33 @@
 import { User } from '../entities/User';
 
+export interface PlatformUserFilters {
+  tenantId?: string;
+  role?: string;
+  isActive?: boolean;
+  /** Case-insensitive fragment matched against email, first name and last name. */
+  q?: string;
+  skip?: number;
+  take?: number;
+}
+
+/**
+ * A user as the platform console lists them, carrying the workspace NAME rather
+ * than only its id. Deliberately not a `User` entity: the entity has no place
+ * for a joined column, and the console's whole job is showing which workspace
+ * each person belongs to.
+ */
+export interface PlatformUserRow {
+  id: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  role: string;
+  isActive: boolean;
+  tenantId: string | null;
+  tenantName: string | null;
+  createdAt: Date;
+}
+
 export interface IUserRepository {
   findById(id: string): Promise<User | null>;
   findByEmail(email: string, tenantId: string): Promise<User | null>;
@@ -32,4 +60,10 @@ export interface IUserRepository {
    * the owner sees what will be left unattended.
    */
   countAssignedWork(userId: string): Promise<{ clients: number; upcomingAppointments: number }>;
+  /**
+   * Every user on the platform, across all workspaces — the one query in this
+   * repository that is deliberately NOT tenant-scoped. Only the SUPER_ADMIN
+   * console calls it, and the route it sits behind is guarded accordingly.
+   */
+  findPlatformUsers(filters: PlatformUserFilters): Promise<{ items: PlatformUserRow[]; total: number }>;
 }

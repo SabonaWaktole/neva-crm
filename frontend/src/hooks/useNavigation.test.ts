@@ -47,8 +47,12 @@ describe('useNavigation', () => {
    * offered six links the backend was designed to refuse. TD-008.
    */
   describe('super admin gets a platform list, not the owner one', () => {
-    it('offers exactly Dashboard and Tenants', () => {
-      expect(idsFor(SUPER_ADMIN)).toEqual(['dashboard', 'tenants']);
+    it('offers exactly Dashboard, Tenants and People', () => {
+      // People joined the list with the platform console's cross-workspace user
+      // listing. Like Tenants it reads from /api/tenants/*, which carries no
+      // :tenantSlug — so it is genuinely reachable and does not reintroduce the
+      // dead tenant-scoped links below.
+      expect(idsFor(SUPER_ADMIN)).toEqual(['dashboard', 'tenants', 'people']);
     });
 
     it.each(['clients', 'appointments', 'inventory', 'quotations', 'reports', 'settings'])(

@@ -1,19 +1,14 @@
 import { z } from 'zod';
 import { SUPPORTED_LANGUAGES } from '../../../../tenant/domain/entities/Tenant';
 
+/*
+ * `register` used to live here, for public self-registration. Workspaces are now
+ * provisioned only by a platform administrator through POST /api/tenants, which
+ * validates the identical fields via `tenantSchemas.createTenant` against the
+ * same `CreateTenantWithOwnerUseCase`. Nothing was lost by removing it — the
+ * route was the only caller.
+ */
 export const authSchemas = {
-  register: z.object({
-    companyName: z.string().min(1),
-    urlSlug: z.string().min(1).regex(/^[a-z0-9-]+$/),
-    ownerEmail: z.string().email(),
-    ownerPassword: z.string().min(8).regex(/[A-Z]/).regex(/[a-z]/).regex(/[0-9]/),
-    // `locale` used to be accepted here and then silently dropped:
-    // RegisterBusinessOwnerUseCase never read it, and Tenant.create had nowhere
-    // to put it. The onboarding form was also sending region codes (us/uk/eu)
-    // against a schema defaulting to a language tag ('en'), so the two ends did
-    // not even agree on a vocabulary. Locale is now set from Settings, where it
-    // is validated against a real supported list.
-  }),
   login: z.object({
     email: z.string().email(),
     password: z.string().min(1),
@@ -21,6 +16,20 @@ export const authSchemas = {
   inviteStaff: z.object({
     email: z.string().email(),
     role: z.enum(['STAFF', 'BUSINESS_OWNER']),
+    warehouseId: z.string().optional().nullable(),
+  }),
+  /**
+   * Creating an account with its password already set, as opposed to
+   * `inviteStaff`, which only sends a link. Same role enum and same password
+   * floor: an admin-set password is a real credential, so it is not relaxed.
+   */
+  createUser: z.object({
+    email: z.string().email(),
+    password: z.string().min(8).regex(/[A-Z]/).regex(/[a-z]/).regex(/[0-9]/),
+    role: z.enum(['STAFF', 'BUSINESS_OWNER']),
+    firstName: z.string().min(1).optional().nullable(),
+    lastName: z.string().min(1).optional().nullable(),
+    phone: z.string().optional().nullable(),
     warehouseId: z.string().optional().nullable(),
   }),
   updateStaffRole: z.object({

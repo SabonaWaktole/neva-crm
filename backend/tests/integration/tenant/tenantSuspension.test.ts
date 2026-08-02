@@ -308,20 +308,26 @@ describe('Tenant suspension enforcement', () => {
       expect(usersAfter.every((u) => u.isActive)).toBe(true);
     });
 
-    it('a suspended tenant still owns its slug — nobody can register over it', async () => {
+    it('a suspended tenant still owns its slug — nobody can provision over it', async () => {
       await setStatus(tenantId, 'SUSPENDED');
 
-      const res = await request(app).post('/api/auth/register').send({
-        companyName: 'Slug Hijack',
-        urlSlug: slug,
-        ownerEmail: `hijack-${uuidv4()}@example.com`,
-        ownerPassword: 'StrongPassword123',
-      });
+      // Aimed at POST /api/tenants rather than the old public register route,
+      // which no longer exists. Same provisioning code path underneath
+      // (CreateTenantWithOwnerUseCase), stricter caller.
+      const res = await request(app)
+        .post('/api/tenants')
+        .set('Cookie', [`jwt=${superAdminToken}`])
+        .send({
+          companyName: 'Slug Hijack',
+          urlSlug: slug,
+          ownerEmail: `hijack-${uuidv4()}@example.com`,
+          ownerPassword: 'StrongPassword123',
+        });
 
       // If suspension ever started excluding tenants from slug lookups, a
       // stranger could claim a paying customer's workspace URL while they were
       // suspended. It must stay refused.
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(409);
       expect(res.body.error).toMatch(/already taken/i);
     });
   });

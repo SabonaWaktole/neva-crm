@@ -1,4 +1,4 @@
-import { DeactivateUserUseCase } from './DeactivateUserUseCase';
+﻿import { DeactivateUserUseCase } from './DeactivateUserUseCase';
 import { IUserRepository } from '../../domain/repositories/IUserRepository';
 import { UserRole } from '../../domain/enums/UserRole';
 import { User } from '../../domain/entities/User';
@@ -46,6 +46,7 @@ describe('DeactivateUserUseCase', () => {
       setActive: jest.fn(),
       countAssignedWork: jest.fn(),
       findActiveByTenantAndRole: jest.fn().mockResolvedValue([]),
+      findPlatformUsers: jest.fn().mockResolvedValue({ items: [], total: 0 }),
     };
     useCase = new DeactivateUserUseCase(userRepository);
   });
@@ -55,7 +56,7 @@ describe('DeactivateUserUseCase', () => {
     expect(userRepository.setActive).toHaveBeenCalledWith('staff-1', false);
   });
 
-  it('never deletes — deactivation is the only off-boarding path', () => {
+  it('never deletes â€” deactivation is the only off-boarding path', () => {
     // Seven non-nullable columns reference User; a delete method would be
     // blocked by RESTRICT or would destroy financial and audit history.
     expect((userRepository as any).delete).toBeUndefined();

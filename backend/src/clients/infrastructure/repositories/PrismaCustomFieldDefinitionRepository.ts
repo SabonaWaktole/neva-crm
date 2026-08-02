@@ -15,7 +15,7 @@ export class PrismaCustomFieldDefinitionRepository implements ICustomFieldDefini
       tenantId: r.tenantId,
       fieldName: r.fieldName,
       fieldType: r.fieldType as FieldType,
-      options: (r.options as string[]) ?? undefined,
+      options: r.options,
     }));
   }
 
