@@ -1,4 +1,5 @@
-import { Routes, Route, Navigate, useNavigate, useParams, useLocation } from 'react-router-dom';
+import type { ReactNode } from 'react';
+import { Navigate, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { getUserDisplayName } from '../../utils/userUtils';
 import { AppLayout } from '../../components/layout/AppLayout/AppLayout';
 import { Sidebar } from '../../components/layout/Sidebar/Sidebar';
@@ -26,6 +27,36 @@ export const SuperAdminShell = () => {
 
   const userName = getUserDisplayName(user);
 
+  /*
+    Not a nested <Routes>: this shell is mounted directly by several
+    exact-path entries in routes/index.tsx (/admin/dashboard, /admin/tenants,
+    ...), none of which end in "*". A descendant <Routes> only receives a
+    matchable "remaining path" from an ancestor splat route, so without one it
+    resolved every one of its <Route>s to a non-match and rendered nothing —
+    the sidebar and header came from AppLayout, but the page body was always
+    blank. Switching on the pathname directly needs no splat.
+  */
+  let page: ReactNode;
+  switch (location.pathname) {
+    case '/admin':
+      page = <Navigate to="/admin/dashboard" replace />;
+      break;
+    case '/admin/dashboard':
+      page = <SuperAdminDashboard />;
+      break;
+    case '/admin/tenants':
+      page = <TenantsPage />;
+      break;
+    case '/admin/people':
+      page = <PeoplePage />;
+      break;
+    case '/admin/setting':
+      page = <PlatformSettingsPage />;
+      break;
+    default:
+      page = <Navigate to="/admin/dashboard" replace />;
+  }
+
   return (
     <AppLayout
       userName={userName}
@@ -48,28 +79,7 @@ export const SuperAdminShell = () => {
         />
       }
     >
-      <Routes>
-        {/*
-          This <Routes> has no ancestor Route with a "*" splat trimming the
-          matched prefix (each entry in routes/index.tsx for /admin/dashboard,
-          /admin/tenants etc. is its own exact-path route rendering this shell
-          directly), so React Router gives it no "remaining path" context.
-          Route paths here are matched against the FULL pathname, not a
-          path relative to /admin — hence absolute /admin/... paths below
-          instead of bare /dashboard, /tenants, etc.
-        */}
-        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-        <Route path="/admin/dashboard" element={<SuperAdminDashboard />} />
-        <Route path="/admin/tenants" element={<TenantsPage />} />
-        <Route path="/admin/people" element={<PeoplePage />} />
-        <Route path="/admin/setting" element={<PlatformSettingsPage />} />
-        {/*
-          Every sidebar link this shell offers now resolves to a route defined
-          here. Anything else lands on the dashboard rather than rendering an
-          empty shell with no explanation.
-        */}
-        <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
-      </Routes>
+      {page}
     </AppLayout>
   );
 };

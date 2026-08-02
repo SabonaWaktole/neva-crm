@@ -248,6 +248,7 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
     getPlatformUsersUseCase,
     bulkUpdateTenantSettingsUseCase,
     tokenService,
+    emailSender,
   });
   app.use('/api/tenants', tenantRoutes);
 

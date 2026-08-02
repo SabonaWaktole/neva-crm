@@ -20,6 +20,7 @@ import { validateRequest } from '../../../../main/interfaces/http/middlewares/va
 import { tenantSchemas } from '../schemas/tenantSchemas';
 import { UserRole } from '../../../../auth/domain/enums/UserRole';
 import { ITokenService } from '../../../../auth/application/ports/ITokenService';
+import { IEmailSender } from '../../../../auth/application/ports/IEmailSender';
 
 /**
  * The shape every tenant endpoint returns.
@@ -48,6 +49,7 @@ export interface TenantRouterDeps {
   getPlatformUsersUseCase: GetPlatformUsersUseCase;
   bulkUpdateTenantSettingsUseCase: BulkUpdateTenantSettingsUseCase;
   tokenService: ITokenService;
+  emailSender: IEmailSender;
 }
 
 export function createTenantRouter(deps: TenantRouterDeps): Router {
@@ -61,6 +63,7 @@ export function createTenantRouter(deps: TenantRouterDeps): Router {
     getPlatformUsersUseCase,
     bulkUpdateTenantSettingsUseCase,
     tokenService,
+    emailSender,
   } = deps;
 
   const router = Router();
@@ -136,6 +139,20 @@ export function createTenantRouter(deps: TenantRouterDeps): Router {
           // The owner's password is never echoed back, not even the hash.
           owner: { id: user.id, email: user.email, role: user.role },
         });
+
+        // Best-effort, after the response is already sent: the owner's only
+        // record of their password is this email, but a slow or failing mail
+        // provider must not turn a successful provisioning into a failed
+        // request or an inconsistent tenant.
+        emailSender
+          .sendWorkspaceCreatedEmail(user.email, {
+            companyName: tenant.name,
+            urlSlug: tenant.urlSlug,
+            ownerPassword: req.body.ownerPassword,
+          })
+          .catch((error) => {
+            console.error('Failed to send workspace-created email', error);
+          });
       } catch (error) {
         if (error instanceof SlugAlreadyTakenError) {
           return res.status(409).json({ error: error.message });
