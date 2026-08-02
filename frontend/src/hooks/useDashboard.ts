@@ -6,6 +6,8 @@ import type {
   ActivityFeedItem,
   Tenant,
   CreateTenantInput,
+  PlatformUser,
+  OwnershipTransferCandidate,
 } from '../services/dashboardService';
 
 export const useDashboardMetrics = () => {
@@ -164,5 +166,87 @@ export const useTenantAdmin = () => {
     isSubmitting,
     error,
     clearError: useCallback(() => setError(null), []),
+  };
+};
+
+/**
+ * The Super Admin's write actions against individual users, across every
+ * workspace. Mirrors `useTenantAdmin` above, with one addition: suspending or
+ * deleting a Business Owner with active staff, and reactivating one with an
+ * unresolved ownership transfer, both 409 with a `code` the server uses to
+ * say WHICH follow-up input is missing rather than just failing. `errorCode`
+ * exposes that so PeoplePage can open the right picker/choice dialog instead
+ * of just showing the message.
+ */
+export const useUserAdmin = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<string | null>(null);
+
+  const run = useCallback(async <T,>(action: () => Promise<T>): Promise<T | null> => {
+    setIsSubmitting(true);
+    setError(null);
+    setErrorCode(null);
+    try {
+      return await action();
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Something went wrong. Please try again.');
+      setErrorCode(err.response?.data?.code ?? null);
+      return null;
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, []);
+
+  const getOwnershipTransferCandidates = useCallback(
+    (userId: string): Promise<OwnershipTransferCandidate[]> =>
+      dashboardService.getOwnershipTransferCandidates(userId),
+    []
+  );
+
+  const suspendUser = useCallback(
+    (userId: string, newOwnerId?: string): Promise<PlatformUser | null> =>
+      run(() => dashboardService.suspendUser(userId, newOwnerId)),
+    [run]
+  );
+
+  const reactivateUser = useCallback(
+    (userId: string, restoreOwnership?: boolean): Promise<PlatformUser | null> =>
+      run(() => dashboardService.reactivateUser(userId, restoreOwnership)),
+    [run]
+  );
+
+  /*
+   * Same reasoning as `useTenantAdmin.deleteTenant`: not built on `run`,
+   * because `run`'s `null`-on-failure is ambiguous with `void`-on-success.
+   */
+  const deleteUser = useCallback(async (userId: string, confirmEmail: string, newOwnerId?: string) => {
+    setIsSubmitting(true);
+    setError(null);
+    setErrorCode(null);
+    try {
+      await dashboardService.deleteUser(userId, confirmEmail, newOwnerId);
+      return true;
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Something went wrong. Please try again.');
+      setErrorCode(err.response?.data?.code ?? null);
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, []);
+
+  return {
+    getOwnershipTransferCandidates,
+    suspendUser,
+    reactivateUser,
+    deleteUser,
+    isSubmitting,
+    error,
+    errorCode,
+    clearError: useCallback(() => {
+      setError(null);
+      setErrorCode(null);
+    }, []),
   };
 };

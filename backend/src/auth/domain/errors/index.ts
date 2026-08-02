@@ -55,3 +55,53 @@ export class UnauthorizedError extends DomainError {
     super(message);
   }
 }
+
+export class UserNotFoundError extends DomainError {
+  constructor(id: string) {
+    super(`No user exists with id "${id}"`);
+  }
+}
+
+/**
+ * Suspend/reactivate/delete are platform-administrative actions over
+ * ordinary accounts. SUPER_ADMIN accounts are deliberately out of scope: they
+ * have no tenant, no ownership to transfer, and locking one out is how a
+ * platform loses its own operators.
+ */
+export class CannotModifySuperAdminError extends DomainError {
+  constructor() {
+    super('Super Admin accounts cannot be suspended, reactivated or deleted through this action');
+  }
+}
+
+/**
+ * The target is a Business Owner with other active staff in the same
+ * workspace, so suspending or deleting them cannot proceed without first
+ * naming who takes over — see SuspendUserUseCase / DeleteUserUseCase.
+ */
+export class OwnershipTransferRequiredError extends DomainError {
+  constructor() {
+    super('This Business Owner has active staff — choose one to become the new Business Owner first');
+  }
+}
+
+/**
+ * The supplied `newOwnerId` is not an active STAFF member of the same
+ * tenant as the Business Owner being suspended or deleted.
+ */
+export class InvalidOwnershipTargetError extends DomainError {
+  constructor() {
+    super('The selected user is not an eligible staff member of this workspace');
+  }
+}
+
+/**
+ * The target has an unresolved ownership transfer from their suspension, so
+ * reactivation cannot proceed without the admin choosing whether to restore
+ * the original ownership or keep the acting Business Owner in place.
+ */
+export class RestoreOwnershipChoiceRequiredError extends DomainError {
+  constructor() {
+    super('Choose whether to restore original ownership or keep the current Business Owner');
+  }
+}

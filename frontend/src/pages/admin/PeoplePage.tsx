@@ -1,28 +1,59 @@
 import { useState } from 'react';
+import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Users } from 'lucide-react';
+import { Plus, Users, MoreVertical, Ban, CheckCircle2, Trash2 } from 'lucide-react';
 import { Button } from '../../components/ui/Button/Button';
 import { TextInput } from '../../components/ui/TextInput';
 import { SelectInput } from '../../components/ui/SelectInput';
 import { Badge } from '../../components/ui/Badge';
 import { DataTable } from '../../components/ui/DataTable';
 import type { DataTableColumn } from '../../components/ui/DataTable';
+import { DropdownMenu } from '../../components/ui/DropdownMenu';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { CreateUserModal } from './CreateUserModal';
-import { useTenants } from '../../hooks/useDashboard';
+import { useTenants, useUserAdmin } from '../../hooks/useDashboard';
 import { usePlatformUsers, useCreatePlatformUser } from '../../hooks/usePlatformUsers';
 import { useDateFormat } from '../../hooks/useDateFormat';
-import type { CreatePlatformUserInput, PlatformUser } from '../../services/dashboardService';
+import type {
+  CreatePlatformUserInput,
+  OwnershipTransferCandidate,
+  PlatformUser,
+} from '../../services/dashboardService';
 import styles from './PeoplePage.module.css';
+
+interface PendingSuspend {
+  user: PlatformUser;
+  candidates: OwnershipTransferCandidate[];
+  isLoadingCandidates: boolean;
+  selectedOwnerId: string;
+  validationError: string | null;
+}
+
+interface PendingReactivate {
+  user: PlatformUser;
+  /** `null` means "not yet chosen" — only relevant when the user has a pending transfer. */
+  restoreOwnership: boolean | null;
+}
+
+interface PendingDelete {
+  user: PlatformUser;
+  candidates: OwnershipTransferCandidate[];
+  isLoadingCandidates: boolean;
+  selectedOwnerId: string;
+  confirmText: string;
+  validationError: string | null;
+}
 
 /**
  * Everyone on the platform, across every workspace.
  *
- * The console's counterpart to per-workspace Team Settings. It deliberately does
- * NOT duplicate deactivation and role changes: those already exist inside a
- * workspace, complete with the reassignment-impact warning, and an administrator
- * reaches them by entering the workspace from the Tenants page. Two
- * implementations of "who still holds this person's clients" is how the two
- * would drift apart.
+ * Unlike Team Settings (which a Business Owner uses on their own staff, and
+ * which flatly refuses to touch a Business Owner at all), this console can
+ * suspend, reactivate or delete ANY account — Business Owner included. That
+ * is what makes the ownership-transfer flow necessary here and nowhere else:
+ * suspending or deleting the sole owner of a workspace that still has staff
+ * must hand the workspace to one of them first. See PlatformSuspendUserUseCase
+ * / PlatformDeleteUserUseCase on the backend.
  */
 export const PeoplePage = () => {
   const { t } = useTranslation('dashboard');
@@ -31,12 +62,24 @@ export const PeoplePage = () => {
   const { users, total, isLoading, error, filters, setFilters, refresh } = usePlatformUsers();
   const {
     createUser,
-    isSubmitting,
+    isSubmitting: isCreating,
     error: createError,
-    clearError,
+    clearError: clearCreateError,
   } = useCreatePlatformUser();
+  const {
+    getOwnershipTransferCandidates,
+    suspendUser,
+    reactivateUser,
+    deleteUser,
+    isSubmitting,
+    error: adminError,
+    clearError: clearAdminError,
+  } = useUserAdmin();
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [pendingSuspend, setPendingSuspend] = useState<PendingSuspend | null>(null);
+  const [pendingReactivate, setPendingReactivate] = useState<PendingReactivate | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
 
   const handleCreate = async (
     tenantId: string,
@@ -46,6 +89,93 @@ export const PeoplePage = () => {
     if (!created) return false;
     refresh();
     return true;
+  };
+
+  const openSuspend = async (user: PlatformUser) => {
+    clearAdminError();
+    setPendingSuspend({
+      user,
+      candidates: [],
+      isLoadingCandidates: user.role === 'BUSINESS_OWNER',
+      selectedOwnerId: '',
+      validationError: null,
+    });
+    if (user.role !== 'BUSINESS_OWNER') return;
+
+    const candidates = await getOwnershipTransferCandidates(user.id);
+    setPendingSuspend((prev) =>
+      prev && prev.user.id === user.id ? { ...prev, candidates, isLoadingCandidates: false } : prev
+    );
+  };
+
+  const openReactivate = (user: PlatformUser) => {
+    clearAdminError();
+    setPendingReactivate({ user, restoreOwnership: null });
+  };
+
+  const openDelete = async (user: PlatformUser) => {
+    clearAdminError();
+    setPendingDelete({
+      user,
+      candidates: [],
+      isLoadingCandidates: user.role === 'BUSINESS_OWNER',
+      selectedOwnerId: '',
+      confirmText: '',
+      validationError: null,
+    });
+    if (user.role !== 'BUSINESS_OWNER') return;
+
+    const candidates = await getOwnershipTransferCandidates(user.id);
+    setPendingDelete((prev) =>
+      prev && prev.user.id === user.id ? { ...prev, candidates, isLoadingCandidates: false } : prev
+    );
+  };
+
+  const handleConfirmSuspend = async () => {
+    if (!pendingSuspend) return;
+    const { user, candidates, selectedOwnerId } = pendingSuspend;
+
+    if (user.role === 'BUSINESS_OWNER' && candidates.length > 0 && !selectedOwnerId) {
+      setPendingSuspend((prev) => (prev ? { ...prev, validationError: t('superAdmin.selectOwnerRequired') } : prev));
+      throw new Error('newOwnerId required');
+    }
+
+    const result = await suspendUser(user.id, selectedOwnerId || undefined);
+    if (!result) throw new Error(adminError ?? 'Action failed');
+
+    setPendingSuspend(null);
+    refresh();
+  };
+
+  const handleConfirmReactivate = async () => {
+    if (!pendingReactivate) return;
+    const { user, restoreOwnership } = pendingReactivate;
+
+    const result = await reactivateUser(user.id, restoreOwnership ?? undefined);
+    if (!result) throw new Error(adminError ?? 'Action failed');
+
+    setPendingReactivate(null);
+    refresh();
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!pendingDelete) return;
+    const { user, candidates, selectedOwnerId, confirmText } = pendingDelete;
+
+    if (confirmText !== user.email) {
+      setPendingDelete((prev) => (prev ? { ...prev, validationError: t('superAdmin.confirmDeleteUserMismatch') } : prev));
+      throw new Error('confirmation mismatch');
+    }
+    if (user.role === 'BUSINESS_OWNER' && candidates.length > 0 && !selectedOwnerId) {
+      setPendingDelete((prev) => (prev ? { ...prev, validationError: t('superAdmin.selectOwnerRequired') } : prev));
+      throw new Error('newOwnerId required');
+    }
+
+    const success = await deleteUser(user.id, confirmText, selectedOwnerId || undefined);
+    if (!success) throw new Error(adminError ?? 'Delete failed');
+
+    setPendingDelete(null);
+    refresh();
   };
 
   const columns: DataTableColumn<PlatformUser>[] = [
@@ -100,6 +230,66 @@ export const PeoplePage = () => {
         </span>
       ),
     },
+    {
+      id: 'actions',
+      header: '',
+      align: 'right',
+      width: '64px',
+      cardLabel: null,
+      render: (user) => {
+        // SUPER_ADMIN accounts are out of scope for this feature entirely —
+        // the backend rejects every one of these actions against them, so no
+        // menu promising options that would only 403.
+        if (user.role === 'SUPER_ADMIN') return null;
+
+        const isPending = isSubmitting && (
+          pendingSuspend?.user.id === user.id ||
+          pendingReactivate?.user.id === user.id ||
+          pendingDelete?.user.id === user.id
+        );
+
+        return (
+          <DropdownMenu
+            align="right"
+            trigger={
+              <button
+                className={styles.actionButton}
+                disabled={isPending}
+                aria-label={t('superAdmin.userActionsFor', { name: user.email })}
+              >
+                <MoreVertical size={16} />
+              </button>
+            }
+            items={[
+              user.isActive
+                ? {
+                    id: 'suspend',
+                    label: t('superAdmin.suspendUser'),
+                    icon: <Ban size={16} />,
+                    danger: true,
+                    onClick: () => openSuspend(user),
+                    disabled: isPending,
+                  }
+                : {
+                    id: 'reactivate',
+                    label: t('superAdmin.reactivateUser'),
+                    icon: <CheckCircle2 size={16} />,
+                    onClick: () => openReactivate(user),
+                    disabled: isPending,
+                  },
+              {
+                id: 'delete',
+                label: t('superAdmin.deleteUser'),
+                icon: <Trash2 size={16} />,
+                danger: true,
+                onClick: () => openDelete(user),
+                disabled: isPending,
+              },
+            ]}
+          />
+        );
+      },
+    },
   ];
 
   return (
@@ -112,7 +302,7 @@ export const PeoplePage = () => {
         <Button
           icon={<Plus size={20} />}
           onClick={() => {
-            clearError();
+            clearCreateError();
             setIsCreateOpen(true);
           }}
           disabled={tenants.length === 0}
@@ -163,6 +353,12 @@ export const PeoplePage = () => {
         </p>
       )}
 
+      {adminError && !pendingSuspend && !pendingReactivate && !pendingDelete && (
+        <p className={styles.error} role="alert">
+          {adminError}
+        </p>
+      )}
+
       <DataTable
         columns={columns}
         rows={users}
@@ -181,8 +377,143 @@ export const PeoplePage = () => {
         onClose={() => setIsCreateOpen(false)}
         tenants={tenants}
         onSubmit={handleCreate}
-        isSubmitting={isSubmitting}
+        isSubmitting={isCreating}
         serverError={createError}
+      />
+
+      <ConfirmDialog
+        isOpen={pendingSuspend !== null}
+        onClose={() => setPendingSuspend(null)}
+        onConfirm={handleConfirmSuspend}
+        tone="danger"
+        title={t('superAdmin.confirmSuspendUserTitle')}
+        confirmLabel={t('superAdmin.suspendUser')}
+        message={
+          pendingSuspend && (
+            <div className={styles.dialogContent}>
+              <p>{t('superAdmin.confirmSuspendUserMessage', { name: userLabel(pendingSuspend.user) })}</p>
+              {pendingSuspend.user.role === 'BUSINESS_OWNER' && (
+                <OwnershipTransferPicker
+                  isLoading={pendingSuspend.isLoadingCandidates}
+                  candidates={pendingSuspend.candidates}
+                  selectedOwnerId={pendingSuspend.selectedOwnerId}
+                  onSelect={(id) =>
+                    setPendingSuspend((prev) => (prev ? { ...prev, selectedOwnerId: id, validationError: null } : prev))
+                  }
+                  helpText={t('superAdmin.ownershipTransferHelpSuspend')}
+                />
+              )}
+              {pendingSuspend.validationError && (
+                <p className={styles.error} role="alert">
+                  {pendingSuspend.validationError}
+                </p>
+              )}
+            </div>
+          )
+        }
+      />
+
+      <ConfirmDialog
+        isOpen={pendingReactivate !== null}
+        onClose={() => setPendingReactivate(null)}
+        onConfirm={handleConfirmReactivate}
+        tone="primary"
+        title={t('superAdmin.confirmReactivateUserTitle')}
+        confirmLabel={t('superAdmin.reactivateUser')}
+        message={
+          pendingReactivate && (
+            <div className={styles.dialogContent}>
+              <p>{t('superAdmin.confirmReactivateUserMessage', { name: userLabel(pendingReactivate.user) })}</p>
+              {pendingReactivate.user.pendingOwnershipTransfer && (
+                <div className={styles.ownershipChoice}>
+                  <p>
+                    {t('superAdmin.ownershipRestoreChoiceIntro', {
+                      name: pendingReactivate.user.pendingOwnershipTransfer.actingOwnerName,
+                    })}
+                  </p>
+                  <label className={styles.radioOption}>
+                    <input
+                      type="radio"
+                      name="restoreOwnership"
+                      checked={pendingReactivate.restoreOwnership === true}
+                      onChange={() =>
+                        setPendingReactivate((prev) => (prev ? { ...prev, restoreOwnership: true } : prev))
+                      }
+                    />
+                    <span>
+                      <strong>{t('superAdmin.restoreOriginalOwnership')}</strong>
+                      <br />
+                      {t('superAdmin.restoreOriginalOwnershipDescription')}
+                    </span>
+                  </label>
+                  <label className={styles.radioOption}>
+                    <input
+                      type="radio"
+                      name="restoreOwnership"
+                      checked={pendingReactivate.restoreOwnership === false}
+                      onChange={() =>
+                        setPendingReactivate((prev) => (prev ? { ...prev, restoreOwnership: false } : prev))
+                      }
+                    />
+                    <span>
+                      <strong>{t('superAdmin.keepCurrentOwnership')}</strong>
+                      <br />
+                      {t('superAdmin.keepCurrentOwnershipDescription')}
+                    </span>
+                  </label>
+                </div>
+              )}
+            </div>
+          )
+        }
+      />
+
+      <ConfirmDialog
+        isOpen={pendingDelete !== null}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={handleConfirmDelete}
+        tone="danger"
+        title={t('superAdmin.confirmDeleteUserTitle')}
+        confirmLabel={t('superAdmin.deleteUser')}
+        message={
+          pendingDelete && (
+            <div className={styles.dialogContent}>
+              <p>{t('superAdmin.confirmDeleteUserMessage', { name: userLabel(pendingDelete.user) })}</p>
+              {pendingDelete.user.role === 'BUSINESS_OWNER' && (
+                <OwnershipTransferPicker
+                  isLoading={pendingDelete.isLoadingCandidates}
+                  candidates={pendingDelete.candidates}
+                  selectedOwnerId={pendingDelete.selectedOwnerId}
+                  onSelect={(id) =>
+                    setPendingDelete((prev) => (prev ? { ...prev, selectedOwnerId: id, validationError: null } : prev))
+                  }
+                  helpText={t('superAdmin.ownershipTransferHelpDelete')}
+                />
+              )}
+              <p>{t('superAdmin.confirmDeleteUserInstruction', { email: pendingDelete.user.email })}</p>
+              <label>
+                <span className={styles.srOnly}>{t('superAdmin.confirmDeleteUserInputLabel')}</span>
+                <input
+                  type="text"
+                  className={styles.deleteConfirmInput}
+                  value={pendingDelete.confirmText}
+                  onChange={(e) =>
+                    setPendingDelete((prev) =>
+                      prev ? { ...prev, confirmText: e.target.value, validationError: null } : prev
+                    )
+                  }
+                  autoComplete="off"
+                  autoFocus
+                />
+              </label>
+              {pendingDelete.validationError && (
+                <p className={styles.error} role="alert">
+                  {pendingDelete.validationError}
+                </p>
+              )}
+            </div>
+          )
+        }
       />
     </div>
   );
@@ -191,3 +522,44 @@ export const PeoplePage = () => {
 /** Maps a stored role onto the `superAdmin.role*` translation keys. */
 const roleKey = (role: PlatformUser['role']) =>
   role === 'BUSINESS_OWNER' ? 'BusinessOwner' : role === 'STAFF' ? 'Staff' : 'SuperAdmin';
+
+const userLabel = (user: { firstName: string | null; lastName: string | null; email: string }) =>
+  [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email;
+
+/** The required-when-staff-exist picker shared by the suspend and delete dialogs. */
+const OwnershipTransferPicker: FC<{
+  isLoading: boolean;
+  candidates: OwnershipTransferCandidate[];
+  selectedOwnerId: string;
+  onSelect: (id: string) => void;
+  helpText: string;
+}> = ({ isLoading, candidates, selectedOwnerId, onSelect, helpText }) => {
+  const { t } = useTranslation('dashboard');
+
+  if (isLoading) {
+    return <p className={styles.platformCell}>{t('superAdmin.loadingCandidates')}</p>;
+  }
+  if (candidates.length === 0) {
+    // No other staff — the operation proceeds directly, nothing to pick.
+    return null;
+  }
+
+  return (
+    <div className={styles.dialogContent}>
+      <p>{helpText}</p>
+      <SelectInput
+        label={t('superAdmin.newBusinessOwner')}
+        value={selectedOwnerId}
+        onChange={(e) => onSelect(e.target.value)}
+        required
+      >
+        <option value="">{t('superAdmin.selectOwnerPlaceholder')}</option>
+        {candidates.map((candidate) => (
+          <option key={candidate.id} value={candidate.id}>
+            {userLabel(candidate)}
+          </option>
+        ))}
+      </SelectInput>
+    </div>
+  );
+};

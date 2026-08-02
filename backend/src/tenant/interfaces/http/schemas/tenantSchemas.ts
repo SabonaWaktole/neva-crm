@@ -49,4 +49,34 @@ export const tenantSchemas = {
   deleteTenant: z.object({
     confirmSlug: z.string().min(1),
   }),
+
+  /**
+   * Super Admin suspending any platform user. `newOwnerId` is only required
+   * when the target is a Business Owner with other active staff —
+   * `PlatformSuspendUserUseCase` is what actually enforces that, this only
+   * shapes the optional field.
+   */
+  suspendUser: z.object({
+    newOwnerId: z.string().optional(),
+  }),
+
+  /**
+   * Super Admin reactivating any platform user. `restoreOwnership` is only
+   * required when the target has an unresolved ownership transfer —
+   * `PlatformReactivateUserUseCase` enforces that.
+   */
+  reactivateUser: z.object({
+    restoreOwnership: z.boolean().optional(),
+  }),
+
+  /**
+   * Super Admin permanently deleting a platform user. `confirmEmail` must
+   * equal the target's own current email, checked again in
+   * `PlatformDeleteUserUseCase` against the real record — same "type it
+   * exactly" pattern as `deleteTenant` above.
+   */
+  deleteUser: z.object({
+    confirmEmail: z.string().min(1),
+    newOwnerId: z.string().optional(),
+  }),
 };

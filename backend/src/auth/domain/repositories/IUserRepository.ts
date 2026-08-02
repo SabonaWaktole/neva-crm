@@ -26,6 +26,12 @@ export interface PlatformUserRow {
   tenantId: string | null;
   tenantName: string | null;
   createdAt: Date;
+  /**
+   * Present (non-null) only when the row is the ORIGINAL owner of an
+   * unresolved suspension-time ownership transfer — the console needs this to
+   * know whether reactivating them requires the restore/keep choice.
+   */
+  pendingOwnershipTransfer: { actingOwnerName: string } | null;
 }
 
 export interface IUserRepository {
@@ -55,6 +61,14 @@ export interface IUserRepository {
    * cascading would erase quotations, interactions and audit history.
    */
   setActive(userId: string, isActive: boolean): Promise<void>;
+  /**
+   * Platform Admin soft-delete: sets `isActive=false`, `deletedAt=now()`, and
+   * anonymizes email/name/phone/avatar so the account can never be
+   * impersonated or re-surfaced, while the row itself survives for the same
+   * FK-RESTRICT reason `setActive` does. There is deliberately no way back —
+   * unlike `setActive`, this has no `undo` counterpart.
+   */
+  softDelete(userId: string): Promise<void>;
   /**
    * Work still pointing at a user, shown in the deactivation confirmation so
    * the owner sees what will be left unattended.

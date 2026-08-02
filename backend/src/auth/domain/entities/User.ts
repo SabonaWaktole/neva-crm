@@ -13,6 +13,12 @@ interface UserProps {
   /** Defaults to true so existing construction sites keep working. */
   isActive?: boolean;
   /**
+   * Platform Admin soft-delete. `null` means not deleted. Distinct from
+   * `isActive`: a deleted user is always inactive, but an inactive user is
+   * not necessarily deleted (ordinary suspension leaves this null).
+   */
+  deletedAt?: Date | null;
+  /**
    * Interface language override. `null` means "follow the workspace default" —
    * deliberately distinct from having chosen English, so a tenant changing its
    * default moves users who never expressed a preference.
@@ -37,6 +43,7 @@ export class User {
    * destroy financial and audit history.
    */
   public readonly isActive: boolean;
+  public readonly deletedAt: Date | null;
   public readonly language: string | null;
   public readonly createdAt: Date;
 
@@ -51,6 +58,7 @@ export class User {
     this.tenantId = props.tenantId;
     this.warehouseId = props.warehouseId || null;
     this.isActive = props.isActive ?? true;
+    this.deletedAt = props.deletedAt ?? null;
     this.language = props.language ?? null;
     this.createdAt = props.createdAt;
   }

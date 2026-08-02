@@ -12,13 +12,26 @@ import {
 } from '../../../domain/errors';
 import { CreateUserUseCase } from '../../../../auth/application/use-cases/CreateUserUseCase';
 import { GetPlatformUsersUseCase } from '../../../../auth/application/use-cases/GetPlatformUsersUseCase';
+import { GetOwnershipTransferCandidatesUseCase } from '../../../../auth/application/use-cases/GetOwnershipTransferCandidatesUseCase';
+import { PlatformSuspendUserUseCase } from '../../../../auth/application/use-cases/PlatformSuspendUserUseCase';
+import { PlatformReactivateUserUseCase } from '../../../../auth/application/use-cases/PlatformReactivateUserUseCase';
+import { PlatformDeleteUserUseCase } from '../../../../auth/application/use-cases/PlatformDeleteUserUseCase';
+import { User } from '../../../../auth/domain/entities/User';
 import { BulkUpdateTenantSettingsUseCase } from '../../../../settings/application/use-cases/BulkUpdateTenantSettingsUseCase';
 import { bulkUpdateTenantSettingsSchema } from '../../../../settings/interfaces/http/schemas/platformSettingsSchemas';
 import {
   authCookieOptions,
   AUTH_COOKIE_MAX_AGE_MS,
 } from '../../../../main/interfaces/http/authCookie';
-import { SlugAlreadyTakenError, UnauthorizedError } from '../../../../auth/domain/errors';
+import {
+  SlugAlreadyTakenError,
+  UnauthorizedError,
+  UserNotFoundError,
+  CannotModifySuperAdminError,
+  OwnershipTransferRequiredError,
+  InvalidOwnershipTargetError,
+  RestoreOwnershipChoiceRequiredError,
+} from '../../../../auth/domain/errors';
 import { authenticate } from '../../../../main/interfaces/http/middlewares/authenticate';
 import { authorize } from '../../../../main/interfaces/http/middlewares/authorize';
 import { validateRequest } from '../../../../main/interfaces/http/middlewares/validateRequest';
@@ -44,6 +57,18 @@ const toResponse = (t: Tenant) => ({
   createdAt: t.createdAt,
 });
 
+/** Mirrors `toResponse` above, for the user-lifecycle endpoints. */
+const toUserResponse = (u: User) => ({
+  id: u.id,
+  email: u.email,
+  firstName: u.firstName,
+  lastName: u.lastName,
+  role: u.role,
+  isActive: u.isActive,
+  tenantId: u.tenantId,
+  createdAt: u.createdAt,
+});
+
 export interface TenantRouterDeps {
   getTenantsUseCase: GetTenantsUseCase;
   createTenantWithOwnerUseCase: CreateTenantWithOwnerUseCase;
@@ -53,6 +78,10 @@ export interface TenantRouterDeps {
   deleteTenantUseCase: DeleteTenantUseCase;
   createUserUseCase: CreateUserUseCase;
   getPlatformUsersUseCase: GetPlatformUsersUseCase;
+  getOwnershipTransferCandidatesUseCase: GetOwnershipTransferCandidatesUseCase;
+  suspendUserUseCase: PlatformSuspendUserUseCase;
+  reactivateUserUseCase: PlatformReactivateUserUseCase;
+  deleteUserUseCase: PlatformDeleteUserUseCase;
   bulkUpdateTenantSettingsUseCase: BulkUpdateTenantSettingsUseCase;
   tokenService: ITokenService;
   emailSender: IEmailSender;
@@ -68,6 +97,10 @@ export function createTenantRouter(deps: TenantRouterDeps): Router {
     deleteTenantUseCase,
     createUserUseCase,
     getPlatformUsersUseCase,
+    getOwnershipTransferCandidatesUseCase,
+    suspendUserUseCase,
+    reactivateUserUseCase,
+    deleteUserUseCase,
     bulkUpdateTenantSettingsUseCase,
     tokenService,
     emailSender,
@@ -246,6 +279,156 @@ export function createTenantRouter(deps: TenantRouterDeps): Router {
       next(error);
     }
   });
+
+  /**
+   * Shared error mapping for the four user-lifecycle endpoints below. A `code`
+   * accompanies the two 409s specifically so the console can tell "needs an
+   * ownership-transfer target" and "needs a restore/keep choice" apart from a
+   * generic conflict and open the right follow-up UI, rather than just
+   * showing the message.
+   */
+  const handleUserLifecycleError = (error: unknown, res: Response, next: NextFunction) => {
+    if (error instanceof UserNotFoundError) {
+      return res.status(404).json({ error: error.message });
+    }
+    if (error instanceof CannotModifySuperAdminError) {
+      return res.status(403).json({ error: error.message });
+    }
+    if (error instanceof ConfirmationMismatchError) {
+      return res.status(400).json({ error: error.message });
+    }
+    if (error instanceof InvalidOwnershipTargetError) {
+      return res.status(400).json({ error: error.message });
+    }
+    if (error instanceof OwnershipTransferRequiredError) {
+      return res.status(409).json({ error: error.message, code: 'OWNERSHIP_TRANSFER_REQUIRED' });
+    }
+    if (error instanceof RestoreOwnershipChoiceRequiredError) {
+      return res.status(409).json({ error: error.message, code: 'RESTORE_CHOICE_REQUIRED' });
+    }
+    if (error instanceof UnauthorizedError) {
+      return res.status(403).json({ error: error.message });
+    }
+    next(error);
+  };
+
+  /**
+   * SUPER_ADMIN only: active staff eligible to become the new Business Owner
+   * of `:id`'s workspace. Powers the ownership-transfer picker the console
+   * shows before suspending or deleting a Business Owner who has a team.
+   *
+   * Registered before `/:id/...` for the same route-ordering reason `/users`
+   * above is.
+   */
+  router.get(
+    '/users/:id/ownership-transfer-candidates',
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const callerRole = callerRoleOf(req);
+        if (!callerRole) {
+          return res.status(401).json({ error: 'Access denied. No token provided.' });
+        }
+
+        const candidates = await getOwnershipTransferCandidatesUseCase.execute({
+          callerRole,
+          userId: String(req.params.id),
+        });
+
+        res.json({ items: candidates.map(toUserResponse) });
+      } catch (error) {
+        handleUserLifecycleError(error, res, next);
+      }
+    }
+  );
+
+  /**
+   * SUPER_ADMIN only: suspend any platform user. `newOwnerId` is required
+   * only when the target is a Business Owner with other active staff — see
+   * `PlatformSuspendUserUseCase`.
+   */
+  router.patch(
+    '/users/:id/suspend',
+    validateRequest(tenantSchemas.suspendUser),
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const callerRole = callerRoleOf(req);
+        if (!callerRole || !req.user) {
+          return res.status(401).json({ error: 'Access denied. No token provided.' });
+        }
+
+        const { user } = await suspendUserUseCase.execute({
+          callerRole,
+          callerId: req.user.userId,
+          userId: String(req.params.id),
+          newOwnerId: req.body.newOwnerId,
+        });
+
+        res.json({ user: toUserResponse(user) });
+      } catch (error) {
+        handleUserLifecycleError(error, res, next);
+      }
+    }
+  );
+
+  /**
+   * SUPER_ADMIN only: reactivate any platform user. `restoreOwnership` is
+   * required only when the target has an unresolved ownership transfer from
+   * their suspension — see `PlatformReactivateUserUseCase`.
+   */
+  router.patch(
+    '/users/:id/reactivate',
+    validateRequest(tenantSchemas.reactivateUser),
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const callerRole = callerRoleOf(req);
+        if (!callerRole || !req.user) {
+          return res.status(401).json({ error: 'Access denied. No token provided.' });
+        }
+
+        const { user } = await reactivateUserUseCase.execute({
+          callerRole,
+          callerId: req.user.userId,
+          userId: String(req.params.id),
+          restoreOwnership: req.body.restoreOwnership,
+        });
+
+        res.json({ user: toUserResponse(user) });
+      } catch (error) {
+        handleUserLifecycleError(error, res, next);
+      }
+    }
+  );
+
+  /**
+   * SUPER_ADMIN only: permanently delete a platform user (soft-delete —
+   * see `PlatformDeleteUserUseCase`). `confirmEmail` must equal the target's
+   * own current email, and `newOwnerId` is required only when the target is
+   * a Business Owner with other active staff.
+   */
+  router.delete(
+    '/users/:id',
+    validateRequest(tenantSchemas.deleteUser),
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const callerRole = callerRoleOf(req);
+        if (!callerRole || !req.user) {
+          return res.status(401).json({ error: 'Access denied. No token provided.' });
+        }
+
+        await deleteUserUseCase.execute({
+          callerRole,
+          callerId: req.user.userId,
+          userId: String(req.params.id),
+          confirmEmail: req.body.confirmEmail,
+          newOwnerId: req.body.newOwnerId,
+        });
+
+        res.status(204).send();
+      } catch (error) {
+        handleUserLifecycleError(error, res, next);
+      }
+    }
+  );
 
   /**
    * SUPER_ADMIN only: apply the same settings to several workspaces at once.
