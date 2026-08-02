@@ -92,9 +92,10 @@ export class PlatformReactivateUserUseCase {
       targetType: 'USER',
       targetId: dto.userId,
       tenantId: target.tenantId,
-      metadata: ownershipResolution
-        ? { ownershipTransferId: transfer!.id, resolution: ownershipResolution }
-        : undefined,
+      metadata: {
+        targetEmail: target.email,
+        ...(ownershipResolution ? { ownershipTransferId: transfer!.id, resolution: ownershipResolution } : {}),
+      },
     });
 
     const updated = await this.userRepository.findById(dto.userId);

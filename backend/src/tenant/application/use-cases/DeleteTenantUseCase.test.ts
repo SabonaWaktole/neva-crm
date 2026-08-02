@@ -37,7 +37,7 @@ describe('DeleteTenantUseCase', () => {
 
   it('throws UnauthorizedError for a non-SUPER_ADMIN caller and touches nothing', async () => {
     await expect(
-      useCase.execute({ callerRole: UserRole.BUSINESS_OWNER, tenantId: 't1', confirmSlug: 'acme' })
+      useCase.execute({ callerId: 'u1', callerRole: UserRole.BUSINESS_OWNER, tenantId: 't1', confirmSlug: 'acme' })
     ).rejects.toThrow(UnauthorizedError);
     expect(mockTenantRepo.findById).not.toHaveBeenCalled();
     expect(mockDeletionTx.run).not.toHaveBeenCalled();
@@ -47,7 +47,7 @@ describe('DeleteTenantUseCase', () => {
     mockTenantRepo.findById.mockResolvedValue(null);
 
     await expect(
-      useCase.execute({ callerRole: UserRole.SUPER_ADMIN, tenantId: 'nope', confirmSlug: 'anything' })
+      useCase.execute({ callerId: 'u1', callerRole: UserRole.SUPER_ADMIN, tenantId: 'nope', confirmSlug: 'anything' })
     ).rejects.toThrow(TenantNotFoundError);
     expect(mockDeletionTx.run).not.toHaveBeenCalled();
   });
@@ -56,7 +56,7 @@ describe('DeleteTenantUseCase', () => {
     mockTenantRepo.findById.mockResolvedValue(tenant);
 
     await expect(
-      useCase.execute({ callerRole: UserRole.SUPER_ADMIN, tenantId: 't1', confirmSlug: 'wrong-slug' })
+      useCase.execute({ callerId: 'u1', callerRole: UserRole.SUPER_ADMIN, tenantId: 't1', confirmSlug: 'wrong-slug' })
     ).rejects.toThrow(ConfirmationMismatchError);
     expect(mockDeletionTx.run).not.toHaveBeenCalled();
     expect(mockMediaCleaner.removeAll).not.toHaveBeenCalled();
@@ -72,7 +72,7 @@ describe('DeleteTenantUseCase', () => {
       callOrder.push('media');
     });
 
-    await useCase.execute({ callerRole: UserRole.SUPER_ADMIN, tenantId: 't1', confirmSlug: 'acme' });
+    await useCase.execute({ callerId: 'u1', callerRole: UserRole.SUPER_ADMIN, tenantId: 't1', confirmSlug: 'acme' });
 
     expect(mockDeletionTx.run).toHaveBeenCalledWith('t1');
     expect(mockMediaCleaner.removeAll).toHaveBeenCalledWith('t1');
@@ -84,7 +84,7 @@ describe('DeleteTenantUseCase', () => {
     mockMediaCleaner.removeAll.mockRejectedValue(new Error('disk error'));
 
     await expect(
-      useCase.execute({ callerRole: UserRole.SUPER_ADMIN, tenantId: 't1', confirmSlug: 'acme' })
+      useCase.execute({ callerId: 'u1', callerRole: UserRole.SUPER_ADMIN, tenantId: 't1', confirmSlug: 'acme' })
     ).resolves.toBeUndefined();
     expect(mockDeletionTx.run).toHaveBeenCalledWith('t1');
   });
@@ -94,7 +94,7 @@ describe('DeleteTenantUseCase', () => {
     mockDeletionTx.run.mockRejectedValue(new Error('fk violation'));
 
     await expect(
-      useCase.execute({ callerRole: UserRole.SUPER_ADMIN, tenantId: 't1', confirmSlug: 'acme' })
+      useCase.execute({ callerId: 'u1', callerRole: UserRole.SUPER_ADMIN, tenantId: 't1', confirmSlug: 'acme' })
     ).rejects.toThrow('fk violation');
     expect(mockMediaCleaner.removeAll).not.toHaveBeenCalled();
   });

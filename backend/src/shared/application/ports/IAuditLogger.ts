@@ -8,6 +8,11 @@ export interface AuditLogEntry {
   metadata?: Record<string, unknown>;
 }
 
+export interface AuditLogRecord extends AuditLogEntry {
+  id: string;
+  createdAt: Date;
+}
+
 /**
  * Append-only record of platform-administrative actions.
  *
@@ -18,4 +23,7 @@ export interface AuditLogEntry {
  */
 export interface IAuditLogger {
   record(entry: AuditLogEntry): Promise<void>;
+
+  /** Most recent entries across the whole platform, newest first — powers the Platform Activity feed. */
+  findRecent(take: number): Promise<AuditLogRecord[]>;
 }

@@ -1,5 +1,8 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { GetTenantsUseCase } from '../../../application/use-cases/GetTenantsUseCase';
+import { GetPlatformActivityUseCase } from '../../../application/use-cases/GetPlatformActivityUseCase';
+import { GetGlobalMrrUseCase } from '../../../application/use-cases/GetGlobalMrrUseCase';
+import { GetSystemHealthUseCase } from '../../../application/use-cases/GetSystemHealthUseCase';
 import { CreateTenantWithOwnerUseCase } from '../../../application/use-cases/CreateTenantWithOwnerUseCase';
 import { SetTenantSubscriptionStatusUseCase } from '../../../application/use-cases/SetTenantSubscriptionStatusUseCase';
 import { EnterTenantUseCase } from '../../../application/use-cases/EnterTenantUseCase';
@@ -39,6 +42,7 @@ import { tenantSchemas } from '../schemas/tenantSchemas';
 import { UserRole } from '../../../../auth/domain/enums/UserRole';
 import { ITokenService } from '../../../../auth/application/ports/ITokenService';
 import { IEmailSender } from '../../../../auth/application/ports/IEmailSender';
+import { IAuditLogger } from '../../../../shared/application/ports/IAuditLogger';
 
 /**
  * The shape every tenant endpoint returns.
@@ -71,6 +75,9 @@ const toUserResponse = (u: User) => ({
 
 export interface TenantRouterDeps {
   getTenantsUseCase: GetTenantsUseCase;
+  getPlatformActivityUseCase: GetPlatformActivityUseCase;
+  getGlobalMrrUseCase: GetGlobalMrrUseCase;
+  getSystemHealthUseCase: GetSystemHealthUseCase;
   createTenantWithOwnerUseCase: CreateTenantWithOwnerUseCase;
   suspendTenantUseCase: SetTenantSubscriptionStatusUseCase;
   reactivateTenantUseCase: SetTenantSubscriptionStatusUseCase;
@@ -85,11 +92,15 @@ export interface TenantRouterDeps {
   bulkUpdateTenantSettingsUseCase: BulkUpdateTenantSettingsUseCase;
   tokenService: ITokenService;
   emailSender: IEmailSender;
+  auditLogger: IAuditLogger;
 }
 
 export function createTenantRouter(deps: TenantRouterDeps): Router {
   const {
     getTenantsUseCase,
+    getPlatformActivityUseCase,
+    getGlobalMrrUseCase,
+    getSystemHealthUseCase,
     createTenantWithOwnerUseCase,
     suspendTenantUseCase,
     reactivateTenantUseCase,
@@ -104,6 +115,7 @@ export function createTenantRouter(deps: TenantRouterDeps): Router {
     bulkUpdateTenantSettingsUseCase,
     tokenService,
     emailSender,
+    auditLogger,
   } = deps;
 
   const router = Router();
@@ -161,7 +173,8 @@ export function createTenantRouter(deps: TenantRouterDeps): Router {
     validateRequest(tenantSchemas.createTenant),
     async (req: Request, res: Response, next: NextFunction) => {
       try {
-        if (!callerRoleOf(req)) {
+        const callerRole = callerRoleOf(req);
+        if (!callerRole || !req.user) {
           return res.status(401).json({ error: 'Access denied. No token provided.' });
         }
 
@@ -179,6 +192,25 @@ export function createTenantRouter(deps: TenantRouterDeps): Router {
           // The owner's password is never echoed back, not even the hash.
           owner: { id: user.id, email: user.email, role: user.role },
         });
+
+        // Awaited, unlike the email send below: an audit trail with a hole in
+        // it defeats its own purpose (see IAuditLogger), so this must not be
+        // best-effort. It runs after the response because a slow write here
+        // must not delay the response, and the provisioning itself is already
+        // committed regardless of whether this record succeeds.
+        auditLogger
+          .record({
+            actorUserId: req.user.userId,
+            actorRole: callerRole,
+            action: 'TENANT_CREATED',
+            targetType: 'TENANT',
+            targetId: tenant.id,
+            tenantId: tenant.id,
+            metadata: { companyName: tenant.name, urlSlug: tenant.urlSlug, ownerEmail: user.email },
+          })
+          .catch((error) => {
+            console.error('Failed to record TENANT_CREATED audit log', error);
+          });
 
         // Best-effort, after the response is already sent: the owner's only
         // record of their password is this email, but a slow or failing mail
@@ -223,6 +255,7 @@ export function createTenantRouter(deps: TenantRouterDeps): Router {
 
         const tenant = await useCase.execute({
           callerRole,
+          callerId: req.user?.userId,
           tenantId: String(req.params.id),
         });
         res.json({ tenant: toResponse(tenant) });
@@ -239,6 +272,74 @@ export function createTenantRouter(deps: TenantRouterDeps): Router {
 
   router.patch('/:id/suspend', statusHandler(suspendTenantUseCase));
   router.patch('/:id/reactivate', statusHandler(reactivateTenantUseCase));
+
+  /**
+   * SUPER_ADMIN only: recent platform-wide administrative events, for the
+   * dashboard's Platform Activity feed. Registered before `/:id/...` for the
+   * same route-ordering reason `/users` below is.
+   */
+  router.get('/activity', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const callerRole = callerRoleOf(req);
+      if (!callerRole) {
+        return res.status(401).json({ error: 'Access denied. No token provided.' });
+      }
+
+      const take = req.query.take ? parseInt(req.query.take as string, 10) : undefined;
+      const items = await getPlatformActivityUseCase.execute({ callerRole, take });
+
+      res.json({ items });
+    } catch (error) {
+      if (error instanceof UnauthorizedError) {
+        return res.status(403).json({ error: error.message });
+      }
+      next(error);
+    }
+  });
+
+  /**
+   * SUPER_ADMIN only: platform-wide Monthly Recurring Revenue, for the
+   * dashboard's Global MRR card. Registered before `/:id/...` for the same
+   * route-ordering reason `/activity` above is.
+   */
+  router.get('/mrr', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const callerRole = callerRoleOf(req);
+      if (!callerRole) {
+        return res.status(401).json({ error: 'Access denied. No token provided.' });
+      }
+
+      const mrr = await getGlobalMrrUseCase.execute({ callerRole });
+      res.json(mrr);
+    } catch (error) {
+      if (error instanceof UnauthorizedError) {
+        return res.status(403).json({ error: error.message });
+      }
+      next(error);
+    }
+  });
+
+  /**
+   * SUPER_ADMIN only: platform system health, for the dashboard's System
+   * Health card. Registered before `/:id/...` for the same route-ordering
+   * reason `/activity` above is.
+   */
+  router.get('/health', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const callerRole = callerRoleOf(req);
+      if (!callerRole) {
+        return res.status(401).json({ error: 'Access denied. No token provided.' });
+      }
+
+      const health = await getSystemHealthUseCase.execute({ callerRole });
+      res.json(health);
+    } catch (error) {
+      if (error instanceof UnauthorizedError) {
+        return res.status(403).json({ error: error.message });
+      }
+      next(error);
+    }
+  });
 
   /**
    * SUPER_ADMIN only: every account on the platform, across all workspaces.
@@ -566,12 +667,13 @@ export function createTenantRouter(deps: TenantRouterDeps): Router {
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const callerRole = callerRoleOf(req);
-        if (!callerRole) {
+        if (!callerRole || !req.user) {
           return res.status(401).json({ error: 'Access denied. No token provided.' });
         }
 
         await deleteTenantUseCase.execute({
           callerRole,
+          callerId: req.user.userId,
           tenantId: String(req.params.id),
           confirmSlug: req.body.confirmSlug,
         });

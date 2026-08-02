@@ -157,10 +157,12 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const getPlatformUsersUseCase = new GetPlatformUsersUseCase(userRepository);
   const enterTenantUseCase = new EnterTenantUseCase(tenantRepository, userRepository, tokenService);
   const exitTenantUseCase = new ExitTenantUseCase(userRepository, tokenService);
+  const auditLogger = new PrismaAuditLogger();
   const deleteTenantUseCase = new DeleteTenantUseCase(
     tenantRepository,
     new PrismaTenantDeletionTransaction(),
-    new FsTenantMediaCleaner()
+    new FsTenantMediaCleaner(),
+    auditLogger
   );
   const inviteStaffUseCase = new InviteStaffUseCase(invitationRepository, emailSender);
   const notificationRepository = new PrismaNotificationRepository();
@@ -207,7 +209,6 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   // Business-Owner-only deactivate/reactivate above — see PlatformSuspendUserUseCase.
   const ownershipTransferRepository = new PrismaOwnershipTransferRepository();
   const ownershipTransactions = new PrismaOwnershipTransactions();
-  const auditLogger = new PrismaAuditLogger();
   const getOwnershipTransferCandidatesUseCase = new GetOwnershipTransferCandidatesUseCase(userRepository);
   const platformSuspendUserUseCase = new PlatformSuspendUserUseCase(
     userRepository,
@@ -271,19 +272,31 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   // operation used by SUPER_ADMIN to list all tenants across the system. It is not scoped to a single tenant.
   const { GetTenantsUseCase } = require('../tenant/application/use-cases/GetTenantsUseCase');
   const getTenantsUseCase = new GetTenantsUseCase(tenantRepository);
+  const { GetPlatformActivityUseCase } = require('../tenant/application/use-cases/GetPlatformActivityUseCase');
+  const getPlatformActivityUseCase = new GetPlatformActivityUseCase(auditLogger);
+  const { GetGlobalMrrUseCase } = require('../tenant/application/use-cases/GetGlobalMrrUseCase');
+  const getGlobalMrrUseCase = new GetGlobalMrrUseCase();
+  const { GetSystemHealthUseCase } = require('../tenant/application/use-cases/GetSystemHealthUseCase');
+  const { PrismaDatabaseHealthChecker } = require('../tenant/infrastructure/PrismaDatabaseHealthChecker');
+  const getSystemHealthUseCase = new GetSystemHealthUseCase(new PrismaDatabaseHealthChecker(prisma));
   const { createTenantRouter } = require('../tenant/interfaces/http/routes/tenantRoutes');
   const tenantRoutes = createTenantRouter({
     getTenantsUseCase,
+    getPlatformActivityUseCase,
+    getGlobalMrrUseCase,
+    getSystemHealthUseCase,
     createTenantWithOwnerUseCase,
     // Same class, opposite directions. The target status is fixed here at
     // construction so no request body can ever choose it.
     suspendTenantUseCase: new SetTenantSubscriptionStatusUseCase(
       tenantRepository,
-      SubscriptionStatus.SUSPENDED
+      SubscriptionStatus.SUSPENDED,
+      auditLogger
     ),
     reactivateTenantUseCase: new SetTenantSubscriptionStatusUseCase(
       tenantRepository,
-      SubscriptionStatus.ACTIVE
+      SubscriptionStatus.ACTIVE,
+      auditLogger
     ),
     enterTenantUseCase,
     deleteTenantUseCase,
@@ -296,6 +309,7 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
     bulkUpdateTenantSettingsUseCase,
     tokenService,
     emailSender,
+    auditLogger,
   });
   app.use('/api/tenants', tenantRoutes);
 

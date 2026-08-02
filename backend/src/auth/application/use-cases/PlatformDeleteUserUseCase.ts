@@ -96,7 +96,10 @@ export class PlatformDeleteUserUseCase {
       targetType: 'USER',
       targetId: dto.userId,
       tenantId: target.tenantId,
-      metadata: ownershipTransferred ? { newOwnerId: dto.newOwnerId } : undefined,
+      metadata: {
+        targetEmail: target.email,
+        ...(ownershipTransferred ? { newOwnerId: dto.newOwnerId } : {}),
+      },
     });
   }
 }

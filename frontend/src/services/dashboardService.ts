@@ -130,6 +130,32 @@ export interface PlatformSettings extends Required<WorkspaceSettingsFields> {
   updatedAt: string | null;
 }
 
+/** Platform-wide Monthly Recurring Revenue, for the dashboard's Global MRR card. */
+export interface GlobalMrr {
+  amountCents: number;
+  currency: string;
+}
+
+/** Platform system health, for the dashboard's System Health card. */
+export interface SystemHealth {
+  status: 'HEALTHY' | 'DEGRADED';
+  checkedAt: string;
+  checks: {
+    database: 'UP' | 'DOWN';
+  };
+}
+
+/** One row of the append-only platform audit log, as the Platform Activity feed consumes it. */
+export interface PlatformActivityEvent {
+  id: string;
+  action: string;
+  targetType: string;
+  targetId: string;
+  tenantId: string | null;
+  metadata?: Record<string, unknown>;
+  createdAt: string;
+}
+
 export const dashboardService = {
   getTenantClientMetrics: async (tenantSlug: string): Promise<DashboardMetrics> => {
     const response = await apiClient.get<DashboardMetrics>(`/${tenantSlug}/dashboard/metrics`);
@@ -148,6 +174,22 @@ export const dashboardService = {
     if (take !== undefined) params.take = take;
     // Note: This endpoint is mounted at the root /api/tenants, not /api/:tenantSlug/...
     const response = await apiClient.get<PaginatedTenants>(`/tenants`, { params });
+    return response.data;
+  },
+
+  getPlatformActivity: async (take?: number): Promise<PlatformActivityEvent[]> => {
+    const params = take ? { take } : {};
+    const response = await apiClient.get<{ items: PlatformActivityEvent[] }>(`/tenants/activity`, { params });
+    return response.data.items;
+  },
+
+  getGlobalMrr: async (): Promise<GlobalMrr> => {
+    const response = await apiClient.get<GlobalMrr>(`/tenants/mrr`);
+    return response.data;
+  },
+
+  getSystemHealth: async (): Promise<SystemHealth> => {
+    const response = await apiClient.get<SystemHealth>(`/tenants/health`);
     return response.data;
   },
 

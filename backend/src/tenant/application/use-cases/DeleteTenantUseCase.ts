@@ -1,6 +1,7 @@
 import { ITenantRepository } from '../../domain/repositories/ITenantRepository';
 import { ITenantDeletionTransaction } from '../ports/ITenantDeletionTransaction';
 import { ITenantMediaCleaner } from '../ports/ITenantMediaCleaner';
+import { IAuditLogger } from '../../../shared/application/ports/IAuditLogger';
 import { UserRole } from '../../../auth/domain/enums/UserRole';
 import { UnauthorizedError } from '../../../auth/domain/errors';
 import { TenantNotFoundError } from '../../domain/errors';
@@ -8,6 +9,8 @@ import { ConfirmationMismatchError } from '../../domain/errors/ConfirmationMisma
 
 export interface DeleteTenantDTO {
   callerRole: string;
+  /** The Super Admin performing the deletion — recorded as the audit entry's actor. */
+  callerId: string;
   tenantId: string;
   /**
    * The caller must type the workspace's own slug to proceed — the same
@@ -39,7 +42,13 @@ export class DeleteTenantUseCase {
   constructor(
     private readonly tenantRepo: ITenantRepository,
     private readonly deletionTx: ITenantDeletionTransaction,
-    private readonly mediaCleaner: ITenantMediaCleaner
+    private readonly mediaCleaner: ITenantMediaCleaner,
+    /**
+     * Optional so every existing test double that constructs this use case
+     * with three arguments keeps compiling. Absent, the deletion still runs;
+     * it simply leaves no TENANT_DELETED audit entry behind.
+     */
+    private readonly auditLogger?: IAuditLogger
   ) {}
 
   async execute(dto: DeleteTenantDTO): Promise<void> {
@@ -57,6 +66,18 @@ export class DeleteTenantUseCase {
     }
 
     await this.deletionTx.run(dto.tenantId);
+
+    // AuditLog has no foreign key onto Tenant (see schema comment), so this
+    // write is valid even though the tenant row above is already gone.
+    await this.auditLogger?.record({
+      actorUserId: dto.callerId,
+      actorRole: dto.callerRole,
+      action: 'TENANT_DELETED',
+      targetType: 'TENANT',
+      targetId: dto.tenantId,
+      tenantId: dto.tenantId,
+      metadata: { companyName: tenant.name, urlSlug: tenant.urlSlug },
+    });
 
     try {
       await this.mediaCleaner.removeAll(dto.tenantId);

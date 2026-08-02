@@ -86,7 +86,7 @@ describe('PlatformReactivateUserUseCase', () => {
       keepOwnership: jest.fn(),
       promoteForDeletion: jest.fn(),
     };
-    auditLogger = { record: jest.fn() };
+    auditLogger = { record: jest.fn(), findRecent: jest.fn() };
     useCase = new PlatformReactivateUserUseCase(
       userRepository,
       ownershipTransferRepository,
