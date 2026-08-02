@@ -65,7 +65,7 @@ describe('PlatformDeleteUserUseCase', () => {
       keepOwnership: jest.fn(),
       promoteForDeletion: jest.fn(),
     };
-    auditLogger = { record: jest.fn() };
+    auditLogger = { record: jest.fn(), findRecent: jest.fn() };
     useCase = new PlatformDeleteUserUseCase(userRepository, ownershipTransactions, auditLogger);
   });
 
