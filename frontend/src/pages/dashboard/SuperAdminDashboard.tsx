@@ -15,7 +15,7 @@ import { Button } from '../../components/ui/Button/Button';
 import { KPICard } from '../../components/ui/KPICard';
 import { TenantManagementTable } from '../../components/widgets/TenantManagementTable';
 import { TimelineItem } from '../../components/ui/TimelineItem';
-import { useTenants, usePlatformActivity } from '../../hooks/useDashboard';
+import { useTenants, usePlatformActivity, useGlobalMrr, useSystemHealth } from '../../hooks/useDashboard';
 import type { PlatformActivityEvent } from '../../services/dashboardService';
 
 /**
@@ -91,11 +91,18 @@ const formatTimeAgo = (isoDate: string): string => {
   return `${days} day${days === 1 ? '' : 's'} ago`;
 };
 
+const formatMrr = (amountCents: number, currency: string): string =>
+  new Intl.NumberFormat('en-US', { style: 'currency', currency, maximumFractionDigits: 0 }).format(
+    amountCents / 100
+  );
+
 export const SuperAdminDashboard = () => {
   const { t } = useTranslation('dashboard');
   const navigate = useNavigate();
   const { tenants, total, isLoading: isLoadingTenants } = useTenants();
   const { events: activityEvents, isLoading: isLoadingActivity } = usePlatformActivity();
+  const { mrr, isLoading: isLoadingMrr } = useGlobalMrr();
+  const { health, isLoading: isLoadingHealth } = useSystemHealth();
 
   return (
     <div className={styles.dashboardContainer}>
@@ -128,23 +135,26 @@ export const SuperAdminDashboard = () => {
           value={isLoadingTenants ? '...' : total}
           icon={<Users size={24} />}
         />
+        {/*
+          Real endpoint, real value: no plan/price field exists anywhere in the
+          schema yet, so there is nothing to sum and this is genuinely $0 today
+          rather than an unimplemented placeholder. It becomes a real figure the
+          moment billing data is modeled, with no further UI change needed.
+        */}
         <KPICard
           title={t('superAdmin.globalMrr')}
-          value={PLACEHOLDER_VALUE}
+          value={isLoadingMrr || !mrr ? '...' : formatMrr(mrr.amountCents, mrr.currency)}
           icon={<Banknote size={24} />}
           iconColor="var(--color-secondary)"
           iconBgColor="var(--color-secondary-fixed)"
-          isPlaceholder={true}
-          placeholderText={t('superAdmin.comingPhase5')}
         />
+        {/* Reflects a real check against the database, not a hard-coded "Healthy". */}
         <KPICard
           title={t('superAdmin.systemHealth')}
-          value={PLACEHOLDER_VALUE}
+          value={isLoadingHealth || !health ? '...' : health.status === 'HEALTHY' ? 'Healthy' : 'Degraded'}
           icon={<CheckCircle2 size={24} />}
-          iconColor="var(--color-success)"
-          iconBgColor="var(--color-success-container)"
-          isPlaceholder={true}
-          placeholderText={t('superAdmin.comingPhase5')}
+          iconColor={health?.status === 'DEGRADED' ? 'var(--color-error)' : 'var(--color-success)'}
+          iconBgColor={health?.status === 'DEGRADED' ? 'var(--color-error-container)' : 'var(--color-success-container)'}
         />
       </section>
 

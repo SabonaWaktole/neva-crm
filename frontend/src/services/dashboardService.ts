@@ -130,6 +130,21 @@ export interface PlatformSettings extends Required<WorkspaceSettingsFields> {
   updatedAt: string | null;
 }
 
+/** Platform-wide Monthly Recurring Revenue, for the dashboard's Global MRR card. */
+export interface GlobalMrr {
+  amountCents: number;
+  currency: string;
+}
+
+/** Platform system health, for the dashboard's System Health card. */
+export interface SystemHealth {
+  status: 'HEALTHY' | 'DEGRADED';
+  checkedAt: string;
+  checks: {
+    database: 'UP' | 'DOWN';
+  };
+}
+
 /** One row of the append-only platform audit log, as the Platform Activity feed consumes it. */
 export interface PlatformActivityEvent {
   id: string;
@@ -166,6 +181,16 @@ export const dashboardService = {
     const params = take ? { take } : {};
     const response = await apiClient.get<{ items: PlatformActivityEvent[] }>(`/tenants/activity`, { params });
     return response.data.items;
+  },
+
+  getGlobalMrr: async (): Promise<GlobalMrr> => {
+    const response = await apiClient.get<GlobalMrr>(`/tenants/mrr`);
+    return response.data;
+  },
+
+  getSystemHealth: async (): Promise<SystemHealth> => {
+    const response = await apiClient.get<SystemHealth>(`/tenants/health`);
+    return response.data;
   },
 
   /*

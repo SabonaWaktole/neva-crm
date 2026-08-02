@@ -9,6 +9,8 @@ import type {
   PlatformUser,
   OwnershipTransferCandidate,
   PlatformActivityEvent,
+  GlobalMrr,
+  SystemHealth,
 } from '../services/dashboardService';
 
 export const useDashboardMetrics = () => {
@@ -119,6 +121,56 @@ export const usePlatformActivity = (take: number = 10) => {
   }, [take, fetchActivity]);
 
   return { events, isLoading, error, fetchActivity };
+};
+
+export const useGlobalMrr = () => {
+  const [mrr, setMrr] = useState<GlobalMrr | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchMrr = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await dashboardService.getGlobalMrr();
+      setMrr(data);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to fetch global MRR');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchMrr();
+  }, [fetchMrr]);
+
+  return { mrr, isLoading, error, fetchMrr };
+};
+
+export const useSystemHealth = () => {
+  const [health, setHealth] = useState<SystemHealth | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchHealth = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await dashboardService.getSystemHealth();
+      setHealth(data);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to fetch system health');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchHealth();
+  }, [fetchHealth]);
+
+  return { health, isLoading, error, fetchHealth };
 };
 
 /**

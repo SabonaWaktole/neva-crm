@@ -1,6 +1,8 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { GetTenantsUseCase } from '../../../application/use-cases/GetTenantsUseCase';
 import { GetPlatformActivityUseCase } from '../../../application/use-cases/GetPlatformActivityUseCase';
+import { GetGlobalMrrUseCase } from '../../../application/use-cases/GetGlobalMrrUseCase';
+import { GetSystemHealthUseCase } from '../../../application/use-cases/GetSystemHealthUseCase';
 import { CreateTenantWithOwnerUseCase } from '../../../application/use-cases/CreateTenantWithOwnerUseCase';
 import { SetTenantSubscriptionStatusUseCase } from '../../../application/use-cases/SetTenantSubscriptionStatusUseCase';
 import { EnterTenantUseCase } from '../../../application/use-cases/EnterTenantUseCase';
@@ -74,6 +76,8 @@ const toUserResponse = (u: User) => ({
 export interface TenantRouterDeps {
   getTenantsUseCase: GetTenantsUseCase;
   getPlatformActivityUseCase: GetPlatformActivityUseCase;
+  getGlobalMrrUseCase: GetGlobalMrrUseCase;
+  getSystemHealthUseCase: GetSystemHealthUseCase;
   createTenantWithOwnerUseCase: CreateTenantWithOwnerUseCase;
   suspendTenantUseCase: SetTenantSubscriptionStatusUseCase;
   reactivateTenantUseCase: SetTenantSubscriptionStatusUseCase;
@@ -95,6 +99,8 @@ export function createTenantRouter(deps: TenantRouterDeps): Router {
   const {
     getTenantsUseCase,
     getPlatformActivityUseCase,
+    getGlobalMrrUseCase,
+    getSystemHealthUseCase,
     createTenantWithOwnerUseCase,
     suspendTenantUseCase,
     reactivateTenantUseCase,
@@ -282,6 +288,50 @@ export function createTenantRouter(deps: TenantRouterDeps): Router {
       const items = await getPlatformActivityUseCase.execute({ callerRole, take });
 
       res.json({ items });
+    } catch (error) {
+      if (error instanceof UnauthorizedError) {
+        return res.status(403).json({ error: error.message });
+      }
+      next(error);
+    }
+  });
+
+  /**
+   * SUPER_ADMIN only: platform-wide Monthly Recurring Revenue, for the
+   * dashboard's Global MRR card. Registered before `/:id/...` for the same
+   * route-ordering reason `/activity` above is.
+   */
+  router.get('/mrr', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const callerRole = callerRoleOf(req);
+      if (!callerRole) {
+        return res.status(401).json({ error: 'Access denied. No token provided.' });
+      }
+
+      const mrr = await getGlobalMrrUseCase.execute({ callerRole });
+      res.json(mrr);
+    } catch (error) {
+      if (error instanceof UnauthorizedError) {
+        return res.status(403).json({ error: error.message });
+      }
+      next(error);
+    }
+  });
+
+  /**
+   * SUPER_ADMIN only: platform system health, for the dashboard's System
+   * Health card. Registered before `/:id/...` for the same route-ordering
+   * reason `/activity` above is.
+   */
+  router.get('/health', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const callerRole = callerRoleOf(req);
+      if (!callerRole) {
+        return res.status(401).json({ error: 'Access denied. No token provided.' });
+      }
+
+      const health = await getSystemHealthUseCase.execute({ callerRole });
+      res.json(health);
     } catch (error) {
       if (error instanceof UnauthorizedError) {
         return res.status(403).json({ error: error.message });

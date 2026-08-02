@@ -273,10 +273,17 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const getTenantsUseCase = new GetTenantsUseCase(tenantRepository);
   const { GetPlatformActivityUseCase } = require('../tenant/application/use-cases/GetPlatformActivityUseCase');
   const getPlatformActivityUseCase = new GetPlatformActivityUseCase(auditLogger);
+  const { GetGlobalMrrUseCase } = require('../tenant/application/use-cases/GetGlobalMrrUseCase');
+  const getGlobalMrrUseCase = new GetGlobalMrrUseCase();
+  const { GetSystemHealthUseCase } = require('../tenant/application/use-cases/GetSystemHealthUseCase');
+  const { PrismaDatabaseHealthChecker } = require('../tenant/infrastructure/PrismaDatabaseHealthChecker');
+  const getSystemHealthUseCase = new GetSystemHealthUseCase(new PrismaDatabaseHealthChecker(prisma));
   const { createTenantRouter } = require('../tenant/interfaces/http/routes/tenantRoutes');
   const tenantRoutes = createTenantRouter({
     getTenantsUseCase,
     getPlatformActivityUseCase,
+    getGlobalMrrUseCase,
+    getSystemHealthUseCase,
     createTenantWithOwnerUseCase,
     // Same class, opposite directions. The target status is fixed here at
     // construction so no request body can ever choose it.
