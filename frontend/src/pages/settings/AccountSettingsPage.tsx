@@ -18,6 +18,15 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './AccountSettingsPage.module.css';
 import { getUserDisplayName } from '../../utils/userUtils';
+// Currency/timezone/locale option lists live in a shared module — the
+// platform console's Settings page (platform defaults + bulk apply to
+// selected tenants) edits these same six fields and must offer the same
+// choices, or the two pickers would silently drift apart.
+import {
+  CURRENCY_OPTIONS,
+  TIMEZONE_OPTIONS,
+  LOCALE_LABELS,
+} from '../../constants/workspaceSettingsOptions';
 
 const mockNavItems: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
@@ -28,55 +37,6 @@ const mockNavItems: NavItem[] = [
   { id: 'reports', label: 'Reports', icon: 'bar_chart' },
   { id: 'settings', label: 'Settings', icon: 'settings', isActive: true },
 ];
-
-/**
- * The currencies offered in the picker.
- *
- * A short list rather than all 162 ISO codes: a dropdown of every currency on
- * earth is worse to use than a short one, and the server validates against the
- * full `Intl.supportedValuesOf('currency')` set regardless — so this list can
- * grow without any server change.
- */
-const CURRENCY_OPTIONS = [
-  { code: 'USD', label: 'USD — US Dollar ($)' },
-  { code: 'EUR', label: 'EUR — Euro (€)' },
-  { code: 'GBP', label: 'GBP — British Pound (£)' },
-  { code: 'CAD', label: 'CAD — Canadian Dollar ($)' },
-  { code: 'AUD', label: 'AUD — Australian Dollar ($)' },
-  { code: 'ETB', label: 'ETB — Ethiopian Birr (Br)' },
-  { code: 'KES', label: 'KES — Kenyan Shilling (KSh)' },
-  { code: 'NGN', label: 'NGN — Nigerian Naira (₦)' },
-  { code: 'INR', label: 'INR — Indian Rupee (₹)' },
-  { code: 'JPY', label: 'JPY — Japanese Yen (¥)' },
-];
-
-/**
- * A shortlist, not all 418 IANA zones — a dropdown of every zone on earth is
- * unusable. The server validates against the full `Intl.supportedValuesOf`
- * set, so this list can grow with no server change.
- */
-const TIMEZONE_OPTIONS = [
-  'UTC',
-  'Europe/Tirane',
-  'Europe/London',
-  'Europe/Berlin',
-  'Africa/Addis_Ababa',
-  'Africa/Nairobi',
-  'Africa/Lagos',
-  'America/New_York',
-  'America/Chicago',
-  'America/Los_Angeles',
-  'Asia/Dubai',
-  'Asia/Kolkata',
-  'Asia/Tokyo',
-  'Australia/Sydney',
-];
-
-const LOCALE_LABELS: Record<(typeof SUPPORTED_LOCALES)[number], string> = {
-  'en-US': 'English (United States) — 1,234.56',
-  'en-GB': 'English (United Kingdom) — 1,234.56',
-  'sq-AL': 'Albanian (Albania) — 1 234,56',
-};
 
 /** The fields this form owns. Branding is deliberately not among them. */
 type FormState = Pick<

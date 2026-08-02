@@ -56,6 +56,10 @@ const superAdminNavItems: NavItem[] = [
   // /api/tenants/users, a SUPER_ADMIN route with no :tenantSlug, so it does not
   // reintroduce any of the dead tenant-scoped links TD-008 removed.
   { id: 'people', label: 'People', icon: 'group' },
+  // Platform-wide defaults + bulk apply to selected tenants — reads/writes
+  // /api/platform-settings and /api/tenants/bulk-settings, both SUPER_ADMIN
+  // routes with no :tenantSlug, same rationale as People above.
+  { id: 'setting', label: 'Settings', icon: 'settings' },
 ];
 
 /** Stock management is the one item legitimately gated on the staff warehouse. */

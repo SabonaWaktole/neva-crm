@@ -18,11 +18,18 @@ import { DATE_FORMATS, SUPPORTED_LOCALES, SUPPORTED_LANGUAGES } from '../../../.
 const SUPPORTED_CURRENCIES = new Set(Intl.supportedValuesOf('currency'));
 const SUPPORTED_TIMEZONES = new Set(Intl.supportedValuesOf('timeZone'));
 
-const currency = z
+/**
+ * Exported so the platform-settings schemas (platform defaults, and the
+ * platform console's bulk apply to selected tenants) validate currency and
+ * timezone against the exact same tables rather than a second
+ * `Intl.supportedValuesOf` computation that could theoretically drift if the
+ * two ever imported different Node builds.
+ */
+export const currency = z
   .string()
   .refine((v) => SUPPORTED_CURRENCIES.has(v), { message: 'Unknown currency code.' });
 
-const timezone = z
+export const timezone = z
   .string()
   .refine((v) => SUPPORTED_TIMEZONES.has(v), { message: 'Unknown timezone.' });
 

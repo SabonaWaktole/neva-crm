@@ -114,6 +114,32 @@ export class PrismaTenantRepository implements ITenantRepository {
     await this.prisma.tenant.update({ where: { id }, data });
   }
 
+  async updateSettingsForMany(
+    tenantIds: string[],
+    settings: Omit<TenantSettingsUpdate, 'name'>
+  ): Promise<number> {
+    const data: Omit<TenantSettingsUpdate, 'name'> = {};
+    if (settings.requiresQuotationApproval !== undefined) {
+      data.requiresQuotationApproval = settings.requiresQuotationApproval;
+    }
+    if (settings.currency !== undefined) data.currency = settings.currency;
+    if (settings.locale !== undefined) data.locale = settings.locale;
+    if (settings.timezone !== undefined) data.timezone = settings.timezone;
+    if (settings.dateFormat !== undefined) data.dateFormat = settings.dateFormat;
+    if (settings.defaultLanguage !== undefined) data.defaultLanguage = settings.defaultLanguage;
+
+    if (Object.keys(data).length === 0 || tenantIds.length === 0) return 0;
+
+    // One UPDATE ... WHERE id IN (...) statement — atomic by construction, with
+    // no explicit transaction wrapper needed. Either every matched row gets the
+    // new values or (on a DB-level failure) none do.
+    const result = await this.prisma.tenant.updateMany({
+      where: { id: { in: tenantIds } },
+      data,
+    });
+    return result.count;
+  }
+
   async setSubscriptionStatus(id: string, status: SubscriptionStatus): Promise<void> {
     await this.prisma.tenant.update({ where: { id }, data: { subscriptionStatus: status } });
   }

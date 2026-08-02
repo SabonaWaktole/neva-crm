@@ -34,6 +34,12 @@ import { CreateTenantWithOwnerUseCase } from '@tenant/application/use-cases/Crea
 import { SetTenantSubscriptionStatusUseCase } from '@tenant/application/use-cases/SetTenantSubscriptionStatusUseCase';
 import { EnterTenantUseCase } from '@tenant/application/use-cases/EnterTenantUseCase';
 import { ExitTenantUseCase } from '@tenant/application/use-cases/ExitTenantUseCase';
+import { PrismaPlatformSettingsRepository } from '../settings/infrastructure/PrismaPlatformSettingsRepository';
+import { IPlatformSettingsRepository } from '../settings/domain/IPlatformSettingsRepository';
+import { GetPlatformSettingsUseCase } from '../settings/application/use-cases/GetPlatformSettingsUseCase';
+import { UpdatePlatformSettingsUseCase } from '../settings/application/use-cases/UpdatePlatformSettingsUseCase';
+import { BulkUpdateTenantSettingsUseCase } from '../settings/application/use-cases/BulkUpdateTenantSettingsUseCase';
+import { createPlatformSettingsRouter } from '../settings/interfaces/http/routes/platformSettingsRoutes';
 import { SubscriptionStatus } from '@tenant/domain/enums/SubscriptionStatus';
 import { ITenantProvisioningTransaction } from '@tenant/application/ports/ITenantProvisioningTransaction';
 import { IUserRepository } from '@auth/domain/repositories/IUserRepository';
@@ -77,6 +83,7 @@ export interface AppDependencies {
    * that actually binds its repositories to the transaction.
    */
   tenantProvisioningTransaction: ITenantProvisioningTransaction;
+  platformSettingsRepository: IPlatformSettingsRepository;
   integrationRepository?: any;
 }
 
@@ -118,6 +125,8 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const emailSender = overrides?.emailSender ?? new EmailJsSender();
   const tenantProvisioningTransaction =
     overrides?.tenantProvisioningTransaction ?? new PrismaTenantProvisioningTransaction();
+  const platformSettingsRepository =
+    overrides?.platformSettingsRepository ?? new PrismaPlatformSettingsRepository();
 
   // Use Cases
   //
@@ -126,8 +135,12 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   // /api/tenants is now the only way a workspace comes into existence.
   const createTenantWithOwnerUseCase = new CreateTenantWithOwnerUseCase(
     tenantProvisioningTransaction,
-    passwordHasher
+    passwordHasher,
+    platformSettingsRepository
   );
+  const getPlatformSettingsUseCase = new GetPlatformSettingsUseCase(platformSettingsRepository);
+  const updatePlatformSettingsUseCase = new UpdatePlatformSettingsUseCase(platformSettingsRepository);
+  const bulkUpdateTenantSettingsUseCase = new BulkUpdateTenantSettingsUseCase(tenantRepository);
   const loginUseCase = new LoginUseCase(userRepository, tenantRepository, passwordHasher, tokenService);
   const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher);
   const getPlatformUsersUseCase = new GetPlatformUsersUseCase(userRepository);
@@ -233,9 +246,21 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
     enterTenantUseCase,
     createUserUseCase,
     getPlatformUsersUseCase,
+    bulkUpdateTenantSettingsUseCase,
     tokenService,
   });
   app.use('/api/tenants', tenantRoutes);
+
+  // Platform-wide default settings — applied only at the moment a NEW
+  // workspace is provisioned (see CreateTenantWithOwnerUseCase above). Mounted
+  // alongside /api/tenants for the same reason: platform-level, not scoped to
+  // any single tenant.
+  const platformSettingsRoutes = createPlatformSettingsRouter({
+    getPlatformSettingsUseCase,
+    updatePlatformSettingsUseCase,
+    tokenService,
+  });
+  app.use('/api/platform-settings', platformSettingsRoutes);
 
   // Dashboard Routes
   // NOTE: /api/:tenantSlug/dashboard DOES have a :tenantSlug prefix because dashboard metrics and feeds

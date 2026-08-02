@@ -8,6 +8,7 @@ import { useNavigation } from '../../hooks/useNavigation';
 import { SuperAdminDashboard } from '../dashboard/SuperAdminDashboard';
 import { TenantsPage } from '../admin/TenantsPage';
 import { PeoplePage } from '../admin/PeoplePage';
+import { PlatformSettingsPage } from '../admin/PlatformSettingsPage';
 
 export const SuperAdminShell = () => {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ export const SuperAdminShell = () => {
     <AppLayout
       userName={userName}
       onLogout={handleLogout}
-      onSettingsClick={() => navigate('/settings')}
+      onSettingsClick={() => navigate('/admin/setting')}
       sidebar={
         <Sidebar 
           orgName="Neva CRM Platform" 
@@ -52,6 +53,7 @@ export const SuperAdminShell = () => {
         <Route path="/dashboard" element={<SuperAdminDashboard />} />
         <Route path="/tenants" element={<TenantsPage />} />
         <Route path="/people" element={<PeoplePage />} />
+        <Route path="/setting" element={<PlatformSettingsPage />} />
         {/*
           Every sidebar link this shell offers now resolves to a route defined
           here. Anything else lands on the dashboard rather than rendering an
