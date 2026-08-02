@@ -326,8 +326,15 @@ export const router = createBrowserRouter([
       },
     ],
   },
+  /*
+   * `/admin/*`, not `/admin`: SuperAdminShell renders its own nested <Routes>
+   * for /dashboard, /tenants and /people. Without the wildcard, the top-level
+   * router only matches the bare `/admin` path exactly — a request for
+   * `/admin/tenants` never reaches SuperAdminShell at all and falls through to
+   * the catch-all 404 below.
+   */
   {
-    path: '/admin',
+    path: '/admin/*',
     element: (
       <ProtectedRoute>
         <RoleGuard allowedRoles={['SUPER_ADMIN']}>

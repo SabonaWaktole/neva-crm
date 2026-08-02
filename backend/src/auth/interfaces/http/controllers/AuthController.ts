@@ -129,6 +129,27 @@ export class AuthController {
         return res.status(401).json({ error: 'This account has been deactivated.' });
       }
 
+      /*
+       * While a platform administrator is managing a workspace, the SESSION and
+       * the USER RECORD disagree, and the session is what the app must render.
+       *
+       * The record says `role: SUPER_ADMIN, tenantId: null` — that is who they
+       * are on the platform. The token says `role: BUSINESS_OWNER` and names the
+       * workspace they entered — that is what this session can actually do, and
+       * it is what every route already enforces. Reporting the record here sent
+       * the SPA the platform sidebar and no workspace branding while the URL sat
+       * on /:tenantSlug, so the console rendered inside a client's workspace
+       * with none of that workspace's currency, timezone or logo.
+       *
+       * Only the impersonation case is overridden. For an ordinary session the
+       * record is still preferred, deliberately: it is the fresher of the two,
+       * so an owner demoted to STAFF mid-session has the UI downgraded on their
+       * next load rather than waiting for the token to expire (TD-010).
+       */
+      const isImpersonating = Boolean(req.user.impersonatorId);
+      const effectiveRole = isImpersonating ? req.user.role : user.role;
+      const effectiveTenantId = isImpersonating ? req.user.tenantId : user.tenantId;
+
       // Media URLs are read straight from Prisma rather than through the User
       // entity: they are presentation-only strings with no domain behaviour,
       // and threading them through the entity would mean touching its
@@ -142,9 +163,9 @@ export class AuthController {
           where: { id: user.id },
           select: { avatarUrl: true, coverImageUrl: true },
         }),
-        user.tenantId
+        effectiveTenantId
           ? prisma.tenant.findUnique({
-              where: { id: user.tenantId },
+              where: { id: effectiveTenantId },
               // currency and locale ride along with the branding for the same
               // reason: the money formatter is used on nearly every page, and
               // making each one fetch settings separately would be a round trip
@@ -189,8 +210,9 @@ export class AuthController {
           firstName: user.firstName,
           lastName: user.lastName,
           phone: user.phone,
-          role: user.role,
-          tenantId: user.tenantId,
+          // Both from the session while impersonating — see effectiveRole above.
+          role: effectiveRole,
+          tenantId: effectiveTenantId,
           tenantSlug: req.user.tenantSlug,
           warehouseId: user.warehouseId,
           avatarUrl: media?.avatarUrl ?? null,
