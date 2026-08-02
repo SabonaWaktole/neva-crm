@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Rocket,
   UserX,
+  Building2,
   AlertCircle,
   Plus,
   Banknote
@@ -35,6 +36,24 @@ const ACTIVITY_PRESENTATION: Record<
     icon: <Rocket size={20} />,
     color: 'var(--color-primary)',
     bg: 'var(--color-primary-fixed)',
+  },
+  TENANT_DELETED: {
+    title: 'Tenant Deleted',
+    icon: <Building2 size={20} />,
+    color: 'var(--color-error)',
+    bg: 'var(--color-error-container)',
+  },
+  TENANT_SUSPENDED: {
+    title: 'Tenant Suspended',
+    icon: <AlertCircle size={20} />,
+    color: 'var(--color-error)',
+    bg: 'var(--color-error-container)',
+  },
+  TENANT_REACTIVATED: {
+    title: 'Tenant Reactivated',
+    icon: <CheckCircle2 size={20} />,
+    color: 'var(--color-success)',
+    bg: 'var(--color-success-container)',
   },
   USER_SUSPENDED: {
     title: 'User Suspended',
@@ -67,6 +86,12 @@ const describeActivity = (event: PlatformActivityEvent): string => {
   switch (event.action) {
     case 'TENANT_CREATED':
       return `"${meta.companyName ?? 'A new workspace'}" was provisioned.`;
+    case 'TENANT_DELETED':
+      return `"${meta.companyName ?? 'A workspace'}" was permanently deleted.`;
+    case 'TENANT_SUSPENDED':
+      return `"${meta.companyName ?? 'A workspace'}" was suspended.`;
+    case 'TENANT_REACTIVATED':
+      return `"${meta.companyName ?? 'A workspace'}" was reactivated.`;
     case 'USER_SUSPENDED':
       return `${meta.targetEmail ?? 'An account'} was suspended.`;
     case 'USER_REACTIVATED':

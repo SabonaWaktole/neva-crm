@@ -255,6 +255,7 @@ export function createTenantRouter(deps: TenantRouterDeps): Router {
 
         const tenant = await useCase.execute({
           callerRole,
+          callerId: req.user?.userId,
           tenantId: String(req.params.id),
         });
         res.json({ tenant: toResponse(tenant) });
@@ -666,12 +667,13 @@ export function createTenantRouter(deps: TenantRouterDeps): Router {
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const callerRole = callerRoleOf(req);
-        if (!callerRole) {
+        if (!callerRole || !req.user) {
           return res.status(401).json({ error: 'Access denied. No token provided.' });
         }
 
         await deleteTenantUseCase.execute({
           callerRole,
+          callerId: req.user.userId,
           tenantId: String(req.params.id),
           confirmSlug: req.body.confirmSlug,
         });

@@ -4,9 +4,12 @@ import { UserRole } from '../../../auth/domain/enums/UserRole';
 import { UnauthorizedError } from '../../../auth/domain/errors';
 import { TenantNotFoundError } from '../../domain/errors';
 import { Tenant } from '../../domain/entities/Tenant';
+import { IAuditLogger } from '../../../shared/application/ports/IAuditLogger';
 
 export interface SetTenantSubscriptionStatusDTO {
   callerRole: string;
+  /** Optional only so call sites that predate audit logging keep compiling; omit and no entry is written. */
+  callerId?: string;
   tenantId: string;
 }
 
@@ -27,7 +30,8 @@ export interface SetTenantSubscriptionStatusDTO {
 export class SetTenantSubscriptionStatusUseCase {
   constructor(
     private readonly tenantRepo: ITenantRepository,
-    private readonly targetStatus: SubscriptionStatus
+    private readonly targetStatus: SubscriptionStatus,
+    private readonly auditLogger?: IAuditLogger
   ) {}
 
   async execute(dto: SetTenantSubscriptionStatusDTO): Promise<Tenant> {
@@ -59,6 +63,18 @@ export class SetTenantSubscriptionStatusUseCase {
     }
 
     await this.tenantRepo.setSubscriptionStatus(dto.tenantId, this.targetStatus);
+
+    if (dto.callerId) {
+      await this.auditLogger?.record({
+        actorUserId: dto.callerId,
+        actorRole: dto.callerRole,
+        action: this.targetStatus === SubscriptionStatus.SUSPENDED ? 'TENANT_SUSPENDED' : 'TENANT_REACTIVATED',
+        targetType: 'TENANT',
+        targetId: dto.tenantId,
+        tenantId: dto.tenantId,
+        metadata: { companyName: tenant.name, urlSlug: tenant.urlSlug },
+      });
+    }
 
     // Re-read rather than mutating the entity in memory, so the caller receives
     // what the database actually holds.
