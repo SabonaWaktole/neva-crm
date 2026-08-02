@@ -17,7 +17,7 @@ import { Button } from '../../components/ui/Button/Button';
 import { KPICard } from '../../components/ui/KPICard';
 import { TenantManagementTable } from '../../components/widgets/TenantManagementTable';
 import { TimelineItem } from '../../components/ui/TimelineItem';
-import { useTenants, usePlatformActivity, useGlobalMrr, useSystemHealth } from '../../hooks/useDashboard';
+import { useTenants, usePlatformActivity, useGlobalMrr, useSystemHealth, useSystemMetrics } from '../../hooks/useDashboard';
 import type { PlatformActivityEvent } from '../../services/dashboardService';
 
 /**
@@ -129,6 +129,7 @@ export const SuperAdminDashboard = () => {
   const { events: activityEvents, isLoading: isLoadingActivity } = usePlatformActivity();
   const { mrr, isLoading: isLoadingMrr } = useGlobalMrr();
   const { health, isLoading: isLoadingHealth } = useSystemHealth();
+  const { metrics, isLoading: isLoadingMetrics } = useSystemMetrics();
 
   return (
     <div className={styles.dashboardContainer}>
@@ -241,18 +242,10 @@ export const SuperAdminDashboard = () => {
       </div>
 
       {/*
-        System Latency Visualizer (PLACEHOLDER).
-
-        This panel already carried the "Coming in Phase 5" overlay, but the
-        overlay is transparent, so the figures beneath it stayed fully legible:
-        a Super Admin read "24ms" and "14.2k/s" as live platform telemetry with
-        a small pill floating over them. A badge does not neutralise a specific
-        number rendered next to a live-looking pulse dot.
-
-        The values are now the same "---" this page's own KPI cards use for
-        their unimplemented metrics, so the panel shows its shape without
-        asserting a measurement. The bars below remain decorative; they carry no
-        readable figure. Wire to real telemetry to replace both. TD-013.
+        Backed by GetSystemMetricsUseCase (/api/tenants/metrics), which reads
+        this process's own request timings — not a synthesized figure. Polls
+        every 5s (see useSystemMetrics) so "real-time" is a live read, not the
+        moment the page loaded. TD-013.
       */}
       <div className={styles.latencyVisualizerWrapper}>
         <div className={styles.latencyVisualizer}>
@@ -260,37 +253,33 @@ export const SuperAdminDashboard = () => {
             <div>
               <p className={styles.latencyLabel}>{t('superAdmin.globalLatency')}</p>
               <div className={styles.latencyValueGroup}>
-                <span className={styles.latencyValue}>{PLACEHOLDER_VALUE}</span>
+                <span className={styles.pulseDot}></span>
+                <span className={styles.latencyValue}>
+                  {isLoadingMetrics || !metrics ? PLACEHOLDER_VALUE : `${metrics.avgLatencyMs}ms`}
+                </span>
               </div>
             </div>
             <div className={styles.latencyDivider}></div>
             <div>
               <p className={styles.latencyLabel}>{t('superAdmin.activeRequests')}</p>
-              <span className={styles.latencyValue}>{PLACEHOLDER_VALUE}</span>
+              <span className={styles.latencyValue}>
+                {isLoadingMetrics || !metrics ? PLACEHOLDER_VALUE : `${metrics.requestsPerSecond}/s`}
+              </span>
             </div>
           </div>
           <div className={styles.trafficChart}>
-             {/* Fake CSS bars */}
              <div className={styles.chartBars}>
-               <div className={styles.bar} style={{ height: '50%', opacity: 0.4 }}></div>
-               <div className={styles.bar} style={{ height: '75%', opacity: 0.6 }}></div>
-               <div className={styles.bar} style={{ height: '66%', opacity: 0.4 }}></div>
-               <div className={styles.bar} style={{ height: '100%', opacity: 1 }}></div>
-               <div className={styles.bar} style={{ height: '50%', opacity: 0.5 }}></div>
-               <div className={styles.bar} style={{ height: '80%', opacity: 0.8 }}></div>
-               <div className={styles.bar} style={{ height: '33%', opacity: 0.4 }}></div>
-               <div className={styles.bar} style={{ height: '66%', opacity: 1 }}></div>
+               {(metrics?.buckets ?? Array(8).fill(0)).map((count, index) => {
+                 const max = Math.max(...(metrics?.buckets ?? [0]), 1);
+                 const heightPct = count > 0 ? Math.max((count / max) * 100, 10) : 3;
+                 return <div key={index} className={styles.bar} style={{ height: `${heightPct}%` }}></div>;
+               })}
              </div>
              <span className={styles.chartLabel}>{t('superAdmin.realtimeTraffic')}</span>
           </div>
         </div>
-        
-        {/* Overlay to indicate this is a placeholder */}
-        <div className={styles.placeholderOverlay}>
-           <div className={styles.placeholderBadge}>{t('superAdmin.comingPhase5')}</div>
-        </div>
       </div>
-      
+
     </div>
   );
 };

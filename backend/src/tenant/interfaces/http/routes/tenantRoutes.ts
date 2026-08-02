@@ -3,6 +3,7 @@ import { GetTenantsUseCase } from '../../../application/use-cases/GetTenantsUseC
 import { GetPlatformActivityUseCase } from '../../../application/use-cases/GetPlatformActivityUseCase';
 import { GetGlobalMrrUseCase } from '../../../application/use-cases/GetGlobalMrrUseCase';
 import { GetSystemHealthUseCase } from '../../../application/use-cases/GetSystemHealthUseCase';
+import { GetSystemMetricsUseCase } from '../../../application/use-cases/GetSystemMetricsUseCase';
 import { CreateTenantWithOwnerUseCase } from '../../../application/use-cases/CreateTenantWithOwnerUseCase';
 import { SetTenantSubscriptionStatusUseCase } from '../../../application/use-cases/SetTenantSubscriptionStatusUseCase';
 import { EnterTenantUseCase } from '../../../application/use-cases/EnterTenantUseCase';
@@ -78,6 +79,7 @@ export interface TenantRouterDeps {
   getPlatformActivityUseCase: GetPlatformActivityUseCase;
   getGlobalMrrUseCase: GetGlobalMrrUseCase;
   getSystemHealthUseCase: GetSystemHealthUseCase;
+  getSystemMetricsUseCase: GetSystemMetricsUseCase;
   createTenantWithOwnerUseCase: CreateTenantWithOwnerUseCase;
   suspendTenantUseCase: SetTenantSubscriptionStatusUseCase;
   reactivateTenantUseCase: SetTenantSubscriptionStatusUseCase;
@@ -101,6 +103,7 @@ export function createTenantRouter(deps: TenantRouterDeps): Router {
     getPlatformActivityUseCase,
     getGlobalMrrUseCase,
     getSystemHealthUseCase,
+    getSystemMetricsUseCase,
     createTenantWithOwnerUseCase,
     suspendTenantUseCase,
     reactivateTenantUseCase,
@@ -333,6 +336,28 @@ export function createTenantRouter(deps: TenantRouterDeps): Router {
 
       const health = await getSystemHealthUseCase.execute({ callerRole });
       res.json(health);
+    } catch (error) {
+      if (error instanceof UnauthorizedError) {
+        return res.status(403).json({ error: error.message });
+      }
+      next(error);
+    }
+  });
+
+  /**
+   * SUPER_ADMIN only: live request latency and traffic, for the dashboard's
+   * Global Latency / Active Requests / Real-time Traffic panel. Registered
+   * before `/:id/...` for the same route-ordering reason `/activity` above is.
+   */
+  router.get('/metrics', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const callerRole = callerRoleOf(req);
+      if (!callerRole) {
+        return res.status(401).json({ error: 'Access denied. No token provided.' });
+      }
+
+      const metrics = await getSystemMetricsUseCase.execute({ callerRole });
+      res.json(metrics);
     } catch (error) {
       if (error instanceof UnauthorizedError) {
         return res.status(403).json({ error: error.message });

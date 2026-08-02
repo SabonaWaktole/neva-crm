@@ -11,6 +11,7 @@ import type {
   PlatformActivityEvent,
   GlobalMrr,
   SystemHealth,
+  SystemMetrics,
 } from '../services/dashboardService';
 
 export const useDashboardMetrics = () => {
@@ -171,6 +172,36 @@ export const useSystemHealth = () => {
   }, [fetchHealth]);
 
   return { health, isLoading, error, fetchHealth };
+};
+
+/** Polls every 5s so the traffic panel reflects "right now" rather than the moment the page loaded. */
+const SYSTEM_METRICS_POLL_INTERVAL_MS = 5000;
+
+export const useSystemMetrics = () => {
+  const [metrics, setMetrics] = useState<SystemMetrics | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchSystemMetrics = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await dashboardService.getSystemMetrics();
+      setMetrics(data);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to fetch system metrics');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchSystemMetrics();
+    const intervalId = setInterval(fetchSystemMetrics, SYSTEM_METRICS_POLL_INTERVAL_MS);
+    return () => clearInterval(intervalId);
+  }, [fetchSystemMetrics]);
+
+  return { metrics, isLoading, error, fetchSystemMetrics };
 };
 
 /**
