@@ -42,6 +42,13 @@ export const ProfilePage: React.FC = () => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordMessage, setPasswordMessage] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+
   const isBusinessOwner = user?.role === 'BUSINESS_OWNER';
 
   useEffect(() => {
@@ -98,6 +105,30 @@ export const ProfilePage: React.FC = () => {
       setError(err.response?.data?.error || t('profile.updateFailed'));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordMessage('');
+    setPasswordError('');
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError(t('profile.passwordMismatch'));
+      return;
+    }
+
+    setPasswordLoading(true);
+    try {
+      await authService.changePassword({ currentPassword, newPassword });
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setPasswordMessage(t('profile.passwordChanged'));
+    } catch (err: any) {
+      setPasswordError(err.response?.data?.error || t('profile.passwordChangeFailed'));
+    } finally {
+      setPasswordLoading(false);
     }
   };
 
@@ -228,6 +259,55 @@ export const ProfilePage: React.FC = () => {
               <div className={styles.formActions}>
                 <Button type="submit" variant="primary" isLoading={loading}>
                   {tc('actions.saveChanges')}
+                </Button>
+              </div>
+            </form>
+          </Card>
+
+          <Card padding="lg">
+            <div className={styles.mediaHeader}>
+              <h2 className={styles.mediaTitle}>{t('profile.changePasswordTitle')}</h2>
+              <p className={styles.mediaSubtitle}>{t('profile.changePasswordSubtitle')}</p>
+            </div>
+
+            {passwordMessage && (
+              <div className={`${styles.banner} ${styles.successBanner}`}>
+                {passwordMessage}
+              </div>
+            )}
+            {passwordError && (
+              <div className={`${styles.banner} ${styles.errorBanner}`}>
+                {passwordError}
+              </div>
+            )}
+
+            <form onSubmit={handlePasswordSubmit} className={styles.form}>
+              <TextInput
+                label={t('profile.currentPassword')}
+                type="password"
+                autoComplete="current-password"
+                value={currentPassword}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCurrentPassword(e.target.value)}
+              />
+              <TextInput
+                label={t('profile.newPassword')}
+                type="password"
+                autoComplete="new-password"
+                value={newPassword}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value)}
+              />
+              <TextInput
+                label={t('profile.confirmPassword')}
+                type="password"
+                autoComplete="new-password"
+                value={confirmPassword}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
+              />
+              <p className={styles.helperText}>{t('profile.passwordRequirements')}</p>
+
+              <div className={styles.formActions}>
+                <Button type="submit" variant="primary" isLoading={passwordLoading}>
+                  {t('profile.changePasswordTitle')}
                 </Button>
               </div>
             </form>

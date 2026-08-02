@@ -15,6 +15,7 @@ import { ResetPasswordUseCase } from '@auth/application/use-cases/ResetPasswordU
 import { GetTenantStaffUseCase } from '@auth/application/use-cases/GetTenantStaffUseCase';
 import { GetPendingInvitationsUseCase } from '@auth/application/use-cases/GetPendingInvitationsUseCase';
 import { UpdateUserProfileUseCase } from '@auth/application/use-cases/UpdateUserProfileUseCase';
+import { ChangePasswordUseCase } from '@auth/application/use-cases/ChangePasswordUseCase';
 import { GetUserProfileUseCase } from '@auth/application/use-cases/GetUserProfileUseCase';
 import { UpdateUserRoleUseCase } from '@auth/application/use-cases/UpdateUserRoleUseCase';
 import { CancelInvitationUseCase } from '@auth/application/use-cases/CancelInvitationUseCase';
@@ -193,6 +194,7 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const getTenantStaffUseCase = new GetTenantStaffUseCase(userRepository);
   const getPendingInvitationsUseCase = new GetPendingInvitationsUseCase(invitationRepository);
   const updateUserProfileUseCase = new UpdateUserProfileUseCase(userRepository);
+  const changePasswordUseCase = new ChangePasswordUseCase(userRepository, passwordHasher);
   const getUserProfileUseCase = new GetUserProfileUseCase(userRepository);
   const updateUserRoleUseCase = new UpdateUserRoleUseCase(userRepository);
   const cancelInvitationUseCase = new CancelInvitationUseCase(invitationRepository);
@@ -242,7 +244,8 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
     getDeactivationImpactUseCase,
     reactivateUserUseCase,
     createUserUseCase,
-    exitTenantUseCase
+    exitTenantUseCase,
+    changePasswordUseCase
   );
 
   // Auth Routes

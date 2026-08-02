@@ -11,6 +11,7 @@ import { ResetPasswordUseCase } from '@auth/application/use-cases/ResetPasswordU
 import { GetTenantStaffUseCase } from '@auth/application/use-cases/GetTenantStaffUseCase';
 import { GetPendingInvitationsUseCase } from '@auth/application/use-cases/GetPendingInvitationsUseCase';
 import { UpdateUserProfileUseCase } from '@auth/application/use-cases/UpdateUserProfileUseCase';
+import { ChangePasswordUseCase } from '@auth/application/use-cases/ChangePasswordUseCase';
 import { GetUserProfileUseCase } from '@auth/application/use-cases/GetUserProfileUseCase';
 import { UpdateUserRoleUseCase } from '@auth/application/use-cases/UpdateUserRoleUseCase';
 import { CancelInvitationUseCase } from '@auth/application/use-cases/CancelInvitationUseCase';
@@ -37,7 +38,8 @@ export class AuthController {
     private getDeactivationImpactUseCase?: GetDeactivationImpactUseCase,
     private reactivateUserUseCase?: ReactivateUserUseCase,
     private createUserUseCase?: CreateUserUseCase,
-    private exitTenantUseCase?: ExitTenantUseCase
+    private exitTenantUseCase?: ExitTenantUseCase,
+    private changePasswordUseCase?: ChangePasswordUseCase
   ) {}
 
   loginTenant = async (req: Request, res: Response) => {
@@ -401,6 +403,23 @@ export class AuthController {
         language: req.body.language,
       });
       res.status(200).json({ message: 'Profile updated successfully' });
+    } catch (error: any) {
+      if (error.name === 'UnauthorizedError') {
+        res.status(403).json({ error: error.message });
+      } else {
+        res.status(400).json({ error: error.message });
+      }
+    }
+  };
+
+  changeMyPassword = async (req: Request, res: Response) => {
+    try {
+      await this.changePasswordUseCase!.execute({
+        userId: req.user!.userId,
+        currentPassword: req.body.currentPassword,
+        newPassword: req.body.newPassword,
+      });
+      res.status(200).json({ message: 'Password changed successfully' });
     } catch (error: any) {
       if (error.name === 'UnauthorizedError') {
         res.status(403).json({ error: error.message });

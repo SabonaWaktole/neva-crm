@@ -10,6 +10,7 @@ import { SuperAdminDashboard } from '../dashboard/SuperAdminDashboard';
 import { TenantsPage } from '../admin/TenantsPage';
 import { PeoplePage } from '../admin/PeoplePage';
 import { PlatformSettingsPage } from '../admin/PlatformSettingsPage';
+import { AdminProfilePage } from '../admin/AdminProfilePage';
 
 export const SuperAdminShell = () => {
   const navigate = useNavigate();
@@ -53,6 +54,9 @@ export const SuperAdminShell = () => {
     case '/admin/setting':
       page = <PlatformSettingsPage />;
       break;
+    case '/admin/profile':
+      page = <AdminProfilePage />;
+      break;
     default:
       page = <Navigate to="/admin/dashboard" replace />;
   }
@@ -61,7 +65,10 @@ export const SuperAdminShell = () => {
     <AppLayout
       userName={userName}
       onLogout={handleLogout}
-      onSettingsClick={() => navigate('/admin/setting')}
+      // The header dropdown's "Settings" mirrors the other shells, where it opens
+      // the signed-in user's own profile — not /admin/setting, which is the
+      // platform-wide configuration page reached from the sidebar instead.
+      onSettingsClick={() => navigate('/admin/profile')}
       sidebar={
         <Sidebar 
           orgName="Neva CRM Platform" 
