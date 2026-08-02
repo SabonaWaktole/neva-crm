@@ -328,7 +328,7 @@ export const router = createBrowserRouter([
   },
   /*
    * SuperAdminShell renders its own nested <Routes> for /dashboard, /tenants,
-   * /people and /setting. Those four are listed here explicitly — as well as
+   * /people, /setting and /profile. Those five are listed here explicitly — as well as
    * the wildcard below — because React Router ranks a dynamic segment plus a
    * matching static child (`/:tenantSlug/dashboard`) ABOVE a static segment
    * plus a splat (`/admin/*`): a splat is scored deliberately low so that a
@@ -382,6 +382,16 @@ export const router = createBrowserRouter([
   },
   {
     path: '/admin/setting',
+    element: (
+      <ProtectedRoute>
+        <RoleGuard allowedRoles={['SUPER_ADMIN']}>
+          <SuperAdminShell />
+        </RoleGuard>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/admin/profile',
     element: (
       <ProtectedRoute>
         <RoleGuard allowedRoles={['SUPER_ADMIN']}>

@@ -45,6 +45,7 @@ export const createGlobalAuthRoutes = (
   // Profile endpoints
   router.get('/me', optionalAuthMw, authController.getMe);
   router.put('/me', authMw, validateRequest(authSchemas.updateProfile), authController.updateMe);
+  router.put('/me/password', authMw, validateRequest(authSchemas.changePassword), authController.changeMyPassword);
 
   return router;
 };

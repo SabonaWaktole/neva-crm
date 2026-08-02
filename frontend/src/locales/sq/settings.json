@@ -107,7 +107,16 @@
     "languageHint": "Ndryshon gjuhën e ndërfaqes vetëm për ju. Nuk ndikon në mënyrën se si formatohen datat, numrat ose monedha — ato ndjekin cilësimet rajonale të hapësirës suaj të punës.",
     "updated": "Profili u përditësua me sukses",
     "updateFailed": "Profili nuk u përditësua dot",
-    "photosSubtitle": "Fotoja juaj e profilit shfaqet pranë emrit tuaj në të gjithë hapësirën e punës."
+    "photosSubtitle": "Fotoja juaj e profilit shfaqet pranë emrit tuaj në të gjithë hapësirën e punës.",
+    "changePasswordTitle": "Ndrysho fjalëkalimin",
+    "changePasswordSubtitle": "Përditëso fjalëkalimin që përdoret për hyrje.",
+    "currentPassword": "Fjalëkalimi aktual",
+    "newPassword": "Fjalëkalimi i ri",
+    "confirmPassword": "Konfirmo fjalëkalimin e ri",
+    "passwordRequirements": "Të paktën 8 karaktere, me një shkronjë të madhe, një shkronjë të vogël dhe një numër.",
+    "passwordMismatch": "Fjalëkalimet e reja nuk përputhen",
+    "passwordChanged": "Fjalëkalimi u ndryshua me sukses",
+    "passwordChangeFailed": "Ndryshimi i fjalëkalimit dështoi"
   },
   "team": {
     "title": "Anëtarët e ekipit",

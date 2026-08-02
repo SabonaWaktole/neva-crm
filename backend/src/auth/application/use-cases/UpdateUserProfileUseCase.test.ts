@@ -87,6 +87,27 @@ describe('UpdateUserProfileUseCase', () => {
     });
   });
 
+  it('should allow SUPER_ADMIN to update its own email', async () => {
+    const adminUser = User.create({
+      ...testUser,
+      role: UserRole.SUPER_ADMIN,
+      tenantId: null,
+    });
+    mockUserRepository.findById.mockResolvedValue(adminUser);
+    mockUserRepository.findAnyByEmail.mockResolvedValue(null);
+
+    await useCase.execute({
+      userId: adminUser.id,
+      requestingUserId: adminUser.id,
+      requestingUserRole: UserRole.SUPER_ADMIN,
+      email: 'new-admin@example.com',
+    });
+
+    expect(mockUserRepository.updateProfile).toHaveBeenCalledWith(adminUser.id, {
+      email: 'new-admin@example.com',
+    });
+  });
+
   it('should throw error if BUSINESS_OWNER tries to update to an existing email', async () => {
     const ownerUser = User.create({
       ...testUser,

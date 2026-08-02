@@ -57,4 +57,8 @@ export const authSchemas = {
     // and not the same as omitting the field.
     language: z.enum(SUPPORTED_LANGUAGES).optional().nullable(),
   }),
+  changePassword: z.object({
+    currentPassword: z.string().min(1),
+    newPassword: z.string().min(8).regex(/[A-Z]/).regex(/[a-z]/).regex(/[0-9]/),
+  }),
 };

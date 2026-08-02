@@ -39,6 +39,11 @@ export const authService = {
     return response.data;
   },
 
+  changePassword: async (data: { currentPassword: string; newPassword: string }) => {
+    const response = await apiClient.put('/auth/me/password', data);
+    return response.data;
+  },
+
   logout: async () => {
     // Nothing to clear client-side; the backend clears the httpOnly cookie.
     await apiClient.post('/auth/logout');

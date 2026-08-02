@@ -107,7 +107,16 @@
     "languageHint": "Changes the language of the interface for you only. It does not affect how dates, numbers or currency are formatted — those follow your workspace's regional settings.",
     "updated": "Profile updated successfully",
     "updateFailed": "Failed to update profile",
-    "photosSubtitle": "Your profile photo appears next to your name across the workspace."
+    "photosSubtitle": "Your profile photo appears next to your name across the workspace.",
+    "changePasswordTitle": "Change Password",
+    "changePasswordSubtitle": "Update the password used to sign in.",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm New Password",
+    "passwordRequirements": "At least 8 characters, with an uppercase letter, a lowercase letter, and a number.",
+    "passwordMismatch": "New passwords do not match",
+    "passwordChanged": "Password changed successfully",
+    "passwordChangeFailed": "Failed to change password"
   },
   "team": {
     "title": "Team Members",

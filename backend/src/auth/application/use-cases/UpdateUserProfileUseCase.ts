@@ -33,9 +33,12 @@ export class UpdateUserProfileUseCase {
       throw new UnauthorizedError('You can only update your own profile');
     }
 
-    // Email change restriction: only BUSINESS_OWNER can change email
+    // Email change restriction: only BUSINESS_OWNER and SUPER_ADMIN can change email
     if (input.email && input.email !== userToUpdate.email) {
-      if (input.requestingUserRole !== UserRole.BUSINESS_OWNER) {
+      if (
+        input.requestingUserRole !== UserRole.BUSINESS_OWNER &&
+        input.requestingUserRole !== UserRole.SUPER_ADMIN
+      ) {
         throw new UnauthorizedError('Only Business Owners can change their email address');
       }
 
