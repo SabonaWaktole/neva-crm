@@ -20,19 +20,14 @@ export const CURRENCY_OPTIONS = [
   { code: 'GBP', label: 'GBP — British Pound (£)' },
   { code: 'CAD', label: 'CAD — Canadian Dollar ($)' },
   { code: 'AUD', label: 'AUD — Australian Dollar ($)' },
-  { code: 'ETB', label: 'ETB — Ethiopian Birr (Br)' },
-  { code: 'KES', label: 'KES — Kenyan Shilling (KSh)' },
-  { code: 'NGN', label: 'NGN — Nigerian Naira (₦)' },
-  { code: 'INR', label: 'INR — Indian Rupee (₹)' },
-  { code: 'JPY', label: 'JPY — Japanese Yen (¥)' },
+  { code: 'ALL', label: 'ALL — Albanian Lek (L)' },
 ];
 
 /**
- * A shortlist, not all 418 IANA zones — a dropdown of every zone on earth is
- * unusable. The server validates against the full `Intl.supportedValuesOf`
- * set, so this list can grow with no server change.
+ * A curated fallback, used only if the runtime can't produce the full IANA
+ * set below (see TIMEZONE_OPTIONS).
  */
-export const TIMEZONE_OPTIONS = [
+const TIMEZONE_FALLBACK = [
   'UTC',
   'Europe/Tirane',
   'Europe/London',
@@ -48,6 +43,19 @@ export const TIMEZONE_OPTIONS = [
   'Asia/Tokyo',
   'Australia/Sydney',
 ];
+
+/**
+ * The full IANA timezone set the browser knows about — matches what the
+ * server validates against (`Intl.supportedValuesOf('timeZone')`), so every
+ * zone the server accepts is selectable here. Falls back to a short curated
+ * list on runtimes that don't support `Intl.supportedValuesOf`.
+ */
+export const TIMEZONE_OPTIONS: string[] =
+  typeof Intl.supportedValuesOf === 'function'
+    ? Intl.supportedValuesOf('timeZone').sort((a, b) =>
+        a === 'UTC' ? -1 : b === 'UTC' ? 1 : a.localeCompare(b)
+      )
+    : TIMEZONE_FALLBACK;
 
 export const LOCALE_LABELS: Record<(typeof SUPPORTED_LOCALES)[number], string> = {
   'en-US': 'English (United States) — 1,234.56',
