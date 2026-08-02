@@ -23,6 +23,7 @@ describe('InviteStaffUseCase', () => {
       sendInvitationEmail: jest.fn().mockResolvedValue(undefined),
       sendPasswordResetEmail: jest.fn().mockResolvedValue(undefined),
       sendTransactionalEmail: jest.fn().mockResolvedValue(undefined),
+      sendWorkspaceCreatedEmail: jest.fn().mockResolvedValue(undefined),
     };
 
     useCase = new InviteStaffUseCase(invitationRepository, emailSender);

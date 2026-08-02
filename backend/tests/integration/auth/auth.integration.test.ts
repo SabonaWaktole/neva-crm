@@ -74,6 +74,7 @@ class InMemoryUserRepository implements IUserRepository {
         tenantId: u.tenantId,
         tenantName: null,
         createdAt: u.createdAt,
+        pendingOwnershipTransfer: null,
       })),
       total: matched.length,
     };
@@ -160,6 +161,26 @@ class InMemoryUserRepository implements IUserRepository {
   async countAssignedWork(_userId: string): Promise<{ clients: number; upcomingAppointments: number }> {
     // This double holds no clients or appointments, so there is nothing to count.
     return { clients: 0, upcomingAppointments: 0 };
+  }
+
+  async softDelete(userId: string): Promise<void> {
+    const user = this.users.find(u => u.id === userId);
+    if (user) {
+      const idx = this.users.indexOf(user);
+      this.users[idx] = User.create({
+        id: user.id,
+        email: `deleted-${user.id}@deleted.invalid`,
+        hashedPassword: user.hashedPassword,
+        role: user.role,
+        tenantId: user.tenantId,
+        createdAt: user.createdAt,
+        firstName: null,
+        lastName: null,
+        phone: null,
+        warehouseId: user.warehouseId,
+        isActive: false,
+      });
+    }
   }
 
   // Test helper
@@ -344,6 +365,12 @@ class FakeEmailSender implements IEmailSender {
    */
   async sendTransactionalEmail(to: string, _subject: string, _html: string): Promise<void> {
     this.sentEmails.push({ to, type: 'transactional', token: '' });
+  }
+  async sendWorkspaceCreatedEmail(
+    to: string,
+    _params: { companyName: string; urlSlug: string; ownerPassword: string }
+  ): Promise<void> {
+    this.sentEmails.push({ to, type: 'workspace-created', token: '' });
   }
 
   clear(): void { this.sentEmails = []; }
