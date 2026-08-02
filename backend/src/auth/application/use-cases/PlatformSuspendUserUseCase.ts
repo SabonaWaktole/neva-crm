@@ -98,7 +98,10 @@ export class PlatformSuspendUserUseCase {
       targetType: 'USER',
       targetId: dto.userId,
       tenantId: target.tenantId,
-      metadata: ownershipTransferId ? { ownershipTransferId, newOwnerId: dto.newOwnerId } : undefined,
+      metadata: {
+        targetEmail: target.email,
+        ...(ownershipTransferId ? { ownershipTransferId, newOwnerId: dto.newOwnerId } : {}),
+      },
     });
 
     const updated = await this.userRepository.findById(dto.userId);

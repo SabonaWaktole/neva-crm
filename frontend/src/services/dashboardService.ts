@@ -130,6 +130,17 @@ export interface PlatformSettings extends Required<WorkspaceSettingsFields> {
   updatedAt: string | null;
 }
 
+/** One row of the append-only platform audit log, as the Platform Activity feed consumes it. */
+export interface PlatformActivityEvent {
+  id: string;
+  action: string;
+  targetType: string;
+  targetId: string;
+  tenantId: string | null;
+  metadata?: Record<string, unknown>;
+  createdAt: string;
+}
+
 export const dashboardService = {
   getTenantClientMetrics: async (tenantSlug: string): Promise<DashboardMetrics> => {
     const response = await apiClient.get<DashboardMetrics>(`/${tenantSlug}/dashboard/metrics`);
@@ -149,6 +160,12 @@ export const dashboardService = {
     // Note: This endpoint is mounted at the root /api/tenants, not /api/:tenantSlug/...
     const response = await apiClient.get<PaginatedTenants>(`/tenants`, { params });
     return response.data;
+  },
+
+  getPlatformActivity: async (take?: number): Promise<PlatformActivityEvent[]> => {
+    const params = take ? { take } : {};
+    const response = await apiClient.get<{ items: PlatformActivityEvent[] }>(`/tenants/activity`, { params });
+    return response.data.items;
   },
 
   /*

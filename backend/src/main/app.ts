@@ -271,9 +271,12 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   // operation used by SUPER_ADMIN to list all tenants across the system. It is not scoped to a single tenant.
   const { GetTenantsUseCase } = require('../tenant/application/use-cases/GetTenantsUseCase');
   const getTenantsUseCase = new GetTenantsUseCase(tenantRepository);
+  const { GetPlatformActivityUseCase } = require('../tenant/application/use-cases/GetPlatformActivityUseCase');
+  const getPlatformActivityUseCase = new GetPlatformActivityUseCase(auditLogger);
   const { createTenantRouter } = require('../tenant/interfaces/http/routes/tenantRoutes');
   const tenantRoutes = createTenantRouter({
     getTenantsUseCase,
+    getPlatformActivityUseCase,
     createTenantWithOwnerUseCase,
     // Same class, opposite directions. The target status is fixed here at
     // construction so no request body can ever choose it.
@@ -296,6 +299,7 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
     bulkUpdateTenantSettingsUseCase,
     tokenService,
     emailSender,
+    auditLogger,
   });
   app.use('/api/tenants', tenantRoutes);
 

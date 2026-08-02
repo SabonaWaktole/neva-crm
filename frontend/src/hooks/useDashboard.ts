@@ -8,6 +8,7 @@ import type {
   CreateTenantInput,
   PlatformUser,
   OwnershipTransferCandidate,
+  PlatformActivityEvent,
 } from '../services/dashboardService';
 
 export const useDashboardMetrics = () => {
@@ -93,6 +94,31 @@ export const useTenants = (skip: number = 0, take: number = 50) => {
   }, [skip, take, fetchTenants]);
 
   return { tenants, total, isLoading, error, fetchTenants };
+};
+
+export const usePlatformActivity = (take: number = 10) => {
+  const [events, setEvents] = useState<PlatformActivityEvent[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchActivity = useCallback(async (fetchTake: number) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await dashboardService.getPlatformActivity(fetchTake);
+      setEvents(data);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to fetch platform activity');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchActivity(take);
+  }, [take, fetchActivity]);
+
+  return { events, isLoading, error, fetchActivity };
 };
 
 /**
