@@ -72,6 +72,24 @@ export interface PlatformUser {
   /** Null for a platform administrator, who belongs to no workspace. */
   tenantName: string | null;
   createdAt: string;
+  /**
+   * Set only when this row is the ORIGINAL owner of an unresolved
+   * suspension-time ownership transfer. Reactivating them requires the
+   * restore/keep choice rather than a plain confirm — see `reactivateUser`.
+   */
+  pendingOwnershipTransfer: { actingOwnerName: string } | null;
+}
+
+/** A staff member eligible to become the new Business Owner of their workspace. */
+export interface OwnershipTransferCandidate {
+  id: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  role: 'SUPER_ADMIN' | 'BUSINESS_OWNER' | 'STAFF';
+  isActive: boolean;
+  tenantId: string | null;
+  createdAt: string;
 }
 
 export interface PlatformUserFilters {
@@ -156,6 +174,15 @@ export const dashboardService = {
   },
 
   /**
+   * Permanently deletes a workspace: every row and every uploaded file that
+   * belongs to it. `confirmSlug` must equal the workspace's own `urlSlug` —
+   * enforced server-side, not just a client-side gate.
+   */
+  deleteTenant: async (tenantId: string, confirmSlug: string): Promise<void> => {
+    await apiClient.delete(`/tenants/${tenantId}`, { data: { confirmSlug } });
+  },
+
+  /**
    * Enter a workspace and administer it as its owner.
    *
    * Replaces the session cookie server-side, so the caller must re-read
@@ -200,6 +227,57 @@ export const dashboardService = {
       input
     );
     return response.data.user;
+  },
+
+  /**
+   * Platform Admin user lifecycle. All four are SUPER_ADMIN-only and, like the
+   * tenant actions above, live at the root /api/tenants/users rather than
+   * under /api/:tenantSlug — they act on ANY account across workspaces.
+   */
+
+  /** Active staff eligible to become the new Business Owner of `userId`'s workspace. */
+  getOwnershipTransferCandidates: async (userId: string): Promise<OwnershipTransferCandidate[]> => {
+    const response = await apiClient.get<{ items: OwnershipTransferCandidate[] }>(
+      `/tenants/users/${userId}/ownership-transfer-candidates`
+    );
+    return response.data.items;
+  },
+
+  /**
+   * Idempotent server-side. `newOwnerId` is required only when the target is
+   * a Business Owner with other active staff — the server responds 409 with
+   * `code: 'OWNERSHIP_TRANSFER_REQUIRED'` when it's missing.
+   */
+  suspendUser: async (userId: string, newOwnerId?: string): Promise<PlatformUser> => {
+    const response = await apiClient.patch<{ user: PlatformUser }>(
+      `/tenants/users/${userId}/suspend`,
+      { newOwnerId }
+    );
+    return response.data.user;
+  },
+
+  /**
+   * Idempotent server-side. `restoreOwnership` is required only when the
+   * target has an unresolved ownership transfer from their suspension — the
+   * server responds 409 with `code: 'RESTORE_CHOICE_REQUIRED'` when it's
+   * missing.
+   */
+  reactivateUser: async (userId: string, restoreOwnership?: boolean): Promise<PlatformUser> => {
+    const response = await apiClient.patch<{ user: PlatformUser }>(
+      `/tenants/users/${userId}/reactivate`,
+      { restoreOwnership }
+    );
+    return response.data.user;
+  },
+
+  /**
+   * Permanently (soft-)deletes an account. `confirmEmail` must equal the
+   * target's own current email — enforced server-side, not just a
+   * client-side gate. `newOwnerId` is required only when the target is a
+   * Business Owner with other active staff.
+   */
+  deleteUser: async (userId: string, confirmEmail: string, newOwnerId?: string): Promise<void> => {
+    await apiClient.delete(`/tenants/users/${userId}`, { data: { confirmEmail, newOwnerId } });
   },
 
   /**

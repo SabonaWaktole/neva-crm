@@ -82,6 +82,7 @@ model Tenant {
   createdAt DateTime @default(now())
 
   users                  User[]
+  ownershipTransfers     OwnershipTransfer[]
   invitations            Invitation[]
   clients                Client[]
   customFieldDefinitions CustomFieldDefinition[]
@@ -195,6 +196,12 @@ model User {
   // Client.lastUpdatedByUserId, ...), so RESTRICT blocks it and cascading would
   // destroy financial and audit history. Same reasoning as ProductInUseError.
   isActive       Boolean  @default(true)
+  // Platform Admin soft-delete. Set together with isActive=false, but distinct
+  // from ordinary suspension: a deleted user's email/name/phone are also
+  // anonymized (see DeleteUserUseCase), and there is no route back from this —
+  // unlike suspension, which reactivation reverses. The row survives, never
+  // hard-deleted, for the same seven-FK-RESTRICT reason isActive does.
+  deletedAt      DateTime?
   // Interface language override. NULL means "follow the workspace default" —
   // distinct from having explicitly chosen English.
   language       String?
@@ -219,6 +226,59 @@ model User {
   notifications        Notification[]           @relation("NotificationRecipient")
   causedNotifications  Notification[]           @relation("NotificationActor")
   sentInvitations      Invitation[]             @relation("InvitationSender")
+  ownershipTransfersAsOriginalOwner OwnershipTransfer[] @relation("OwnershipTransferOriginalOwner")
+  ownershipTransfersAsActingOwner   OwnershipTransfer[] @relation("OwnershipTransferActingOwner")
+}
+
+/// Records a temporary Business-Owner promotion created when a Platform Admin
+/// suspends a Business Owner who still has active staff (see SuspendUserUseCase).
+/// Reactivation reads the ACTIVE row to offer "restore original ownership" vs
+/// "keep current ownership" (ReactivateUserUseCase), then resolves it to
+/// RESTORED or KEPT — a terminal state, never reused.
+///
+/// Only created for suspension. A Business Owner deletion that transfers
+/// ownership is permanent by construction (the original owner is gone), so it
+/// has no row here — just an AuditLog entry.
+model OwnershipTransfer {
+  id                        String    @id
+  tenantId                  String
+  originalOwnerId           String
+  actingOwnerId             String
+  // The acting owner's role/warehouse before promotion, so "restore" can put
+  // them back exactly where they were.
+  previousActingRole        String
+  previousActingWarehouseId String?
+  status                    String    // 'ACTIVE' | 'RESTORED' | 'KEPT'
+  createdAt                 DateTime  @default(now())
+  createdByUserId           String
+  resolvedAt                DateTime?
+  resolvedByUserId          String?
+
+  tenant        Tenant @relation(fields: [tenantId], references: [id])
+  originalOwner User   @relation("OwnershipTransferOriginalOwner", fields: [originalOwnerId], references: [id])
+  actingOwner   User   @relation("OwnershipTransferActingOwner", fields: [actingOwnerId], references: [id])
+
+  @@index([originalOwnerId, status])
+  @@index([actingOwnerId, status])
+}
+
+/// Append-only record of platform-administrative actions. Deliberately has no
+/// foreign keys: an audit trail must survive the very rows it describes (a
+/// soft-deleted user's history should not become unreadable), so actor/target
+/// ids are plain strings rather than relations.
+model AuditLog {
+  id          String   @id
+  actorUserId String
+  actorRole   String
+  action      String   // e.g. 'USER_SUSPENDED', 'USER_REACTIVATED', 'USER_DELETED', 'OWNERSHIP_TRANSFERRED'
+  targetType  String   // 'USER'
+  targetId    String
+  tenantId    String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  @@index([targetType, targetId])
+  @@index([tenantId])
 }
 
 model Invitation {

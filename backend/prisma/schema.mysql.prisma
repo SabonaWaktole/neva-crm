@@ -69,6 +69,7 @@ model Tenant {
   createdAt DateTime @default(now())
 
   users                  User[]
+  ownershipTransfers     OwnershipTransfer[]
   invitations            Invitation[]
   clients                Client[]
   customFieldDefinitions CustomFieldDefinition[]
@@ -170,6 +171,9 @@ model User {
   // Client.lastUpdatedByUserId, ...), so RESTRICT blocks it and cascading would
   // destroy financial and audit history. Same reasoning as ProductInUseError.
   isActive       Boolean  @default(true)
+  // Platform Admin soft-delete. See the Postgres schema for the full rationale;
+  // this model must stay in step with it field-for-field.
+  deletedAt      DateTime?
   // Interface language override. NULL means "follow the workspace default" —
   // distinct from having explicitly chosen English.
   language       String?
@@ -194,6 +198,48 @@ model User {
   notifications        Notification[]           @relation("NotificationRecipient")
   causedNotifications  Notification[]           @relation("NotificationActor")
   sentInvitations      Invitation[]             @relation("InvitationSender")
+  ownershipTransfersAsOriginalOwner OwnershipTransfer[] @relation("OwnershipTransferOriginalOwner")
+  ownershipTransfersAsActingOwner   OwnershipTransfer[] @relation("OwnershipTransferActingOwner")
+}
+
+/// See the Postgres schema for the full rationale; this model must stay in
+/// step with it field-for-field.
+model OwnershipTransfer {
+  id                        String    @id
+  tenantId                  String
+  originalOwnerId           String
+  actingOwnerId             String
+  previousActingRole        String
+  previousActingWarehouseId String?
+  status                    String
+  createdAt                 DateTime  @default(now())
+  createdByUserId           String
+  resolvedAt                DateTime?
+  resolvedByUserId          String?
+
+  tenant        Tenant @relation(fields: [tenantId], references: [id])
+  originalOwner User   @relation("OwnershipTransferOriginalOwner", fields: [originalOwnerId], references: [id])
+  actingOwner   User   @relation("OwnershipTransferActingOwner", fields: [actingOwnerId], references: [id])
+
+  @@index([originalOwnerId, status])
+  @@index([actingOwnerId, status])
+}
+
+/// See the Postgres schema for the full rationale; this model must stay in
+/// step with it field-for-field.
+model AuditLog {
+  id          String   @id
+  actorUserId String
+  actorRole   String
+  action      String
+  targetType  String
+  targetId    String
+  tenantId    String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  @@index([targetType, targetId])
+  @@index([tenantId])
 }
 
 model Invitation {

@@ -1,5 +1,7 @@
 import { DomainError } from '../../../shared/domain/errors/DomainError';
 
+export { ConfirmationMismatchError } from './ConfirmationMismatchError';
+
 export class TenantNotFoundError extends DomainError {
   constructor(id: string) {
     super(`No tenant exists with id "${id}"`);
@@ -21,6 +23,6 @@ export class TenantNotFoundError extends DomainError {
  */
 export class TenantSuspendedError extends DomainError {
   constructor() {
-    super('This workspace is suspended — contact support');
+    super('This workspace is suspended :( contact support');
   }
 }

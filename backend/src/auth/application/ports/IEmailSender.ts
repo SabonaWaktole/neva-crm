@@ -16,4 +16,16 @@ export interface IEmailSender {
    * only ships bytes.
    */
   sendTransactionalEmail(to: string, subject: string, html: string): Promise<void>;
+
+  /**
+   * Sent once, right after a Super Admin provisions a workspace: gives the new
+   * Business Owner the login credentials for the workspace just created on
+   * their behalf. A separate method rather than a `sendTransactionalEmail`
+   * call from the route, because the password is a secret this port should be
+   * the one place responsible for wording it correctly.
+   */
+  sendWorkspaceCreatedEmail(
+    to: string,
+    params: { companyName: string; urlSlug: string; ownerPassword: string }
+  ): Promise<void>;
 }

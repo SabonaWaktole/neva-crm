@@ -96,6 +96,25 @@ export class PrismaUserRepository implements IUserRepository {
     });
   }
 
+  async softDelete(userId: string): Promise<void> {
+    // Anonymized rather than nulled: email/firstName/lastName/phone keep their
+    // columns NOT NULL-compatible (email in particular is read by every join
+    // that still references this user), while no longer identifying anyone.
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        isActive: false,
+        deletedAt: new Date(),
+        email: `deleted-${userId}@deleted.invalid`,
+        firstName: null,
+        lastName: null,
+        phone: null,
+        avatarUrl: null,
+        coverImageUrl: null,
+      },
+    });
+  }
+
   async countAssignedWork(userId: string): Promise<{ clients: number; upcomingAppointments: number }> {
     // Only work that would actually go unattended is counted: currently
     // assigned clients, and appointments still ahead that are not cancelled.
@@ -117,7 +136,10 @@ export class PrismaUserRepository implements IUserRepository {
   async findPlatformUsers(
     filters: PlatformUserFilters
   ): Promise<{ items: PlatformUserRow[]; total: number }> {
-    const where: any = {};
+    // Deleted accounts never appear in the console's list — that is what
+    // "delete" means here, as opposed to suspend/reactivate which keep the
+    // row visible with a status badge.
+    const where: any = { deletedAt: null };
     if (filters.tenantId) where.tenantId = filters.tenantId;
     if (filters.role) where.role = filters.role;
     if (filters.isActive !== undefined) where.isActive = filters.isActive;
@@ -156,6 +178,22 @@ export class PrismaUserRepository implements IUserRepository {
       this.prisma.user.count({ where }),
     ]);
 
+    // A second query rather than a join: only rows with an ACTIVE transfer as
+    // ORIGINAL owner need it, which is a small minority, and Prisma cannot
+    // express "latest active row per user" as a single findMany include.
+    const pendingTransfers = rows.length
+      ? await this.prisma.ownershipTransfer.findMany({
+          where: { originalOwnerId: { in: rows.map((r) => r.id) }, status: 'ACTIVE' },
+          select: { originalOwnerId: true, actingOwner: { select: { firstName: true, lastName: true, email: true } } },
+        })
+      : [];
+    const transferByOriginalOwnerId = new Map(
+      pendingTransfers.map((t) => [
+        t.originalOwnerId,
+        { actingOwnerName: [t.actingOwner.firstName, t.actingOwner.lastName].filter(Boolean).join(' ') || t.actingOwner.email },
+      ])
+    );
+
     return {
       items: rows.map((r) => ({
         id: r.id,
@@ -169,6 +207,7 @@ export class PrismaUserRepository implements IUserRepository {
         // as "Platform" rather than as a missing value.
         tenantName: r.tenant?.name ?? null,
         createdAt: r.createdAt,
+        pendingOwnershipTransfer: transferByOriginalOwnerId.get(r.id) ?? null,
       })),
       total,
     };

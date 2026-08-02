@@ -43,6 +43,7 @@ describe('LoginUseCase', () => {
       updateProfile: jest.fn(),
       updateRoleAndWarehouse: jest.fn(),
       setActive: jest.fn(),
+      softDelete: jest.fn(),
       countAssignedWork: jest.fn(),
       findActiveByTenantAndRole: jest.fn().mockResolvedValue([]),
       findPlatformUsers: jest.fn().mockResolvedValue({ items: [], total: 0 }),

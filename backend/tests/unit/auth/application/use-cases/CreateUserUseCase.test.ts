@@ -30,6 +30,7 @@ describe('CreateUserUseCase', () => {
       updateProfile: jest.fn(),
       updateRoleAndWarehouse: jest.fn(),
       setActive: jest.fn(),
+      softDelete: jest.fn(),
       countAssignedWork: jest.fn(),
     } as unknown as jest.Mocked<IUserRepository>;
 

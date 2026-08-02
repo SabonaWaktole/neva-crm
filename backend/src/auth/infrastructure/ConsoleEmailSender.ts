@@ -15,4 +15,13 @@ export class ConsoleEmailSender implements IEmailSender {
     // the last place that should become a second copy of customer data.
     console.log(`[EMAIL] To: ${to} | ${subject} | ${html.length} bytes`);
   }
+
+  async sendWorkspaceCreatedEmail(
+    to: string,
+    params: { companyName: string; urlSlug: string; ownerPassword: string }
+  ): Promise<void> {
+    console.log(
+      `[EMAIL] To: ${to} | Workspace "${params.companyName}" (${params.urlSlug}) created | Password: ${params.ownerPassword}`
+    );
+  }
 }

@@ -40,6 +40,30 @@ export class EmailJsSender implements IEmailSender {
     await this.send(to, subject, html, 'notification');
   }
 
+  async sendWorkspaceCreatedEmail(
+    to: string,
+    params: { companyName: string; urlSlug: string; ownerPassword: string }
+  ): Promise<void> {
+    const loginUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/login`;
+
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+        <h2 style="color: #4F46E5;">Your NevaCRM workspace is ready</h2>
+        <p>A workspace has been created for you on NevaCRM. Here are your login details:</p>
+        <table style="margin-top: 15px; border-collapse: collapse;">
+          <tr><td style="padding: 4px 12px 4px 0; color: #666;">Workspace</td><td><strong>${params.companyName}</strong></td></tr>
+          <tr><td style="padding: 4px 12px 4px 0; color: #666;">Workspace URL</td><td><strong>${params.urlSlug}</strong></td></tr>
+          <tr><td style="padding: 4px 12px 4px 0; color: #666;">Email</td><td><strong>${to}</strong></td></tr>
+          <tr><td style="padding: 4px 12px 4px 0; color: #666;">Password</td><td><strong>${params.ownerPassword}</strong></td></tr>
+        </table>
+        <a href="${loginUrl}" style="display: inline-block; background-color: #4F46E5; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 20px;">Log in to your workspace</a>
+        <p style="margin-top: 20px; font-size: 12px; color: #999;">For your security, we recommend changing your password after logging in.</p>
+      </div>
+    `;
+
+    await this.send(to, `Your NevaCRM workspace "${params.companyName}" is ready`, htmlContent, 'workspace created');
+  }
+
   async sendInvitationEmail(to: string, token: string, tenantName: string): Promise<void> {
     const inviteLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/invitations/accept?token=${token}&email=${encodeURIComponent(to)}`;
     

@@ -125,7 +125,7 @@ describe('resolveTenant middleware', () => {
 
       expect(res.status).toHaveBeenCalledWith(403);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'This workspace is suspended — contact support',
+        error: 'This workspace is suspended :( contact support',
         code: 'TENANT_SUSPENDED',
       });
       expect(next).not.toHaveBeenCalled();

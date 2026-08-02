@@ -21,6 +21,13 @@ import { CancelInvitationUseCase } from '@auth/application/use-cases/CancelInvit
 import { ReactivateUserUseCase } from '@auth/application/use-cases/ReactivateUserUseCase';
 import { DeactivateUserUseCase } from '@auth/application/use-cases/DeactivateUserUseCase';
 import { GetDeactivationImpactUseCase } from '@auth/application/use-cases/GetDeactivationImpactUseCase';
+import { GetOwnershipTransferCandidatesUseCase } from '@auth/application/use-cases/GetOwnershipTransferCandidatesUseCase';
+import { PlatformSuspendUserUseCase } from '@auth/application/use-cases/PlatformSuspendUserUseCase';
+import { PlatformReactivateUserUseCase } from '@auth/application/use-cases/PlatformReactivateUserUseCase';
+import { PlatformDeleteUserUseCase } from '@auth/application/use-cases/PlatformDeleteUserUseCase';
+import { PrismaOwnershipTransferRepository } from '@auth/infrastructure/repositories/PrismaOwnershipTransferRepository';
+import { PrismaOwnershipTransactions } from '@auth/infrastructure/PrismaOwnershipTransactions';
+import { PrismaAuditLogger } from '@shared/infrastructure/PrismaAuditLogger';
 import { PrismaUserRepository } from '@auth/infrastructure/repositories/PrismaUserRepository';
 import { PrismaTenantRepository } from '@tenant/infrastructure/repositories/PrismaTenantRepository';
 import { PrismaInvitationRepository } from '@auth/infrastructure/repositories/PrismaInvitationRepository';
@@ -34,6 +41,9 @@ import { CreateTenantWithOwnerUseCase } from '@tenant/application/use-cases/Crea
 import { SetTenantSubscriptionStatusUseCase } from '@tenant/application/use-cases/SetTenantSubscriptionStatusUseCase';
 import { EnterTenantUseCase } from '@tenant/application/use-cases/EnterTenantUseCase';
 import { ExitTenantUseCase } from '@tenant/application/use-cases/ExitTenantUseCase';
+import { DeleteTenantUseCase } from '@tenant/application/use-cases/DeleteTenantUseCase';
+import { PrismaTenantDeletionTransaction } from '@tenant/infrastructure/PrismaTenantDeletionTransaction';
+import { FsTenantMediaCleaner } from '@tenant/infrastructure/FsTenantMediaCleaner';
 import { PrismaPlatformSettingsRepository } from '../settings/infrastructure/PrismaPlatformSettingsRepository';
 import { IPlatformSettingsRepository } from '../settings/domain/IPlatformSettingsRepository';
 import { GetPlatformSettingsUseCase } from '../settings/application/use-cases/GetPlatformSettingsUseCase';
@@ -146,6 +156,11 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const getPlatformUsersUseCase = new GetPlatformUsersUseCase(userRepository);
   const enterTenantUseCase = new EnterTenantUseCase(tenantRepository, userRepository, tokenService);
   const exitTenantUseCase = new ExitTenantUseCase(userRepository, tokenService);
+  const deleteTenantUseCase = new DeleteTenantUseCase(
+    tenantRepository,
+    new PrismaTenantDeletionTransaction(),
+    new FsTenantMediaCleaner()
+  );
   const inviteStaffUseCase = new InviteStaffUseCase(invitationRepository, emailSender);
   const notificationRepository = new PrismaNotificationRepository();
   const notificationSettingsRepository = new PrismaNotificationSettingsRepository();
@@ -184,6 +199,30 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const deactivateUserUseCase = new DeactivateUserUseCase(userRepository);
   const getDeactivationImpactUseCase = new GetDeactivationImpactUseCase(userRepository);
   const reactivateUserUseCase = new ReactivateUserUseCase(userRepository);
+
+  // Platform Admin user lifecycle (suspend/reactivate/delete, including
+  // Business Owner ownership transfer). Distinct actor and scope from the
+  // Business-Owner-only deactivate/reactivate above — see PlatformSuspendUserUseCase.
+  const ownershipTransferRepository = new PrismaOwnershipTransferRepository();
+  const ownershipTransactions = new PrismaOwnershipTransactions();
+  const auditLogger = new PrismaAuditLogger();
+  const getOwnershipTransferCandidatesUseCase = new GetOwnershipTransferCandidatesUseCase(userRepository);
+  const platformSuspendUserUseCase = new PlatformSuspendUserUseCase(
+    userRepository,
+    ownershipTransactions,
+    auditLogger
+  );
+  const platformReactivateUserUseCase = new PlatformReactivateUserUseCase(
+    userRepository,
+    ownershipTransferRepository,
+    ownershipTransactions,
+    auditLogger
+  );
+  const platformDeleteUserUseCase = new PlatformDeleteUserUseCase(
+    userRepository,
+    ownershipTransactions,
+    auditLogger
+  );
 
   // Controller
   const authController = new AuthController(
@@ -244,10 +283,16 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
       SubscriptionStatus.ACTIVE
     ),
     enterTenantUseCase,
+    deleteTenantUseCase,
     createUserUseCase,
     getPlatformUsersUseCase,
+    getOwnershipTransferCandidatesUseCase,
+    suspendUserUseCase: platformSuspendUserUseCase,
+    reactivateUserUseCase: platformReactivateUserUseCase,
+    deleteUserUseCase: platformDeleteUserUseCase,
     bulkUpdateTenantSettingsUseCase,
     tokenService,
+    emailSender,
   });
   app.use('/api/tenants', tenantRoutes);
 
