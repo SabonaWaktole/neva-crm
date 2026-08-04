@@ -1,4 +1,18 @@
+import { useTranslation } from 'react-i18next';
 import type { NavItem } from '../components/layout/Sidebar/Sidebar';
+
+/**
+ * A nav entry before its label is resolved.
+ *
+ * Labels are `common:nav.*` keys rather than literal strings because these
+ * arrays are module-level constants — evaluated once, at import, long before
+ * any language is known. Translating at the module level would freeze the
+ * sidebar into whatever language happened to be active on first import and
+ * leave it there through every subsequent language change. Resolving inside
+ * the hook re-runs on each render, so the sidebar follows the language like
+ * the rest of the interface does.
+ */
+type NavItemSpec = Omit<NavItem, 'label'> & { labelKey: string };
 
 /**
  * Sidebar contents per role.
@@ -8,28 +22,28 @@ import type { NavItem } from '../components/layout/Sidebar/Sidebar';
  * user on /unauthorized. Reports is the case in point — it is guarded
  * `['BUSINESS_OWNER', 'SUPER_ADMIN']` there, so it must not appear for STAFF.
  */
-const ownerNavItems: NavItem[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
-  { id: 'clients', label: 'Clients', icon: 'group' },
-  { id: 'appointments', label: 'Appointments', icon: 'event' },
-  { id: 'inventory', label: 'Products & Stock', icon: 'inventory_2' },
-  { id: 'quotations', label: 'Quotations', icon: 'description' },
-  { id: 'reports', label: 'Reports', icon: 'bar_chart' },
-  { id: 'settings', path: 'settings/profile', label: 'Settings', icon: 'settings' },
+const ownerNavItems: NavItemSpec[] = [
+  { id: 'dashboard', labelKey: 'nav.dashboard', icon: 'dashboard' },
+  { id: 'clients', labelKey: 'nav.clients', icon: 'group' },
+  { id: 'appointments', labelKey: 'nav.appointments', icon: 'event' },
+  { id: 'inventory', labelKey: 'nav.inventory', icon: 'inventory_2' },
+  { id: 'quotations', labelKey: 'nav.quotations', icon: 'description' },
+  { id: 'reports', labelKey: 'nav.reports', icon: 'bar_chart' },
+  { id: 'settings', path: 'settings/profile', labelKey: 'nav.settings', icon: 'settings' },
 ];
 
-const staffNavItems: NavItem[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
-  { id: 'clients', label: 'Clients', icon: 'group' },
-  { id: 'appointments', label: 'Appointments', icon: 'event' },
-  { id: 'quotations', label: 'Quotations', icon: 'description' },
+const staffNavItems: NavItemSpec[] = [
+  { id: 'dashboard', labelKey: 'nav.dashboard', icon: 'dashboard' },
+  { id: 'clients', labelKey: 'nav.clients', icon: 'group' },
+  { id: 'appointments', labelKey: 'nav.appointments', icon: 'event' },
+  { id: 'quotations', labelKey: 'nav.quotations', icon: 'description' },
   // No 'tasks' entry: there is no Tasks feature in this codebase — no route,
   // page, Prisma model or endpoint. The link was a leftover from early planning
   // and sent staff to a 404.
   // settings/profile carries no RoleGuard, so every staff member can reach
   // their own profile — previously this link only appeared for staff who
   // happened to manage a warehouse.
-  { id: 'settings', path: 'settings/profile', label: 'Settings', icon: 'settings' },
+  { id: 'settings', path: 'settings/profile', labelKey: 'nav.settings', icon: 'settings' },
 ];
 
 /**
@@ -46,30 +60,31 @@ const staffNavItems: NavItem[] = [
  * wrong. It now contains only what a platform-level role can actually reach.
  * TD-008.
  */
-const superAdminNavItems: NavItem[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
+const superAdminNavItems: NavItemSpec[] = [
+  { id: 'dashboard', labelKey: 'nav.dashboard', icon: 'dashboard' },
   // `domain` (Building) rather than a new name: Sidebar's iconMap falls back to
   // the dashboard icon for anything it does not know, so an unmapped name would
   // silently give two identical icons instead of an error.
-  { id: 'tenants', label: 'Tenants', icon: 'domain' },
+  { id: 'tenants', labelKey: 'nav.tenants', icon: 'domain' },
   // People is platform-wide and therefore legitimately reachable: it reads from
   // /api/tenants/users, a SUPER_ADMIN route with no :tenantSlug, so it does not
   // reintroduce any of the dead tenant-scoped links TD-008 removed.
-  { id: 'people', label: 'People', icon: 'group' },
+  { id: 'people', labelKey: 'nav.people', icon: 'group' },
   // Platform-wide defaults + bulk apply to selected tenants — reads/writes
   // /api/platform-settings and /api/tenants/bulk-settings, both SUPER_ADMIN
   // routes with no :tenantSlug, same rationale as People above.
-  { id: 'setting', label: 'Settings', icon: 'settings' },
+  { id: 'setting', labelKey: 'nav.settings', icon: 'settings' },
 ];
 
 /** Stock management is the one item legitimately gated on the staff warehouse. */
-const staffWarehouseNavItem: NavItem = {
+const staffWarehouseNavItem: NavItemSpec = {
   id: 'inventory',
-  label: 'Products & Stock',
+  labelKey: 'nav.inventory',
   icon: 'inventory_2',
 };
 
-export const useNavigation = (user?: any | null, currentPath?: string) => {
+export const useNavigation = (user?: any | null, currentPath?: string): NavItem[] => {
+  const { t } = useTranslation('common');
   const role = user?.role;
 
   // Every branch copies. Returning the module-level array by reference meant a
@@ -78,7 +93,7 @@ export const useNavigation = (user?: any | null, currentPath?: string) => {
   //
   // SUPER_ADMIN is matched explicitly rather than being left to fall through:
   // "not STAFF" was never a sound definition of "business owner". See TD-008.
-  const baseItems: NavItem[] =
+  const baseItems: NavItemSpec[] =
     role === 'STAFF'
       ? [...staffNavItems]
       : role === 'SUPER_ADMIN'
@@ -102,8 +117,9 @@ export const useNavigation = (user?: any | null, currentPath?: string) => {
   const matchesPath = (id: string) => currentPath?.includes(`/${id}`) ?? false;
   const anotherItemMatches = baseItems.some(item => item.id !== 'dashboard' && matchesPath(item.id));
 
-  return baseItems.map(item => ({
+  return baseItems.map(({ labelKey, ...item }) => ({
     ...item,
+    label: t(labelKey),
     isActive:
       matchesPath(item.id) ||
       (item.id === 'dashboard' &&

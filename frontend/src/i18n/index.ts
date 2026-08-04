@@ -29,11 +29,31 @@ import sqSettings from '../locales/sq/settings.json';
 import sqDashboard from '../locales/sq/dashboard.json';
 import sqNotifications from '../locales/sq/notifications.json';
 
+import elCommon from '../locales/el/common.json';
+import elAuth from '../locales/el/auth.json';
+import elClients from '../locales/el/clients.json';
+import elAppointments from '../locales/el/appointments.json';
+import elInventory from '../locales/el/inventory.json';
+import elQuotations from '../locales/el/quotations.json';
+import elSettings from '../locales/el/settings.json';
+import elDashboard from '../locales/el/dashboard.json';
+import elNotifications from '../locales/el/notifications.json';
+
+import itCommon from '../locales/it/common.json';
+import itAuth from '../locales/it/auth.json';
+import itClients from '../locales/it/clients.json';
+import itAppointments from '../locales/it/appointments.json';
+import itInventory from '../locales/it/inventory.json';
+import itQuotations from '../locales/it/quotations.json';
+import itSettings from '../locales/it/settings.json';
+import itDashboard from '../locales/it/dashboard.json';
+import itNotifications from '../locales/it/notifications.json';
+
 /**
  * Catalogues are imported statically rather than fetched at runtime.
  *
- * Two languages of UI text is a few tens of kilobytes, which is smaller than the
- * loader that would fetch them — and static imports mean there is no async gap
+ * Four languages of UI text is well under a hundred kilobytes, still smaller
+ * than the loader that would fetch them — and static imports mean no async gap
  * on first paint where the interface renders raw translation keys. Namespaces
  * are still separated, so switching to lazy loading later is a config change
  * rather than a restructure.
@@ -60,6 +80,28 @@ export const resources = {
     settings: sqSettings,
     dashboard: sqDashboard,
     notifications: sqNotifications,
+  },
+  el: {
+    common: elCommon,
+    auth: elAuth,
+    clients: elClients,
+    appointments: elAppointments,
+    inventory: elInventory,
+    quotations: elQuotations,
+    settings: elSettings,
+    dashboard: elDashboard,
+    notifications: elNotifications,
+  },
+  it: {
+    common: itCommon,
+    auth: itAuth,
+    clients: itClients,
+    appointments: itAppointments,
+    inventory: itInventory,
+    quotations: itQuotations,
+    settings: itSettings,
+    dashboard: itDashboard,
+    notifications: itNotifications,
   },
 } as const;
 

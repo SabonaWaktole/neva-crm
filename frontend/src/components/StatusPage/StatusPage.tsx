@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { ShieldAlert, FileQuestion, ServerCrash } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button/Button';
 import styles from './StatusPage.module.css';
 
@@ -10,30 +11,17 @@ export interface StatusPageProps {
   action?: ReactNode;
 }
 
-const VARIANT_CONTENT: Record<
-  NonNullable<StatusPageProps['variant']>,
-  { icon: ReactNode; title: string; description: string }
-> = {
-  '401': {
-    icon: <ShieldAlert size={40} />,
-    title: 'Sign in required',
-    description: 'You need to be signed in to view this page.',
-  },
-  '403': {
-    icon: <ShieldAlert size={40} />,
-    title: 'Unauthorized Access',
-    description: "You don't have permission to view this page. If you think this is a mistake, contact your account owner.",
-  },
-  '404': {
-    icon: <FileQuestion size={40} />,
-    title: 'Page not found',
-    description: "The page you're looking for doesn't exist or may have been moved.",
-  },
-  '500': {
-    icon: <ServerCrash size={40} />,
-    title: 'Something went wrong',
-    description: 'An unexpected error occurred. Please try again.',
-  },
+/**
+ * Only the icon is a module constant. The title and description used to sit
+ * here alongside it, which meant they were fixed in English at import time —
+ * before any language had been resolved — and never changed afterwards. They
+ * are looked up per render now; the icon has no language to be wrong about.
+ */
+const VARIANT_ICON: Record<NonNullable<StatusPageProps['variant']>, ReactNode> = {
+  '401': <ShieldAlert size={40} />,
+  '403': <ShieldAlert size={40} />,
+  '404': <FileQuestion size={40} />,
+  '500': <ServerCrash size={40} />,
 };
 
 export const StatusPage: React.FC<StatusPageProps> = ({
@@ -42,16 +30,16 @@ export const StatusPage: React.FC<StatusPageProps> = ({
   description,
   action,
 }) => {
-  const content = VARIANT_CONTENT[variant];
+  const { t } = useTranslation('common');
 
   return (
     <div className={styles.container}>
-      <div className={styles.iconWrapper}>{content.icon}</div>
-      <h1 className={styles.title}>{title || content.title}</h1>
-      <p className={styles.description}>{description || content.description}</p>
+      <div className={styles.iconWrapper}>{VARIANT_ICON[variant]}</div>
+      <h1 className={styles.title}>{title || t(`status.${variant}.title`)}</h1>
+      <p className={styles.description}>{description || t(`status.${variant}.description`)}</p>
       {action ?? (
         <Button variant="primary" onClick={() => window.history.back()}>
-          Go back
+          {t('status.goBack')}
         </Button>
       )}
     </div>

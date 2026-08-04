@@ -10,6 +10,7 @@ import { resolveMediaUrl, srcSetFor } from '../../../services/mediaService';
 import styles from './AppLayout.module.css';
 import { NotificationBell } from '../../notifications/NotificationBell';
 import { ImpersonationBanner } from '../ImpersonationBanner';
+import { useTranslation } from 'react-i18next';
 
 export interface AppLayoutProps {
   children: ReactNode;
@@ -30,6 +31,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   onLogout,
   onSettingsClick,
 }) => {
+  const { t } = useTranslation('common');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
@@ -43,10 +45,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
 
   const profileItems: DropdownMenuItemType[] = [
     ...(onSettingsClick
-      ? [{ id: 'settings', label: 'Settings', icon: <Settings size={18} />, onClick: onSettingsClick }]
+      ? [{ id: 'settings', label: t('header.settings'), icon: <Settings size={18} />, onClick: onSettingsClick }]
       : []),
     ...(onLogout
-      ? [{ id: 'logout', label: 'Log Out', icon: <LogOut size={18} />, onClick: onLogout, danger: true }]
+      ? [{ id: 'logout', label: t('actions.logOut'), icon: <LogOut size={18} />, onClick: onLogout, danger: true }]
       : []),
   ];
 
@@ -66,7 +68,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           <button 
             className={`${styles.iconBtn} ${styles.menuBtn}`} 
             onClick={() => setIsSidebarOpen(true)}
-            aria-label="Open menu"
+            aria-label={t('header.openMenu')}
           >
             <Menu size={24} />
           </button>
@@ -77,7 +79,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           <Search className={styles.searchIcon} size={18} />
           <input
             type="text"
-            placeholder="Search..."
+            placeholder={t('header.searchPlaceholder')}
             className={styles.searchInput}
           />
         </div>
@@ -85,7 +87,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         <div className={styles.headerRight}>
           <button
             className={`${styles.iconBtn} ${styles.mobileSearchBtn}`}
-            aria-label="Search"
+            aria-label={t('header.search')}
             onClick={() => setIsMobileSearchOpen((prev) => !prev)}
           >
             {isMobileSearchOpen ? <X size={20} /> : <Search size={20} />}
@@ -97,19 +99,19 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             notification bell.
           */}
           <NotificationBell />
-          <button className={`${styles.iconBtn} ${styles.helpBtn}`} aria-label="Help">
+          <button className={`${styles.iconBtn} ${styles.helpBtn}`} aria-label={t('header.help')}>
             <HelpCircle size={20} />
           </button>
           <DropdownMenu
             align="right"
             trigger={
-              <button className={styles.profileBtn} aria-label="User Profile">
+              <button className={styles.profileBtn} aria-label={t('header.userProfile')}>
                 <Avatar
                   src={avatarSrc}
                   srcSet={avatarSrcSet}
                   fallback={userName.charAt(0).toUpperCase()}
                   size="sm"
-                  alt={`${userName}'s profile`}
+                  alt={t('header.profileAlt', { name: userName })}
                 />
               </button>
             }
@@ -124,7 +126,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           <Search className={styles.searchIcon} size={18} />
           <input
             type="text"
-            placeholder="Search..."
+            placeholder={t('header.searchPlaceholder')}
             className={styles.searchInput}
             autoFocus
           />

@@ -9,7 +9,7 @@ export type DateFormat = (typeof DATE_FORMATS)[number];
 
 // Mirrors the backend's Tenant.SUPPORTED_LOCALES. This is a FORMATTING locale
 // (separators, date order), deliberately independent of the UI language.
-export const SUPPORTED_LOCALES = ['en-US', 'en-GB', 'sq-AL'] as const;
+export const SUPPORTED_LOCALES = ['en-US', 'en-GB', 'sq-AL', 'el-GR', 'it-IT'] as const;
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 
 export interface TenantSettings {

@@ -9,14 +9,14 @@ import type { Language } from './config';
  * quietly promoted without this list changing, and the change is visible in a
  * diff.
  *
- * Albanian is absent on purpose. Its catalogue is structurally complete —
- * correct keys, interpolation and plural rules — but the wording has not been
- * checked by a speaker, and business vocabulary (quotation, stock level,
- * warehouse, lead) is where a plausible-looking wrong term is most likely and
- * least likely to be noticed.
+ * Albanian, Greek and Italian are absent on purpose. Their catalogues are
+ * structurally complete — correct keys, interpolation and plural rules, 100%
+ * of the English keys — but the wording has not been checked by a speaker, and
+ * business vocabulary (quotation, stock level, warehouse, lead) is where a
+ * plausible-looking wrong term is most likely and least likely to be noticed.
  *
- * Adding 'sq' here requires: a native review of the strings, the reviewed key
- * paths recorded in locales/sq/.reviewed.json, and
+ * Adding any of them here requires: a native review of the strings, the
+ * reviewed key paths recorded in locales/<lang>/.reviewed.json, and
  * `node scripts/check-translations.mjs --strict` passing. See TD-019.
  */
 export const REVIEWED_LANGUAGES: readonly Language[] = ['en'];

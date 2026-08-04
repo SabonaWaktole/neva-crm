@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Navigate, useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getUserDisplayName } from '../../utils/userUtils';
 import { AppLayout } from '../../components/layout/AppLayout/AppLayout';
 import { Sidebar } from '../../components/layout/Sidebar/Sidebar';
@@ -13,6 +14,7 @@ import { PlatformSettingsPage } from '../admin/PlatformSettingsPage';
 import { AdminProfilePage } from '../admin/AdminProfilePage';
 
 export const SuperAdminShell = () => {
+  const { t } = useTranslation('common');
   const navigate = useNavigate();
   useParams();
   const { user } = useAuthStore();
@@ -71,8 +73,8 @@ export const SuperAdminShell = () => {
       onSettingsClick={() => navigate('/admin/profile')}
       sidebar={
         <Sidebar 
-          orgName="Neva CRM Platform" 
-          orgTier="Global Administration" 
+          orgName={t('shell.platformName')}
+          orgTier={t('shell.platformTier')}
           navItems={navItemsWithActiveState}
           /*
             No :tenantSlug segment, unlike StaffShell and BusinessOwnerShell —
