@@ -137,8 +137,15 @@ export const AccountSettingsPage = () => {
       setSaved(updated);
       setForm(toFormState(updated));
 
-      // The money formatter reads currency and locale from the auth store, so
-      // it has to learn about the change without waiting for a page reload.
+      // The money formatter reads currency and locale from the auth store, and
+      // useLanguageSync reads the language from it, so both have to learn about
+      // the change without waiting for a page reload.
+      //
+      // Every field the server persists here must be mirrored back. Language
+      // was missing, which made saving a new workspace language look like it
+      // did nothing: the PUT stored it, the success toast fired, but the store
+      // still held the old value, so the interface stayed in the old language
+      // until the next sign-in refetched /me.
       if (user) {
         setUser({
           ...user,
@@ -146,6 +153,7 @@ export const AccountSettingsPage = () => {
           tenantLocale: updated.locale,
           tenantTimezone: updated.timezone,
           tenantDateFormat: updated.dateFormat,
+          tenantDefaultLanguage: updated.defaultLanguage,
         });
       }
       toast.success(tc('feedback.saved'));
