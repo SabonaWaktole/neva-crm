@@ -1,4 +1,4 @@
-import { PlatformReactivateUserUseCase } from './PlatformReactivateUserUseCase';
+import { PlatformReactivateUserUseCase, OwnershipResolution } from './PlatformReactivateUserUseCase';
 import { IUserRepository } from '../../domain/repositories/IUserRepository';
 import { IOwnershipTransferRepository } from '../../domain/repositories/IOwnershipTransferRepository';
 import { IOwnershipTransactions } from '../ports/IOwnershipTransactions';
@@ -84,6 +84,7 @@ describe('PlatformReactivateUserUseCase', () => {
       promoteForSuspension: jest.fn(),
       restoreOwnership: jest.fn(),
       keepOwnership: jest.fn(),
+      keepBothOwners: jest.fn(),
       promoteForDeletion: jest.fn(),
     };
     auditLogger = { record: jest.fn(), findRecent: jest.fn() };
@@ -150,32 +151,71 @@ describe('PlatformReactivateUserUseCase', () => {
       });
     });
 
-    it('requires an explicit restoreOwnership choice', async () => {
+    it('requires an explicit ownershipResolution choice', async () => {
       await expect(reactivate()).rejects.toThrow(RestoreOwnershipChoiceRequiredError);
       expect(ownershipTransactions.restoreOwnership).not.toHaveBeenCalled();
       expect(ownershipTransactions.keepOwnership).not.toHaveBeenCalled();
+      expect(ownershipTransactions.keepBothOwners).not.toHaveBeenCalled();
     });
 
     it('restores original ownership when chosen', async () => {
-      await reactivate({ restoreOwnership: true });
+      await reactivate({ ownershipResolution: OwnershipResolution.RESTORE });
       expect(ownershipTransactions.restoreOwnership).toHaveBeenCalledWith('transfer-1', CALLER);
       expect(userRepository.setActive).not.toHaveBeenCalled();
     });
 
     it('keeps the acting owner when chosen', async () => {
-      await reactivate({ restoreOwnership: false });
+      await reactivate({ ownershipResolution: OwnershipResolution.KEEP });
       expect(ownershipTransactions.keepOwnership).toHaveBeenCalledWith('transfer-1', CALLER);
     });
 
-    it('refuses to restore when the acting owner is no longer active', async () => {
-      userRepository.findById.mockImplementation(async (id: string) => {
-        if (id === 'user-1') return makeUser();
-        if (id === 'staff-1') return makeUser({ id: 'staff-1', role: UserRole.BUSINESS_OWNER, isActive: false });
-        return null;
+    it('keeps BOTH as Business Owners when chosen, demoting neither', async () => {
+      await reactivate({ ownershipResolution: OwnershipResolution.KEEP_BOTH });
+
+      expect(ownershipTransactions.keepBothOwners).toHaveBeenCalledWith('transfer-1', CALLER);
+      expect(ownershipTransactions.restoreOwnership).not.toHaveBeenCalled();
+      expect(ownershipTransactions.keepOwnership).not.toHaveBeenCalled();
+      expect(userRepository.setActive).not.toHaveBeenCalled();
+      expect(auditLogger.record).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'USER_REACTIVATED',
+          metadata: expect.objectContaining({ resolution: 'KEEP_BOTH' }),
+        })
+      );
+    });
+
+    describe('when the acting owner is no longer active', () => {
+      beforeEach(() => {
+        userRepository.findById.mockImplementation(async (id: string) => {
+          if (id === 'user-1') return makeUser();
+          if (id === 'staff-1') return makeUser({ id: 'staff-1', role: UserRole.BUSINESS_OWNER, isActive: false });
+          return null;
+        });
       });
 
-      await expect(reactivate({ restoreOwnership: true })).rejects.toThrow(RestoreOwnershipChoiceRequiredError);
-      expect(ownershipTransactions.restoreOwnership).not.toHaveBeenCalled();
+      it('refuses to restore', async () => {
+        await expect(reactivate({ ownershipResolution: OwnershipResolution.RESTORE })).rejects.toThrow(
+          RestoreOwnershipChoiceRequiredError
+        );
+        expect(ownershipTransactions.restoreOwnership).not.toHaveBeenCalled();
+      });
+
+      // "Keep both" is a statement about the stand-in as much as about the
+      // person coming back; with no stand-in left it is not a choice that
+      // means anything.
+      it('refuses to keep both', async () => {
+        await expect(reactivate({ ownershipResolution: OwnershipResolution.KEEP_BOTH })).rejects.toThrow(
+          RestoreOwnershipChoiceRequiredError
+        );
+        expect(ownershipTransactions.keepBothOwners).not.toHaveBeenCalled();
+      });
+
+      // KEEP only demotes the person being reactivated, so it still resolves
+      // the transfer whatever happened to the acting owner.
+      it('still allows keeping the acting owner', async () => {
+        await reactivate({ ownershipResolution: OwnershipResolution.KEEP });
+        expect(ownershipTransactions.keepOwnership).toHaveBeenCalledWith('transfer-1', CALLER);
+      });
     });
   });
 });

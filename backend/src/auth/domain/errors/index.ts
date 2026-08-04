@@ -38,6 +38,25 @@ export class InvitationAlreadyAcceptedError extends DomainError {
   }
 }
 
+/**
+ * The invitee already has an account in that workspace. Accepting would create
+ * a second one for the same (email, tenantId) pair, which is exactly the key
+ * `LoginUseCase` resolves an account by — so the two would be
+ * indistinguishable at the login form. Promote the existing account instead.
+ */
+export class UserAlreadyInWorkspaceError extends DomainError {
+  constructor(email: string) {
+    super(`"${email}" already has an account in this workspace`);
+  }
+}
+
+/** An unexpired, unaccepted invitation for that address already exists. */
+export class InvitationAlreadyPendingError extends DomainError {
+  constructor(email: string) {
+    super(`An invitation for "${email}" is already pending in this workspace`);
+  }
+}
+
 export class TokenExpiredError extends DomainError {
   constructor() {
     super('This token has expired');

@@ -10,6 +10,7 @@ import {
   InvalidOwnershipTargetError,
 } from '../../domain/errors';
 import { User } from '../../domain/entities/User';
+import { otherActiveOwners } from '../../domain/services/ownership';
 
 export interface PlatformSuspendUserDTO {
   callerRole: string;
@@ -25,9 +26,11 @@ export interface PlatformSuspendUserDTO {
  * Distinct from `DeactivateUserUseCase`: that one is a Business Owner
  * off-boarding their own staff and explicitly refuses to touch a Business
  * Owner at all. This one is the platform administrator, who may suspend
- * either role, and who — when suspending the sole owner of a workspace that
- * still has staff — must first hand the workspace to one of them so it
+ * either role, and who — when suspending the LAST active owner of a workspace
+ * that still has staff — must first hand the workspace to one of them so it
  * remains manageable while the owner is out. See `IOwnershipTransactions`.
+ * An owner who has co-owners is suspended outright: the workspace already has
+ * someone in charge.
  *
  * Reversible, unlike `PlatformDeleteUserUseCase`: reactivation
  * (`PlatformReactivateUserUseCase`) can always undo this, ownership transfer
@@ -63,7 +66,20 @@ export class PlatformSuspendUserUseCase {
     let ownershipTransferId: string | null = null;
 
     if (target.role === UserRole.BUSINESS_OWNER && target.tenantId) {
-      const staff = await this.userRepository.findActiveByTenantAndRole(target.tenantId, UserRole.STAFF);
+      // A workspace may have several Business Owners. Handing it to a staff
+      // member is only needed when this one is the LAST of them — with a
+      // co-owner still active the workspace stays manageable on its own, so
+      // the suspension is the same one-step flip a staff member gets.
+      const owners = await this.userRepository.findActiveByTenantAndRole(
+        target.tenantId,
+        UserRole.BUSINESS_OWNER
+      );
+      const coOwners = otherActiveOwners(owners, target.id);
+
+      const staff =
+        coOwners.length > 0
+          ? []
+          : await this.userRepository.findActiveByTenantAndRole(target.tenantId, UserRole.STAFF);
 
       if (staff.length > 0) {
         if (!dto.newOwnerId) {

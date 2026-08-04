@@ -11,16 +11,33 @@ import {
 } from '../../domain/errors';
 import { User } from '../../domain/entities/User';
 
+/**
+ * What to do with the temporary Business Owner promoted at suspension time.
+ *
+ * `KEEP_BOTH` is the one resolution that demotes nobody: a business may have
+ * any number of Business Owners, so restoring the original does not have to
+ * cost the stand-in their role.
+ */
+export const OwnershipResolution = {
+  /** Original owner returns; the acting owner reverts to their former role. */
+  RESTORE: 'RESTORE',
+  /** Acting owner stays; the original owner returns as STAFF. */
+  KEEP: 'KEEP',
+  /** Both stay Business Owners of the workspace. */
+  KEEP_BOTH: 'KEEP_BOTH',
+} as const;
+
+export type OwnershipResolution = (typeof OwnershipResolution)[keyof typeof OwnershipResolution];
+
 export interface PlatformReactivateUserDTO {
   callerRole: string;
   callerId: string;
   userId: string;
   /**
    * Required only when the target has an unresolved ownership transfer from
-   * their suspension: true restores them as owner and reverts the acting
-   * owner; false keeps the acting owner and returns the target as STAFF.
+   * their suspension. See `OwnershipResolution` for what each choice does.
    */
-  restoreOwnership?: boolean;
+  ownershipResolution?: OwnershipResolution;
 }
 
 /**
@@ -28,8 +45,9 @@ export interface PlatformReactivateUserDTO {
  *
  * A plain suspension (no ownership transfer involved) is a one-step flip,
  * same shape as `SetTenantSubscriptionStatusUseCase`. A suspension that
- * promoted a staff member requires the admin to choose whether to undo that
- * or keep it — see `IOwnershipTransactions.restoreOwnership`/`keepOwnership`.
+ * promoted a staff member requires the admin to choose between the three
+ * `OwnershipResolution`s — see `IOwnershipTransactions.restoreOwnership` /
+ * `keepOwnership` / `keepBothOwners`.
  */
 export class PlatformReactivateUserUseCase {
   constructor(
@@ -59,27 +77,32 @@ export class PlatformReactivateUserUseCase {
 
     const transfer = await this.ownershipTransferRepository.findActiveByOriginalOwnerId(dto.userId);
 
-    let ownershipResolution: 'RESTORED' | 'KEPT' | null = null;
+    let resolution: OwnershipResolution | null = null;
 
     if (transfer) {
-      if (dto.restoreOwnership === undefined) {
+      if (dto.ownershipResolution === undefined) {
         throw new RestoreOwnershipChoiceRequiredError();
       }
+      resolution = dto.ownershipResolution;
 
       // The acting owner may themselves have been suspended or deleted since
-      // the transfer was created — restoring is meaningless if the person
-      // being restored TO no longer holds an active account to hand back.
+      // the transfer was created. Both resolutions that say something about
+      // what happens to THEM — reverting them, or leaving them in place
+      // alongside the original owner — are meaningless without an active
+      // account on the other side; KEEP is not, since it only demotes the
+      // person being reactivated.
       const actingOwner = await this.userRepository.findById(transfer.actingOwnerId);
-      if (dto.restoreOwnership && (!actingOwner || actingOwner.deletedAt || !actingOwner.isActive)) {
+      const actingOwnerIsActive = Boolean(actingOwner && !actingOwner.deletedAt && actingOwner.isActive);
+      if (resolution !== OwnershipResolution.KEEP && !actingOwnerIsActive) {
         throw new RestoreOwnershipChoiceRequiredError();
       }
 
-      if (dto.restoreOwnership) {
+      if (resolution === OwnershipResolution.RESTORE) {
         await this.ownershipTransactions.restoreOwnership(transfer.id, dto.callerId);
-        ownershipResolution = 'RESTORED';
+      } else if (resolution === OwnershipResolution.KEEP_BOTH) {
+        await this.ownershipTransactions.keepBothOwners(transfer.id, dto.callerId);
       } else {
         await this.ownershipTransactions.keepOwnership(transfer.id, dto.callerId);
-        ownershipResolution = 'KEPT';
       }
     } else {
       await this.userRepository.setActive(dto.userId, true);
@@ -94,7 +117,7 @@ export class PlatformReactivateUserUseCase {
       tenantId: target.tenantId,
       metadata: {
         targetEmail: target.email,
-        ...(ownershipResolution ? { ownershipTransferId: transfer!.id, resolution: ownershipResolution } : {}),
+        ...(resolution ? { ownershipTransferId: transfer!.id, resolution } : {}),
       },
     });
 

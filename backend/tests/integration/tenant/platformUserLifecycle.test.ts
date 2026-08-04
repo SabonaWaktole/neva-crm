@@ -137,6 +137,26 @@ describe('Platform Admin user lifecycle', () => {
       expect(transfer?.actingOwnerId).toBe(staff.id);
     });
 
+    it('suspends a Business Owner with staff directly when the workspace has a co-owner', async () => {
+      const owner = await createUser('BUSINESS_OWNER');
+      const coOwner = await createUser('BUSINESS_OWNER');
+      const staff = await createUser('STAFF');
+
+      const res = await request(app)
+        .patch(`/api/tenants/users/${owner.id}/suspend`)
+        .set('Authorization', `Bearer ${superAdminToken}`)
+        .send({});
+
+      expect(res.status).toBe(200);
+      expect(res.body.user.isActive).toBe(false);
+
+      // Nobody was promoted and no transfer to resolve later: the co-owner
+      // already runs the workspace.
+      expect((await prisma.user.findUnique({ where: { id: staff.id } }))?.role).toBe('STAFF');
+      expect((await prisma.user.findUnique({ where: { id: coOwner.id } }))?.role).toBe('BUSINESS_OWNER');
+      expect(await prisma.ownershipTransfer.findFirst({ where: { originalOwnerId: owner.id } })).toBeNull();
+    });
+
     it('returns 400 for a newOwnerId that is not an eligible staff member', async () => {
       const owner = await createUser('BUSINESS_OWNER');
       await createUser('STAFF');
@@ -164,7 +184,7 @@ describe('Platform Admin user lifecycle', () => {
       expect(res.body.user.isActive).toBe(true);
     });
 
-    it('requires restoreOwnership (409) after a suspension that transferred ownership, then restores it', async () => {
+    it('requires ownershipResolution (409) after a suspension that transferred ownership, then restores it', async () => {
       const owner = await createUser('BUSINESS_OWNER');
       const staff = await createUser('STAFF');
 
@@ -183,7 +203,7 @@ describe('Platform Admin user lifecycle', () => {
       const res = await request(app)
         .patch(`/api/tenants/users/${owner.id}/reactivate`)
         .set('Authorization', `Bearer ${superAdminToken}`)
-        .send({ restoreOwnership: true });
+        .send({ ownershipResolution: 'RESTORE' });
 
       expect(res.status).toBe(200);
       expect(res.body.user.isActive).toBe(true);
@@ -208,7 +228,7 @@ describe('Platform Admin user lifecycle', () => {
       const res = await request(app)
         .patch(`/api/tenants/users/${owner.id}/reactivate`)
         .set('Authorization', `Bearer ${superAdminToken}`)
-        .send({ restoreOwnership: false });
+        .send({ ownershipResolution: 'KEEP' });
 
       expect(res.status).toBe(200);
       expect(res.body.user.role).toBe('STAFF');
@@ -218,6 +238,48 @@ describe('Platform Admin user lifecycle', () => {
 
       const transfer = await prisma.ownershipTransfer.findFirst({ where: { originalOwnerId: owner.id } });
       expect(transfer?.status).toBe('KEPT');
+    });
+
+    it('keeps BOTH as Business Owners when chosen, demoting neither', async () => {
+      const owner = await createUser('BUSINESS_OWNER');
+      const staff = await createUser('STAFF');
+
+      await request(app)
+        .patch(`/api/tenants/users/${owner.id}/suspend`)
+        .set('Authorization', `Bearer ${superAdminToken}`)
+        .send({ newOwnerId: staff.id });
+
+      const res = await request(app)
+        .patch(`/api/tenants/users/${owner.id}/reactivate`)
+        .set('Authorization', `Bearer ${superAdminToken}`)
+        .send({ ownershipResolution: 'KEEP_BOTH' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.user.isActive).toBe(true);
+      expect(res.body.user.role).toBe('BUSINESS_OWNER');
+
+      // The temporary owner stays exactly where the suspension left them —
+      // the workspace now genuinely has two Business Owners.
+      const actingOwner = await prisma.user.findUnique({ where: { id: staff.id } });
+      expect(actingOwner?.role).toBe('BUSINESS_OWNER');
+
+      const owners = await prisma.user.findMany({ where: { tenantId, role: 'BUSINESS_OWNER', isActive: true } });
+      expect(owners.map((u) => u.id).sort()).toEqual([owner.id, staff.id].sort());
+
+      const transfer = await prisma.ownershipTransfer.findFirst({ where: { originalOwnerId: owner.id } });
+      expect(transfer?.status).toBe('KEPT_BOTH');
+      expect(transfer?.resolvedAt).not.toBeNull();
+    });
+
+    it('rejects an unknown ownershipResolution with 400', async () => {
+      const staff = await createUser('STAFF', { isActive: false });
+
+      const res = await request(app)
+        .patch(`/api/tenants/users/${staff.id}/reactivate`)
+        .set('Authorization', `Bearer ${superAdminToken}`)
+        .send({ ownershipResolution: 'DELETE_EVERYONE' });
+
+      expect(res.status).toBe(400);
     });
   });
 
@@ -266,6 +328,20 @@ describe('Platform Admin user lifecycle', () => {
       expect(tenant).not.toBeNull();
     });
 
+    it('deletes a Business Owner with staff directly when the workspace has a co-owner', async () => {
+      const owner = await createUser('BUSINESS_OWNER');
+      await createUser('BUSINESS_OWNER');
+      const staff = await createUser('STAFF');
+
+      const res = await request(app)
+        .delete(`/api/tenants/users/${owner.id}`)
+        .set('Authorization', `Bearer ${superAdminToken}`)
+        .send({ confirmEmail: owner.email });
+
+      expect(res.status).toBe(204);
+      expect((await prisma.user.findUnique({ where: { id: staff.id } }))?.role).toBe('STAFF');
+    });
+
     it('requires newOwnerId (409) when deleting a Business Owner with active staff, then transfers ownership permanently', async () => {
       const owner = await createUser('BUSINESS_OWNER');
       const staff = await createUser('STAFF');
@@ -310,6 +386,142 @@ describe('Platform Admin user lifecycle', () => {
       expect(res.status).toBe(200);
       expect(res.body.items).toHaveLength(1);
       expect(res.body.items[0].id).toBe(staff.id);
+    });
+
+    it('lists nobody while the workspace has another active Business Owner', async () => {
+      const owner = await createUser('BUSINESS_OWNER');
+      await createUser('BUSINESS_OWNER');
+      await createUser('STAFF');
+
+      const res = await request(app)
+        .get(`/api/tenants/users/${owner.id}/ownership-transfer-candidates`)
+        .set('Authorization', `Bearer ${superAdminToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.items).toEqual([]);
+    });
+  });
+
+  /**
+   * The third way to become a Business Owner: invited straight from the
+   * platform console. Promotion from staff and an invitation from an existing
+   * owner are the other two, and both live under /api/:tenantSlug/auth.
+   */
+  describe('invite', () => {
+    const invitedEmails: string[] = [];
+
+    const inviteEmail = () => {
+      const email = `invited-${uuidv4().slice(0, 8)}@test.com`;
+      invitedEmails.push(email);
+      return email;
+    };
+
+    afterEach(async () => {
+      await prisma.invitation.deleteMany({ where: { tenantId } });
+      invitedEmails.length = 0;
+    });
+
+    it('creates a BUSINESS_OWNER invitation by default, without echoing the token', async () => {
+      const email = inviteEmail();
+
+      const res = await request(app)
+        .post(`/api/tenants/${tenantId}/invitations`)
+        .set('Authorization', `Bearer ${superAdminToken}`)
+        .send({ email });
+
+      expect(res.status).toBe(201);
+      expect(res.body.invitation).toEqual({ email, role: 'BUSINESS_OWNER' });
+      expect(JSON.stringify(res.body)).not.toContain('token');
+
+      const invitation = await prisma.invitation.findFirst({ where: { tenantId, email } });
+      expect(invitation?.role).toBe('BUSINESS_OWNER');
+      expect(invitation?.acceptedAt).toBeNull();
+    });
+
+    it('adds an owner rather than replacing the existing one', async () => {
+      const owner = await createUser('BUSINESS_OWNER');
+      const email = inviteEmail();
+
+      await request(app)
+        .post(`/api/tenants/${tenantId}/invitations`)
+        .set('Authorization', `Bearer ${superAdminToken}`)
+        .send({ email })
+        .expect(201);
+
+      const stillOwner = await prisma.user.findUnique({ where: { id: owner.id } });
+      expect(stillOwner?.role).toBe('BUSINESS_OWNER');
+      expect(stillOwner?.isActive).toBe(true);
+    });
+
+    it('accepts an explicit STAFF role', async () => {
+      const email = inviteEmail();
+
+      const res = await request(app)
+        .post(`/api/tenants/${tenantId}/invitations`)
+        .set('Authorization', `Bearer ${superAdminToken}`)
+        .send({ email, role: 'STAFF' });
+
+      expect(res.status).toBe(201);
+      expect(res.body.invitation.role).toBe('STAFF');
+    });
+
+    it('rejects SUPER_ADMIN as a role with 400', async () => {
+      const res = await request(app)
+        .post(`/api/tenants/${tenantId}/invitations`)
+        .set('Authorization', `Bearer ${superAdminToken}`)
+        .send({ email: inviteEmail(), role: 'SUPER_ADMIN' });
+
+      expect(res.status).toBe(400);
+    });
+
+    it('rejects a non-SUPER_ADMIN caller with 403', async () => {
+      const owner = await createUser('BUSINESS_OWNER');
+
+      const res = await request(app)
+        .post(`/api/tenants/${tenantId}/invitations`)
+        .set('Authorization', `Bearer ${tokenFor(owner.id, 'BUSINESS_OWNER')}`)
+        .send({ email: inviteEmail() });
+
+      expect(res.status).toBe(403);
+    });
+
+    it('returns 404 for an unknown workspace', async () => {
+      const res = await request(app)
+        .post(`/api/tenants/${uuidv4()}/invitations`)
+        .set('Authorization', `Bearer ${superAdminToken}`)
+        .send({ email: inviteEmail() });
+
+      expect(res.status).toBe(404);
+    });
+
+    it('returns 409 when the invitee already has an account in that workspace', async () => {
+      const existing = await createUser('STAFF');
+
+      const res = await request(app)
+        .post(`/api/tenants/${tenantId}/invitations`)
+        .set('Authorization', `Bearer ${superAdminToken}`)
+        .send({ email: existing.email });
+
+      expect(res.status).toBe(409);
+      expect(res.body.code).toBe('USER_ALREADY_IN_WORKSPACE');
+    });
+
+    it('returns 409 on a duplicate pending invitation', async () => {
+      const email = inviteEmail();
+
+      await request(app)
+        .post(`/api/tenants/${tenantId}/invitations`)
+        .set('Authorization', `Bearer ${superAdminToken}`)
+        .send({ email })
+        .expect(201);
+
+      const res = await request(app)
+        .post(`/api/tenants/${tenantId}/invitations`)
+        .set('Authorization', `Bearer ${superAdminToken}`)
+        .send({ email });
+
+      expect(res.status).toBe(409);
+      expect(res.body.code).toBe('INVITATION_ALREADY_PENDING');
     });
   });
 });

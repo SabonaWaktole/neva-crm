@@ -180,7 +180,15 @@
     "restoreOriginalOwnership": "Ripristina la titolarità originale",
     "restoreOriginalOwnershipDescription": "Questo utente torna a essere titolare aziendale e il membro del personale che lo sostituiva torna al suo ruolo precedente.",
     "keepCurrentOwnership": "Mantieni la titolarità attuale",
-    "keepCurrentOwnershipDescription": "Il membro del personale che lo sostituiva resta titolare aziendale e questo utente rientra come membro ordinario del personale."
+    "keepCurrentOwnershipDescription": "Il membro del personale che lo sostituiva resta titolare aziendale e questo utente rientra come membro ordinario del personale.",
+    "keepBothOwners": "Mantieni entrambi come titolari aziendali",
+    "keepBothOwnersDescription": "Questo utente torna a essere titolare aziendale e anche il sostituto mantiene il ruolo. Lo spazio di lavoro resta con due titolari e nessuno viene retrocesso.",
+    "inviteUser": "Invita utente",
+    "inviteUserTitle": "Invita qualcuno in uno spazio di lavoro",
+    "inviteUserIntro": "Riceverà un link via email e sceglierà la propria password. Invitare un titolare aziendale ne aggiunge uno — uno spazio di lavoro può averne diversi e nessun titolare esistente viene sostituito.",
+    "inviteUserSubmit": "Invia invito",
+    "sendingInvite": "Invio…",
+    "inviteRoleHelp": "I titolari aziendali amministrano lo spazio di lavoro insieme agli altri titolari. Il personale ci lavora dentro."
   },
   "reports": {
     "title": "Report e analisi",

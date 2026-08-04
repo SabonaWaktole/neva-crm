@@ -180,7 +180,15 @@
     "restoreOriginalOwnership": "Restore original ownership",
     "restoreOriginalOwnershipDescription": "This user becomes Business Owner again, and the standing-in staff member returns to their previous role.",
     "keepCurrentOwnership": "Keep current ownership",
-    "keepCurrentOwnershipDescription": "The standing-in staff member stays Business Owner, and this user rejoins as a regular staff member."
+    "keepCurrentOwnershipDescription": "The standing-in staff member stays Business Owner, and this user rejoins as a regular staff member.",
+    "keepBothOwners": "Keep both as Business Owners",
+    "keepBothOwnersDescription": "This user becomes Business Owner again and the standing-in member keeps the role too. The workspace ends up with two owners and nobody is demoted.",
+    "inviteUser": "Invite user",
+    "inviteUserTitle": "Invite someone to a workspace",
+    "inviteUserIntro": "They'll get an email link and choose their own password. Inviting a Business Owner adds one — a workspace can have several, and no existing owner is replaced.",
+    "inviteUserSubmit": "Send invitation",
+    "sendingInvite": "Sending…",
+    "inviteRoleHelp": "Business Owners administer the workspace alongside any existing owners. Staff work inside it."
   },
   "reports": {
     "title": "Reports & Analytics",

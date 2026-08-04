@@ -8,6 +8,7 @@ import type {
   CreateTenantInput,
   PlatformUser,
   OwnershipTransferCandidate,
+  OwnershipResolution,
   PlatformActivityEvent,
   GlobalMrr,
   SystemHealth,
@@ -320,8 +321,8 @@ export const useUserAdmin = () => {
   );
 
   const reactivateUser = useCallback(
-    (userId: string, restoreOwnership?: boolean): Promise<PlatformUser | null> =>
-      run(() => dashboardService.reactivateUser(userId, restoreOwnership)),
+    (userId: string, ownershipResolution?: OwnershipResolution): Promise<PlatformUser | null> =>
+      run(() => dashboardService.reactivateUser(userId, ownershipResolution)),
     [run]
   );
 

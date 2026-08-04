@@ -38,6 +38,14 @@ export interface IOwnershipTransactions {
   keepOwnership(transferId: string, resolvedByUserId: string): Promise<void>;
 
   /**
+   * Reactivation, "Keep Both Owners": the acting owner stays BUSINESS_OWNER
+   * and the original owner comes back as one too, so the workspace ends up
+   * with two. Nothing here demotes anyone — a business may have any number of
+   * Business Owners, which is exactly what the other two resolutions give up.
+   */
+  keepBothOwners(transferId: string, resolvedByUserId: string): Promise<void>;
+
+  /**
    * Deleting a Business Owner who has other active staff: the chosen staff
    * member is permanently promoted to BUSINESS_OWNER. No transfer row —
    * deletion has no "restore" to come back to.

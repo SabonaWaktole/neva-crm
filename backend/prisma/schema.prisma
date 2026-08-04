@@ -232,9 +232,11 @@ model User {
 
 /// Records a temporary Business-Owner promotion created when a Platform Admin
 /// suspends a Business Owner who still has active staff (see SuspendUserUseCase).
-/// Reactivation reads the ACTIVE row to offer "restore original ownership" vs
-/// "keep current ownership" (ReactivateUserUseCase), then resolves it to
-/// RESTORED or KEPT — a terminal state, never reused.
+/// Reactivation reads the ACTIVE row to offer "restore original ownership",
+/// "keep current ownership" or "keep both as Business Owners"
+/// (PlatformReactivateUserUseCase), then resolves it to RESTORED, KEPT or
+/// KEPT_BOTH — a terminal state, never reused. KEPT_BOTH demotes nobody: a
+/// workspace may have any number of Business Owners.
 ///
 /// Only created for suspension. A Business Owner deletion that transfers
 /// ownership is permanent by construction (the original owner is gone), so it
@@ -248,7 +250,7 @@ model OwnershipTransfer {
   // them back exactly where they were.
   previousActingRole        String
   previousActingWarehouseId String?
-  status                    String    // 'ACTIVE' | 'RESTORED' | 'KEPT'
+  status                    String    // 'ACTIVE' | 'RESTORED' | 'KEPT' | 'KEPT_BOTH'
   createdAt                 DateTime  @default(now())
   createdByUserId           String
   resolvedAt                DateTime?
@@ -270,7 +272,7 @@ model AuditLog {
   id          String   @id
   actorUserId String
   actorRole   String
-  action      String   // e.g. 'USER_SUSPENDED', 'USER_REACTIVATED', 'USER_DELETED', 'OWNERSHIP_TRANSFERRED'
+  action      String   // e.g. 'USER_SUSPENDED', 'USER_REACTIVATED', 'USER_DELETED', 'USER_INVITED', 'OWNERSHIP_TRANSFERRED'
   targetType  String   // 'USER'
   targetId    String
   tenantId    String?

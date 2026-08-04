@@ -5,6 +5,13 @@ export const OwnershipTransferStatus = {
   RESTORED: 'RESTORED',
   /** Reactivation kept the acting owner and returned the original owner as STAFF. */
   KEPT: 'KEPT',
+  /**
+   * Reactivation kept the acting owner AND returned the original owner as a
+   * Business Owner — the workspace now has both. A workspace may have any
+   * number of Business Owners, so this is a resolution in its own right and
+   * not a variant of KEPT: nobody is demoted.
+   */
+  KEPT_BOTH: 'KEPT_BOTH',
 } as const;
 
 export type OwnershipTransferStatus =

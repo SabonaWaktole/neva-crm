@@ -61,12 +61,28 @@ export const tenantSchemas = {
   }),
 
   /**
-   * Super Admin reactivating any platform user. `restoreOwnership` is only
+   * Super Admin reactivating any platform user. `ownershipResolution` is only
    * required when the target has an unresolved ownership transfer —
-   * `PlatformReactivateUserUseCase` enforces that.
+   * `PlatformReactivateUserUseCase` enforces that, and documents what each of
+   * the three choices does.
    */
   reactivateUser: z.object({
-    restoreOwnership: z.boolean().optional(),
+    ownershipResolution: z.enum(['RESTORE', 'KEEP', 'KEEP_BOTH']).optional(),
+  }),
+
+  /**
+   * Super Admin inviting someone into a workspace from outside the platform —
+   * the third route to becoming a Business Owner, alongside promotion from
+   * staff and an invitation from an existing owner.
+   *
+   * The role defaults to BUSINESS_OWNER because that is what this endpoint is
+   * for; STAFF stays available so the console does not need a near-identical
+   * second endpoint to invite a team member. `SUPER_ADMIN` is absent for the
+   * same reason it is absent from `createUser` above.
+   */
+  inviteUser: z.object({
+    email: z.string().email(),
+    role: z.enum(['BUSINESS_OWNER', 'STAFF']).default('BUSINESS_OWNER'),
   }),
 
   /**

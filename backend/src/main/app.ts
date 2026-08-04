@@ -9,6 +9,7 @@ import { LoginUseCase } from '@auth/application/use-cases/LoginUseCase';
 import { CreateUserUseCase } from '@auth/application/use-cases/CreateUserUseCase';
 import { GetPlatformUsersUseCase } from '@auth/application/use-cases/GetPlatformUsersUseCase';
 import { InviteStaffUseCase } from '@auth/application/use-cases/InviteStaffUseCase';
+import { PlatformInviteUserUseCase } from '@auth/application/use-cases/PlatformInviteUserUseCase';
 import { AcceptInvitationUseCase } from '@auth/application/use-cases/AcceptInvitationUseCase';
 import { RequestPasswordResetUseCase } from '@auth/application/use-cases/RequestPasswordResetUseCase';
 import { ResetPasswordUseCase } from '@auth/application/use-cases/ResetPasswordUseCase';
@@ -240,6 +241,13 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
     ownershipTransactions,
     auditLogger
   );
+  const platformInviteUserUseCase = new PlatformInviteUserUseCase(
+    invitationRepository,
+    userRepository,
+    tenantRepository,
+    emailSender,
+    auditLogger
+  );
 
   // Controller
   const authController = new AuthController(
@@ -318,6 +326,7 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
     enterTenantUseCase,
     deleteTenantUseCase,
     createUserUseCase,
+    inviteUserUseCase: platformInviteUserUseCase,
     getPlatformUsersUseCase,
     getOwnershipTransferCandidatesUseCase,
     suspendUserUseCase: platformSuspendUserUseCase,

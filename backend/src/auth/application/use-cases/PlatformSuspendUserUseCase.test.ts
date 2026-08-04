@@ -63,6 +63,7 @@ describe('PlatformSuspendUserUseCase', () => {
       promoteForSuspension: jest.fn(),
       restoreOwnership: jest.fn(),
       keepOwnership: jest.fn(),
+      keepBothOwners: jest.fn(),
       promoteForDeletion: jest.fn(),
     };
     auditLogger = { record: jest.fn(), findRecent: jest.fn() };
@@ -129,12 +130,30 @@ describe('PlatformSuspendUserUseCase', () => {
     expect(ownershipTransactions.promoteForSuspension).not.toHaveBeenCalled();
   });
 
-  describe('Business Owner with active staff', () => {
+  // A workspace may have several Business Owners; only the last one standing
+  // has to hand it over. See `otherActiveOwners`.
+  it('suspends a Business Owner with staff directly when a co-owner remains', async () => {
+    userRepository.findById.mockResolvedValue(makeUser({ role: UserRole.BUSINESS_OWNER }));
+    userRepository.findActiveByTenantAndRole.mockImplementation(async (_tenantId, role) =>
+      role === UserRole.BUSINESS_OWNER
+        ? [makeUser({ id: 'user-1', role: UserRole.BUSINESS_OWNER }), makeUser({ id: 'owner-2', role: UserRole.BUSINESS_OWNER })]
+        : [makeUser({ id: 'staff-1', role: UserRole.STAFF })]
+    );
+
+    await suspend();
+
+    expect(userRepository.setActive).toHaveBeenCalledWith('user-1', false);
+    expect(ownershipTransactions.promoteForSuspension).not.toHaveBeenCalled();
+  });
+
+  describe('sole Business Owner with active staff', () => {
     beforeEach(() => {
       userRepository.findById.mockResolvedValue(makeUser({ role: UserRole.BUSINESS_OWNER }));
-      userRepository.findActiveByTenantAndRole.mockResolvedValue([
-        makeUser({ id: 'staff-1', role: UserRole.STAFF, warehouseId: 'wh-1' }),
-      ]);
+      userRepository.findActiveByTenantAndRole.mockImplementation(async (_tenantId, role) =>
+        role === UserRole.BUSINESS_OWNER
+          ? [makeUser({ id: 'user-1', role: UserRole.BUSINESS_OWNER })]
+          : [makeUser({ id: 'staff-1', role: UserRole.STAFF, warehouseId: 'wh-1' })]
+      );
     });
 
     it('requires newOwnerId', async () => {

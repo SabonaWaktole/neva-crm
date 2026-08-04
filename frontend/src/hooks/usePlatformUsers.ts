@@ -4,6 +4,7 @@ import type {
   PlatformUser,
   PlatformUserFilters,
   CreatePlatformUserInput,
+  InvitePlatformUserInput,
 } from '../services/dashboardService';
 
 /**
@@ -79,6 +80,45 @@ export const useCreatePlatformUser = () => {
 
   return {
     createUser,
+    isSubmitting,
+    error,
+    clearError: useCallback(() => setError(null), []),
+  };
+};
+
+/**
+ * Inviting someone into a workspace from the console, by default as a Business
+ * Owner.
+ *
+ * Same shape as `useCreatePlatformUser` above and deliberately not folded into
+ * it: the two write different things (an invitation versus an account) and
+ * fail for different reasons the operator has to read — "already has an
+ * account here" and "an invitation is already pending" both come back as the
+ * server's own message.
+ */
+export const useInvitePlatformUser = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const inviteUser = useCallback(
+    async (tenantId: string, input: InvitePlatformUserInput): Promise<boolean> => {
+      setIsSubmitting(true);
+      setError(null);
+      try {
+        await dashboardService.invitePlatformUser(tenantId, input);
+        return true;
+      } catch (err: any) {
+        setError(err.response?.data?.error || 'Could not send the invitation.');
+        return false;
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    []
+  );
+
+  return {
+    inviteUser,
     isSubmitting,
     error,
     clearError: useCallback(() => setError(null), []),
