@@ -11,12 +11,12 @@ import type {
 } from '../types/client';
 
 export const clientService = {
-  createClient: async (tenantSlug: string, data: { name: string; contactInfo?: { email?: string; phone?: string }; status?: ClientStatus; assignedUserId?: string | null; customFieldValues?: Record<string, any> }) => {
+  createClient: async (tenantSlug: string, data: { name: string; email?: string; phone?: string; status?: ClientStatus; assignedUserId?: string | null; customFieldValues?: Record<string, any> }) => {
     const response = await apiClient.post<Client>(`/${tenantSlug}/clients`, data);
     return response.data;
   },
 
-  updateClient: async (tenantSlug: string, clientId: string, data: { name?: string; contactInfo?: { email?: string; phone?: string }; status?: ClientStatus; assignedUserId?: string | null; customFieldValues?: Record<string, any> }) => {
+  updateClient: async (tenantSlug: string, clientId: string, data: { name?: string; email?: string; phone?: string; status?: ClientStatus; assignedUserId?: string | null; customFieldValues?: Record<string, any> }) => {
     const response = await apiClient.put<Client>(`/${tenantSlug}/clients/${clientId}`, data);
     return response.data;
   },
