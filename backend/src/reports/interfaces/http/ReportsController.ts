@@ -11,6 +11,15 @@ import { ReportPdfRenderer } from '../../infrastructure/ReportPdfRenderer';
 
 const exportPdfSchema = z.object({
   tenantName: z.string().default('Workspace'),
+  currency: z.string().default('USD'),
+  locale: z.string().default('en-US'),
+  revenue: z.array(z.object({ month: z.string(), revenue: z.number() })).default([]),
+  clients: z.array(z.object({ status: z.string(), count: z.number() })).default([]),
+  inventory: z
+    .array(z.object({ warehouseName: z.string(), totalItems: z.number(), totalValue: z.number() }))
+    .default([]),
+  clientTrend: z.array(z.object({ month: z.string(), count: z.number() })).default([]),
+  appointmentsByStatus: z.array(z.object({ status: z.string(), count: z.number() })).default([]),
   byStaff: z
     .array(
       z.object({
@@ -34,11 +43,6 @@ const exportPdfSchema = z.object({
       })
     )
     .default([]),
-  // Chart title -> base64 PNG data URI, captured client-side from the
-  // already-rendered recharts SVGs. No shape validation beyond "string": an
-  // oversized or malformed value fails harmlessly inside the renderer's
-  // try/catch rather than here.
-  charts: z.record(z.string(), z.string()).default({}),
 });
 
 export class ReportsController {
@@ -128,22 +132,28 @@ export class ReportsController {
   };
 
   /**
-   * POST rather than GET because the request body carries the chart PNGs
-   * captured client-side — those can run to hundreds of KB combined, well past
-   * what belongs in a query string. The report data itself (tables, chart
-   * titles) is also client-supplied rather than re-queried here: it is the
-   * same numbers already on screen, and re-querying risks the PDF disagreeing
-   * with what the user was just looking at when they clicked the button.
+   * POST rather than GET: report data is client-supplied rather than
+   * re-queried here — it is the same numbers already on screen, and
+   * re-querying risks the PDF disagreeing with what the user was just
+   * looking at when they clicked the button. Charts are drawn server-side by
+   * `ReportPdfRenderer` from these same numbers (see `pdfCharts.ts`), not
+   * from a client-captured image.
    */
   exportPdf = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const body = exportPdfSchema.parse(req.body);
       const pdf = await this.pdfRenderer.render({
         tenantName: body.tenantName,
+        currency: body.currency,
+        locale: body.locale,
         generatedAt: new Date(),
+        revenue: body.revenue,
+        clients: body.clients,
+        inventory: body.inventory,
+        clientTrend: body.clientTrend,
+        appointmentsByStatus: body.appointmentsByStatus,
         byStaff: body.byStaff,
         lowStock: body.lowStock,
-        charts: body.charts,
       });
 
       res.setHeader('Content-Type', 'application/pdf');

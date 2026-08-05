@@ -1,4 +1,26 @@
 import PDFDocument from 'pdfkit';
+import { drawBarChart, drawLegend, drawLineChart, drawPieChart } from './pdfCharts';
+
+export interface ReportPdfMonthlyPoint {
+  month: string;
+  revenue: number;
+}
+
+export interface ReportPdfStatusCount {
+  status: string;
+  count: number;
+}
+
+export interface ReportPdfWarehouseValue {
+  warehouseName: string;
+  totalItems: number;
+  totalValue: number;
+}
+
+export interface ReportPdfTrendPoint {
+  month: string;
+  count: number;
+}
 
 export interface ReportPdfStaffRow {
   staffName: string;
@@ -19,20 +41,39 @@ export interface ReportPdfLowStockRow {
 
 export interface ReportPdfData {
   tenantName: string;
+  currency: string;
+  locale: string;
   generatedAt: Date;
+  revenue: ReportPdfMonthlyPoint[];
+  clients: ReportPdfStatusCount[];
+  inventory: ReportPdfWarehouseValue[];
+  clientTrend: ReportPdfTrendPoint[];
+  appointmentsByStatus: ReportPdfStatusCount[];
   byStaff: ReportPdfStaffRow[];
   lowStock: ReportPdfLowStockRow[];
-  /** One base64-encoded PNG per chart, keyed by a human title (e.g. "Monthly Revenue"). */
-  charts: Record<string, string>;
 }
 
 /**
- * Renders the Reports page as a PDF: chart images captured client-side (see
- * `ReportsPage.tsx`'s `XMLSerializer` -> canvas -> PNG pipeline, since recharts
- * has no server-side renderer here) followed by the two tables the page
- * already shows, using the same manual-column pdfkit technique as
- * `QuotationPdfRenderer`/`InvoicePdfRenderer` — four columns is not enough to
- * justify a table helper pdfkit does not provide.
+ * Fixed categorical order, matching `--chart-1`..`--chart-6` in
+ * `frontend/src/styles/tokens.css`. Duplicated rather than shared: the
+ * frontend's copy is a CSS custom property resolved by the browser, this one
+ * is a plain hex value pdfkit can fill a path with directly, and there's no
+ * build step that would let the two mechanisms share a single source without
+ * far more machinery than six colors justifies.
+ */
+const CHART_COLORS = ['#0071e3', '#0f9aa8', '#b45309', '#7c3aed', '#c2418f', '#12864a'];
+
+/**
+ * Renders the Reports page as a PDF.
+ *
+ * Charts are drawn natively with pdfkit (see `pdfCharts.ts`) rather than
+ * embedding images captured from the on-screen recharts SVGs. That path was
+ * tried first and produced wrong output twice running — colors that didn't
+ * resolve outside the browser's stylesheet context, then a shape that didn't
+ * rasterize correctly either — because it depended on browser SVG
+ * serialization behaving predictably outside a live page. Plotting the same
+ * numbers directly here removes that entire dependency: the PDF is built
+ * from the same report data the page renders from, not a screenshot of it.
  */
 export class ReportPdfRenderer {
   async render(data: ReportPdfData): Promise<Buffer> {
@@ -55,27 +96,98 @@ export class ReportPdfRenderer {
     const left = doc.page.margins.left;
     const right = doc.page.width - doc.page.margins.right;
     const contentWidth = right - left;
+    const money = (amount: number) => formatMoney(amount, data.currency, data.locale);
 
     doc.fontSize(20).fillColor('#000').text(data.tenantName);
     doc.fontSize(10).fillColor('#666').text('Reports export');
     doc.text(`Generated: ${data.generatedAt.toISOString().slice(0, 10)}`);
     doc.moveDown(1);
 
-    // One chart per page keeps each image legible rather than shrinking six
-    // charts onto one sheet.
-    for (const [title, base64] of Object.entries(data.charts)) {
-      if (!base64) continue;
+    // One chart per page keeps each legible rather than shrinking six charts
+    // onto one sheet.
+    if (data.revenue.length > 0) {
       doc.addPage();
-      doc.fontSize(14).fillColor('#000').text(title);
+      doc.fontSize(14).fillColor('#000').text('Monthly revenue');
       doc.moveDown(0.5);
-      try {
-        const buffer = Buffer.from(base64.replace(/^data:image\/\w+;base64,/, ''), 'base64');
-        doc.image(buffer, doc.x, doc.y, { fit: [contentWidth, 380] });
-      } catch {
-        // A malformed/undecodable chart image must not fail the whole export
-        // — the tables below are still worth having.
-        doc.fontSize(10).fillColor('#999').text('(chart image unavailable)');
-      }
+      drawLineChart(
+        doc,
+        { x: left, y: doc.y, width: contentWidth, height: 300 },
+        data.revenue.map((r) => ({ label: r.month, value: r.revenue })),
+        CHART_COLORS[0],
+        money
+      );
+    }
+
+    if (data.clients.length > 0) {
+      doc.addPage();
+      doc.fontSize(14).fillColor('#000').text('Client distribution');
+      doc.moveDown(0.5);
+      const total = data.clients.reduce((sum, c) => sum + c.count, 0);
+      const slices = data.clients.map((c, i) => ({
+        label: humanStatus(c.status),
+        value: c.count,
+        color: CHART_COLORS[i % CHART_COLORS.length],
+      }));
+      const chartTop = doc.y;
+      drawPieChart(doc, { cx: left + contentWidth / 2, cy: chartTop + 130, radius: 110, innerRadius: 60 }, slices);
+      drawLegend(
+        doc,
+        left,
+        chartTop + 270,
+        contentWidth,
+        slices.map((s) => ({
+          label: s.label,
+          value: `${s.value} (${total > 0 ? Math.round((s.value / total) * 100) : 0}%)`,
+          color: s.color,
+        }))
+      );
+    }
+
+    if (data.inventory.length > 0) {
+      doc.addPage();
+      doc.fontSize(14).fillColor('#000').text('Inventory value by warehouse');
+      doc.moveDown(0.5);
+      drawBarChart(
+        doc,
+        { x: left, y: doc.y, width: contentWidth, height: 260 },
+        data.inventory.map((i) => ({ label: i.warehouseName, value: i.totalValue })),
+        CHART_COLORS[0],
+        money
+      );
+
+      doc.addPage();
+      doc.fontSize(14).fillColor('#000').text('Items held by warehouse');
+      doc.moveDown(0.5);
+      drawBarChart(
+        doc,
+        { x: left, y: doc.y, width: contentWidth, height: 260 },
+        data.inventory.map((i) => ({ label: i.warehouseName, value: i.totalItems })),
+        CHART_COLORS[1]
+      );
+    }
+
+    if (data.appointmentsByStatus.length > 0) {
+      doc.addPage();
+      doc.fontSize(14).fillColor('#000').text('Appointment statistics');
+      doc.moveDown(0.5);
+      drawBarChart(
+        doc,
+        { x: left, y: doc.y, width: contentWidth, height: 260 },
+        data.appointmentsByStatus.map((a) => ({ label: humanStatus(a.status), value: a.count })),
+        CHART_COLORS[2]
+      );
+    }
+
+    if (data.clientTrend.length > 0) {
+      doc.addPage();
+      doc.fontSize(14).fillColor('#000').text('New clients');
+      doc.moveDown(0.5);
+      drawLineChart(
+        doc,
+        { x: left, y: doc.y, width: contentWidth, height: 300 },
+        data.clientTrend.map((t) => ({ label: t.month, value: t.count })),
+        CHART_COLORS[3]
+      );
     }
 
     if (data.byStaff.length > 0) {
@@ -108,7 +220,7 @@ export class ReportPdfRenderer {
           r.warehouseName,
           String(r.quantity),
           String(r.threshold),
-          r.status,
+          humanStatus(r.status),
         ])
       );
     }
@@ -141,4 +253,19 @@ export class ReportPdfRenderer {
       y += 18;
     }
   }
+}
+
+function formatMoney(amount: number, currency: string, locale: string): string {
+  try {
+    return new Intl.NumberFormat(locale, { style: 'currency', currency, maximumFractionDigits: 0 }).format(amount);
+  } catch {
+    return amount.toFixed(0);
+  }
+}
+
+function humanStatus(status: string): string {
+  return status
+    .split('_')
+    .map((word) => word.charAt(0) + word.slice(1).toLowerCase())
+    .join(' ');
 }

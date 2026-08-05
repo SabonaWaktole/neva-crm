@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -18,100 +18,6 @@ import { useMoneyFormat } from '../hooks/useMoneyFormat';
 import { useStatusLabel } from '../hooks/useStatusLabel';
 import { Badge } from '../components/ui/Badge/Badge';
 import styles from './ReportsPage.module.css';
-
-/**
- * Copies resolved (not `var(...)`) color/text styles from a live SVG element
- * onto its detached clone, recursively.
- *
- * Recharts paints with `fill="var(--chart-1)"` etc., which only resolves
- * against the main document's stylesheet. The clone gets serialized into a
- * standalone `data:image/svg+xml` document with no access to that
- * stylesheet, so every `var(--chart-N)` falls back to the CSS-initial value
- * for `fill` — black — which is why the exported chart turned solid black.
- * `getComputedStyle` on the still-attached source resolves the variables
- * correctly; baking that result in as an inline style on the clone means the
- * detached document never has to resolve anything itself.
- */
-function inlineComputedStyle(source: Element, target: Element): void {
-  const computed = window.getComputedStyle(source);
-  const style = (target as SVGElement).style;
-  style.fill = computed.fill;
-  style.stroke = computed.stroke;
-  style.strokeWidth = computed.strokeWidth;
-  style.strokeDasharray = computed.strokeDasharray;
-  style.opacity = computed.opacity;
-  style.fillOpacity = computed.fillOpacity;
-  style.strokeOpacity = computed.strokeOpacity;
-  style.color = computed.color;
-  style.fontSize = computed.fontSize;
-  style.fontFamily = computed.fontFamily;
-  style.fontWeight = computed.fontWeight;
-
-  const sourceChildren = source.children;
-  const targetChildren = target.children;
-  for (let i = 0; i < sourceChildren.length; i++) {
-    inlineComputedStyle(sourceChildren[i], targetChildren[i]);
-  }
-}
-
-/**
- * Serializes the first `<svg>` inside `container` and rasterizes it to a PNG
- * data URL via an offscreen canvas.
- *
- * recharts has no server-side renderer available here, so "embed the chart in
- * a PDF" has to start from the SVG the browser already drew rather than
- * re-plotting the data in pdfkit. `XMLSerializer` -> `Image` -> `canvas` is
- * the standard client-side path for that; no extra library required.
- *
- * Returns null (rather than throwing) when the container has no chart yet —
- * an empty-state chart card, or one still loading — so the caller can skip it
- * without failing the whole export.
- */
-function captureChartAsPng(container: HTMLDivElement | null): Promise<string | null> {
-  return new Promise((resolve) => {
-    const svg = container?.querySelector('svg');
-    if (!svg) {
-      resolve(null);
-      return;
-    }
-
-    const rect = svg.getBoundingClientRect();
-    const width = Math.max(1, Math.round(rect.width)) || 600;
-    const height = Math.max(1, Math.round(rect.height)) || 320;
-
-    // Explicit dimensions on the clone: the source `<svg>` from recharts
-    // relies on its parent's CSS size, which an offscreen `Image` has no
-    // parent to inherit.
-    const clone = svg.cloneNode(true) as SVGSVGElement;
-    clone.setAttribute('width', String(width));
-    clone.setAttribute('height', String(height));
-    inlineComputedStyle(svg, clone);
-
-    const svgString = new XMLSerializer().serializeToString(clone);
-    const svgDataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`;
-
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        resolve(null);
-        return;
-      }
-      // White background: the SVG has none of its own, and a PDF page is
-      // white — without this a chart with transparent fills would print
-      // however the PDF viewer chooses to render transparency (often black).
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, width, height);
-      ctx.drawImage(img, 0, 0, width, height);
-      resolve(canvas.toDataURL('image/png'));
-    };
-    img.onerror = () => resolve(null);
-    img.src = svgDataUrl;
-  });
-}
 
 /**
  * Fixed categorical order, read from the validated chart tokens. Slots are
@@ -179,15 +85,11 @@ export const ReportsPage: React.FC = () => {
   const logout = useAuthStore(state => state.logout);
   // Both the tooltip amounts and the axis ticks come from here, so the tenant's
   // currency drives the whole page rather than just the tooltips.
-  const { formatWhole: formatCurrency, formatCompact: compactCurrency } = useMoneyFormat();
+  const { formatWhole: formatCurrency, formatCompact: compactCurrency, currency, locale } = useMoneyFormat();
   const { revenue, clients, inventory, clientTrend, appointments, lowStock, loading, error, refresh } =
     useReports();
   const statusLabel = useStatusLabel();
 
-  // One ref per chart card, keyed by the title used both on screen and in the
-  // exported PDF — so the export's section headings always match what the
-  // user was looking at when they clicked the button.
-  const chartRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [exportingPdf, setExportingPdf] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
 
@@ -196,19 +98,17 @@ export const ReportsPage: React.FC = () => {
     setExportingPdf(true);
     setExportError(null);
     try {
-      const chartEntries = await Promise.all(
-        Object.entries(chartRefs.current).map(async ([title, el]) => [title, await captureChartAsPng(el)] as const)
-      );
-      const charts: Record<string, string> = {};
-      for (const [title, dataUrl] of chartEntries) {
-        if (dataUrl) charts[title] = dataUrl;
-      }
-
       const blob = await reportService.exportPdf(tenantSlug, {
         tenantName: tenantSlug,
+        currency: currency ?? undefined,
+        locale: locale ?? undefined,
+        revenue,
+        clients,
+        inventory,
+        clientTrend,
+        appointmentsByStatus: appointments.byStatus,
         byStaff: appointments.byStaff,
         lowStock: lowStock.items,
-        charts,
       });
       downloadBlob(blob, 'reports.pdf', { open: true });
     } catch (err: any) {
@@ -321,7 +221,7 @@ export const ReportsPage: React.FC = () => {
                 <h2 className={styles.chartTitle}>{t('reports.monthlyRevenue')}</h2>
                 <p className={styles.chartCaption}>{t('reports.monthlyRevenueCaption')}</p>
               </div>
-              <div className={styles.chartBody} ref={(el) => { chartRefs.current[t('reports.monthlyRevenue')] = el; }}>
+              <div className={styles.chartBody}>
                 {revenue.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={revenue} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
@@ -356,7 +256,7 @@ export const ReportsPage: React.FC = () => {
                 <h2 className={styles.chartTitle}>{t('reports.clientDistribution')}</h2>
                 <p className={styles.chartCaption}>{t('reports.clientDistributionCaption')}</p>
               </div>
-              <div className={styles.chartBody} ref={(el) => { chartRefs.current[t('reports.clientDistribution')] = el; }}>
+              <div className={styles.chartBody}>
                 {clients.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -401,7 +301,7 @@ export const ReportsPage: React.FC = () => {
                 <h2 className={styles.chartTitle}>{t('reports.inventoryValue')}</h2>
                 <p className={styles.chartCaption}>{t('reports.inventoryValueCaption')}</p>
               </div>
-              <div className={styles.chartBody} ref={(el) => { chartRefs.current[t('reports.inventoryValue')] = el; }}>
+              <div className={styles.chartBody}>
                 {inventory.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={inventory} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
@@ -432,7 +332,7 @@ export const ReportsPage: React.FC = () => {
                 <h2 className={styles.chartTitle}>{t('reports.itemsHeld')}</h2>
                 <p className={styles.chartCaption}>{t('reports.itemsHeldCaption')}</p>
               </div>
-              <div className={styles.chartBody} ref={(el) => { chartRefs.current[t('reports.itemsHeld')] = el; }}>
+              <div className={styles.chartBody}>
                 {inventory.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={inventory} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
@@ -467,7 +367,7 @@ export const ReportsPage: React.FC = () => {
                 <h2 className={styles.chartTitle}>{t('reports.appointmentStats')}</h2>
                 <p className={styles.chartCaption}>{t('reports.appointmentStatsCaption')}</p>
               </div>
-              <div className={styles.chartBody} ref={(el) => { chartRefs.current[t('reports.appointmentStats')] = el; }}>
+              <div className={styles.chartBody}>
                 {appointmentsByStatus.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={appointmentsByStatus} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
@@ -500,7 +400,7 @@ export const ReportsPage: React.FC = () => {
                 <h2 className={styles.chartTitle}>{t('reports.clientTrend')}</h2>
                 <p className={styles.chartCaption}>{t('reports.clientTrendCaption')}</p>
               </div>
-              <div className={styles.chartBody} ref={(el) => { chartRefs.current[t('reports.clientTrend')] = el; }}>
+              <div className={styles.chartBody}>
                 {clientTrend.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={clientTrend} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>

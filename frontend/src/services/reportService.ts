@@ -118,17 +118,23 @@ export const reportService = {
   },
 
   /**
-   * POST rather than GET: the body carries the chart PNGs captured
-   * client-side (see ReportsPage's `captureChartAsPng`), which can run to
-   * hundreds of KB — well past what belongs in a query string.
+   * POST rather than GET: the body carries the full report dataset (the
+   * same numbers already on screen), which the backend both tabulates and
+   * plots into the PDF — see `ReportPdfRenderer`.
    */
   exportPdf: async (
     tenantSlug: string,
     payload: {
       tenantName: string;
+      currency?: string;
+      locale?: string;
+      revenue: MonthlyRevenue[];
+      clients: ClientStatusCount[];
+      inventory: WarehouseInventoryValue[];
+      clientTrend: NewClientsPoint[];
+      appointmentsByStatus: AppointmentStatusCount[];
       byStaff: AppointmentsByStaff[];
       lowStock: LowStockItem[];
-      charts: Record<string, string>;
     }
   ): Promise<Blob> => {
     const response = await apiClient.post(`/${tenantSlug}/reports/export/pdf`, payload, {
