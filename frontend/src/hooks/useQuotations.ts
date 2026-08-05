@@ -23,8 +23,9 @@ export function useQuotations() {
       const result = await quotationService.fetchQuotations(tenantSlug, options);
       return result;
     } catch (err: any) {
-      setError(err.message);
-      throw err;
+      const message = err.response?.data?.error || err.message;
+      setError(message);
+      throw new Error(message);
     } finally {
       setLoading(false);
     }
@@ -38,8 +39,9 @@ export function useQuotations() {
       const result = await quotationService.fetchQuotationDetail(tenantSlug, id);
       return result;
     } catch (err: any) {
-      setError(err.message);
-      throw err;
+      const message = err.response?.data?.error || err.message;
+      setError(message);
+      throw new Error(message);
     } finally {
       setLoading(false);
     }
@@ -52,8 +54,14 @@ export function useQuotations() {
     try {
       return await quotationService.createQuotation(tenantSlug, payload);
     } catch (err: any) {
-      setError(err.message);
-      throw err;
+      // The server's own reason (e.g. a Zod validation message, or a domain
+      // rule like "Only Draft quotations can be updated") was previously
+      // dropped here — `err.message` on an axios error is just the generic
+      // HTTP status text ("Request failed with status code 400"), so the form
+      // showed that instead of anything the user could act on.
+      const message = err.response?.data?.error || err.message;
+      setError(message);
+      throw new Error(message);
     } finally {
       setLoading(false);
     }
@@ -66,8 +74,9 @@ export function useQuotations() {
     try {
       return await quotationService.updateQuotation(tenantSlug, id, payload);
     } catch (err: any) {
-      setError(err.message);
-      throw err;
+      const message = err.response?.data?.error || err.message;
+      setError(message);
+      throw new Error(message);
     } finally {
       setLoading(false);
     }
@@ -114,8 +123,9 @@ export function useQuotationActions() {
     try {
       return await quotationService.performAction(tenantSlug, id, action, payload);
     } catch (err: any) {
-      setError(err.message);
-      throw err;
+      const message = err.response?.data?.error || err.message;
+      setError(message);
+      throw new Error(message);
     } finally {
       setLoading(false);
     }

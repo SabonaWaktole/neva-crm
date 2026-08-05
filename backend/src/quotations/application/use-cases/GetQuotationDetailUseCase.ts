@@ -55,6 +55,13 @@ export class GetQuotationDetailUseCase {
           permittedActions.push('MARK_ACCEPTED', 'MARK_REJECTED', 'EXPIRE');
         }
         break;
+      case QuotationStatus.Rejected:
+        // Revising a Rejected quotation and saving it resends it — see
+        // UpdateQuotationUseCase.
+        if (canAct) {
+          permittedActions.push('EDIT');
+        }
+        break;
     }
 
     /*

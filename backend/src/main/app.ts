@@ -514,7 +514,7 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
 
   const quotationsController = new QuotationsController(
     new CreateQuotationUseCase(quotationRepo, quotationLineItemRepo, quotationHistoryRepo, prismaClientRepository, productRepo, warehouseRepo),
-    new UpdateQuotationUseCase(quotationRepo, quotationLineItemRepo, productRepo, warehouseRepo),
+    new UpdateQuotationUseCase(quotationRepo, quotationLineItemRepo, productRepo, warehouseRepo, stockLevelRepo, quotationWriteTx, quotationDelivery),
     // Each transition takes the email dispatcher so it can send AFTER its
     // transaction commits — see runWithPostCommitEmail.
     // Submit and Approve are the two routes into SENT, so they are the two

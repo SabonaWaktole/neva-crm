@@ -88,6 +88,9 @@ model Tenant {
   // Quotations
   quotations Quotation[]
 
+  // Invoices
+  invoices Invoice[]
+
   notifications        Notification[]
   notificationSettings NotificationSettings?
 
@@ -195,6 +198,8 @@ model User {
   inventoryMovements   StockMovement[]
   quotations           Quotation[]
   statusChanges        QuotationStatusHistory[]
+  invoices             Invoice[]
+  invoiceStatusChanges InvoiceStatusHistory[]
   notifications        Notification[]           @relation("NotificationRecipient")
   causedNotifications  Notification[]           @relation("NotificationActor")
   sentInvitations      Invitation[]             @relation("InvitationSender")
@@ -289,6 +294,7 @@ model Client {
   interactions      Interaction[]
   appointments      Appointment[]
   quotations        Quotation[]
+  invoices          Invoice[]
 
   @@index([tenantId, status])
   @@index([tenantId, assignedUserId])
@@ -421,6 +427,7 @@ model Warehouse {
   movementsFrom      StockMovement[]     @relation("FromWarehouse")
   movementsTo        StockMovement[]     @relation("ToWarehouse")
   quotationLineItems QuotationLineItem[]
+  invoiceLineItems   InvoiceLineItem[]
 
   @@unique([tenantId, name])
 }
@@ -450,6 +457,7 @@ model Product {
   movements          StockMovement[]
   images             ProductImage[]
   quotationLineItems QuotationLineItem[]
+  invoiceLineItems   InvoiceLineItem[]
 
   @@unique([tenantId, sku])
   @@index([tenantId, categoryId])
@@ -560,6 +568,12 @@ model Quotation {
   lineItems     QuotationLineItem[]
   statusHistory QuotationStatusHistory[]
 
+  /// At most one — converting a second time is refused by
+  /// ConvertQuotationToInvoiceUseCase and, decisively, by Invoice.quotationId
+  /// being @unique. No `@relation` needed on this side beyond the implicit
+  /// back-reference: Prisma infers the one-to-one from Invoice's unique FK.
+  invoice Invoice?
+
   @@index([tenantId, clientId])
   @@index([tenantId, status])
   /// Drives the follow-up and auto-expiry sweeps, which both scan SENT
@@ -614,6 +628,88 @@ model QuotationStatusHistory {
   changedBy User?     @relation(fields: [changedByUserId], references: [id], onDelete: Restrict)
 
   @@index([tenantId, quotationId])
+}
+
+// ==========================================
+// INVOICES MODULE
+// ==========================================
+
+model Invoice {
+  id              String    @id @default(uuid())
+  tenantId        String
+  clientId        String
+
+  /// Created by converting exactly one ACCEPTED Quotation — enforced by this
+  /// unique constraint, the actual guarantee under concurrency (the use case's
+  /// own "does one already exist" check is a defensive, non-atomic mirror of
+  /// this).
+  quotationId     String    @unique
+  createdByUserId String
+  status          String
+  dueDate         DateTime
+  sentAt          DateTime?
+  paidAt          DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  tenant    Tenant    @relation(fields: [tenantId], references: [id])
+  client    Client    @relation(fields: [clientId], references: [id])
+  quotation Quotation @relation(fields: [quotationId], references: [id])
+  createdBy User      @relation(fields: [createdByUserId], references: [id])
+
+  lineItems     InvoiceLineItem[]
+  statusHistory InvoiceStatusHistory[]
+
+  @@index([tenantId, clientId])
+  @@index([tenantId, status])
+  /// Drives the overdue sweep (InvoiceOverdueJob), which scans SENT invoices
+  /// by due date across all tenants — same shape as Quotation's
+  /// `[status, sentAt]` index for the same reason.
+  @@index([status, dueDate])
+}
+
+model InvoiceLineItem {
+  id        String @id @default(uuid())
+  tenantId  String
+  invoiceId String
+
+  /// Copied from the source QuotationLineItem at conversion time — a
+  /// snapshot, not a live reference. A quotation edited after conversion must
+  /// not retroactively change an issued invoice.
+  productId   String
+  warehouseId String
+  quantity    Int
+  unitPrice   Float
+
+  invoice   Invoice   @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  product   Product   @relation(fields: [productId], references: [id])
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+
+  @@index([tenantId, invoiceId])
+}
+
+model InvoiceStatusHistory {
+  id         String   @id @default(uuid())
+  tenantId   String
+  invoiceId  String
+  fromStatus String
+  toStatus   String
+
+  /// NULL means the scheduler made this change, not a person — same
+  /// convention as QuotationStatusHistory.changedByUserId, for the same
+  /// reason: automatic overdue detection has no acting user.
+  changedByUserId String?
+  note            String?  @db.Text
+  createdAt       DateTime @default(now())
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  /// `onDelete: Restrict`, stated explicitly — same rationale as
+  /// QuotationStatusHistory.changedBy: deleting a user must not silently
+  /// rewrite their past status changes as "done by the scheduler".
+  changedBy User? @relation(fields: [changedByUserId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, invoiceId])
 }
 
 // ==========================================

@@ -33,6 +33,20 @@ CREATE TABLE `Tenant` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `PlatformSettings` (
+    `id` VARCHAR(191) NOT NULL DEFAULT 'platform',
+    `requiresQuotationApproval` BOOLEAN NOT NULL DEFAULT true,
+    `currency` VARCHAR(191) NOT NULL DEFAULT 'USD',
+    `locale` VARCHAR(191) NOT NULL DEFAULT 'en-US',
+    `timezone` VARCHAR(191) NOT NULL DEFAULT 'UTC',
+    `dateFormat` VARCHAR(191) NOT NULL DEFAULT 'MM/DD/YYYY',
+    `defaultLanguage` VARCHAR(191) NOT NULL DEFAULT 'en',
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `NotificationSettings` (
     `tenantId` VARCHAR(191) NOT NULL,
     `emailEnabled` BOOLEAN NOT NULL DEFAULT true,
@@ -59,6 +73,7 @@ CREATE TABLE `User` (
     `phone` VARCHAR(191) NULL,
     `role` VARCHAR(191) NOT NULL,
     `isActive` BOOLEAN NOT NULL DEFAULT true,
+    `deletedAt` DATETIME(3) NULL,
     `language` VARCHAR(191) NULL,
     `avatarUrl` TEXT NULL,
     `coverImageUrl` TEXT NULL,
@@ -66,6 +81,42 @@ CREATE TABLE `User` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `warehouseId` VARCHAR(191) NULL,
 
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `OwnershipTransfer` (
+    `id` VARCHAR(191) NOT NULL,
+    `tenantId` VARCHAR(191) NOT NULL,
+    `originalOwnerId` VARCHAR(191) NOT NULL,
+    `actingOwnerId` VARCHAR(191) NOT NULL,
+    `previousActingRole` VARCHAR(191) NOT NULL,
+    `previousActingWarehouseId` VARCHAR(191) NULL,
+    `status` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `createdByUserId` VARCHAR(191) NOT NULL,
+    `resolvedAt` DATETIME(3) NULL,
+    `resolvedByUserId` VARCHAR(191) NULL,
+
+    INDEX `OwnershipTransfer_originalOwnerId_status_idx`(`originalOwnerId`, `status`),
+    INDEX `OwnershipTransfer_actingOwnerId_status_idx`(`actingOwnerId`, `status`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `AuditLog` (
+    `id` VARCHAR(191) NOT NULL,
+    `actorUserId` VARCHAR(191) NOT NULL,
+    `actorRole` VARCHAR(191) NOT NULL,
+    `action` VARCHAR(191) NOT NULL,
+    `targetType` VARCHAR(191) NOT NULL,
+    `targetId` VARCHAR(191) NOT NULL,
+    `tenantId` VARCHAR(191) NULL,
+    `metadata` JSON NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    INDEX `AuditLog_targetType_targetId_idx`(`targetType`, `targetId`),
+    INDEX `AuditLog_tenantId_idx`(`tenantId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -345,6 +396,56 @@ CREATE TABLE `QuotationStatusHistory` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `Invoice` (
+    `id` VARCHAR(191) NOT NULL,
+    `tenantId` VARCHAR(191) NOT NULL,
+    `clientId` VARCHAR(191) NOT NULL,
+    `quotationId` VARCHAR(191) NOT NULL,
+    `createdByUserId` VARCHAR(191) NOT NULL,
+    `status` VARCHAR(191) NOT NULL,
+    `dueDate` DATETIME(3) NOT NULL,
+    `sentAt` DATETIME(3) NULL,
+    `paidAt` DATETIME(3) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `Invoice_quotationId_key`(`quotationId`),
+    INDEX `Invoice_tenantId_clientId_idx`(`tenantId`, `clientId`),
+    INDEX `Invoice_tenantId_status_idx`(`tenantId`, `status`),
+    INDEX `Invoice_status_dueDate_idx`(`status`, `dueDate`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `InvoiceLineItem` (
+    `id` VARCHAR(191) NOT NULL,
+    `tenantId` VARCHAR(191) NOT NULL,
+    `invoiceId` VARCHAR(191) NOT NULL,
+    `productId` VARCHAR(191) NOT NULL,
+    `warehouseId` VARCHAR(191) NOT NULL,
+    `quantity` INTEGER NOT NULL,
+    `unitPrice` DOUBLE NOT NULL,
+
+    INDEX `InvoiceLineItem_tenantId_invoiceId_idx`(`tenantId`, `invoiceId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `InvoiceStatusHistory` (
+    `id` VARCHAR(191) NOT NULL,
+    `tenantId` VARCHAR(191) NOT NULL,
+    `invoiceId` VARCHAR(191) NOT NULL,
+    `fromStatus` VARCHAR(191) NOT NULL,
+    `toStatus` VARCHAR(191) NOT NULL,
+    `changedByUserId` VARCHAR(191) NULL,
+    `note` TEXT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    INDEX `InvoiceStatusHistory_tenantId_invoiceId_idx`(`tenantId`, `invoiceId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `Integration` (
     `id` VARCHAR(191) NOT NULL,
     `tenantId` VARCHAR(191) NOT NULL,
@@ -384,6 +485,15 @@ ALTER TABLE `User` ADD CONSTRAINT `User_tenantId_fkey` FOREIGN KEY (`tenantId`) 
 
 -- AddForeignKey
 ALTER TABLE `User` ADD CONSTRAINT `User_warehouseId_fkey` FOREIGN KEY (`warehouseId`) REFERENCES `Warehouse`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `OwnershipTransfer` ADD CONSTRAINT `OwnershipTransfer_tenantId_fkey` FOREIGN KEY (`tenantId`) REFERENCES `Tenant`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `OwnershipTransfer` ADD CONSTRAINT `OwnershipTransfer_originalOwnerId_fkey` FOREIGN KEY (`originalOwnerId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `OwnershipTransfer` ADD CONSTRAINT `OwnershipTransfer_actingOwnerId_fkey` FOREIGN KEY (`actingOwnerId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Invitation` ADD CONSTRAINT `Invitation_tenantId_fkey` FOREIGN KEY (`tenantId`) REFERENCES `Tenant`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -506,6 +616,33 @@ ALTER TABLE `QuotationStatusHistory` ADD CONSTRAINT `QuotationStatusHistory_quot
 ALTER TABLE `QuotationStatusHistory` ADD CONSTRAINT `QuotationStatusHistory_changedByUserId_fkey` FOREIGN KEY (`changedByUserId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `Invoice` ADD CONSTRAINT `Invoice_tenantId_fkey` FOREIGN KEY (`tenantId`) REFERENCES `Tenant`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Invoice` ADD CONSTRAINT `Invoice_clientId_fkey` FOREIGN KEY (`clientId`) REFERENCES `Client`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Invoice` ADD CONSTRAINT `Invoice_quotationId_fkey` FOREIGN KEY (`quotationId`) REFERENCES `Quotation`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Invoice` ADD CONSTRAINT `Invoice_createdByUserId_fkey` FOREIGN KEY (`createdByUserId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `InvoiceLineItem` ADD CONSTRAINT `InvoiceLineItem_invoiceId_fkey` FOREIGN KEY (`invoiceId`) REFERENCES `Invoice`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `InvoiceLineItem` ADD CONSTRAINT `InvoiceLineItem_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `Product`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `InvoiceLineItem` ADD CONSTRAINT `InvoiceLineItem_warehouseId_fkey` FOREIGN KEY (`warehouseId`) REFERENCES `Warehouse`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `InvoiceStatusHistory` ADD CONSTRAINT `InvoiceStatusHistory_invoiceId_fkey` FOREIGN KEY (`invoiceId`) REFERENCES `Invoice`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `InvoiceStatusHistory` ADD CONSTRAINT `InvoiceStatusHistory_changedByUserId_fkey` FOREIGN KEY (`changedByUserId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `Integration` ADD CONSTRAINT `Integration_tenantId_fkey` FOREIGN KEY (`tenantId`) REFERENCES `Tenant`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -516,6 +653,7 @@ ALTER TABLE `Notification` ADD CONSTRAINT `Notification_recipientUserId_fkey` FO
 
 -- AddForeignKey
 ALTER TABLE `Notification` ADD CONSTRAINT `Notification_actorUserId_fkey` FOREIGN KEY (`actorUserId`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
 
 -- ===== Prisma migration bookkeeping table =====
 CREATE TABLE `_prisma_migrations` (
@@ -544,5 +682,8 @@ INSERT INTO `_prisma_migrations` (id, checksum, finished_at, migration_name, log
 INSERT INTO `_prisma_migrations` (id, checksum, finished_at, migration_name, logs, rolled_back_at, started_at, applied_steps_count) VALUES ('ac3ad2d0-e044-481a-829f-4689b85df518', 'f17dfef5f3e6be118d56ef7e3918b5529a3ef08de0c91258e708839ae3a51405', NOW(3), '20260727120000_add_notifications', NULL, NULL, NOW(3), 1);
 INSERT INTO `_prisma_migrations` (id, checksum, finished_at, migration_name, logs, rolled_back_at, started_at, applied_steps_count) VALUES ('b0c1a924-5116-4b8b-8221-672241dfa349', 'c2eb524b0039029147d0670e23a63dbe8b0853d9d4fdc7dcbab1358930a6988b', NOW(3), '20260727213632_add_tenant_subscription_status', NULL, NULL, NOW(3), 1);
 INSERT INTO `_prisma_migrations` (id, checksum, finished_at, migration_name, logs, rolled_back_at, started_at, applied_steps_count) VALUES ('d026fad2-d21b-445c-96a3-0aae1752b890', 'aa8f002dfaf5ab4da8cfd3c4b38113d4d09bb431bf1d88478d434392b12b5c27', NOW(3), '20260728120000_add_notification_settings_scheduling_and_quotation_sharing', NULL, NULL, NOW(3), 1);
+INSERT INTO `_prisma_migrations` (id, checksum, finished_at, migration_name, logs, rolled_back_at, started_at, applied_steps_count) VALUES ('bc31a3ee-37f0-4730-baea-b4e3d0a45f13', 'f389bf5af115f8dd88d3caa1c6a0cbb1446c693c394d6412606cf9a8a26630fd', NOW(3), '20260802115649_add_platform_settings', NULL, NULL, NOW(3), 1);
+INSERT INTO `_prisma_migrations` (id, checksum, finished_at, migration_name, logs, rolled_back_at, started_at, applied_steps_count) VALUES ('230172cc-04c3-4a95-8078-b585f85d11c3', '3ed28a9eba3d25d2a668cab95e0ba820fdad0aef83feaa2a822e47efddfe7883', NOW(3), '20260802144314_add_user_lifecycle_management', NULL, NULL, NOW(3), 1);
+INSERT INTO `_prisma_migrations` (id, checksum, finished_at, migration_name, logs, rolled_back_at, started_at, applied_steps_count) VALUES ('d205834b-763b-4ad8-b1b9-434ebda8a623', '48ce837b9b68b5e9b2d1533d9cde916ef776d5fa3665d87820d3901a7b2ada81', NOW(3), '20260805111836_add_invoices', NULL, NULL, NOW(3), 1);
 
 SET FOREIGN_KEY_CHECKS=1;
