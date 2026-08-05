@@ -10,6 +10,7 @@ import { NotificationService } from '../../../notifications/application/Notifica
 import { IUserRepository } from '../../../auth/domain/repositories/IUserRepository';
 import { quotationReference } from '../../domain/quotationReference';
 import { runWithPostCommitEmail, IPostCommitEmailDispatcher } from '../runWithPostCommitEmail';
+import { assertStockAvailable } from '../assertQuotationStockAvailable';
 
 export class MarkQuotationAcceptedUseCase {
   constructor(
@@ -53,17 +54,7 @@ export class MarkQuotationAcceptedUseCase {
     quotation.accept(); // Throws if not Sent
 
     const lineItems = await this.lineItemRepo.findByQuotationId(input.tenantId, input.quotationId);
-
-    // Pre-validate all stock levels
-    for (const li of lineItems) {
-      const stock = await this.stockLevelRepo.findByProductAndWarehouse(input.tenantId, li.productId, li.warehouseId);
-      if (!stock) {
-        throw new Error(`Stock level not found for product ${li.productId} at warehouse ${li.warehouseId}`);
-      }
-      if (stock.quantity < li.quantity) {
-        throw new Error(`Insufficient stock for product ${li.productId} at warehouse ${li.warehouseId}`);
-      }
-    }
+    await assertStockAvailable(input.tenantId, lineItems, this.stockLevelRepo);
 
     await this.transactionManager.executeTransaction(async (repos) => {
       for (const li of lineItems) {

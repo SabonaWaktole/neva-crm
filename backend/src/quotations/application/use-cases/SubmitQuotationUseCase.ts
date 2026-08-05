@@ -8,11 +8,16 @@ import { runWithPostCommitEmail, IPostCommitEmailDispatcher } from '../runWithPo
 import { generateShareToken } from '../../domain/shareToken';
 import { IQuotationDeliveryService } from '../QuotationDeliveryService';
 import { QuotationStatus } from '../../domain/Quotation';
+import { IQuotationLineItemRepository } from '../../domain/IQuotationLineItemRepository';
+import { IStockLevelRepository } from '../../../inventory/domain/repositories';
+import { assertQuotationStockAvailable } from '../assertQuotationStockAvailable';
 
 export class SubmitQuotationUseCase {
   constructor(
     private writeTx: IQuotationWriteTransaction,
     private userRepo: IUserRepository,
+    private lineItemRepo: IQuotationLineItemRepository,
+    private stockLevelRepo: IStockLevelRepository,
     private emailDispatcher?: IPostCommitEmailDispatcher,
     private delivery?: IQuotationDeliveryService
   ) {}
@@ -36,6 +41,17 @@ export class SubmitQuotationUseCase {
 
       const fromStatus = quotation.status;
       quotation.submit({ requiresApproval: input.requiresQuotationApproval });
+
+      /*
+       * Only on the branch that actually reaches the client. A quotation
+       * held for approval is not sent yet — ApproveQuotationUseCase runs this
+       * same check on its own way to SENT, since stock can move in the
+       * meantime. Checked (and can throw) before `issueShareToken`, so a
+       * quotation refused here never gets a customer-facing link at all.
+       */
+      if (quotation.status === QuotationStatus.Sent) {
+        await assertQuotationStockAvailable(input.tenantId, input.quotationId, this.lineItemRepo, this.stockLevelRepo);
+      }
 
       // Mints the customer link, but only on the branch that actually reaches
       // SENT — the entity refuses on any other status, so this is safe to call

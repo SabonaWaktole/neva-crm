@@ -519,8 +519,8 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
     // transaction commits — see runWithPostCommitEmail.
     // Submit and Approve are the two routes into SENT, so they are the two
     // that deliver to the customer.
-    new SubmitQuotationUseCase(quotationWriteTx, userRepository, notificationEmailDispatcher, quotationDelivery),
-    new ApproveQuotationUseCase(quotationWriteTx, userRepository, notificationEmailDispatcher, quotationDelivery),
+    new SubmitQuotationUseCase(quotationWriteTx, userRepository, quotationLineItemRepo, stockLevelRepo, notificationEmailDispatcher, quotationDelivery),
+    new ApproveQuotationUseCase(quotationWriteTx, userRepository, quotationLineItemRepo, stockLevelRepo, notificationEmailDispatcher, quotationDelivery),
     new ReturnQuotationToDraftUseCase(quotationWriteTx, userRepository, notificationEmailDispatcher),
     markQuotationAcceptedUseCase,
     markQuotationRejectedUseCase,
