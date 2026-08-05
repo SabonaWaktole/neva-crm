@@ -1,0 +1,30 @@
+{
+  "title": "Notifiche",
+  "bellAria": "Notifiche",
+  "bellAriaUnread": "Notifiche, {{count}} non lette",
+  "markAllRead": "Segna tutte come lette",
+  "viewAll": "Vedi tutte",
+  "empty": "Non hai nuove notifiche.",
+  "emptyHint": "Qui compaiono gli aggiornamenti su preventivi, appuntamenti e clienti.",
+  "loading": "Caricamento notifiche...",
+  "unreadBadge": "Nuovo",
+  "breadcrumb": "Notifiche",
+  "actor": {
+    "system": "Il sistema"
+  },
+  "type": {
+    "QUOTATION_SUBMITTED_FOR_APPROVAL": "{{actor}} ha inviato il preventivo {{reference}} per la tua approvazione",
+    "QUOTATION_APPROVED": "{{actor}} ha approvato il preventivo {{reference}}",
+    "QUOTATION_RETURNED_TO_DRAFT": "{{actor}} ha riportato il preventivo {{reference}} in bozza",
+    "QUOTATION_ACCEPTED": "Il preventivo {{reference}} è stato contrassegnato come accettato da {{actor}}",
+    "QUOTATION_REJECTED": "Il preventivo {{reference}} è stato contrassegnato come rifiutato da {{actor}}",
+    "QUOTATION_EXPIRED": "Il preventivo {{reference}} è scaduto",
+    "APPOINTMENT_ASSIGNED": "{{actor}} ha fissato per te un appuntamento con {{client}}",
+    "APPOINTMENT_RESCHEDULED": "{{actor}} ha spostato il tuo appuntamento al {{scheduledAt}} — {{reason}}",
+    "APPOINTMENT_CANCELLED": "{{actor}} ha annullato il tuo appuntamento — {{reason}}",
+    "CLIENT_ASSIGNED": "{{actor}} ti ha assegnato {{client}}",
+    "INVITATION_ACCEPTED": "{{email}} ha accettato il tuo invito e si è unito al team",
+    "APPOINTMENT_REMINDER": "Promemoria: appuntamento con {{clientName}}",
+    "QUOTATION_FOLLOW_UP": "Il preventivo {{reference}} non ha ricevuto risposta da {{clientName}} da {{daysWaiting}} giorni"
+  }
+}

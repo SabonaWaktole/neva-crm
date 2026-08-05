@@ -90,6 +90,30 @@ export class PrismaOwnershipTransactions implements IOwnershipTransactions {
     });
   }
 
+  async keepBothOwners(transferId: string, resolvedByUserId: string): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      const transfer = await tx.ownershipTransfer.findUniqueOrThrow({ where: { id: transferId } });
+
+      // Only the original owner is written. The acting owner is deliberately
+      // left exactly as `promoteForSuspension` left them — BUSINESS_OWNER,
+      // with the role/warehouse they had before saved on the transfer row but
+      // never applied, because this resolution does not take the promotion
+      // back.
+      await tx.user.update({
+        where: { id: transfer.originalOwnerId },
+        data: { role: UserRole.BUSINESS_OWNER, isActive: true },
+      });
+      await tx.ownershipTransfer.update({
+        where: { id: transferId },
+        data: {
+          status: OwnershipTransferStatus.KEPT_BOTH,
+          resolvedAt: new Date(),
+          resolvedByUserId,
+        },
+      });
+    });
+  }
+
   async promoteForDeletion(params: { actingOwnerId: string }): Promise<void> {
     await this.prisma.user.update({
       where: { id: params.actingOwnerId },

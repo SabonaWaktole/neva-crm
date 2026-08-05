@@ -1,6 +1,7 @@
 import { IQuotationRepository } from '../../domain/IQuotationRepository';
 import { IQuotationLineItemRepository } from '../../domain/IQuotationLineItemRepository';
 import { IQuotationStatusHistoryRepository } from '../../domain/IQuotationStatusHistoryRepository';
+import { IInvoiceRepository } from '../../../invoices/domain/IInvoiceRepository';
 import { UserRole } from '../../../auth/domain/enums/UserRole';
 import { QuotationStatus } from '../../domain/Quotation';
 
@@ -8,7 +9,11 @@ export class GetQuotationDetailUseCase {
   constructor(
     private quotationRepo: IQuotationRepository,
     private lineItemRepo: IQuotationLineItemRepository,
-    private historyRepo: IQuotationStatusHistoryRepository
+    private historyRepo: IQuotationStatusHistoryRepository,
+    // Optional: existing callers (and tests) that construct this use case
+    // without an invoice repository still work, just with `invoiceId` always
+    // null. Only the real HTTP wiring needs to pass one.
+    private invoiceRepo?: IInvoiceRepository
   ) {}
 
   async execute(input: {
@@ -52,6 +57,16 @@ export class GetQuotationDetailUseCase {
         break;
     }
 
-    return { quotation, lineItems, history, permittedActions };
+    /*
+     * Whether this quotation has already been converted to an invoice — the
+     * frontend uses this to show "Convert to Invoice" only when the answer is
+     * no. `findByQuotationId` returns at most one row: the DB enforces
+     * one-quotation-to-at-most-one-invoice via a unique constraint.
+     */
+    const invoice = this.invoiceRepo
+      ? await this.invoiceRepo.findByQuotationId(input.tenantId, input.quotationId)
+      : null;
+
+    return { quotation, lineItems, history, permittedActions, invoiceId: invoice?.id ?? null };
   }
 }

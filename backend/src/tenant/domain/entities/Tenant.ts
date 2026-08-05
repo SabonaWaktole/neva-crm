@@ -17,21 +17,22 @@ export type DateFormat = (typeof DATE_FORMATS)[number];
  * number and date *conventions* (separators, ordering), which is a different
  * concern from UI translation language.
  *
- * `sq-AL` is offered because Albanian is a shipped UI language and its users are
- * the most likely to want Albanian formatting — but the two remain independent.
- * Choosing Albanian as an interface language does NOT change formatting, and a
- * tenant may pair either locale with either language.
+ * `sq-AL`, `el-GR` and `it-IT` are offered because Albanian, Greek and Italian
+ * are shipped UI languages and their users are the most likely to want matching
+ * formatting — but the two remain independent. Choosing Greek as an interface
+ * language does NOT change formatting, and a tenant may pair any locale with
+ * any language.
  */
-export const SUPPORTED_LOCALES = ['en-US', 'en-GB', 'sq-AL'] as const;
+export const SUPPORTED_LOCALES = ['en-US', 'en-GB', 'sq-AL', 'el-GR', 'it-IT'] as const;
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 
 /**
  * Interface languages, as opposed to formatting locales above.
  *
- * These are two different axes and must not be merged. `sq-AL` is a formatting
- * locale; `sq` is a language. A tenant can hold any combination of the two.
+ * These are two different axes and must not be merged. `el-GR` is a formatting
+ * locale; `el` is a language. A tenant can hold any combination of the two.
  */
-export const SUPPORTED_LANGUAGES = ['en', 'sq'] as const;
+export const SUPPORTED_LANGUAGES = ['en', 'sq', 'el', 'it'] as const;
 export type Language = (typeof SUPPORTED_LANGUAGES)[number];
 
 export const DEFAULT_LANGUAGE: Language = 'en';

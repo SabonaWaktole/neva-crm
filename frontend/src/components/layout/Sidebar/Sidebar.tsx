@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Users, Calendar, Package, FileText, BarChart3,
   Settings, Building, CreditCard, Search, ClipboardCheck, Plus,
-  HelpCircle, LogOut,
+  HelpCircle, LogOut, Receipt,
   type LucideIcon,
 } from 'lucide-react';
 import { Button } from '../../ui/Button/Button';
@@ -17,6 +17,7 @@ const iconMap: Record<string, LucideIcon> = {
   event: Calendar,
   inventory_2: Package,
   description: FileText,
+  receipt_long: Receipt,
   bar_chart: BarChart3,
   settings: Settings,
   settings_applications: Settings,
@@ -47,7 +48,7 @@ export interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({
   orgName,
-  orgTier = 'Standard Tier',
+  orgTier,
   navItems,
   isOpen = false,
   onClose,
@@ -56,6 +57,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onLogoutClick,
 }) => {
   const { t } = useTranslation('common');
+  // Defaulted here rather than in the parameter list: a default parameter is
+  // evaluated per render but written in English, so it has to be a lookup, and
+  // `t` is not in scope until the component body has started.
+  const tier = orgTier ?? t('shell.standardTier');
   const tenantLogoUrl = useAuthStore((state) => state.user?.tenantLogoUrl);
   const logoSrc = resolveMediaUrl(tenantLogoUrl);
 
@@ -90,7 +95,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
         <div className={styles.orgInfo}>
           <h2 className={styles.orgName}>{orgName}</h2>
-          <p className={styles.orgTier}>{orgTier}</p>
+          <p className={styles.orgTier}>{tier}</p>
         </div>
       </div>
 

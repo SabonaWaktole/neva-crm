@@ -42,6 +42,19 @@ export const QUOTATION_STATUS_KEYS: Record<QuotationStatus, string> = {
   EXPIRED: 'quotations:status.expired',
 };
 
+/** Mirrors the backend's InvoiceStatus enum (Invoice.ts). */
+export const INVOICE_STATUSES = ['DRAFT', 'SENT', 'PAID', 'OVERDUE', 'VOID'] as const;
+
+export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
+
+export const INVOICE_STATUS_KEYS: Record<InvoiceStatus, string> = {
+  DRAFT: 'invoices:status.draft',
+  SENT: 'invoices:status.sent',
+  PAID: 'invoices:status.paid',
+  OVERDUE: 'invoices:status.overdue',
+  VOID: 'invoices:status.void',
+};
+
 export const CLIENT_STATUS_KEYS: Record<ClientStatus, string> = {
   PROSPECT: 'clients:status.prospect',
   ACTIVE: 'clients:status.active',
@@ -85,6 +98,7 @@ const lookup = (keys: Record<string, string>, status: string): string | null =>
   Object.prototype.hasOwnProperty.call(keys, status) ? keys[status] : null;
 
 export const quotationStatusKey = (status: string) => lookup(QUOTATION_STATUS_KEYS, status);
+export const invoiceStatusKey = (status: string) => lookup(INVOICE_STATUS_KEYS, status);
 export const clientStatusKey = (status: string) => lookup(CLIENT_STATUS_KEYS, status);
 export const productStatusKey = (status: string) => lookup(PRODUCT_STATUS_KEYS, status);
 export const appointmentStatusKey = (status: string) => lookup(APPOINTMENT_STATUS_KEYS, status);

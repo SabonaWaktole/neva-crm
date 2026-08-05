@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   Rocket,
   UserX,
+  UserPlus,
   Building2,
   AlertCircle,
   Plus,
@@ -68,6 +69,12 @@ const ACTIVITY_PRESENTATION: Record<
     color: 'var(--color-success)',
     bg: 'var(--color-success-container)',
   },
+  USER_INVITED: {
+    title: 'User Invited',
+    icon: <UserPlus size={20} />,
+    color: 'var(--color-primary)',
+    bg: 'var(--color-primary-fixed)',
+  },
   USER_DELETED: {
     title: 'User Deleted',
     icon: <UserX size={20} />,
@@ -97,6 +104,10 @@ const describeActivity = (event: PlatformActivityEvent): string => {
       return `${meta.targetEmail ?? 'An account'} was suspended.`;
     case 'USER_REACTIVATED':
       return `${meta.targetEmail ?? 'An account'} was reactivated.`;
+    case 'USER_INVITED':
+      return meta.role === 'BUSINESS_OWNER'
+        ? `${meta.email ?? 'Someone'} was invited as a Business Owner.`
+        : `${meta.email ?? 'Someone'} was invited to a workspace.`;
     case 'USER_DELETED':
       return `${meta.targetEmail ?? 'An account'} was removed from the platform.`;
     case 'OWNERSHIP_TRANSFERRED':

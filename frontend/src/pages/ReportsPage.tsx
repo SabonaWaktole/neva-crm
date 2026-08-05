@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line
 } from 'recharts';
-import { AlertCircle, BarChart3 } from 'lucide-react';
+import { AlertCircle, BarChart3, Download } from 'lucide-react';
 import { useReports } from '../hooks/useReports';
+import { reportService } from '../services/reportService';
+import { downloadBlob } from '../utils/downloadBlob';
 import { Sidebar } from '../components/layout/Sidebar/Sidebar';
 import { AppLayout } from '../components/layout/AppLayout/AppLayout';
 import { Button } from '../components/ui/Button/Button';
@@ -83,10 +85,38 @@ export const ReportsPage: React.FC = () => {
   const logout = useAuthStore(state => state.logout);
   // Both the tooltip amounts and the axis ticks come from here, so the tenant's
   // currency drives the whole page rather than just the tooltips.
-  const { formatWhole: formatCurrency, formatCompact: compactCurrency } = useMoneyFormat();
+  const { formatWhole: formatCurrency, formatCompact: compactCurrency, currency, locale } = useMoneyFormat();
   const { revenue, clients, inventory, clientTrend, appointments, lowStock, loading, error, refresh } =
     useReports();
   const statusLabel = useStatusLabel();
+
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+
+  const handleExportPdf = async () => {
+    if (!tenantSlug) return;
+    setExportingPdf(true);
+    setExportError(null);
+    try {
+      const blob = await reportService.exportPdf(tenantSlug, {
+        tenantName: tenantSlug,
+        currency: currency ?? undefined,
+        locale: locale ?? undefined,
+        revenue,
+        clients,
+        inventory,
+        clientTrend,
+        appointmentsByStatus: appointments.byStatus,
+        byStaff: appointments.byStaff,
+        lowStock: lowStock.items,
+      });
+      downloadBlob(blob, 'reports.pdf', { open: true });
+    } catch (err: any) {
+      setExportError(err.response?.data?.error || err.message || t('reports.downloadPdfError'));
+    } finally {
+      setExportingPdf(false);
+    }
+  };
 
   /*
    * Recharts needs a display label on the datum itself — it has no hook into
@@ -155,9 +185,19 @@ export const ReportsPage: React.FC = () => {
             <h1 className={styles.title}>{t('reports.title')}</h1>
             <p className={styles.subtitle}>{t('reports.subtitle')}</p>
           </div>
-          <Button variant="outline" onClick={refresh}>
-            {t('reports.refresh')}
-          </Button>
+          <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
+            <Button variant="outline" onClick={refresh}>
+              {t('reports.refresh')}
+            </Button>
+            <Button
+              variant="primary"
+              icon={<Download size={16} />}
+              onClick={handleExportPdf}
+              disabled={exportingPdf}
+            >
+              {exportingPdf ? t('reports.downloadingPdf') : t('reports.downloadPdf')}
+            </Button>
+          </div>
         </header>
 
         <main className={styles.main}>
@@ -165,6 +205,12 @@ export const ReportsPage: React.FC = () => {
             <div className={styles.errorBanner} role="alert">
               <AlertCircle size={16} />
               {error}
+            </div>
+          )}
+          {exportError && (
+            <div className={styles.errorBanner} role="alert">
+              <AlertCircle size={16} />
+              {exportError}
             </div>
           )}
 

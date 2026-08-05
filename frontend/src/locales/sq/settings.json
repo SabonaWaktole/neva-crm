@@ -1,5 +1,16 @@
 {
   "breadcrumb": "Cilësimet",
+  "nav": {
+    "title": "Cilësimet",
+    "profile": "Profili",
+    "company": "Kompania",
+    "clientManagement": "Menaxhimi i klientëve",
+    "notifications": "Njoftimet",
+    "team": "Ekipi",
+    "integrations": "Integrimet",
+    "warehouses": "Magazinat",
+    "categories": "Kategoritë"
+  },
   "company": {
     "title": "Cilësimet e kompanisë",
     "subtitle": "Menaxhoni të dhënat kryesore, lokalizimin dhe preferencat e organizatës suaj.",
@@ -184,7 +195,15 @@
     "connecting": "Duke u lidhur...",
     "connect": "Lidh {{name}}",
     "disconnecting": "Duke shkëputur...",
-    "disconnect": "Shkëput"
+    "disconnect": "Shkëput",
+    "connected": "I lidhur",
+    "notConnected": "Jo i lidhur",
+    "ownerOnlyNotice": "Vetëm Pronarët e Biznesit mund të lidhin ose shkëputin integrimet.",
+    "confirmDisconnect": "Jeni i sigurt që doni ta shkëputni këtë integrim?",
+    "googleCalendar": {
+      "name": "Google Calendar",
+      "description": "Sinkronizoni takimet e CRM-së tuaj drejtpërdrejt me Google Calendar-in tuaj."
+    }
   },
   "notifications": {
     "title": "Notifications",

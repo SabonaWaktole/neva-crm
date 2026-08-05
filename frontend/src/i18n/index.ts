@@ -15,6 +15,7 @@ import enClients from '../locales/en/clients.json';
 import enAppointments from '../locales/en/appointments.json';
 import enInventory from '../locales/en/inventory.json';
 import enQuotations from '../locales/en/quotations.json';
+import enInvoices from '../locales/en/invoices.json';
 import enSettings from '../locales/en/settings.json';
 import enDashboard from '../locales/en/dashboard.json';
 import enNotifications from '../locales/en/notifications.json';
@@ -25,15 +26,38 @@ import sqClients from '../locales/sq/clients.json';
 import sqAppointments from '../locales/sq/appointments.json';
 import sqInventory from '../locales/sq/inventory.json';
 import sqQuotations from '../locales/sq/quotations.json';
+import sqInvoices from '../locales/sq/invoices.json';
 import sqSettings from '../locales/sq/settings.json';
 import sqDashboard from '../locales/sq/dashboard.json';
 import sqNotifications from '../locales/sq/notifications.json';
 
+import elCommon from '../locales/el/common.json';
+import elAuth from '../locales/el/auth.json';
+import elClients from '../locales/el/clients.json';
+import elAppointments from '../locales/el/appointments.json';
+import elInventory from '../locales/el/inventory.json';
+import elQuotations from '../locales/el/quotations.json';
+import elInvoices from '../locales/el/invoices.json';
+import elSettings from '../locales/el/settings.json';
+import elDashboard from '../locales/el/dashboard.json';
+import elNotifications from '../locales/el/notifications.json';
+
+import itCommon from '../locales/it/common.json';
+import itAuth from '../locales/it/auth.json';
+import itClients from '../locales/it/clients.json';
+import itAppointments from '../locales/it/appointments.json';
+import itInventory from '../locales/it/inventory.json';
+import itQuotations from '../locales/it/quotations.json';
+import itInvoices from '../locales/it/invoices.json';
+import itSettings from '../locales/it/settings.json';
+import itDashboard from '../locales/it/dashboard.json';
+import itNotifications from '../locales/it/notifications.json';
+
 /**
  * Catalogues are imported statically rather than fetched at runtime.
  *
- * Two languages of UI text is a few tens of kilobytes, which is smaller than the
- * loader that would fetch them — and static imports mean there is no async gap
+ * Four languages of UI text is well under a hundred kilobytes, still smaller
+ * than the loader that would fetch them — and static imports mean no async gap
  * on first paint where the interface renders raw translation keys. Namespaces
  * are still separated, so switching to lazy loading later is a config change
  * rather than a restructure.
@@ -46,6 +70,7 @@ export const resources = {
     appointments: enAppointments,
     inventory: enInventory,
     quotations: enQuotations,
+    invoices: enInvoices,
     settings: enSettings,
     dashboard: enDashboard,
     notifications: enNotifications,
@@ -57,9 +82,34 @@ export const resources = {
     appointments: sqAppointments,
     inventory: sqInventory,
     quotations: sqQuotations,
+    invoices: sqInvoices,
     settings: sqSettings,
     dashboard: sqDashboard,
     notifications: sqNotifications,
+  },
+  el: {
+    common: elCommon,
+    auth: elAuth,
+    clients: elClients,
+    appointments: elAppointments,
+    inventory: elInventory,
+    quotations: elQuotations,
+    invoices: elInvoices,
+    settings: elSettings,
+    dashboard: elDashboard,
+    notifications: elNotifications,
+  },
+  it: {
+    common: itCommon,
+    auth: itAuth,
+    clients: itClients,
+    appointments: itAppointments,
+    inventory: itInventory,
+    quotations: itQuotations,
+    invoices: itInvoices,
+    settings: itSettings,
+    dashboard: itDashboard,
+    notifications: itNotifications,
   },
 } as const;
 

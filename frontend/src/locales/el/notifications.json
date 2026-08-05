@@ -1,0 +1,30 @@
+{
+  "title": "Ειδοποιήσεις",
+  "bellAria": "Ειδοποιήσεις",
+  "bellAriaUnread": "Ειδοποιήσεις, {{count}} μη αναγνωσμένες",
+  "markAllRead": "Σήμανση όλων ως αναγνωσμένων",
+  "viewAll": "Προβολή όλων",
+  "empty": "Δεν έχετε νέες ειδοποιήσεις.",
+  "emptyHint": "Οι ενημερώσεις για τις προσφορές, τα ραντεβού και τους πελάτες σας εμφανίζονται εδώ.",
+  "loading": "Φόρτωση ειδοποιήσεων...",
+  "unreadBadge": "Νέο",
+  "breadcrumb": "Ειδοποιήσεις",
+  "actor": {
+    "system": "Το σύστημα"
+  },
+  "type": {
+    "QUOTATION_SUBMITTED_FOR_APPROVAL": "Ο/Η {{actor}} υπέβαλε την προσφορά {{reference}} για έγκρισή σας",
+    "QUOTATION_APPROVED": "Ο/Η {{actor}} ενέκρινε την προσφορά {{reference}}",
+    "QUOTATION_RETURNED_TO_DRAFT": "Ο/Η {{actor}} επέστρεψε την προσφορά {{reference}} σε πρόχειρο",
+    "QUOTATION_ACCEPTED": "Η προσφορά {{reference}} σημάνθηκε ως αποδεκτή από τον/την {{actor}}",
+    "QUOTATION_REJECTED": "Η προσφορά {{reference}} σημάνθηκε ως απορριφθείσα από τον/την {{actor}}",
+    "QUOTATION_EXPIRED": "Η προσφορά {{reference}} έχει λήξει",
+    "APPOINTMENT_ASSIGNED": "Ο/Η {{actor}} προγραμμάτισε για εσάς ραντεβού με τον/την {{client}}",
+    "APPOINTMENT_RESCHEDULED": "Ο/Η {{actor}} μετέφερε το ραντεβού σας στις {{scheduledAt}} — {{reason}}",
+    "APPOINTMENT_CANCELLED": "Ο/Η {{actor}} ακύρωσε το ραντεβού σας — {{reason}}",
+    "CLIENT_ASSIGNED": "Ο/Η {{actor}} σας ανέθεσε τον πελάτη {{client}}",
+    "INVITATION_ACCEPTED": "Ο/Η {{email}} αποδέχτηκε την πρόσκλησή σας και εντάχθηκε στην ομάδα",
+    "APPOINTMENT_REMINDER": "Υπενθύμιση: ραντεβού με τον/την {{clientName}}",
+    "QUOTATION_FOLLOW_UP": "Η προσφορά {{reference}} δεν έχει λάβει απάντηση από τον/την {{clientName}} εδώ και {{daysWaiting}} ημέρες"
+  }
+}

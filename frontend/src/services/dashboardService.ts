@@ -110,6 +110,23 @@ export interface CreatePlatformUserInput {
 }
 
 /**
+ * A Platform Admin inviting someone into a workspace by email — the third way
+ * to become a Business Owner, next to being promoted from staff and being
+ * invited by an existing owner. Adds an owner; a workspace may have several.
+ */
+export interface InvitePlatformUserInput {
+  email: string;
+  role: 'BUSINESS_OWNER' | 'STAFF';
+}
+
+/**
+ * What to do with the stand-in Business Owner when the original one is
+ * reactivated. `KEEP_BOTH` demotes nobody — the workspace simply ends up with
+ * two owners, which it is allowed to have.
+ */
+export type OwnershipResolution = 'RESTORE' | 'KEEP' | 'KEEP_BOTH';
+
+/**
  * The six fields both platform-wide defaults and a bulk apply to selected
  * tenants can set — the same set a workspace's own Settings page edits.
  * Company identity (name, address, branding) is deliberately absent: it names
@@ -284,6 +301,25 @@ export const dashboardService = {
   },
 
   /**
+   * Invite someone into a workspace by email, defaulting to Business Owner.
+   *
+   * The counterpart to `createPlatformUser`: that one sets a password the
+   * admin then has to pass on, this one lets the recipient choose their own
+   * through the ordinary invitation-acceptance page. Returns no token — the
+   * link only ever travels by email.
+   */
+  invitePlatformUser: async (
+    tenantId: string,
+    input: InvitePlatformUserInput
+  ): Promise<{ email: string; role: string }> => {
+    const response = await apiClient.post<{ invitation: { email: string; role: string } }>(
+      `/tenants/${tenantId}/invitations`,
+      input
+    );
+    return response.data.invitation;
+  },
+
+  /**
    * Platform Admin user lifecycle. All four are SUPER_ADMIN-only and, like the
    * tenant actions above, live at the root /api/tenants/users rather than
    * under /api/:tenantSlug — they act on ANY account across workspaces.
@@ -311,15 +347,18 @@ export const dashboardService = {
   },
 
   /**
-   * Idempotent server-side. `restoreOwnership` is required only when the
+   * Idempotent server-side. `ownershipResolution` is required only when the
    * target has an unresolved ownership transfer from their suspension — the
    * server responds 409 with `code: 'RESTORE_CHOICE_REQUIRED'` when it's
    * missing.
    */
-  reactivateUser: async (userId: string, restoreOwnership?: boolean): Promise<PlatformUser> => {
+  reactivateUser: async (
+    userId: string,
+    ownershipResolution?: OwnershipResolution
+  ): Promise<PlatformUser> => {
     const response = await apiClient.patch<{ user: PlatformUser }>(
       `/tenants/users/${userId}/reactivate`,
-      { restoreOwnership }
+      { ownershipResolution }
     );
     return response.data.user;
   },

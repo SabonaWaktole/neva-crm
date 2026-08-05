@@ -8,7 +8,7 @@
  * see the regression test in useMoneyFormat.test.ts, which fails if anyone
  * wires the i18n language into an Intl formatter.
  */
-export const SUPPORTED_LANGUAGES = ['en', 'sq'] as const;
+export const SUPPORTED_LANGUAGES = ['en', 'sq', 'el', 'it'] as const;
 export type Language = (typeof SUPPORTED_LANGUAGES)[number];
 
 export const DEFAULT_LANGUAGE: Language = 'en';
@@ -20,6 +20,8 @@ export const DEFAULT_LANGUAGE: Language = 'en';
 export const LANGUAGE_LABELS: Record<Language, string> = {
   en: 'English',
   sq: 'Shqip',
+  el: 'Ελληνικά',
+  it: 'Italiano',
 };
 
 export const isSupportedLanguage = (value: unknown): value is Language =>
@@ -40,6 +42,7 @@ export const NAMESPACES = [
   'appointments',
   'inventory',
   'quotations',
+  'invoices',
   'settings',
   'dashboard',
   'notifications',

@@ -61,4 +61,6 @@ export const LOCALE_LABELS: Record<(typeof SUPPORTED_LOCALES)[number], string> =
   'en-US': 'English (United States) — 1,234.56',
   'en-GB': 'English (United Kingdom) — 1,234.56',
   'sq-AL': 'Albanian (Albania) — 1 234,56',
+  'el-GR': 'Greek (Greece) — 1.234,56',
+  'it-IT': 'Italian (Italy) — 1.234,56',
 };

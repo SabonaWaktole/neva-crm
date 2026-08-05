@@ -10,6 +10,7 @@ import {
   InvalidOwnershipTargetError,
 } from '../../domain/errors';
 import { ConfirmationMismatchError } from '../../../shared/domain/errors/ConfirmationMismatchError';
+import { otherActiveOwners } from '../../domain/services/ownership';
 
 export interface PlatformDeleteUserDTO {
   callerRole: string;
@@ -25,9 +26,10 @@ export interface PlatformDeleteUserDTO {
  * Permanently (soft-)deletes any account — Business Owner or Staff.
  *
  * Irreversible, unlike `PlatformSuspendUserUseCase`: there is no
- * "un-delete". A Business Owner with other active staff must first hand the
- * workspace to one of them, exactly like suspension, except the handover has
- * no transfer record to resolve later — the original owner is gone for good.
+ * "un-delete". The LAST active Business Owner of a workspace that still has
+ * staff must first hand it to one of them, exactly like suspension, except
+ * the handover has no transfer record to resolve later — the original owner
+ * is gone for good. An owner with co-owners is deleted outright.
  *
  * "Delete" is a soft delete (`IUserRepository.softDelete`), not a row
  * removal: seven non-nullable columns reference User, so a hard delete is
@@ -61,7 +63,19 @@ export class PlatformDeleteUserUseCase {
     let ownershipTransferred = false;
 
     if (target.role === UserRole.BUSINESS_OWNER && target.tenantId) {
-      const staff = await this.userRepository.findActiveByTenantAndRole(target.tenantId, UserRole.STAFF);
+      // Same rule as `PlatformSuspendUserUseCase`: only the LAST active
+      // Business Owner has to hand the workspace over. Co-owners are the
+      // normal case, not an anomaly — see `otherActiveOwners`.
+      const owners = await this.userRepository.findActiveByTenantAndRole(
+        target.tenantId,
+        UserRole.BUSINESS_OWNER
+      );
+      const coOwners = otherActiveOwners(owners, target.id);
+
+      const staff =
+        coOwners.length > 0
+          ? []
+          : await this.userRepository.findActiveByTenantAndRole(target.tenantId, UserRole.STAFF);
 
       if (staff.length > 0) {
         if (!dto.newOwnerId) {

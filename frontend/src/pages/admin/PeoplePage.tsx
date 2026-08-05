@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Users, MoreVertical, Ban, CheckCircle2, Trash2 } from 'lucide-react';
+import { Plus, UserPlus, Users, MoreVertical, Ban, CheckCircle2, Trash2 } from 'lucide-react';
 import { Button } from '../../components/ui/Button/Button';
 import { TextInput } from '../../components/ui/TextInput';
 import { SelectInput } from '../../components/ui/SelectInput';
@@ -11,11 +11,18 @@ import type { DataTableColumn } from '../../components/ui/DataTable';
 import { DropdownMenu } from '../../components/ui/DropdownMenu';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { CreateUserModal } from './CreateUserModal';
+import { InviteUserModal } from './InviteUserModal';
 import { useTenants, useUserAdmin } from '../../hooks/useDashboard';
-import { usePlatformUsers, useCreatePlatformUser } from '../../hooks/usePlatformUsers';
+import {
+  usePlatformUsers,
+  useCreatePlatformUser,
+  useInvitePlatformUser,
+} from '../../hooks/usePlatformUsers';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import type {
   CreatePlatformUserInput,
+  InvitePlatformUserInput,
+  OwnershipResolution,
   OwnershipTransferCandidate,
   PlatformUser,
 } from '../../services/dashboardService';
@@ -32,7 +39,7 @@ interface PendingSuspend {
 interface PendingReactivate {
   user: PlatformUser;
   /** `null` means "not yet chosen" — only relevant when the user has a pending transfer. */
-  restoreOwnership: boolean | null;
+  ownershipResolution: OwnershipResolution | null;
 }
 
 interface PendingDelete {
@@ -43,6 +50,35 @@ interface PendingDelete {
   confirmText: string;
   validationError: string | null;
 }
+
+/**
+ * The reactivation choices, in the order they are offered.
+ *
+ * A list rather than three hand-written blocks so a fourth resolution — or a
+ * reworded third — is one entry, and so the radios cannot drift apart in
+ * markup. The values are the server's `ownershipResolution` enum verbatim.
+ */
+const OWNERSHIP_RESOLUTIONS: {
+  value: OwnershipResolution;
+  labelKey: string;
+  descriptionKey: string;
+}[] = [
+  {
+    value: 'RESTORE',
+    labelKey: 'superAdmin.restoreOriginalOwnership',
+    descriptionKey: 'superAdmin.restoreOriginalOwnershipDescription',
+  },
+  {
+    value: 'KEEP',
+    labelKey: 'superAdmin.keepCurrentOwnership',
+    descriptionKey: 'superAdmin.keepCurrentOwnershipDescription',
+  },
+  {
+    value: 'KEEP_BOTH',
+    labelKey: 'superAdmin.keepBothOwners',
+    descriptionKey: 'superAdmin.keepBothOwnersDescription',
+  },
+];
 
 /**
  * Everyone on the platform, across every workspace.
@@ -67,6 +103,12 @@ export const PeoplePage = () => {
     clearError: clearCreateError,
   } = useCreatePlatformUser();
   const {
+    inviteUser,
+    isSubmitting: isInviting,
+    error: inviteError,
+    clearError: clearInviteError,
+  } = useInvitePlatformUser();
+  const {
     getOwnershipTransferCandidates,
     suspendUser,
     reactivateUser,
@@ -77,6 +119,7 @@ export const PeoplePage = () => {
   } = useUserAdmin();
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [pendingSuspend, setPendingSuspend] = useState<PendingSuspend | null>(null);
   const [pendingReactivate, setPendingReactivate] = useState<PendingReactivate | null>(null);
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
@@ -90,6 +133,14 @@ export const PeoplePage = () => {
     refresh();
     return true;
   };
+
+  /*
+   * No `refresh()` afterwards, unlike `handleCreate`: an invitation is not an
+   * account yet, so nothing this page lists has changed. The row appears once
+   * the invitee accepts.
+   */
+  const handleInvite = (tenantId: string, input: InvitePlatformUserInput): Promise<boolean> =>
+    inviteUser(tenantId, input);
 
   const openSuspend = async (user: PlatformUser) => {
     clearAdminError();
@@ -110,7 +161,7 @@ export const PeoplePage = () => {
 
   const openReactivate = (user: PlatformUser) => {
     clearAdminError();
-    setPendingReactivate({ user, restoreOwnership: null });
+    setPendingReactivate({ user, ownershipResolution: null });
   };
 
   const openDelete = async (user: PlatformUser) => {
@@ -149,9 +200,9 @@ export const PeoplePage = () => {
 
   const handleConfirmReactivate = async () => {
     if (!pendingReactivate) return;
-    const { user, restoreOwnership } = pendingReactivate;
+    const { user, ownershipResolution } = pendingReactivate;
 
-    const result = await reactivateUser(user.id, restoreOwnership ?? undefined);
+    const result = await reactivateUser(user.id, ownershipResolution ?? undefined);
     if (!result) throw new Error(adminError ?? 'Action failed');
 
     setPendingReactivate(null);
@@ -299,16 +350,31 @@ export const PeoplePage = () => {
           <h1 className={styles.title}>{t('superAdmin.peopleTitle')}</h1>
           <p className={styles.subtitle}>{t('superAdmin.peopleSubtitle', { count: total })}</p>
         </div>
-        <Button
-          icon={<Plus size={20} />}
-          onClick={() => {
-            clearCreateError();
-            setIsCreateOpen(true);
-          }}
-          disabled={tenants.length === 0}
-        >
-          {t('superAdmin.newUser')}
-        </Button>
+        <div className={styles.headerActions}>
+          {/* Invite first: it is the one that does not require the admin to
+              invent and hand over a password. */}
+          <Button
+            variant="outline"
+            icon={<UserPlus size={20} />}
+            onClick={() => {
+              clearInviteError();
+              setIsInviteOpen(true);
+            }}
+            disabled={tenants.length === 0}
+          >
+            {t('superAdmin.inviteUser')}
+          </Button>
+          <Button
+            icon={<Plus size={20} />}
+            onClick={() => {
+              clearCreateError();
+              setIsCreateOpen(true);
+            }}
+            disabled={tenants.length === 0}
+          >
+            {t('superAdmin.newUser')}
+          </Button>
+        </div>
       </header>
 
       <div className={styles.filters}>
@@ -381,6 +447,15 @@ export const PeoplePage = () => {
         serverError={createError}
       />
 
+      <InviteUserModal
+        isOpen={isInviteOpen}
+        onClose={() => setIsInviteOpen(false)}
+        tenants={tenants}
+        onSubmit={handleInvite}
+        isSubmitting={isInviting}
+        serverError={inviteError}
+      />
+
       <ConfirmDialog
         isOpen={pendingSuspend !== null}
         onClose={() => setPendingSuspend(null)}
@@ -431,36 +506,29 @@ export const PeoplePage = () => {
                       name: pendingReactivate.user.pendingOwnershipTransfer.actingOwnerName,
                     })}
                   </p>
-                  <label className={styles.radioOption}>
-                    <input
-                      type="radio"
-                      name="restoreOwnership"
-                      checked={pendingReactivate.restoreOwnership === true}
-                      onChange={() =>
-                        setPendingReactivate((prev) => (prev ? { ...prev, restoreOwnership: true } : prev))
-                      }
-                    />
-                    <span>
-                      <strong>{t('superAdmin.restoreOriginalOwnership')}</strong>
-                      <br />
-                      {t('superAdmin.restoreOriginalOwnershipDescription')}
-                    </span>
-                  </label>
-                  <label className={styles.radioOption}>
-                    <input
-                      type="radio"
-                      name="restoreOwnership"
-                      checked={pendingReactivate.restoreOwnership === false}
-                      onChange={() =>
-                        setPendingReactivate((prev) => (prev ? { ...prev, restoreOwnership: false } : prev))
-                      }
-                    />
-                    <span>
-                      <strong>{t('superAdmin.keepCurrentOwnership')}</strong>
-                      <br />
-                      {t('superAdmin.keepCurrentOwnershipDescription')}
-                    </span>
-                  </label>
+                  {/* Three choices, and only the last one demotes nobody: a
+                      workspace may have several Business Owners, so bringing
+                      the original back does not have to cost the stand-in
+                      their role. */}
+                  {OWNERSHIP_RESOLUTIONS.map(({ value, labelKey, descriptionKey }) => (
+                    <label key={value} className={styles.radioOption}>
+                      <input
+                        type="radio"
+                        name="ownershipResolution"
+                        checked={pendingReactivate.ownershipResolution === value}
+                        onChange={() =>
+                          setPendingReactivate((prev) =>
+                            prev ? { ...prev, ownershipResolution: value } : prev
+                          )
+                        }
+                      />
+                      <span>
+                        <strong>{t(labelKey)}</strong>
+                        <br />
+                        {t(descriptionKey)}
+                      </span>
+                    </label>
+                  ))}
                 </div>
               )}
             </div>

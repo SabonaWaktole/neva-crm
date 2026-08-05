@@ -1,4 +1,5 @@
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { SUPPORTED_LANGUAGES, LANGUAGE_LABELS, type Language } from '../../i18n/config';
 import { REVIEWED_LANGUAGES } from '../../i18n/reviewStatus';
 import styles from './LanguagePicker.module.css';
@@ -32,6 +33,7 @@ export const LanguagePicker: React.FC<LanguagePickerProps> = ({
   disabled,
   inheritOption,
 }) => {
+  const { t } = useTranslation('common');
   const unreviewed = SUPPORTED_LANGUAGES.filter((code) => !REVIEWED_LANGUAGES.includes(code));
 
   return (
@@ -47,19 +49,25 @@ export const LanguagePicker: React.FC<LanguagePickerProps> = ({
         {SUPPORTED_LANGUAGES.map((code) => (
           <option key={code} value={code}>
             {LANGUAGE_LABELS[code]}
-            {REVIEWED_LANGUAGES.includes(code) ? '' : ' — translation in review'}
+            {REVIEWED_LANGUAGES.includes(code) ? '' : ` — ${t('language.inReview')}`}
           </option>
         ))}
       </select>
 
       {unreviewed.length > 0 && (
         <p className={styles.reviewNotice}>
-          <strong>
-            {unreviewed.map((code) => LANGUAGE_LABELS[code]).join(', ')}
-          </strong>{' '}
-          {unreviewed.length === 1 ? 'is' : 'are'} translated but not yet checked by a
-          native speaker. Wording may be wrong in places, and server error messages
-          are still shown in English.
+          {/*
+            One key per plural rather than an inline "is"/"are": the sentence
+            differs by more than a verb in most languages, and splicing English
+            grammar together from fragments is exactly what does not survive
+            translation.
+          */}
+          <Trans
+            t={t}
+            i18nKey={unreviewed.length === 1 ? 'language.reviewNoticeOne' : 'language.reviewNoticeOther'}
+            values={{ languages: unreviewed.map((code) => LANGUAGE_LABELS[code]).join(', ') }}
+            components={[<strong key="languages" />]}
+          />
         </p>
       )}
     </>

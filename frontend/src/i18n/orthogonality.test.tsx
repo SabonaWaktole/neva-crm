@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import i18n, { applyLanguage } from './index';
 import { resolveLanguage } from './useLanguage';
+import { SUPPORTED_LANGUAGES, LANGUAGE_LABELS } from './config';
 import { useMoneyFormat } from '../hooks/useMoneyFormat';
 import { useAuthStore } from '../store/useAuthStore';
 
@@ -100,9 +101,54 @@ describe('language resolution precedence', () => {
 });
 
 describe('catalogue integrity', () => {
-  it('translates a common key in both languages', () => {
+  it('translates a common key in every shipped language', () => {
     expect(i18n.getFixedT('en', 'common')('actions.save')).toBe('Save');
     expect(i18n.getFixedT('sq', 'common')('actions.save')).toBe('Ruaj');
+    expect(i18n.getFixedT('el', 'common')('actions.save')).toBe('Αποθήκευση');
+    expect(i18n.getFixedT('it', 'common')('actions.save')).toBe('Salva');
+  });
+
+  /*
+   * The failure this guards against is silent. i18next falls back to English
+   * for any key a language is missing, so an unwired catalogue does not throw
+   * or warn — the interface simply stays in English, and the language looks
+   * "supported" in the picker while translating nothing.
+   *
+   * Checking a key per namespace catches the realistic mistake: adding a
+   * language to SUPPORTED_LANGUAGES and its catalogue files, then forgetting
+   * one import in the resources map.
+   */
+  it.each(['sq', 'el', 'it'] as const)(
+    'has %s wired into resources for every namespace, not just declared',
+    (language) => {
+      const probes = {
+        common: 'actions.save',
+        auth: 'login.submit',
+        clients: 'list.title',
+        appointments: 'calendar.today',
+        inventory: 'list.title',
+        quotations: 'list.title',
+        settings: 'profile.title',
+        dashboard: 'recentActivity',
+        notifications: 'title',
+      } as const;
+
+      for (const [namespace, key] of Object.entries(probes)) {
+        const translated = i18n.getFixedT(language, namespace)(key);
+        const english = i18n.getFixedT('en', namespace)(key);
+        expect(translated).not.toContain(`${namespace}:`);
+        expect(translated).not.toBe(english);
+      }
+    }
+  );
+
+  it('names every supported language in its own script', () => {
+    // A picker that says "Greek" is no help to someone who only reads Greek.
+    for (const language of SUPPORTED_LANGUAGES) {
+      expect(LANGUAGE_LABELS[language]).toBeTruthy();
+    }
+    expect(LANGUAGE_LABELS.el).toBe('Ελληνικά');
+    expect(LANGUAGE_LABELS.it).toBe('Italiano');
   });
 
   it('falls back to English for a key Albanian has not translated yet', () => {

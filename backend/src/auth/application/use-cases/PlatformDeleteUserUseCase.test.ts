@@ -63,6 +63,7 @@ describe('PlatformDeleteUserUseCase', () => {
       promoteForSuspension: jest.fn(),
       restoreOwnership: jest.fn(),
       keepOwnership: jest.fn(),
+      keepBothOwners: jest.fn(),
       promoteForDeletion: jest.fn(),
     };
     auditLogger = { record: jest.fn(), findRecent: jest.fn() };
@@ -107,10 +108,30 @@ describe('PlatformDeleteUserUseCase', () => {
     expect(ownershipTransactions.promoteForDeletion).not.toHaveBeenCalled();
   });
 
-  describe('Business Owner with active staff', () => {
+  // Mirrors PlatformSuspendUserUseCase: with a co-owner left in charge there
+  // is nothing to hand over.
+  it('deletes a Business Owner with staff directly when a co-owner remains', async () => {
+    userRepository.findById.mockResolvedValue(makeUser({ role: UserRole.BUSINESS_OWNER }));
+    userRepository.findActiveByTenantAndRole.mockImplementation(async (_tenantId, role) =>
+      role === UserRole.BUSINESS_OWNER
+        ? [makeUser({ id: 'user-1', role: UserRole.BUSINESS_OWNER }), makeUser({ id: 'owner-2', role: UserRole.BUSINESS_OWNER })]
+        : [makeUser({ id: 'staff-1', role: UserRole.STAFF })]
+    );
+
+    await del();
+
+    expect(userRepository.softDelete).toHaveBeenCalledWith('user-1');
+    expect(ownershipTransactions.promoteForDeletion).not.toHaveBeenCalled();
+  });
+
+  describe('sole Business Owner with active staff', () => {
     beforeEach(() => {
       userRepository.findById.mockResolvedValue(makeUser({ role: UserRole.BUSINESS_OWNER }));
-      userRepository.findActiveByTenantAndRole.mockResolvedValue([makeUser({ id: 'staff-1', role: UserRole.STAFF })]);
+      userRepository.findActiveByTenantAndRole.mockImplementation(async (_tenantId, role) =>
+        role === UserRole.BUSINESS_OWNER
+          ? [makeUser({ id: 'user-1', role: UserRole.BUSINESS_OWNER })]
+          : [makeUser({ id: 'staff-1', role: UserRole.STAFF })]
+      );
     });
 
     it('requires newOwnerId and deletes nothing without it', async () => {

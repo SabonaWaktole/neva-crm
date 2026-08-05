@@ -9,6 +9,7 @@ import { LoginUseCase } from '@auth/application/use-cases/LoginUseCase';
 import { CreateUserUseCase } from '@auth/application/use-cases/CreateUserUseCase';
 import { GetPlatformUsersUseCase } from '@auth/application/use-cases/GetPlatformUsersUseCase';
 import { InviteStaffUseCase } from '@auth/application/use-cases/InviteStaffUseCase';
+import { PlatformInviteUserUseCase } from '@auth/application/use-cases/PlatformInviteUserUseCase';
 import { AcceptInvitationUseCase } from '@auth/application/use-cases/AcceptInvitationUseCase';
 import { RequestPasswordResetUseCase } from '@auth/application/use-cases/RequestPasswordResetUseCase';
 import { ResetPasswordUseCase } from '@auth/application/use-cases/ResetPasswordUseCase';
@@ -123,7 +124,9 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
     },
     credentials: true,
   }));
-  app.use(express.json());
+  // Default 100kb is too small for the Reports PDF export, whose body carries
+  // several client-captured chart PNGs as base64 alongside the table data.
+  app.use(express.json({ limit: '15mb' }));
   app.use(cookieParser());
 
   // Backs the Super Admin dashboard's Global Latency / Active Requests /
@@ -240,6 +243,13 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
     ownershipTransactions,
     auditLogger
   );
+  const platformInviteUserUseCase = new PlatformInviteUserUseCase(
+    invitationRepository,
+    userRepository,
+    tenantRepository,
+    emailSender,
+    auditLogger
+  );
 
   // Controller
   const authController = new AuthController(
@@ -318,6 +328,7 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
     enterTenantUseCase,
     deleteTenantUseCase,
     createUserUseCase,
+    inviteUserUseCase: platformInviteUserUseCase,
     getPlatformUsersUseCase,
     getOwnershipTransferCandidatesUseCase,
     suspendUserUseCase: platformSuspendUserUseCase,
@@ -485,6 +496,14 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
     process.env.FRONTEND_URL || 'http://localhost:5173'
   );
 
+  // Needed by GetQuotationDetailUseCase below to answer "does an invoice
+  // already exist for this quotation" (drives the frontend's "Convert to
+  // Invoice" button). Declared here, ahead of the Invoices Routes block
+  // further down, purely because that is where GetQuotationDetailUseCase is
+  // constructed — the two blocks otherwise share nothing.
+  const { PrismaInvoiceRepository: PrismaInvoiceRepositoryForQuotationDetail } = require('../invoices/infrastructure/repositories/PrismaInvoiceRepository');
+  const invoiceRepoForQuotationDetail = new PrismaInvoiceRepositoryForQuotationDetail(prisma);
+
   const quotationsController = new QuotationsController(
     new CreateQuotationUseCase(quotationRepo, quotationLineItemRepo, quotationHistoryRepo, prismaClientRepository, productRepo, warehouseRepo),
     new UpdateQuotationUseCase(quotationRepo, quotationLineItemRepo, productRepo, warehouseRepo),
@@ -499,7 +518,7 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
     new MarkQuotationRejectedUseCase(quotationWriteTx, userRepository, notificationEmailDispatcher),
     new ExpireQuotationUseCase(quotationWriteTx, userRepository, notificationEmailDispatcher),
     new SearchQuotationsUseCase(quotationRepo),
-    new GetQuotationDetailUseCase(quotationRepo, quotationLineItemRepo, quotationHistoryRepo),
+    new GetQuotationDetailUseCase(quotationRepo, quotationLineItemRepo, quotationHistoryRepo, invoiceRepoForQuotationDetail),
     new GetPendingApprovalsUseCase(quotationRepo),
     settingsService
   );
@@ -522,6 +541,51 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
       new QuotationPdfRenderer()
     )
   );
+
+  // Invoices Routes
+  //
+  // Mirrors the Quotations block above: converted from an ACCEPTED quotation
+  // (ConvertQuotationToInvoiceUseCase), never created standalone. No approval
+  // step and no stock deduction — both already happened on the way to the
+  // quotation being ACCEPTED — so this composition root is shorter than the
+  // Quotations one above it.
+  const { PrismaInvoiceRepository } = require('../invoices/infrastructure/repositories/PrismaInvoiceRepository');
+  const { PrismaInvoiceLineItemRepository } = require('../invoices/infrastructure/repositories/PrismaInvoiceLineItemRepository');
+  const { PrismaInvoiceStatusHistoryRepository } = require('../invoices/infrastructure/repositories/PrismaInvoiceStatusHistoryRepository');
+  const { PrismaInvoiceWriteTransaction } = require('../invoices/infrastructure/PrismaInvoiceWriteTransaction');
+  const { PrismaInvoicePdfReader } = require('../invoices/infrastructure/PrismaInvoicePdfReader');
+  const { InvoicePdfRenderer } = require('../invoices/infrastructure/InvoicePdfRenderer');
+
+  const { ConvertQuotationToInvoiceUseCase } = require('../invoices/application/use-cases/ConvertQuotationToInvoiceUseCase');
+  const { SendInvoiceUseCase } = require('../invoices/application/use-cases/SendInvoiceUseCase');
+  const { MarkInvoicePaidUseCase } = require('../invoices/application/use-cases/MarkInvoicePaidUseCase');
+  const { VoidInvoiceUseCase } = require('../invoices/application/use-cases/VoidInvoiceUseCase');
+  const { SearchInvoicesUseCase } = require('../invoices/application/use-cases/SearchInvoicesUseCase');
+  const { GetInvoiceDetailUseCase } = require('../invoices/application/use-cases/GetInvoiceDetailUseCase');
+  const { GetInvoicePdfViewUseCase } = require('../invoices/application/GetInvoicePdfViewUseCase');
+
+  const { InvoicesController } = require('../invoices/interfaces/http/InvoicesController');
+  const { createInvoiceRouter } = require('../invoices/interfaces/http/invoiceRoutes');
+
+  const invoiceRepo = new PrismaInvoiceRepository(prisma);
+  const invoiceLineItemRepo = new PrismaInvoiceLineItemRepository(prisma);
+  const invoiceHistoryRepo = new PrismaInvoiceStatusHistoryRepository(prisma);
+  const invoiceWriteTx = new PrismaInvoiceWriteTransaction(prisma);
+  const invoicePdfReader = new PrismaInvoicePdfReader(prisma);
+
+  const invoicesController = new InvoicesController(
+    new ConvertQuotationToInvoiceUseCase(quotationRepo, quotationLineItemRepo, invoiceRepo, invoiceWriteTx),
+    new SendInvoiceUseCase(invoiceWriteTx),
+    new MarkInvoicePaidUseCase(invoiceWriteTx),
+    new VoidInvoiceUseCase(invoiceWriteTx),
+    new SearchInvoicesUseCase(invoiceRepo),
+    new GetInvoiceDetailUseCase(invoiceRepo, invoiceLineItemRepo, invoiceHistoryRepo),
+    new GetInvoicePdfViewUseCase(invoicePdfReader),
+    new InvoicePdfRenderer()
+  );
+
+  const invoiceRoutes = createInvoiceRouter(invoicesController, tokenService, tenantRepository);
+  app.use('/api/:tenantSlug/invoices', invoiceRoutes);
 
   // Media Routes (profile photos + workspace branding)
   const { MediaController } = require('../media/interfaces/http/MediaController');
@@ -592,6 +656,7 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const { GetAppointmentReportUseCase } = require('../reports/application/use-cases/GetAppointmentReportUseCase');
   const { GetClientTrendUseCase } = require('../reports/application/use-cases/GetClientTrendUseCase');
   const { GetLowStockReportUseCase } = require('../reports/application/use-cases/GetLowStockReportUseCase');
+  const { ReportPdfRenderer } = require('../reports/infrastructure/ReportPdfRenderer');
 
   const reportRepo = new PrismaReportRepository(prisma);
   const reportsController = new ReportsController(
@@ -600,7 +665,8 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
     new GetInventoryReportUseCase(reportRepo),
     new GetAppointmentReportUseCase(reportRepo),
     new GetClientTrendUseCase(reportRepo),
-    new GetLowStockReportUseCase(reportRepo)
+    new GetLowStockReportUseCase(reportRepo),
+    new ReportPdfRenderer()
   );
 
   const reportRoutes = createReportRouter(reportsController, tokenService, tenantRepository);

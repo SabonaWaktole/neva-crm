@@ -1,8 +1,9 @@
 import React from 'react';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { useDashboardMetrics, useActivityFeed, useTenants } from './useDashboard';
+import { useDashboardMetrics, useActivityFeed, useTenants, useUserAdmin } from './useDashboard';
+import { useInvitePlatformUser } from './usePlatformUsers';
 import { server } from '../setupTests';
 import { http, HttpResponse } from 'msw';
 
@@ -219,6 +220,107 @@ describe('useDashboard Hooks', () => {
 
       // Count should still be 1 (useEffect dependencies haven't changed)
       expect(fetchCount).toBe(1);
+    });
+  });
+
+  // ─── useUserAdmin ──────────────────────────────────────────────────
+  describe('useUserAdmin', () => {
+    /*
+     * Reactivation after a suspension that promoted a stand-in is a
+     * three-way choice, and which one the console sends decides whether
+     * anyone gets demoted. These assert the wire value, not just that a
+     * request went out.
+     */
+    it.each(['RESTORE', 'KEEP', 'KEEP_BOTH'] as const)(
+      'sends ownershipResolution %s verbatim',
+      async (resolution) => {
+        let received: any = null;
+        server.use(
+          http.patch('http://localhost:3000/api/tenants/users/u-1/reactivate', async ({ request }) => {
+            received = await request.json();
+            return HttpResponse.json({ user: { id: 'u-1', isActive: true } });
+          })
+        );
+
+        const { result } = renderHook(() => useUserAdmin());
+        await act(async () => {
+          await result.current.reactivateUser('u-1', resolution);
+        });
+
+        expect(received).toEqual({ ownershipResolution: resolution });
+      }
+    );
+
+    it('surfaces the server code when reactivation needs a choice first', async () => {
+      server.use(
+        http.patch('http://localhost:3000/api/tenants/users/u-1/reactivate', () =>
+          HttpResponse.json(
+            { error: 'Choose what happens to ownership', code: 'RESTORE_CHOICE_REQUIRED' },
+            { status: 409 }
+          )
+        )
+      );
+
+      const { result } = renderHook(() => useUserAdmin());
+      await act(async () => {
+        await result.current.reactivateUser('u-1');
+      });
+
+      expect(result.current.errorCode).toBe('RESTORE_CHOICE_REQUIRED');
+    });
+  });
+
+  // ─── useInvitePlatformUser ─────────────────────────────────────────
+  describe('useInvitePlatformUser', () => {
+    it('invites into the chosen workspace and reports success', async () => {
+      let received: any = null;
+      server.use(
+        http.post('http://localhost:3000/api/tenants/t-1/invitations', async ({ request }) => {
+          received = await request.json();
+          return HttpResponse.json(
+            { invitation: { email: 'new@owner.com', role: 'BUSINESS_OWNER' } },
+            { status: 201 }
+          );
+        })
+      );
+
+      const { result } = renderHook(() => useInvitePlatformUser());
+      let sent = false;
+      await act(async () => {
+        sent = await result.current.inviteUser('t-1', {
+          email: 'new@owner.com',
+          role: 'BUSINESS_OWNER',
+        });
+      });
+
+      expect(sent).toBe(true);
+      expect(received).toEqual({ email: 'new@owner.com', role: 'BUSINESS_OWNER' });
+      expect(result.current.error).toBeNull();
+    });
+
+    // "Already has an account here" is the operator's cue to promote instead
+    // of invite, so the server's own wording has to reach them.
+    it('surfaces the server message when the invitee is already in the workspace', async () => {
+      server.use(
+        http.post('http://localhost:3000/api/tenants/t-1/invitations', () =>
+          HttpResponse.json(
+            { error: '"taken@owner.com" already has an account in this workspace', code: 'USER_ALREADY_IN_WORKSPACE' },
+            { status: 409 }
+          )
+        )
+      );
+
+      const { result } = renderHook(() => useInvitePlatformUser());
+      let sent = true;
+      await act(async () => {
+        sent = await result.current.inviteUser('t-1', {
+          email: 'taken@owner.com',
+          role: 'BUSINESS_OWNER',
+        });
+      });
+
+      expect(sent).toBe(false);
+      expect(result.current.error).toContain('already has an account');
     });
   });
 });

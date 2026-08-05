@@ -16,6 +16,7 @@ import {
 } from '../../../domain/errors';
 import { CreateUserUseCase } from '../../../../auth/application/use-cases/CreateUserUseCase';
 import { GetPlatformUsersUseCase } from '../../../../auth/application/use-cases/GetPlatformUsersUseCase';
+import { PlatformInviteUserUseCase } from '../../../../auth/application/use-cases/PlatformInviteUserUseCase';
 import { GetOwnershipTransferCandidatesUseCase } from '../../../../auth/application/use-cases/GetOwnershipTransferCandidatesUseCase';
 import { PlatformSuspendUserUseCase } from '../../../../auth/application/use-cases/PlatformSuspendUserUseCase';
 import { PlatformReactivateUserUseCase } from '../../../../auth/application/use-cases/PlatformReactivateUserUseCase';
@@ -35,6 +36,8 @@ import {
   OwnershipTransferRequiredError,
   InvalidOwnershipTargetError,
   RestoreOwnershipChoiceRequiredError,
+  UserAlreadyInWorkspaceError,
+  InvitationAlreadyPendingError,
 } from '../../../../auth/domain/errors';
 import { authenticate } from '../../../../main/interfaces/http/middlewares/authenticate';
 import { authorize } from '../../../../main/interfaces/http/middlewares/authorize';
@@ -86,6 +89,7 @@ export interface TenantRouterDeps {
   enterTenantUseCase: EnterTenantUseCase;
   deleteTenantUseCase: DeleteTenantUseCase;
   createUserUseCase: CreateUserUseCase;
+  inviteUserUseCase: PlatformInviteUserUseCase;
   getPlatformUsersUseCase: GetPlatformUsersUseCase;
   getOwnershipTransferCandidatesUseCase: GetOwnershipTransferCandidatesUseCase;
   suspendUserUseCase: PlatformSuspendUserUseCase;
@@ -110,6 +114,7 @@ export function createTenantRouter(deps: TenantRouterDeps): Router {
     enterTenantUseCase,
     deleteTenantUseCase,
     createUserUseCase,
+    inviteUserUseCase,
     getPlatformUsersUseCase,
     getOwnershipTransferCandidatesUseCase,
     suspendUserUseCase,
@@ -497,9 +502,10 @@ export function createTenantRouter(deps: TenantRouterDeps): Router {
   );
 
   /**
-   * SUPER_ADMIN only: reactivate any platform user. `restoreOwnership` is
+   * SUPER_ADMIN only: reactivate any platform user. `ownershipResolution` is
    * required only when the target has an unresolved ownership transfer from
-   * their suspension — see `PlatformReactivateUserUseCase`.
+   * their suspension, and picks between restoring them, keeping the stand-in,
+   * or keeping BOTH as Business Owners — see `PlatformReactivateUserUseCase`.
    */
   router.patch(
     '/users/:id/reactivate',
@@ -515,7 +521,7 @@ export function createTenantRouter(deps: TenantRouterDeps): Router {
           callerRole,
           callerId: req.user.userId,
           userId: String(req.params.id),
-          restoreOwnership: req.body.restoreOwnership,
+          ownershipResolution: req.body.ownershipResolution,
         });
 
         res.json({ user: toUserResponse(user) });
@@ -628,6 +634,60 @@ export function createTenantRouter(deps: TenantRouterDeps): Router {
 
         res.status(201).json({ user });
       } catch (error) {
+        if (error instanceof UnauthorizedError) {
+          return res.status(403).json({ error: error.message });
+        }
+        next(error);
+      }
+    }
+  );
+
+  /**
+   * SUPER_ADMIN only: invite someone into a workspace by email, defaulting to
+   * BUSINESS_OWNER.
+   *
+   * The third of the three ways a person becomes a Business Owner, and the
+   * only one that starts outside the platform without the admin choosing the
+   * password: promotion from staff (PUT /api/:tenantSlug/auth/staff/:id) and
+   * an invitation from an existing owner (POST /api/:tenantSlug/auth/invitations)
+   * are the other two. The recipient accepts through the same public
+   * POST /api/auth/invitations/accept as any other invitee — no separate
+   * acceptance path to keep in step.
+   *
+   * Adds an owner; never replaces one. A workspace may have several.
+   */
+  router.post(
+    '/:id/invitations',
+    validateRequest(tenantSchemas.inviteUser),
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const callerRole = callerRoleOf(req);
+        if (!callerRole || !req.user) {
+          return res.status(401).json({ error: 'Access denied. No token provided.' });
+        }
+
+        const invitation = await inviteUserUseCase.execute({
+          callerRole,
+          callerId: req.user.userId,
+          tenantId: String(req.params.id),
+          email: req.body.email,
+          role: req.body.role,
+        });
+
+        // The token is deliberately not echoed: the invitation email carries
+        // it, and a link that grants account creation does not belong in an
+        // API response body or the logs that collect one.
+        res.status(201).json({ invitation: { email: invitation.email, role: invitation.role } });
+      } catch (error) {
+        if (error instanceof TenantNotFoundError) {
+          return res.status(404).json({ error: 'Tenant not found' });
+        }
+        if (error instanceof UserAlreadyInWorkspaceError) {
+          return res.status(409).json({ error: error.message, code: 'USER_ALREADY_IN_WORKSPACE' });
+        }
+        if (error instanceof InvitationAlreadyPendingError) {
+          return res.status(409).json({ error: error.message, code: 'INVITATION_ALREADY_PENDING' });
+        }
         if (error instanceof UnauthorizedError) {
           return res.status(403).json({ error: error.message });
         }

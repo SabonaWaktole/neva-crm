@@ -93,7 +93,7 @@ const toFormState = (settings: TenantSettings): FormState => ({
 export const AccountSettingsPage = () => {
   const navigate = useNavigate();
   const { tenantSlug } = useParams();
-  const { user, setUser } = useAuthStore();
+  const { user, updateUser } = useAuthStore();
   const { logout } = useLogout();
   const toast = useToast();
   const { t } = useTranslation('settings');
@@ -137,15 +137,22 @@ export const AccountSettingsPage = () => {
       setSaved(updated);
       setForm(toFormState(updated));
 
-      // The money formatter reads currency and locale from the auth store, so
-      // it has to learn about the change without waiting for a page reload.
+      // The money formatter reads currency and locale from the auth store, and
+      // useLanguageSync reads the language from it, so both have to learn about
+      // the change without waiting for a page reload.
+      //
+      // Every field the server persists here must be mirrored back. Language
+      // was missing, which made saving a new workspace language look like it
+      // did nothing: the PUT stored it, the success toast fired, but the store
+      // still held the old value, so the interface stayed in the old language
+      // until the next sign-in refetched /me.
       if (user) {
-        setUser({
-          ...user,
+        updateUser({
           tenantCurrency: updated.currency,
           tenantLocale: updated.locale,
           tenantTimezone: updated.timezone,
           tenantDateFormat: updated.dateFormat,
+          tenantDefaultLanguage: updated.defaultLanguage,
         });
       }
       toast.success(tc('feedback.saved'));
@@ -222,7 +229,7 @@ export const AccountSettingsPage = () => {
                 kind="logo"
                 tenantSlug={tenantSlug || ''}
                 value={user?.tenantLogoUrl ?? null}
-                onChange={(url) => user && setUser({ ...user, tenantLogoUrl: url })}
+                onChange={(url) => user && updateUser({ tenantLogoUrl: url })}
                 label={t('company.branding.logoLabel')}
                 hint={t('company.branding.logoHint')}
                 disabled={!isBusinessOwner}
@@ -232,7 +239,7 @@ export const AccountSettingsPage = () => {
                 kind="company-cover"
                 tenantSlug={tenantSlug || ''}
                 value={user?.tenantCoverImageUrl ?? null}
-                onChange={(url) => user && setUser({ ...user, tenantCoverImageUrl: url })}
+                onChange={(url) => user && updateUser({ tenantCoverImageUrl: url })}
                 variant="banner"
                 label={t('company.branding.bannerLabel')}
                 hint={t('company.branding.bannerHint')}

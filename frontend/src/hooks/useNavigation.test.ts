@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
+import { renderHook } from '@testing-library/react';
 import { useNavigation } from './useNavigation';
+import '../i18n';
 
 /**
  * The sidebar duplicates a permission decision that really lives in
@@ -8,14 +10,18 @@ import { useNavigation } from './useNavigation';
  */
 describe('useNavigation', () => {
   /*
-   * `useNavigation` is a pure function of its arguments — it calls no React
-   * hooks — so invoking it directly is correct and no renderer is needed.
-   * The linter cannot see that and flags the anonymous arrow as a component
-   * calling a hook. Disabled here rather than downgrading the rule, which is
-   * genuinely useful everywhere else. See TD-018.
+   * `useNavigation` used to be a pure function that these tests could call
+   * directly. It now calls `useTranslation` — the sidebar labels are catalogue
+   * lookups rather than hardcoded English — so it needs a renderer.
+   *
+   * Every assertion below is about `id`, not `label`: which links a role gets
+   * is a permission question and has nothing to do with language. Rendering is
+   * a mechanical requirement here, not a change of subject.
    */
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const idsFor = (user: any) => useNavigation(user, '/acme/dashboard').map((i) => i.id);
+  const navFor = (user: any, path = '/acme/dashboard') =>
+    renderHook(() => useNavigation(user, path)).result.current;
+
+  const idsFor = (user: any) => navFor(user).map((i) => i.id);
 
   const OWNER = { role: 'BUSINESS_OWNER' };
   const STAFF = { role: 'STAFF' };
@@ -73,9 +79,7 @@ describe('useNavigation', () => {
   });
 
   describe('active-state highlighting', () => {
-    // Same pure-function-not-a-hook situation as idsFor above. See TD-018.
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const activeIdsAt = (user: any, path: string) => useNavigation(user, path)
+    const activeIdsAt = (user: any, path: string) => navFor(user, path)
       .filter((i) => i.isActive)
       .map((i) => i.id);
 
@@ -141,7 +145,7 @@ describe('useNavigation', () => {
 
       expect(afterwards).toEqual(first);
       expect(idsFor(OWNER)).toEqual([
-        'dashboard', 'clients', 'appointments', 'inventory', 'quotations', 'reports', 'settings',
+        'dashboard', 'clients', 'appointments', 'inventory', 'quotations', 'invoices', 'reports', 'settings',
       ]);
     });
 

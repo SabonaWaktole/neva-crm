@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AlertCircle, Check, ImagePlus, Trash2, Upload } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../Modal/Modal';
 import {
   ACCEPTED_EXTENSIONS,
@@ -29,13 +30,6 @@ const CROP_SPECS: Record<MediaKind, CropAspect> = {
   'user-cover': { width: 3200, height: 800 },
 };
 
-const TITLES: Record<MediaKind, string> = {
-  logo: 'Company logo',
-  avatar: 'Profile photo',
-  'company-cover': 'Company banner',
-  'user-cover': 'Cover photo',
-};
-
 export interface ImagePickerProps {
   kind: MediaKind;
   tenantSlug: string;
@@ -59,6 +53,7 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({
   hint,
   disabled = false,
 }) => {
+  const { t } = useTranslation('common');
   const inputRef = useRef<HTMLInputElement>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -99,7 +94,7 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({
       setJustSaved(true);
       window.setTimeout(() => setJustSaved(false), 1800);
     } catch (uploadError: any) {
-      setError(uploadError?.message ?? 'Upload failed. Please try again.');
+      setError(uploadError?.message ?? t('media.uploadFailed'));
     } finally {
       setProgress(null);
     }
@@ -113,7 +108,7 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({
       await mediaService.remove(tenantSlug, kind);
       onChange(null);
     } catch (removeError: any) {
-      setError(removeError?.message ?? 'Could not remove that image.');
+      setError(removeError?.message ?? t('media.removeFailed'));
     } finally {
       setProgress(null);
     }
@@ -143,7 +138,7 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({
           onClick={() => !disabled && !isBusy && inputRef.current?.click()}
           role="button"
           tabIndex={disabled ? -1 : 0}
-          aria-label={`${value ? 'Replace' : 'Upload'} ${TITLES[kind].toLowerCase()}`}
+          aria-label={`${value ? t('media.replace') : t('media.upload')} ${label ?? kind}`}
           aria-busy={isBusy}
           onKeyDown={(event) => {
             if (event.key === 'Enter' || event.key === ' ') {
@@ -157,13 +152,13 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({
               className={styles.preview}
               src={resolved}
               srcSet={srcSetFor(value)}
-              alt={TITLES[kind]}
+              alt={label ?? kind}
               loading="lazy"
             />
           ) : (
             <div className={styles.empty}>
               <ImagePlus size={variant === 'banner' ? 22 : 20} strokeWidth={1.5} />
-              {variant === 'banner' && <span>Drop an image or click to browse</span>}
+              {variant === 'banner' && <span>{t('media.dropHint')}</span>}
             </div>
           )}
 
@@ -171,7 +166,7 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({
           {!disabled && !isBusy && (
             <div className={styles.overlay}>
               <Upload size={18} />
-              <span>{value ? 'Replace' : 'Upload'}</span>
+              <span>{value ? t('media.replace') : t('media.upload')}</span>
             </div>
           )}
 
@@ -220,7 +215,7 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({
               onClick={() => inputRef.current?.click()}
               disabled={disabled || isBusy}
             >
-              {value ? 'Replace' : 'Upload'}
+              {value ? t('media.replace') : t('media.upload')}
             </button>
             {value && (
               <button
@@ -230,7 +225,7 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({
                 disabled={disabled || isBusy}
               >
                 <Trash2 size={13} />
-                Remove
+                {t('actions.remove')}
               </button>
             )}
           </div>
@@ -269,7 +264,7 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({
       <Modal
         isOpen={Boolean(pendingFile)}
         onClose={() => !isBusy && setPendingFile(null)}
-        title={`Position your ${TITLES[kind].toLowerCase()}`}
+        title={t('media.positionTitle')}
         maxWidth={variant === 'banner' ? 'lg' : 'md'}
       >
         {pendingFile && (
@@ -279,7 +274,7 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({
             isBusy={isBusy}
             onCancel={() => setPendingFile(null)}
             onConfirm={handleUpload}
-            confirmLabel={isBusy ? 'Uploading…' : 'Save image'}
+            confirmLabel={isBusy ? t('media.uploading') : t('media.saveImage')}
           />
         )}
       </Modal>

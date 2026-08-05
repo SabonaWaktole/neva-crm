@@ -77,5 +77,65 @@
   },
   "cropper": {
     "hint": "Drag to reposition · scroll or use the slider to zoom"
+  },
+  "media": {
+    "upload": "Upload",
+    "replace": "Replace",
+    "dropHint": "Drop an image or click to browse",
+    "positionTitle": "Position image",
+    "uploading": "Uploading…",
+    "saveImage": "Save image",
+    "uploadFailed": "Upload failed. Please try again.",
+    "removeFailed": "Could not remove that image."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "clients": "Clients",
+    "appointments": "Appointments",
+    "inventory": "Products & Stock",
+    "quotations": "Quotations",
+    "invoices": "Invoices",
+    "reports": "Reports",
+    "settings": "Settings",
+    "tenants": "Tenants",
+    "people": "People"
+  },
+  "shell": {
+    "standardTier": "Standard Tier",
+    "platformName": "Neva CRM Platform",
+    "platformTier": "Global Administration"
+  },
+  "header": {
+    "searchPlaceholder": "Search...",
+    "openMenu": "Open menu",
+    "search": "Search",
+    "help": "Help",
+    "userProfile": "User Profile",
+    "profileAlt": "{{name}}'s profile",
+    "settings": "Settings"
+  },
+  "status": {
+    "goBack": "Go back",
+    "401": {
+      "title": "Sign in required",
+      "description": "You need to be signed in to view this page."
+    },
+    "403": {
+      "title": "Unauthorized Access",
+      "description": "You don't have permission to view this page. If you think this is a mistake, contact your account owner."
+    },
+    "404": {
+      "title": "Page not found",
+      "description": "The page you're looking for doesn't exist or may have been moved."
+    },
+    "500": {
+      "title": "Something went wrong",
+      "description": "An unexpected error occurred. Please try again."
+    }
+  },
+  "language": {
+    "inReview": "translation in review",
+    "reviewNoticeOne": "<0>{{languages}}</0> is translated but not yet checked by a native speaker. Wording may be wrong in places, and server error messages are still shown in English.",
+    "reviewNoticeOther": "<0>{{languages}}</0> are translated but not yet checked by a native speaker. Wording may be wrong in places, and server error messages are still shown in English."
   }
 }

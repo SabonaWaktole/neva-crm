@@ -26,6 +26,7 @@ export const createReportRouter = (
   router.get('/inventory', reportsController.getInventory);
   router.get('/inventory/low-stock', reportsController.getLowStock);
   router.get('/appointments', reportsController.getAppointments);
+  router.post('/export/pdf', reportsController.exportPdf);
 
   return router;
 };

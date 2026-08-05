@@ -3,6 +3,7 @@ import { PrismaSchedulerQueries } from './PrismaSchedulerQueries';
 import { AppointmentReminderJob } from './jobs/AppointmentReminderJob';
 import { QuotationFollowUpJob } from './jobs/QuotationFollowUpJob';
 import { QuotationExpiryJob } from './jobs/QuotationExpiryJob';
+import { InvoiceOverdueJob } from './jobs/InvoiceOverdueJob';
 
 import { PrismaUserRepository } from '../auth/infrastructure/repositories/PrismaUserRepository';
 import { PrismaTenantRepository } from '../tenant/infrastructure/repositories/PrismaTenantRepository';
@@ -14,6 +15,8 @@ import { NotificationEmailComposer } from '../notifications/application/Notifica
 import { NotificationEmailDispatcher } from '../notifications/application/NotificationEmailDispatcher';
 import { PrismaQuotationWriteTransaction } from '../quotations/infrastructure/PrismaQuotationWriteTransaction';
 import { ExpireQuotationUseCase } from '../quotations/application/use-cases/ExpireQuotationUseCase';
+import { PrismaInvoiceWriteTransaction } from '../invoices/infrastructure/PrismaInvoiceWriteTransaction';
+import { MarkInvoiceOverdueUseCase } from '../invoices/application/use-cases/MarkInvoiceOverdueUseCase';
 
 /**
  * Builds the background worker.
@@ -55,10 +58,13 @@ export function createScheduler(): Scheduler {
     emailDispatcher
   );
 
+  const markInvoiceOverdue = new MarkInvoiceOverdueUseCase(new PrismaInvoiceWriteTransaction());
+
   const jobs: ScheduledJob[] = [
     new AppointmentReminderJob(queries, settingsRepository, notifications),
     new QuotationFollowUpJob(queries, settingsRepository, notifications),
     new QuotationExpiryJob(queries, settingsRepository, expireQuotation),
+    new InvoiceOverdueJob(queries, markInvoiceOverdue),
   ];
 
   return new Scheduler(jobs);

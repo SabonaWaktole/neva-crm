@@ -67,4 +67,22 @@ export interface ISchedulerQueries {
    * query. The state change is the idempotency.
    */
   findQuotationsDueExpiry(tenantId: string, now: Date, days: number): Promise<StaleQuotation[]>;
+
+  /**
+   * Every Sent invoice whose due date has passed, across all tenants.
+   *
+   * Cross-tenant and unconditional, unlike the quotation queries above —
+   * there is no per-tenant opt-in for invoice overdue detection (see
+   * `InvoiceOverdueJob`), so there is nothing to loop over per tenant. The
+   * state change (Sent -> Overdue) is its own idempotency marker, same as
+   * `findQuotationsDueExpiry`.
+   */
+  findInvoicesPastDue(now: Date): Promise<PastDueInvoice[]>;
+}
+
+/** A Sent invoice whose due date has passed. */
+export interface PastDueInvoice {
+  id: string;
+  tenantId: string;
+  dueDate: Date;
 }

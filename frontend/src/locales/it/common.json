@@ -1,0 +1,141 @@
+{
+  "actions": {
+    "save": "Salva",
+    "saveChanges": "Salva modifiche",
+    "discardChanges": "Annulla modifiche",
+    "cancel": "Annulla",
+    "close": "Chiudi",
+    "confirm": "Conferma",
+    "continue": "Continua",
+    "back": "Indietro",
+    "edit": "Modifica",
+    "delete": "Elimina",
+    "create": "Crea",
+    "add": "Aggiungi",
+    "remove": "Rimuovi",
+    "search": "Cerca",
+    "refresh": "Aggiorna",
+    "retry": "Riprova",
+    "viewAll": "Vedi tutti",
+    "logOut": "Esci",
+    "support": "Assistenza",
+    "newEntry": "Nuova voce"
+  },
+  "state": {
+    "loading": "Caricamento…",
+    "saving": "Salvataggio...",
+    "noResults": "Nessun risultato trovato",
+    "notSet": "—"
+  },
+  "feedback": {
+    "saved": "Impostazioni salvate.",
+    "saveFailed": "Impossibile salvare le impostazioni.",
+    "loadFailed": "Impossibile caricare le impostazioni."
+  },
+  "labels": {
+    "actions": "Azioni",
+    "status": "Stato",
+    "name": "Nome",
+    "email": "Email",
+    "phone": "Telefono",
+    "date": "Data",
+    "required": "Obbligatorio"
+  },
+  "pagination": {
+    "page": "Pagina {{page}}",
+    "showing": "Visualizzati {{from}}–{{to}} di {{total}}",
+    "range": "{{first}}–{{last}} di {{total}} {{itemLabel}}",
+    "empty": "Nessun {{itemLabel}}",
+    "rows": "Righe",
+    "previousPage": "Pagina precedente",
+    "nextPage": "Pagina successiva",
+    "label": "Impaginazione",
+    "items": "elementi"
+  },
+  "table": {
+    "selectAllRows": "Seleziona tutte le righe",
+    "selectAll": "Seleziona tutto",
+    "selected": "{{count}} selezionati",
+    "selectRow": "Seleziona riga"
+  },
+  "dialog": {
+    "confirm": "Conferma",
+    "cancel": "Annulla"
+  },
+  "a11y": {
+    "notifications": "Notifiche",
+    "dismissNotification": "Ignora notifica",
+    "closePanel": "Chiudi pannello",
+    "closeModal": "Chiudi finestra",
+    "breadcrumb": "Percorso di navigazione"
+  },
+  "input": {
+    "selectAnOption": "Seleziona un'opzione"
+  },
+  "stock": {
+    "units": "{{count}} unità"
+  },
+  "cropper": {
+    "hint": "Trascina per riposizionare · scorri o usa il cursore per lo zoom"
+  },
+  "media": {
+    "upload": "Carica",
+    "replace": "Sostituisci",
+    "dropHint": "Trascina un'immagine o clicca per sfogliare",
+    "positionTitle": "Posiziona immagine",
+    "uploading": "Caricamento…",
+    "saveImage": "Salva immagine",
+    "uploadFailed": "Caricamento non riuscito. Riprova.",
+    "removeFailed": "Impossibile rimuovere l'immagine."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "clients": "Clienti",
+    "appointments": "Appuntamenti",
+    "inventory": "Prodotti e scorte",
+    "quotations": "Preventivi",
+    "invoices": "Fatture",
+    "reports": "Report",
+    "settings": "Impostazioni",
+    "tenants": "Tenant",
+    "people": "Persone"
+  },
+  "shell": {
+    "standardTier": "Livello standard",
+    "platformName": "Piattaforma Neva CRM",
+    "platformTier": "Amministrazione globale"
+  },
+  "header": {
+    "searchPlaceholder": "Cerca...",
+    "openMenu": "Apri menu",
+    "search": "Cerca",
+    "help": "Aiuto",
+    "userProfile": "Profilo utente",
+    "profileAlt": "Profilo di {{name}}",
+    "settings": "Impostazioni"
+  },
+  "status": {
+    "goBack": "Torna indietro",
+    "401": {
+      "title": "Accesso richiesto",
+      "description": "Devi aver effettuato l'accesso per vedere questa pagina."
+    },
+    "403": {
+      "title": "Accesso non autorizzato",
+      "description": "Non hai il permesso di vedere questa pagina. Se pensi che si tratti di un errore, contatta il titolare del tuo account."
+    },
+    "404": {
+      "title": "Pagina non trovata",
+      "description": "La pagina che cerchi non esiste o potrebbe essere stata spostata."
+    },
+    "500": {
+      "title": "Qualcosa è andato storto",
+      "description": "Si è verificato un errore imprevisto. Riprova."
+    }
+  },
+  "language": {
+    "inReview": "traduzione in revisione",
+    "reviewNoticeOne": "<0>{{languages}}</0> è tradotto ma non ancora verificato da un madrelingua. La formulazione potrebbe essere errata in alcuni punti e i messaggi di errore del server sono ancora mostrati in inglese.",
+    "reviewNoticeOther": "<0>{{languages}}</0> sono tradotti ma non ancora verificati da madrelingua. La formulazione potrebbe essere errata in alcuni punti e i messaggi di errore del server sono ancora mostrati in inglese."
+  }
+}

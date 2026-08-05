@@ -13,6 +13,14 @@
   flex-wrap: wrap;
 }
 
+/* Wraps so the two actions stack rather than squeeze on a narrow screen. */
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 0.75rem);
+  flex-wrap: wrap;
+}
+
 .title {
   margin: 0;
   font-size: 1.75rem;

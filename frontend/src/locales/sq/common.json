@@ -77,5 +77,65 @@
   },
   "cropper": {
     "hint": "Tërhiqni për ta ripozicionuar · rrotulloni ose përdorni rrëshqitësin për të zmadhuar"
+  },
+  "media": {
+    "upload": "Ngarko",
+    "replace": "Zëvendëso",
+    "dropHint": "Lësho një imazh ose kliko për të shfletuar",
+    "positionTitle": "Pozicionimi i imazhit",
+    "uploading": "Duke ngarkuar…",
+    "saveImage": "Ruaj imazhin",
+    "uploadFailed": "Ngarkimi dështoi. Provo përsëri.",
+    "removeFailed": "Imazhi nuk u hoq dot."
+  },
+  "nav": {
+    "dashboard": "Paneli",
+    "clients": "Klientët",
+    "appointments": "Takimet",
+    "inventory": "Produktet dhe stoku",
+    "quotations": "Ofertat",
+    "invoices": "Faturat",
+    "reports": "Raportet",
+    "settings": "Cilësimet",
+    "tenants": "Organizatat",
+    "people": "Personat"
+  },
+  "shell": {
+    "standardTier": "Niveli standard",
+    "platformName": "Platforma Neva CRM",
+    "platformTier": "Administrim global"
+  },
+  "header": {
+    "searchPlaceholder": "Kërko...",
+    "openMenu": "Hap menynë",
+    "search": "Kërko",
+    "help": "Ndihmë",
+    "userProfile": "Profili i përdoruesit",
+    "profileAlt": "Profili i {{name}}",
+    "settings": "Cilësimet"
+  },
+  "status": {
+    "goBack": "Kthehu",
+    "401": {
+      "title": "Kërkohet hyrja",
+      "description": "Duhet të keni hyrë për ta parë këtë faqe."
+    },
+    "403": {
+      "title": "Qasje e paautorizuar",
+      "description": "Nuk keni leje ta shihni këtë faqe. Nëse mendoni se është gabim, kontaktoni pronarin e llogarisë suaj."
+    },
+    "404": {
+      "title": "Faqja nuk u gjet",
+      "description": "Faqja që po kërkoni nuk ekziston ose mund të jetë zhvendosur."
+    },
+    "500": {
+      "title": "Diçka shkoi keq",
+      "description": "Ndodhi një gabim i papritur. Ju lutemi provoni përsëri."
+    }
+  },
+  "language": {
+    "inReview": "përkthimi në shqyrtim",
+    "reviewNoticeOne": "<0>{{languages}}</0> është përkthyer, por nuk është kontrolluar ende nga një folës amtar. Formulimi mund të jetë i pasaktë në disa vende dhe mesazhet e gabimeve të serverit shfaqen ende në anglisht.",
+    "reviewNoticeOther": "<0>{{languages}}</0> janë përkthyer, por nuk janë kontrolluar ende nga folës amtarë. Formulimi mund të jetë i pasaktë në disa vende dhe mesazhet e gabimeve të serverit shfaqen ende në anglisht."
   }
 }
