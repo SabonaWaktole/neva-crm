@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Download, Edit, CheckCircle, XCircle, Send, ArrowLeft, Archive, Link as LinkIcon } from 'lucide-react';
+import { Download, Edit, CheckCircle, XCircle, Send, ArrowLeft, Archive, Link as LinkIcon, Receipt } from 'lucide-react';
 import { Button } from '../../components/ui/Button/Button';
 import { Card } from '../../components/ui/Card/Card';
 import { Badge } from '../../components/ui/Badge/Badge';
@@ -10,6 +10,7 @@ import styles from './QuotationDetailContent.module.css';
 import { API_BASE_URL } from '../../api/baseUrl';
 
 import { useQuotations, useQuotationActions } from '../../hooks/useQuotations';
+import { useInvoices } from '../../hooks/useInvoices';
 import { useTeam } from '../../hooks/useTeam';
 import { findPersonById, getStaffDisplayName } from '../../utils/userUtils';
 import { useMoneyFormat } from '../../hooks/useMoneyFormat';
@@ -19,14 +20,17 @@ import { useDateFormat } from '../../hooks/useDateFormat';
 export const QuotationDetailContent: React.FC = () => {
   const dates = useDateFormat();
   const { t } = useTranslation('quotations');
+  const { t: ti } = useTranslation('invoices');
   const { format: formatMoney } = useMoneyFormat();
   const statusLabel = useStatusLabel();
   const navigate = useNavigate();
   const { tenantSlug, id } = useParams();
-  
+
   const { fetchQuotationDetail, loading } = useQuotations();
   const { staff, fetchStaff } = useTeam();
   const actionHooks = useQuotationActions();
+  const { convertQuotationToInvoice, loading: converting } = useInvoices();
+  const [convertError, setConvertError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchStaff();
@@ -80,7 +84,27 @@ export const QuotationDetailContent: React.FC = () => {
     return <div className={styles.loadingState}>{t('detail.loading')}</div>;
   }
 
-  const { quotation, lineItems, history, permittedActions, shareUrl, shareToken } = data;
+  const { quotation, lineItems, history, permittedActions, shareUrl, shareToken, invoiceId } = data;
+
+  /**
+   * Reachable only once the quotation is ACCEPTED and no invoice has been
+   * created from it yet — `invoiceId` comes from the detail response
+   * (GetQuotationDetailUseCase), which is the single source of truth for
+   * "has this already been converted" rather than trying to infer it from
+   * quotation status alone.
+   */
+  const canConvertToInvoice = quotation.status === 'ACCEPTED' && !invoiceId;
+
+  const handleConvertToInvoice = async () => {
+    if (!id) return;
+    setConvertError(null);
+    try {
+      const result = await convertQuotationToInvoice(id);
+      navigate(`/${tenantSlug}/invoices/${result.id}`);
+    } catch (err: any) {
+      setConvertError(err.response?.data?.error || err.message || ti('convert.error'));
+    }
+  };
 
   /**
    * The customer's PDF, built against this app's own API base.
@@ -182,7 +206,27 @@ export const QuotationDetailContent: React.FC = () => {
           {permittedActions.includes('EXPIRE') && (
             <Button variant="outline" icon={<Archive size={16} />} onClick={() => handleAction('EXPIRE')}>{t('detail.expire')}</Button>
           )}
-          
+
+          {canConvertToInvoice && (
+            <Button
+              variant="primary"
+              icon={<Receipt size={16} />}
+              onClick={handleConvertToInvoice}
+              disabled={converting}
+            >
+              {ti('convert.action')}
+            </Button>
+          )}
+          {invoiceId && (
+            <Button
+              variant="outline"
+              icon={<Receipt size={16} />}
+              onClick={() => navigate(`/${tenantSlug}/invoices/${invoiceId}`)}
+            >
+              {ti('detail.title', { reference: invoiceId.split('-')[0].toUpperCase() })}
+            </Button>
+          )}
+
           {/*
             Both actions exist only once the quotation has been sent, because
             that is when the server mints the share token — before then there is
@@ -218,9 +262,9 @@ export const QuotationDetailContent: React.FC = () => {
         </div>
       </div>
       
-      {actionError && (
+      {(actionError || convertError) && (
         <div className={styles.errorBanner} role="alert">
-          {actionError}
+          {actionError || convertError}
         </div>
       )}
 

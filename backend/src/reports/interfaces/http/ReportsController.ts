@@ -1,11 +1,45 @@
 import { Request, Response, NextFunction } from 'express';
 import { requireTenantId } from "@main/interfaces/http/tenantContext";
+import { z } from 'zod';
 import { GetRevenueReportUseCase } from '../../application/use-cases/GetRevenueReportUseCase';
 import { GetClientReportUseCase } from '../../application/use-cases/GetClientReportUseCase';
 import { GetInventoryReportUseCase } from '../../application/use-cases/GetInventoryReportUseCase';
 import { GetAppointmentReportUseCase } from '../../application/use-cases/GetAppointmentReportUseCase';
 import { GetClientTrendUseCase } from '../../application/use-cases/GetClientTrendUseCase';
 import { GetLowStockReportUseCase } from '../../application/use-cases/GetLowStockReportUseCase';
+import { ReportPdfRenderer } from '../../infrastructure/ReportPdfRenderer';
+
+const exportPdfSchema = z.object({
+  tenantName: z.string().default('Workspace'),
+  byStaff: z
+    .array(
+      z.object({
+        staffName: z.string(),
+        scheduled: z.number(),
+        confirmed: z.number(),
+        completed: z.number(),
+        cancelled: z.number(),
+        total: z.number(),
+      })
+    )
+    .default([]),
+  lowStock: z
+    .array(
+      z.object({
+        productName: z.string(),
+        warehouseName: z.string(),
+        quantity: z.number(),
+        threshold: z.number(),
+        status: z.string(),
+      })
+    )
+    .default([]),
+  // Chart title -> base64 PNG data URI, captured client-side from the
+  // already-rendered recharts SVGs. No shape validation beyond "string": an
+  // oversized or malformed value fails harmlessly inside the renderer's
+  // try/catch rather than here.
+  charts: z.record(z.string(), z.string()).default({}),
+});
 
 export class ReportsController {
   constructor(
@@ -17,7 +51,8 @@ export class ReportsController {
     // called `getClientTrend`, and the two would otherwise collide on the
     // instance.
     private readonly getClientTrendUseCase: GetClientTrendUseCase,
-    private readonly getLowStockReport: GetLowStockReportUseCase
+    private readonly getLowStockReport: GetLowStockReportUseCase,
+    private readonly pdfRenderer: ReportPdfRenderer = new ReportPdfRenderer()
   ) {}
 
   getRevenue = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -87,6 +122,34 @@ export class ReportsController {
       const tenantId = requireTenantId(req);
       const data = await this.getLowStockReport.execute(tenantId);
       res.status(200).json(data);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * POST rather than GET because the request body carries the chart PNGs
+   * captured client-side — those can run to hundreds of KB combined, well past
+   * what belongs in a query string. The report data itself (tables, chart
+   * titles) is also client-supplied rather than re-queried here: it is the
+   * same numbers already on screen, and re-querying risks the PDF disagreeing
+   * with what the user was just looking at when they clicked the button.
+   */
+  exportPdf = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const body = exportPdfSchema.parse(req.body);
+      const pdf = await this.pdfRenderer.render({
+        tenantName: body.tenantName,
+        generatedAt: new Date(),
+        byStaff: body.byStaff,
+        lowStock: body.lowStock,
+        charts: body.charts,
+      });
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Length', pdf.length);
+      res.setHeader('Content-Disposition', 'attachment; filename="reports.pdf"');
+      res.send(pdf);
     } catch (error) {
       next(error);
     }

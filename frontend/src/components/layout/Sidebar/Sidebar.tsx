@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Users, Calendar, Package, FileText, BarChart3,
   Settings, Building, CreditCard, Search, ClipboardCheck, Plus,
-  HelpCircle, LogOut,
+  HelpCircle, LogOut, Receipt,
   type LucideIcon,
 } from 'lucide-react';
 import { Button } from '../../ui/Button/Button';
@@ -17,6 +17,7 @@ const iconMap: Record<string, LucideIcon> = {
   event: Calendar,
   inventory_2: Package,
   description: FileText,
+  receipt_long: Receipt,
   bar_chart: BarChart3,
   settings: Settings,
   settings_applications: Settings,

@@ -29,6 +29,8 @@ import { PublicQuotationPage } from '../pages/quotations/PublicQuotationPage';
 import { NotificationSettingsPage } from '../pages/settings/NotificationSettingsPage';
 import { CreateQuotation } from '../pages/quotations/CreateQuotation';
 import { EditQuotation } from '../pages/quotations/EditQuotation';
+import { InvoiceList } from '../pages/invoices/InvoiceList';
+import { InvoiceDetail } from '../pages/invoices/InvoiceDetail';
 import { IntegrationsPage } from '../pages/IntegrationsPage';
 import { StatusPage } from '../components/StatusPage/StatusPage';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -313,6 +315,22 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <QuotationDetail />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'invoices',
+        element: (
+          <ProtectedRoute>
+            <InvoiceList />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'invoices/:id',
+        element: (
+          <ProtectedRoute>
+            <InvoiceDetail />
           </ProtectedRoute>
         ),
       },

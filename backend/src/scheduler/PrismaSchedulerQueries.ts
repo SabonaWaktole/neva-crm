@@ -4,6 +4,7 @@ import {
   ISchedulerQueries,
   DueAppointment,
   StaleQuotation,
+  PastDueInvoice,
 } from './ISchedulerQueries';
 
 /** Rows a sweep will consider in one pass. Bounds the blast radius of a backlog. */
@@ -122,5 +123,19 @@ export class PrismaSchedulerQueries implements ISchedulerQueries {
       sentAt: r.sentAt as Date,
       clientName: r.client.name,
     }));
+  }
+
+  async findInvoicesPastDue(now: Date): Promise<PastDueInvoice[]> {
+    const rows = await this.prisma.invoice.findMany({
+      where: {
+        status: 'SENT',
+        dueDate: { lt: now },
+      },
+      select: { id: true, tenantId: true, dueDate: true },
+      orderBy: { dueDate: 'asc' },
+      take: SWEEP_LIMIT,
+    });
+
+    return rows;
   }
 }

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import {
   quotationStatusKey,
+  invoiceStatusKey,
   clientStatusKey,
   productStatusKey,
   appointmentStatusKey,
@@ -23,6 +24,7 @@ export function useStatusLabel() {
 
   return {
     quotation: (status: string) => translate(quotationStatusKey(status), status),
+    invoice: (status: string) => translate(invoiceStatusKey(status), status),
     client: (status: string) => translate(clientStatusKey(status), status),
     product: (status: string) => translate(productStatusKey(status), status),
     appointment: (status: string) => translate(appointmentStatusKey(status), status),

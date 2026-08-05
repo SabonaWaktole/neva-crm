@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line
 } from 'recharts';
-import { AlertCircle, BarChart3 } from 'lucide-react';
+import { AlertCircle, BarChart3, Download } from 'lucide-react';
 import { useReports } from '../hooks/useReports';
+import { reportService } from '../services/reportService';
+import { downloadBlob } from '../utils/downloadBlob';
 import { Sidebar } from '../components/layout/Sidebar/Sidebar';
 import { AppLayout } from '../components/layout/AppLayout/AppLayout';
 import { Button } from '../components/ui/Button/Button';
@@ -16,6 +18,64 @@ import { useMoneyFormat } from '../hooks/useMoneyFormat';
 import { useStatusLabel } from '../hooks/useStatusLabel';
 import { Badge } from '../components/ui/Badge/Badge';
 import styles from './ReportsPage.module.css';
+
+/**
+ * Serializes the first `<svg>` inside `container` and rasterizes it to a PNG
+ * data URL via an offscreen canvas.
+ *
+ * recharts has no server-side renderer available here, so "embed the chart in
+ * a PDF" has to start from the SVG the browser already drew rather than
+ * re-plotting the data in pdfkit. `XMLSerializer` -> `Image` -> `canvas` is
+ * the standard client-side path for that; no extra library required.
+ *
+ * Returns null (rather than throwing) when the container has no chart yet —
+ * an empty-state chart card, or one still loading — so the caller can skip it
+ * without failing the whole export.
+ */
+function captureChartAsPng(container: HTMLDivElement | null): Promise<string | null> {
+  return new Promise((resolve) => {
+    const svg = container?.querySelector('svg');
+    if (!svg) {
+      resolve(null);
+      return;
+    }
+
+    const rect = svg.getBoundingClientRect();
+    const width = Math.max(1, Math.round(rect.width)) || 600;
+    const height = Math.max(1, Math.round(rect.height)) || 320;
+
+    // Explicit dimensions on the clone: the source `<svg>` from recharts
+    // relies on its parent's CSS size, which an offscreen `Image` has no
+    // parent to inherit.
+    const clone = svg.cloneNode(true) as SVGSVGElement;
+    clone.setAttribute('width', String(width));
+    clone.setAttribute('height', String(height));
+
+    const svgString = new XMLSerializer().serializeToString(clone);
+    const svgDataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`;
+
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        resolve(null);
+        return;
+      }
+      // White background: the SVG has none of its own, and a PDF page is
+      // white — without this a chart with transparent fills would print
+      // however the PDF viewer chooses to render transparency (often black).
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, width, height);
+      ctx.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/png'));
+    };
+    img.onerror = () => resolve(null);
+    img.src = svgDataUrl;
+  });
+}
 
 /**
  * Fixed categorical order, read from the validated chart tokens. Slots are
@@ -88,6 +148,40 @@ export const ReportsPage: React.FC = () => {
     useReports();
   const statusLabel = useStatusLabel();
 
+  // One ref per chart card, keyed by the title used both on screen and in the
+  // exported PDF — so the export's section headings always match what the
+  // user was looking at when they clicked the button.
+  const chartRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+
+  const handleExportPdf = async () => {
+    if (!tenantSlug) return;
+    setExportingPdf(true);
+    setExportError(null);
+    try {
+      const chartEntries = await Promise.all(
+        Object.entries(chartRefs.current).map(async ([title, el]) => [title, await captureChartAsPng(el)] as const)
+      );
+      const charts: Record<string, string> = {};
+      for (const [title, dataUrl] of chartEntries) {
+        if (dataUrl) charts[title] = dataUrl;
+      }
+
+      const blob = await reportService.exportPdf(tenantSlug, {
+        tenantName: tenantSlug,
+        byStaff: appointments.byStaff,
+        lowStock: lowStock.items,
+        charts,
+      });
+      downloadBlob(blob, 'reports.pdf', { open: true });
+    } catch (err: any) {
+      setExportError(err.response?.data?.error || err.message || t('reports.downloadPdfError'));
+    } finally {
+      setExportingPdf(false);
+    }
+  };
+
   /*
    * Recharts needs a display label on the datum itself — it has no hook into
    * the translation layer — so the status codes are mapped up front rather
@@ -155,9 +249,19 @@ export const ReportsPage: React.FC = () => {
             <h1 className={styles.title}>{t('reports.title')}</h1>
             <p className={styles.subtitle}>{t('reports.subtitle')}</p>
           </div>
-          <Button variant="outline" onClick={refresh}>
-            {t('reports.refresh')}
-          </Button>
+          <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
+            <Button variant="outline" onClick={refresh}>
+              {t('reports.refresh')}
+            </Button>
+            <Button
+              variant="primary"
+              icon={<Download size={16} />}
+              onClick={handleExportPdf}
+              disabled={exportingPdf}
+            >
+              {exportingPdf ? t('reports.downloadingPdf') : t('reports.downloadPdf')}
+            </Button>
+          </div>
         </header>
 
         <main className={styles.main}>
@@ -165,6 +269,12 @@ export const ReportsPage: React.FC = () => {
             <div className={styles.errorBanner} role="alert">
               <AlertCircle size={16} />
               {error}
+            </div>
+          )}
+          {exportError && (
+            <div className={styles.errorBanner} role="alert">
+              <AlertCircle size={16} />
+              {exportError}
             </div>
           )}
 
@@ -175,7 +285,7 @@ export const ReportsPage: React.FC = () => {
                 <h2 className={styles.chartTitle}>{t('reports.monthlyRevenue')}</h2>
                 <p className={styles.chartCaption}>{t('reports.monthlyRevenueCaption')}</p>
               </div>
-              <div className={styles.chartBody}>
+              <div className={styles.chartBody} ref={(el) => { chartRefs.current[t('reports.monthlyRevenue')] = el; }}>
                 {revenue.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={revenue} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
@@ -210,7 +320,7 @@ export const ReportsPage: React.FC = () => {
                 <h2 className={styles.chartTitle}>{t('reports.clientDistribution')}</h2>
                 <p className={styles.chartCaption}>{t('reports.clientDistributionCaption')}</p>
               </div>
-              <div className={styles.chartBody}>
+              <div className={styles.chartBody} ref={(el) => { chartRefs.current[t('reports.clientDistribution')] = el; }}>
                 {clients.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -255,7 +365,7 @@ export const ReportsPage: React.FC = () => {
                 <h2 className={styles.chartTitle}>{t('reports.inventoryValue')}</h2>
                 <p className={styles.chartCaption}>{t('reports.inventoryValueCaption')}</p>
               </div>
-              <div className={styles.chartBody}>
+              <div className={styles.chartBody} ref={(el) => { chartRefs.current[t('reports.inventoryValue')] = el; }}>
                 {inventory.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={inventory} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
@@ -286,7 +396,7 @@ export const ReportsPage: React.FC = () => {
                 <h2 className={styles.chartTitle}>{t('reports.itemsHeld')}</h2>
                 <p className={styles.chartCaption}>{t('reports.itemsHeldCaption')}</p>
               </div>
-              <div className={styles.chartBody}>
+              <div className={styles.chartBody} ref={(el) => { chartRefs.current[t('reports.itemsHeld')] = el; }}>
                 {inventory.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={inventory} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
@@ -321,7 +431,7 @@ export const ReportsPage: React.FC = () => {
                 <h2 className={styles.chartTitle}>{t('reports.appointmentStats')}</h2>
                 <p className={styles.chartCaption}>{t('reports.appointmentStatsCaption')}</p>
               </div>
-              <div className={styles.chartBody}>
+              <div className={styles.chartBody} ref={(el) => { chartRefs.current[t('reports.appointmentStats')] = el; }}>
                 {appointmentsByStatus.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={appointmentsByStatus} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
@@ -354,7 +464,7 @@ export const ReportsPage: React.FC = () => {
                 <h2 className={styles.chartTitle}>{t('reports.clientTrend')}</h2>
                 <p className={styles.chartCaption}>{t('reports.clientTrendCaption')}</p>
               </div>
-              <div className={styles.chartBody}>
+              <div className={styles.chartBody} ref={(el) => { chartRefs.current[t('reports.clientTrend')] = el; }}>
                 {clientTrend.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={clientTrend} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>

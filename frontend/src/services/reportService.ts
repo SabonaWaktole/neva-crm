@@ -115,5 +115,25 @@ export const reportService = {
       `/${tenantSlug}/reports/inventory/low-stock`
     );
     return response.data;
+  },
+
+  /**
+   * POST rather than GET: the body carries the chart PNGs captured
+   * client-side (see ReportsPage's `captureChartAsPng`), which can run to
+   * hundreds of KB — well past what belongs in a query string.
+   */
+  exportPdf: async (
+    tenantSlug: string,
+    payload: {
+      tenantName: string;
+      byStaff: AppointmentsByStaff[];
+      lowStock: LowStockItem[];
+      charts: Record<string, string>;
+    }
+  ): Promise<Blob> => {
+    const response = await apiClient.post(`/${tenantSlug}/reports/export/pdf`, payload, {
+      responseType: 'blob'
+    });
+    return response.data;
   }
 };
