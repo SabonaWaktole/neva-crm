@@ -181,5 +181,31 @@ describe('PublicQuotationPage', () => {
       expect(screen.queryByRole('button', { name: 'Accept' })).not.toBeInTheDocument();
       expect(screen.getByText(/accepted this quotation/i)).toBeInTheDocument();
     });
+
+    it('shows the server error and stays on Sent when Accept is refused (e.g. out of stock), instead of silently reverting', async () => {
+      // Regression: a non-2xx, non-404 response used to be parsed as if it
+      // were the quotation body, so this looked like a no-op — the confirm
+      // step just closed and the same three buttons reappeared with nothing
+      // to explain why.
+      const user = userEvent.setup();
+      respondWith(true, quotation);
+      renderPage();
+      await screen.findByText('Wiztik');
+
+      await user.click(screen.getByRole('button', { name: 'Accept' }));
+
+      (globalThis.fetch as any).mockResolvedValueOnce({
+        ok: false,
+        status: 422,
+        json: async () => ({ error: 'One or more items are no longer available in the quoted quantity.' }),
+      });
+      await user.click(screen.getByRole('button', { name: 'Confirm' }));
+
+      expect(
+        await screen.findByText('One or more items are no longer available in the quoted quantity.')
+      ).toBeInTheDocument();
+      // Still Sent, still mid-confirmation — not silently reset.
+      expect(screen.getByRole('button', { name: 'Confirm' })).toBeInTheDocument();
+    });
   });
 });

@@ -96,4 +96,33 @@ describe('RespondToPublicQuotationUseCase', () => {
 
     expect(result).toEqual({ outcome: 'invalid_state' });
   });
+
+  it('returns failed — not invalid_state — when Accept is refused for insufficient stock', async () => {
+    // Regression: this used to fall into the same bare `catch` as an
+    // already-responded race, so the client got back the unchanged, still-Sent
+    // quotation with no explanation — Confirm silently appeared to do nothing.
+    reader.findByShareToken.mockResolvedValue(view('SENT'));
+    acceptUseCase.execute.mockRejectedValue(
+      new Error('Insufficient stock for product p1 at warehouse w1')
+    );
+
+    const result = await useCase.execute({ token: 'tok', decision: 'accept' });
+
+    expect(result.outcome).toBe('failed');
+    expect((result as any).message).not.toContain('p1');
+    expect((result as any).message).not.toContain('w1');
+    expect((result as any).message).toMatch(/no longer available|out of stock/i);
+  });
+
+  it('returns failed with a generic message for an unrecognised error', async () => {
+    reader.findByShareToken.mockResolvedValue(view('SENT'));
+    rejectUseCase.execute.mockRejectedValue(new Error('boom'));
+
+    const result = await useCase.execute({ token: 'tok', decision: 'reject' });
+
+    expect(result).toEqual({
+      outcome: 'failed',
+      message: 'Something went wrong on our end. Please try again, or contact the sender if the problem continues.',
+    });
+  });
 });

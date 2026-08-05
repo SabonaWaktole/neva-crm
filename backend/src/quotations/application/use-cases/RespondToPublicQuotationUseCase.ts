@@ -7,7 +7,8 @@ export type PublicQuotationDecision = 'accept' | 'reject';
 export type RespondToPublicQuotationResult =
   | { outcome: 'ok' }
   | { outcome: 'not_found' }
-  | { outcome: 'invalid_state' };
+  | { outcome: 'invalid_state' }
+  | { outcome: 'failed'; message: string };
 
 /**
  * The client's half of Accept / Reject / Re-quote (§6.5).
@@ -58,12 +59,35 @@ export class RespondToPublicQuotationUseCase {
         });
       }
       return { outcome: 'ok' };
-    } catch {
-      // Both use cases throw on any status other than Sent — already
-      // responded, or (impossibly, given a live token) still a draft. Either
-      // way the client made a choice on a quotation that has since moved on,
-      // not a token problem, so this is distinct from `not_found`.
-      return { outcome: 'invalid_state' };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '';
+
+      // The one error both use cases throw for "not Sent any more" — already
+      // responded, or (impossibly, given a live token) still a draft. That is
+      // a race the client can silently reconcile to: nothing was lost, the
+      // quotation just moved on, so the current view is returned as-is.
+      if (message.startsWith('Invalid state transition')) {
+        return { outcome: 'invalid_state' };
+      }
+
+      /*
+       * Anything else is a real failure, not a state race — most concretely,
+       * Accept's pre-flight stock check throwing "Insufficient stock for
+       * product X at warehouse Y" (or "Stock level not found for..."). That
+       * must NOT be swallowed into `invalid_state`: doing so previously made
+       * the route hand back the unchanged, still-Sent quotation with no
+       * explanation, which the client experienced as "I clicked Confirm and
+       * nothing happened." The raw message names internal product/warehouse
+       * ids, so it is not sent to the client — only used here to choose a
+       * message that is.
+       */
+      const isStockFailure = /stock/i.test(message);
+      return {
+        outcome: 'failed',
+        message: isStockFailure
+          ? "This quotation can't be accepted as quoted — one or more items are no longer available in the quoted quantity. Please contact the sender for an updated quote."
+          : 'Something went wrong on our end. Please try again, or contact the sender if the problem continues.',
+      };
     }
   }
 }

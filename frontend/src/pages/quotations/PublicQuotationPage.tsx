@@ -91,10 +91,15 @@ export const PublicQuotationPage = () => {
    * Accept / Reject / Re-quote all resolve to the same two server routes —
    * "Re-quote" is Reject with a required note (RespondToPublicQuotationUseCase).
    *
-   * The server always returns the current state of the quotation, whether the
-   * call succeeded, arrived twice (409, e.g. two tabs) or the quotation was
-   * withdrawn since the page loaded (404) — so the page reconciles to whatever
-   * comes back rather than trusting its own guess at the new status.
+   * 200 and 409 both carry a quotation view: the call either succeeded, or
+   * arrived after the quotation had already moved on (another tab, a race),
+   * and either way the page reconciles to whatever state comes back rather
+   * than trusting its own guess. 422 is a real failure — e.g. Accept refused
+   * because the quoted quantity is no longer in stock — and carries an error
+   * message instead; this must NOT be treated as success. Earlier code only
+   * special-cased 404 and blindly parsed everything else as the quotation
+   * body, so a 422 silently "succeeded" into the same, unchanged Sent state
+   * with no explanation — Confirm appeared to do nothing.
    */
   const respond = async (decision: 'accept' | 'reject', note?: string) => {
     setSubmitting(true);
@@ -111,7 +116,14 @@ export const PublicQuotationPage = () => {
         return;
       }
 
-      const data = (await response.json()) as PublicQuotation;
+      const body = await response.json();
+
+      if (!response.ok && response.status !== 409) {
+        setActionError(body.error || t('public.actions.error'));
+        return;
+      }
+
+      const data = body as PublicQuotation;
       setQuotation(data);
       setPendingAction(null);
       setRequoteNote('');

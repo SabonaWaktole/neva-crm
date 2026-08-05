@@ -188,6 +188,15 @@ async function sendRespondResult(
     return;
   }
 
+  if (result.outcome === 'failed') {
+    // A real failure (e.g. Accept's stock check), not a state race — the
+    // quotation is unchanged. Returned as a bare error, deliberately NOT
+    // shaped like the quotation view, so the page shows the message instead
+    // of quietly re-rendering the same buttons as if nothing had happened.
+    res.status(422).json({ error: result.message });
+    return;
+  }
+
   const view = await getPublicQuotation.execute(token);
   if (!view) {
     res.status(404).json({ error: 'Quotation not found' });
