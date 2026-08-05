@@ -69,6 +69,20 @@ interface AuthState {
   isInitializing: boolean;
 
   setUser: (user: User | null, impersonating?: Impersonation | null) => void;
+  /**
+   * Patches fields onto the CURRENT user mid-session — a profile edit, an
+   * avatar upload, a settings save mirroring its result back onto the store.
+   *
+   * Deliberately distinct from `setUser`, which defaults `impersonating` to
+   * null because establishing a session (login, /me on load, entering or
+   * exiting a workspace) is exactly when a stale banner must not survive.
+   * A field patch is not a new session: it fires while the existing one,
+   * impersonation included, is still in effect, so `impersonating` is left
+   * untouched. Using `setUser` here was the bug — every one of these calls
+   * silently ended an in-progress impersonation the moment a Super Admin
+   * saved a company or profile setting inside the workspace they'd entered.
+   */
+  updateUser: (patch: Partial<User>) => void;
   logout: () => void;
   setInitializing: (isInitializing: boolean) => void;
 }
@@ -83,6 +97,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   // omitted: every caller that sets a user is establishing a whole session, and
   // a stale banner surviving a re-login would misreport whose data is on screen.
   setUser: (user, impersonating = null) => set({ user, impersonating, isAuthenticated: !!user }),
+  updateUser: (patch) =>
+    set((state) => (state.user ? { user: { ...state.user, ...patch } } : state)),
   logout: () => set({ user: null, impersonating: null, isAuthenticated: false }),
   setInitializing: (isInitializing) => set({ isInitializing }),
 }));

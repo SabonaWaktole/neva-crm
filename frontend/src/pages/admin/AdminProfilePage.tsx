@@ -20,7 +20,7 @@ import styles from './AdminProfilePage.module.css';
 export const AdminProfilePage: React.FC = () => {
   const { t } = useTranslation('settings');
   const { t: tc } = useTranslation('common');
-  const { user, setUser } = useAuthStore();
+  const { user, updateUser } = useAuthStore();
 
   const [firstName, setFirstName] = useState(user?.firstName || '');
   const [lastName, setLastName] = useState(user?.lastName || '');
@@ -58,7 +58,7 @@ export const AdminProfilePage: React.FC = () => {
       });
 
       if (user) {
-        setUser({ ...user, firstName: firstName || null, lastName: lastName || null, email });
+        updateUser({ firstName: firstName || null, lastName: lastName || null, email });
       }
 
       setProfileMessage(t('profile.updated'));

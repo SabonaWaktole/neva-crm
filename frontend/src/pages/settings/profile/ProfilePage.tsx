@@ -27,7 +27,7 @@ export const ProfilePage: React.FC = () => {
 
   const { t } = useTranslation('settings');
   const { t: tc } = useTranslation('common');
-  const { user, setUser } = useAuthStore();
+  const { user, updateUser } = useAuthStore();
   const navItems = useNavigation(user, location.pathname);
   
   const [firstName, setFirstName] = useState(user?.firstName || '');
@@ -90,8 +90,7 @@ export const ProfilePage: React.FC = () => {
       
       // Update local state
       if (user) {
-        setUser({
-          ...user,
+        updateUser({
           firstName: firstName || null,
           lastName: lastName || null,
           phone: phone || null,
@@ -178,7 +177,7 @@ export const ProfilePage: React.FC = () => {
               kind="avatar"
               tenantSlug={tenantSlug || ''}
               value={user?.avatarUrl ?? null}
-              onChange={(url) => user && setUser({ ...user, avatarUrl: url })}
+              onChange={(url) => user && updateUser({ avatarUrl: url })}
               label="Profile photo"
               hint="Square image, at least 256×256. JPEG, PNG, WebP, GIF or AVIF up to 8 MB."
             />
@@ -187,7 +186,7 @@ export const ProfilePage: React.FC = () => {
               kind="user-cover"
               tenantSlug={tenantSlug || ''}
               value={user?.coverImageUrl ?? null}
-              onChange={(url) => user && setUser({ ...user, coverImageUrl: url })}
+              onChange={(url) => user && updateUser({ coverImageUrl: url })}
               variant="banner"
               label="Cover photo"
               hint="Wide image, ideally 1600×400 or larger."

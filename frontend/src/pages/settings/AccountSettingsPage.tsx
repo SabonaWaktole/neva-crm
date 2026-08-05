@@ -93,7 +93,7 @@ const toFormState = (settings: TenantSettings): FormState => ({
 export const AccountSettingsPage = () => {
   const navigate = useNavigate();
   const { tenantSlug } = useParams();
-  const { user, setUser } = useAuthStore();
+  const { user, updateUser } = useAuthStore();
   const { logout } = useLogout();
   const toast = useToast();
   const { t } = useTranslation('settings');
@@ -147,8 +147,7 @@ export const AccountSettingsPage = () => {
       // still held the old value, so the interface stayed in the old language
       // until the next sign-in refetched /me.
       if (user) {
-        setUser({
-          ...user,
+        updateUser({
           tenantCurrency: updated.currency,
           tenantLocale: updated.locale,
           tenantTimezone: updated.timezone,
@@ -230,7 +229,7 @@ export const AccountSettingsPage = () => {
                 kind="logo"
                 tenantSlug={tenantSlug || ''}
                 value={user?.tenantLogoUrl ?? null}
-                onChange={(url) => user && setUser({ ...user, tenantLogoUrl: url })}
+                onChange={(url) => user && updateUser({ tenantLogoUrl: url })}
                 label={t('company.branding.logoLabel')}
                 hint={t('company.branding.logoHint')}
                 disabled={!isBusinessOwner}
@@ -240,7 +239,7 @@ export const AccountSettingsPage = () => {
                 kind="company-cover"
                 tenantSlug={tenantSlug || ''}
                 value={user?.tenantCoverImageUrl ?? null}
-                onChange={(url) => user && setUser({ ...user, tenantCoverImageUrl: url })}
+                onChange={(url) => user && updateUser({ tenantCoverImageUrl: url })}
                 variant="banner"
                 label={t('company.branding.bannerLabel')}
                 hint={t('company.branding.bannerHint')}
