@@ -20,6 +20,41 @@ import { Badge } from '../components/ui/Badge/Badge';
 import styles from './ReportsPage.module.css';
 
 /**
+ * Copies resolved (not `var(...)`) color/text styles from a live SVG element
+ * onto its detached clone, recursively.
+ *
+ * Recharts paints with `fill="var(--chart-1)"` etc., which only resolves
+ * against the main document's stylesheet. The clone gets serialized into a
+ * standalone `data:image/svg+xml` document with no access to that
+ * stylesheet, so every `var(--chart-N)` falls back to the CSS-initial value
+ * for `fill` — black — which is why the exported chart turned solid black.
+ * `getComputedStyle` on the still-attached source resolves the variables
+ * correctly; baking that result in as an inline style on the clone means the
+ * detached document never has to resolve anything itself.
+ */
+function inlineComputedStyle(source: Element, target: Element): void {
+  const computed = window.getComputedStyle(source);
+  const style = (target as SVGElement).style;
+  style.fill = computed.fill;
+  style.stroke = computed.stroke;
+  style.strokeWidth = computed.strokeWidth;
+  style.strokeDasharray = computed.strokeDasharray;
+  style.opacity = computed.opacity;
+  style.fillOpacity = computed.fillOpacity;
+  style.strokeOpacity = computed.strokeOpacity;
+  style.color = computed.color;
+  style.fontSize = computed.fontSize;
+  style.fontFamily = computed.fontFamily;
+  style.fontWeight = computed.fontWeight;
+
+  const sourceChildren = source.children;
+  const targetChildren = target.children;
+  for (let i = 0; i < sourceChildren.length; i++) {
+    inlineComputedStyle(sourceChildren[i], targetChildren[i]);
+  }
+}
+
+/**
  * Serializes the first `<svg>` inside `container` and rasterizes it to a PNG
  * data URL via an offscreen canvas.
  *
@@ -50,6 +85,7 @@ function captureChartAsPng(container: HTMLDivElement | null): Promise<string | n
     const clone = svg.cloneNode(true) as SVGSVGElement;
     clone.setAttribute('width', String(width));
     clone.setAttribute('height', String(height));
+    inlineComputedStyle(svg, clone);
 
     const svgString = new XMLSerializer().serializeToString(clone);
     const svgDataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`;
