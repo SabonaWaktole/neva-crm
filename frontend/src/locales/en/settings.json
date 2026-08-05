@@ -1,5 +1,16 @@
 {
   "breadcrumb": "Settings",
+  "nav": {
+    "title": "Settings",
+    "profile": "Profile",
+    "company": "Company",
+    "clientManagement": "Client Management",
+    "notifications": "Notifications",
+    "team": "Team",
+    "integrations": "Integrations",
+    "warehouses": "Warehouses",
+    "categories": "Categories"
+  },
   "company": {
     "title": "Company Settings",
     "subtitle": "Manage your organization's core details, localization, and preferences.",
@@ -184,7 +195,15 @@
     "connecting": "Connecting...",
     "connect": "Connect {{name}}",
     "disconnecting": "Disconnecting...",
-    "disconnect": "Disconnect"
+    "disconnect": "Disconnect",
+    "connected": "Connected",
+    "notConnected": "Not Connected",
+    "ownerOnlyNotice": "Only Business Owners can connect or disconnect integrations.",
+    "confirmDisconnect": "Are you sure you want to disconnect this integration?",
+    "googleCalendar": {
+      "name": "Google Calendar",
+      "description": "Sync your CRM appointments directly to your Google Calendar."
+    }
   },
   "notifications": {
     "title": "Notifications",

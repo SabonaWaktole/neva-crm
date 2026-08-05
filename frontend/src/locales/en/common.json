@@ -78,6 +78,16 @@
   "cropper": {
     "hint": "Drag to reposition · scroll or use the slider to zoom"
   },
+  "media": {
+    "upload": "Upload",
+    "replace": "Replace",
+    "dropHint": "Drop an image or click to browse",
+    "positionTitle": "Position image",
+    "uploading": "Uploading…",
+    "saveImage": "Save image",
+    "uploadFailed": "Upload failed. Please try again.",
+    "removeFailed": "Could not remove that image."
+  },
   "nav": {
     "dashboard": "Dashboard",
     "clients": "Clients",

@@ -78,6 +78,16 @@
   "cropper": {
     "hint": "Trascina per riposizionare · scorri o usa il cursore per lo zoom"
   },
+  "media": {
+    "upload": "Carica",
+    "replace": "Sostituisci",
+    "dropHint": "Trascina un'immagine o clicca per sfogliare",
+    "positionTitle": "Posiziona immagine",
+    "uploading": "Caricamento…",
+    "saveImage": "Salva immagine",
+    "uploadFailed": "Caricamento non riuscito. Riprova.",
+    "removeFailed": "Impossibile rimuovere l'immagine."
+  },
   "nav": {
     "dashboard": "Dashboard",
     "clients": "Clienti",

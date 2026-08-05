@@ -78,6 +78,16 @@
   "cropper": {
     "hint": "Tërhiqni për ta ripozicionuar · rrotulloni ose përdorni rrëshqitësin për të zmadhuar"
   },
+  "media": {
+    "upload": "Ngarko",
+    "replace": "Zëvendëso",
+    "dropHint": "Lësho një imazh ose kliko për të shfletuar",
+    "positionTitle": "Pozicionimi i imazhit",
+    "uploading": "Duke ngarkuar…",
+    "saveImage": "Ruaj imazhin",
+    "uploadFailed": "Ngarkimi dështoi. Provo përsëri.",
+    "removeFailed": "Imazhi nuk u hoq dot."
+  },
   "nav": {
     "dashboard": "Paneli",
     "clients": "Klientët",

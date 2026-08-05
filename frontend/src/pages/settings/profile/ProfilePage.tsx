@@ -178,8 +178,8 @@ export const ProfilePage: React.FC = () => {
               tenantSlug={tenantSlug || ''}
               value={user?.avatarUrl ?? null}
               onChange={(url) => user && updateUser({ avatarUrl: url })}
-              label="Profile photo"
-              hint="Square image, at least 256×256. JPEG, PNG, WebP, GIF or AVIF up to 8 MB."
+              label={t('profile.profilePhotoLabel')}
+              hint={t('profile.profilePhotoHint')}
             />
 
             <ImagePicker
@@ -188,8 +188,8 @@ export const ProfilePage: React.FC = () => {
               value={user?.coverImageUrl ?? null}
               onChange={(url) => user && updateUser({ coverImageUrl: url })}
               variant="banner"
-              label="Cover photo"
-              hint="Wide image, ideally 1600×400 or larger."
+              label={t('profile.coverPhotoLabel')}
+              hint={t('profile.coverPhotoHint')}
             />
           </Card>
 

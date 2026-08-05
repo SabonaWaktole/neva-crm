@@ -162,6 +162,8 @@
     "totalActive": "Total Active",
     "capacityUsed": "Capacity Used",
     "hubTraffic": "Hub Traffic",
+    "hubTrafficOptimal": "Optimal",
+    "addButton": "Add Warehouse",
     "listTitle": "Global Facilities List",
     "caption": "Warehouse facilities",
     "filterAria": "Filter",

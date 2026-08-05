@@ -162,6 +162,8 @@
     "totalActive": "Totale attivi",
     "capacityUsed": "Capacità utilizzata",
     "hubTraffic": "Traffico hub",
+    "hubTrafficOptimal": "Ottimale",
+    "addButton": "Aggiungi magazzino",
     "listTitle": "Elenco globale delle strutture",
     "caption": "Strutture di magazzino",
     "filterAria": "Filtra",

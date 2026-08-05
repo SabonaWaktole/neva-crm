@@ -1,5 +1,16 @@
 {
   "breadcrumb": "Ρυθμίσεις",
+  "nav": {
+    "title": "Ρυθμίσεις",
+    "profile": "Προφίλ",
+    "company": "Εταιρεία",
+    "clientManagement": "Διαχείριση πελατών",
+    "notifications": "Ειδοποιήσεις",
+    "team": "Ομάδα",
+    "integrations": "Ενσωματώσεις",
+    "warehouses": "Αποθήκες",
+    "categories": "Κατηγορίες"
+  },
   "company": {
     "title": "Ρυθμίσεις εταιρείας",
     "subtitle": "Διαχειριστείτε τα βασικά στοιχεία, την τοπική προσαρμογή και τις προτιμήσεις του οργανισμού σας.",
@@ -184,7 +195,15 @@
     "connecting": "Σύνδεση...",
     "connect": "Σύνδεση {{name}}",
     "disconnecting": "Αποσύνδεση...",
-    "disconnect": "Αποσύνδεση"
+    "disconnect": "Αποσύνδεση",
+    "connected": "Συνδεδεμένο",
+    "notConnected": "Μη συνδεδεμένο",
+    "ownerOnlyNotice": "Μόνο οι ιδιοκτήτες επιχείρησης μπορούν να συνδέουν ή να αποσυνδέουν ενσωματώσεις.",
+    "confirmDisconnect": "Είστε βέβαιοι ότι θέλετε να αποσυνδέσετε αυτή την ενσωμάτωση;",
+    "googleCalendar": {
+      "name": "Google Calendar",
+      "description": "Συγχρονίστε τα ραντεβού του CRM απευθείας με το Google Calendar σας."
+    }
   },
   "notifications": {
     "title": "Ειδοποιήσεις",

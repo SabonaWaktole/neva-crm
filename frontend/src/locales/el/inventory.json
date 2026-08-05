@@ -162,6 +162,8 @@
     "totalActive": "Σύνολο ενεργών",
     "capacityUsed": "Χρησιμοποιούμενη χωρητικότητα",
     "hubTraffic": "Κίνηση κόμβων",
+    "hubTrafficOptimal": "Βέλτιστη",
+    "addButton": "Προσθήκη αποθήκης",
     "listTitle": "Καθολική λίστα εγκαταστάσεων",
     "caption": "Εγκαταστάσεις αποθηκών",
     "filterAria": "Φίλτρο",

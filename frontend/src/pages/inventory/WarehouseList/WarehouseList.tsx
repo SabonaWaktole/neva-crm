@@ -90,7 +90,7 @@ const WarehouseListContent: React.FC = () => {
         {isBusinessOwner && (
           <button className={styles.addButton} onClick={handleOpenAdd}>
             <Plus size={20} />
-            Add Warehouse
+            {t('warehouses.addButton')}
           </button>
         )}
       </header>
@@ -113,7 +113,7 @@ const WarehouseListContent: React.FC = () => {
         />
         <KPICard
           title={t('warehouses.hubTraffic')}
-          value="Optimal"
+          value={t('warehouses.hubTrafficOptimal')}
           icon={<Truck />}
         />
       </div>

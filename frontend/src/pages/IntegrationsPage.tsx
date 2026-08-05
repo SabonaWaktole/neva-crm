@@ -11,20 +11,15 @@ import { useTranslation } from 'react-i18next';
 import { useDateFormat } from '../hooks/useDateFormat';
 import { getUserDisplayName } from '../utils/userUtils';
 
-const AVAILABLE_INTEGRATIONS = [
-  {
-    provider: 'GOOGLE_CALENDAR',
-    name: 'Google Calendar',
-    description: 'Sync your CRM appointments directly to your Google Calendar.',
-    icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M14.135 12.01L14.135 12.01H12.01V14.135H14.135V12.01ZM14.135 16.26H12.01V18.385H14.135V16.26ZM18.385 12.01H16.26V14.135H18.385V12.01ZM18.385 16.26H16.26V18.385H18.385V16.26ZM18.385 10.947H16.26V12.01H14.135V10.947H12.01V12.01H10.947V10.947H8.822V12.01H6.697V10.947H5.635V20.51H19.447V10.947H18.385ZM19.447 7.76H17.322V5.635H15.197V7.76H9.885V5.635H7.76V7.76H5.635C4.467 7.76 3.51 8.716 3.51 9.885L3.51 20.51C3.51 21.678 4.467 22.635 5.635 22.635H19.447C20.616 22.635 21.572 21.678 21.572 20.51V9.885C21.572 8.716 20.616 7.76 19.447 7.76ZM19.447 20.51H5.635V9.885H19.447V20.51Z" fill="#4285F4"/>
-        <path d="M9.885 5.635H7.76V7.76H9.885V5.635Z" fill="#34A853"/>
-        <path d="M17.322 5.635H15.197V7.76H17.322V5.635Z" fill="#EA4335"/>
-      </svg>
-    )
-  }
-];
+const INTEGRATION_ICONS: Record<string, React.ReactNode> = {
+  GOOGLE_CALENDAR: (
+    <svg width="32" height="32" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14.135 12.01L14.135 12.01H12.01V14.135H14.135V12.01ZM14.135 16.26H12.01V18.385H14.135V16.26ZM18.385 12.01H16.26V14.135H18.385V12.01ZM18.385 16.26H16.26V18.385H18.385V16.26ZM18.385 10.947H16.26V12.01H14.135V10.947H12.01V12.01H10.947V10.947H8.822V12.01H6.697V10.947H5.635V20.51H19.447V10.947H18.385ZM19.447 7.76H17.322V5.635H15.197V7.76H9.885V5.635H7.76V7.76H5.635C4.467 7.76 3.51 8.716 3.51 9.885L3.51 20.51C3.51 21.678 4.467 22.635 5.635 22.635H19.447C20.616 22.635 21.572 21.678 21.572 20.51V9.885C21.572 8.716 20.616 7.76 19.447 7.76ZM19.447 20.51H5.635V9.885H19.447V20.51Z" fill="#4285F4"/>
+      <path d="M9.885 5.635H7.76V7.76H9.885V5.635Z" fill="#34A853"/>
+      <path d="M17.322 5.635H15.197V7.76H17.322V5.635Z" fill="#EA4335"/>
+    </svg>
+  ),
+};
 
 export const IntegrationsPage: React.FC = () => {
   const dates = useDateFormat();
@@ -39,6 +34,15 @@ export const IntegrationsPage: React.FC = () => {
   const [connecting, setConnecting] = useState<string | null>(null);
 
   const navItems = useNavigation(user, location.pathname);
+
+  const AVAILABLE_INTEGRATIONS = [
+    {
+      provider: 'GOOGLE_CALENDAR',
+      name: t('integrations.googleCalendar.name'),
+      description: t('integrations.googleCalendar.description'),
+      icon: INTEGRATION_ICONS.GOOGLE_CALENDAR,
+    },
+  ];
 
   const isBusinessOwner = user?.role === 'BUSINESS_OWNER';
   const userName = getUserDisplayName(user, 'Settings User');
@@ -63,7 +67,7 @@ export const IntegrationsPage: React.FC = () => {
   };
 
   const handleDisconnect = async (provider: string) => {
-    if (window.confirm('Are you sure you want to disconnect this integration?')) {
+    if (window.confirm(t('integrations.confirmDisconnect'))) {
       setConnecting(provider);
       try {
         await disconnectIntegration(provider);
@@ -113,7 +117,7 @@ export const IntegrationsPage: React.FC = () => {
 
           {!isBusinessOwner && (
             <div style={{ backgroundColor: 'var(--color-secondary-container)', color: 'var(--color-on-secondary-container)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-lg)' }}>
-              Only Business Owners can connect or disconnect integrations.
+              {t('integrations.ownerOnlyNotice')}
             </div>
           )}
 
@@ -154,7 +158,7 @@ export const IntegrationsPage: React.FC = () => {
                         backgroundColor: isConnected ? 'var(--color-primary-container)' : 'var(--color-surface-variant)',
                         color: isConnected ? 'var(--color-on-primary-container)' : 'var(--color-on-surface-variant)'
                       }}>
-                        {isConnected ? 'Connected' : 'Not Connected'}
+                        {isConnected ? t('integrations.connected') : t('integrations.notConnected')}
                       </span>
                     </div>
                   </div>
