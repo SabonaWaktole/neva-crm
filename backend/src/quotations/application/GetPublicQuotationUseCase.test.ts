@@ -5,6 +5,8 @@ import {
 } from './GetPublicQuotationUseCase';
 
 const view = (status: string): PublicQuotationView => ({
+  quotationId: 'quotation-1',
+  tenantId: 'tenant-1',
   reference: 'ABC12345',
   status,
   issuedAt: new Date('2026-07-01T00:00:00.000Z'),

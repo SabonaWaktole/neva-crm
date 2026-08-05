@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Download, Edit, CheckCircle, XCircle, Send, ArrowLeft, Archive, Link as LinkIcon, Receipt } from 'lucide-react';
+import { Download, Edit, CheckCircle, XCircle, Send, ArrowLeft, Archive, Receipt } from 'lucide-react';
 import { Button } from '../../components/ui/Button/Button';
 import { Card } from '../../components/ui/Card/Card';
 import { Badge } from '../../components/ui/Badge/Badge';
@@ -54,9 +54,22 @@ export const QuotationDetailContent: React.FC = () => {
     return person ? getStaffDisplayName(person) : `${userId.substring(0, 8)}`;
   };
 
+  /**
+   * A history row's `changedByUserId` is only ever NULL for two reasons: the
+   * expiry scheduler, or the client responding through their public
+   * quotation link (RespondToPublicQuotationUseCase — the entity has no
+   * "system did this" transition of its own). Only ACCEPTED and REJECTED can
+   * be produced by a client, so that is what distinguishes the two here.
+   */
+  const displayHistoryActor = (event: { changedByUserId: string | null; toStatus: string }): string => {
+    if (!event.changedByUserId && (event.toStatus === 'ACCEPTED' || event.toStatus === 'REJECTED')) {
+      return t('detail.client');
+    }
+    return displayUser(event.changedByUserId);
+  };
+
   const [data, setData] = useState<any>(null);
   const [actionError, setActionError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
 
   /*
    * useCallback is load-bearing, not decoration. `loadData` is used by the
@@ -84,7 +97,7 @@ export const QuotationDetailContent: React.FC = () => {
     return <div className={styles.loadingState}>{t('detail.loading')}</div>;
   }
 
-  const { quotation, lineItems, history, permittedActions, shareUrl, shareToken, invoiceId } = data;
+  const { quotation, lineItems, history, permittedActions, shareToken, invoiceId } = data;
 
   /**
    * Reachable only once the quotation is ACCEPTED and no invoice has been
@@ -116,22 +129,6 @@ export const QuotationDetailContent: React.FC = () => {
   const pdfUrl = shareToken
     ? `${API_BASE_URL}/public/quotations/${shareToken}/pdf`
     : null;
-
-  const handleCopyLink = async () => {
-    if (!shareUrl) return;
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      setCopied(true);
-      // Reverts the label so the button does not read "Copied" forever and
-      // leave the next click looking like it did nothing.
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Clipboard access can be denied (insecure origin, permissions policy).
-      // Surfacing the URL is more useful than a failure toast the user cannot
-      // act on — they can still select and copy it by hand.
-      setActionError(shareUrl);
-    }
-  };
 
   const handleAction = async (action: string) => {
     if (!id) return;
@@ -228,36 +225,29 @@ export const QuotationDetailContent: React.FC = () => {
           )}
 
           {/*
-            Both actions exist only once the quotation has been sent, because
-            that is when the server mints the share token — before then there is
-            no customer-facing document to link to or render. This replaces the
-            disabled placeholder that TD-020 tracked.
+            Only once the quotation has been sent, because that is when the
+            server mints the share token — before then there is no
+            customer-facing document to render.
 
-            The PDF opens in a new tab rather than downloading through the API
-            client: it is a public URL needing no auth header, and letting the
-            browser fetch it directly means the customer and the staff member
-            are looking at byte-identical output.
+            No "copy client link" action here on purpose: the whole point of
+            the client's public page is that it is THEIR decision, so staff —
+            who may well be the same person who needs the quotation approved
+            — must not have a one-click way to open it and Accept/Reject on
+            the client's behalf. The link still goes out by email on Send.
+            The PDF stays: it opens in a new tab rather than downloading
+            through the API client because it is a public URL needing no auth
+            header, and letting the browser fetch it directly means the
+            customer and the staff member are looking at byte-identical
+            output — that part carries no such risk.
           */}
-          {shareUrl && (
-            <>
-              <Button
-                variant="outline"
-                icon={<LinkIcon size={16} />}
-                onClick={handleCopyLink}
-                title={t('share.hint')}
-              >
-                {copied ? t('share.copied') : t('share.copyLink')}
-              </Button>
-              {pdfUrl && (
-                <Button
-                  variant="outline"
-                  icon={<Download size={16} />}
-                  onClick={() => window.open(pdfUrl, '_blank', 'noopener')}
-                >
-                  {t('share.downloadPdf')}
-                </Button>
-              )}
-            </>
+          {pdfUrl && (
+            <Button
+              variant="outline"
+              icon={<Download size={16} />}
+              onClick={() => window.open(pdfUrl, '_blank', 'noopener')}
+            >
+              {t('share.downloadPdf')}
+            </Button>
           )}
         </div>
       </div>
@@ -354,13 +344,13 @@ export const QuotationDetailContent: React.FC = () => {
                 <div key={idx} className={styles.timelineItem}>
                   <div className={styles.timelineDot} />
                   <div className={styles.timelineContent}>
-                    <span className={styles.timelineStatus}>{statusLabel.quotation(event.status)}</span>
+                    <span className={styles.timelineStatus}>{statusLabel.quotation(event.toStatus)}</span>
                     <span className={styles.timelineDate}>{dates.dateTime(event.changedAt)}</span>
                     <span className={styles.timelineUser}>
-                      {t('detail.byUser', { user: displayUser(event.changedByUserId) })}
+                      {t('detail.byUser', { user: displayHistoryActor(event) })}
                     </span>
-                    {event.reason && <span style={{ fontSize: '12px', fontStyle: 'italic', color: 'var(--color-on-surface-variant)' }}>
-                        {t('detail.reason', { reason: event.reason })}
+                    {event.note && <span style={{ fontSize: '12px', fontStyle: 'italic', color: 'var(--color-on-surface-variant)' }}>
+                        {t('detail.reason', { reason: event.note })}
                       </span>}
                   </div>
                 </div>

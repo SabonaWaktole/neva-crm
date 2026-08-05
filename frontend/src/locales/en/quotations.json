@@ -61,6 +61,7 @@
     "warehouse": "Warehouse: {{warehouse}}",
     "breadcrumb": "CRM > Quotations > {{reference}}",
     "unknownUser": "Unknown user",
+    "client": "The client",
     "unknownClient": "Unknown",
     "notes": "Notes"
   },
@@ -102,6 +103,21 @@
     "lineTotal": "Total",
     "subtotal": "Subtotal",
     "download": "Download PDF",
-    "privateNotice": "This is a private link. Please do not forward it."
+    "privateNotice": "This is a private link. Please do not forward it.",
+    "actions": {
+      "accept": "Accept",
+      "reject": "Reject",
+      "requote": "Request changes",
+      "confirmAccept": "Accept this quotation? The sender will be notified.",
+      "confirmReject": "Reject this quotation? The sender will be notified.",
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "send": "Send",
+      "requotePrompt": "What would you like changed?",
+      "requotePlaceholder": "e.g. Could you include a quantity discount?",
+      "accepted": "You've accepted this quotation. The sender has been notified.",
+      "rejected": "You've declined this quotation. The sender has been notified.",
+      "error": "Something went wrong. Please try again."
+    }
   }
 }

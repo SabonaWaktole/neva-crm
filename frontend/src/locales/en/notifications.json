@@ -10,7 +10,8 @@
   "unreadBadge": "New",
   "breadcrumb": "Notifications",
   "actor": {
-    "system": "The system"
+    "system": "The system",
+    "client": "The client"
   },
   "type": {
     "QUOTATION_SUBMITTED_FOR_APPROVAL": "{{actor}} submitted quotation {{reference}} for your approval",

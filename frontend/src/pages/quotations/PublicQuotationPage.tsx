@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Download, FileWarning } from 'lucide-react';
+import { Download, FileWarning, CheckCircle2, XCircle, MessageSquareText } from 'lucide-react';
 import styles from './PublicQuotationPage.module.css';
 import { API_BASE_URL } from '../../api/baseUrl';
 
@@ -33,6 +33,8 @@ interface PublicQuotation {
 
 const apiBase = API_BASE_URL;
 
+type PendingAction = 'accept' | 'reject' | 'requote' | null;
+
 /**
  * The quotation as the customer sees it (§6.5).
  *
@@ -53,6 +55,11 @@ export const PublicQuotationPage = () => {
   const [quotation, setQuotation] = useState<PublicQuotation | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+
+  const [pendingAction, setPendingAction] = useState<PendingAction>(null);
+  const [requoteNote, setRequoteNote] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -79,6 +86,41 @@ export const PublicQuotationPage = () => {
       cancelled = true;
     };
   }, [token]);
+
+  /**
+   * Accept / Reject / Re-quote all resolve to the same two server routes —
+   * "Re-quote" is Reject with a required note (RespondToPublicQuotationUseCase).
+   *
+   * The server always returns the current state of the quotation, whether the
+   * call succeeded, arrived twice (409, e.g. two tabs) or the quotation was
+   * withdrawn since the page loaded (404) — so the page reconciles to whatever
+   * comes back rather than trusting its own guess at the new status.
+   */
+  const respond = async (decision: 'accept' | 'reject', note?: string) => {
+    setSubmitting(true);
+    setActionError(null);
+    try {
+      const response = await fetch(`${apiBase}/public/quotations/${token}/${decision}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(decision === 'reject' ? { note } : {}),
+      });
+
+      if (response.status === 404) {
+        setNotFound(true);
+        return;
+      }
+
+      const data = (await response.json()) as PublicQuotation;
+      setQuotation(data);
+      setPendingAction(null);
+      setRequoteNote('');
+    } catch {
+      setActionError(t('public.actions.error'));
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   if (loading) {
     return <div className={styles.centered}>{t('public.loading')}</div>;
@@ -194,6 +236,119 @@ export const PublicQuotationPage = () => {
             </tfoot>
           </table>
         </div>
+
+        {quotation.status === 'SENT' && (
+          <section className={styles.responseSection}>
+            {pendingAction === null && (
+              <div className={styles.actionButtons}>
+                <button
+                  type="button"
+                  className={styles.acceptButton}
+                  disabled={submitting}
+                  onClick={() => setPendingAction('accept')}
+                >
+                  <CheckCircle2 size={16} />
+                  {t('public.actions.accept')}
+                </button>
+                <button
+                  type="button"
+                  className={styles.rejectButton}
+                  disabled={submitting}
+                  onClick={() => setPendingAction('reject')}
+                >
+                  <XCircle size={16} />
+                  {t('public.actions.reject')}
+                </button>
+                <button
+                  type="button"
+                  className={styles.requoteButton}
+                  disabled={submitting}
+                  onClick={() => setPendingAction('requote')}
+                >
+                  <MessageSquareText size={16} />
+                  {t('public.actions.requote')}
+                </button>
+              </div>
+            )}
+
+            {(pendingAction === 'accept' || pendingAction === 'reject') && (
+              <div className={styles.confirmPanel}>
+                <p>
+                  {pendingAction === 'accept'
+                    ? t('public.actions.confirmAccept')
+                    : t('public.actions.confirmReject')}
+                </p>
+                <div className={styles.confirmButtons}>
+                  <button
+                    type="button"
+                    className={styles.secondaryButton}
+                    disabled={submitting}
+                    onClick={() => setPendingAction(null)}
+                  >
+                    {t('public.actions.cancel')}
+                  </button>
+                  <button
+                    type="button"
+                    className={pendingAction === 'accept' ? styles.acceptButton : styles.rejectButton}
+                    disabled={submitting}
+                    onClick={() => respond(pendingAction, pendingAction === 'reject' ? '' : undefined)}
+                  >
+                    {t('public.actions.confirm')}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {pendingAction === 'requote' && (
+              <div className={styles.confirmPanel}>
+                <label htmlFor="requote-note">{t('public.actions.requotePrompt')}</label>
+                <textarea
+                  id="requote-note"
+                  className={styles.requoteInput}
+                  value={requoteNote}
+                  onChange={(event) => setRequoteNote(event.target.value)}
+                  placeholder={t('public.actions.requotePlaceholder')}
+                  rows={3}
+                />
+                <div className={styles.confirmButtons}>
+                  <button
+                    type="button"
+                    className={styles.secondaryButton}
+                    disabled={submitting}
+                    onClick={() => {
+                      setPendingAction(null);
+                      setRequoteNote('');
+                    }}
+                  >
+                    {t('public.actions.cancel')}
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.requoteButton}
+                    disabled={submitting || requoteNote.trim() === ''}
+                    onClick={() => respond('reject', requoteNote.trim())}
+                  >
+                    {t('public.actions.send')}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {actionError && <p className={styles.actionError}>{actionError}</p>}
+          </section>
+        )}
+
+        {quotation.status === 'ACCEPTED' && (
+          <section className={styles.responseSection}>
+            <p className={styles.responseBanner}>{t('public.actions.accepted')}</p>
+          </section>
+        )}
+
+        {quotation.status === 'REJECTED' && (
+          <section className={styles.responseSection}>
+            <p className={styles.responseBanner}>{t('public.actions.rejected')}</p>
+          </section>
+        )}
 
         <footer className={styles.footer}>{t('public.privateNotice')}</footer>
       </article>

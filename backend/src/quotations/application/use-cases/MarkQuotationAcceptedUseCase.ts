@@ -23,11 +23,20 @@ export class MarkQuotationAcceptedUseCase {
     private emailDispatcher?: IPostCommitEmailDispatcher
   ) {}
 
+  /**
+   * @param input.actingUserId  NULL means the client, acting through their
+   *   public quotation link rather than a staff member — see
+   *   RespondToPublicQuotationUseCase. Stock movements still need a real user
+   *   for their `createdBy` FK, so that write attributes to the quotation's
+   *   own creator (`stockActorId` below); only the status history and
+   *   notification, which have no such constraint, record the NULL and read
+   *   as the client's own action.
+   */
   async execute(input: {
     tenantId: string;
     quotationId: string;
-    actingUserId: string;
-    actingUserRole: string;
+    actingUserId: string | null;
+    actingUserRole: string | null;
   }) {
     const quotation = await this.quotationRepo.findById(input.tenantId, input.quotationId);
     if (!quotation) {
@@ -37,6 +46,8 @@ export class MarkQuotationAcceptedUseCase {
     if (input.actingUserRole === UserRole.STAFF && quotation.createdByUserId !== input.actingUserId) {
       throw new Error('Unauthorized: Staff can only act on their own quotations');
     }
+
+    const stockActorId = input.actingUserId ?? quotation.createdByUserId;
 
     const fromStatus = quotation.status;
     quotation.accept(); // Throws if not Sent
@@ -74,7 +85,7 @@ export class MarkQuotationAcceptedUseCase {
           quantity: -li.quantity,
           type: StockMovementType.ADJUSTMENT,
           reason: `Quotation ${input.quotationId} accepted`,
-          createdBy: input.actingUserId
+          createdBy: stockActorId
         });
         await repos.stockMovementRepository.save(movement);
       }

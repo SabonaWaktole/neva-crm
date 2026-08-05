@@ -61,6 +61,7 @@
     "warehouse": "Magazina: {{warehouse}}",
     "breadcrumb": "CRM > Ofertat > {{reference}}",
     "unknownUser": "Përdorues i panjohur",
+    "client": "Klienti",
     "unknownClient": "I panjohur",
     "notes": "Shënime"
   },
@@ -102,6 +103,21 @@
     "lineTotal": "Total",
     "subtotal": "Subtotal",
     "download": "Download PDF",
-    "privateNotice": "This is a private link. Please do not forward it."
+    "privateNotice": "This is a private link. Please do not forward it.",
+    "actions": {
+      "accept": "Prano",
+      "reject": "Refuzo",
+      "requote": "Kërko ndryshime",
+      "confirmAccept": "Ta pranoj këtë ofertë? Dërguesi do të njoftohet.",
+      "confirmReject": "Ta refuzoj këtë ofertë? Dërguesi do të njoftohet.",
+      "confirm": "Konfirmo",
+      "cancel": "Anulo",
+      "send": "Dërgo",
+      "requotePrompt": "Çfarë do të donit të ndryshohej?",
+      "requotePlaceholder": "p.sh. A mund të përfshini një zbritje për sasi?",
+      "accepted": "E pranuat këtë ofertë. Dërguesi është njoftuar.",
+      "rejected": "E refuzuat këtë ofertë. Dërguesi është njoftuar.",
+      "error": "Diçka shkoi keq. Ju lutemi provoni përsëri."
+    }
   }
 }

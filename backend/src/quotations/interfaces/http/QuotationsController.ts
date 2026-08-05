@@ -177,14 +177,15 @@ export class QuotationsController {
 
   private async markRejected(req: Request, res: Response) {
     try {
-      markRejectedSchema.parse(req.body);
+      const validatedData = markRejectedSchema.parse(req.body);
       const tenantId = requireTenantId(req);
       const id = req.params.id as string;
       const result = await this.markQuotationRejectedUseCase.execute({
         tenantId,
         quotationId: id,
         actingUserId: req.user!.userId,
-        actingUserRole: req.user!.role
+        actingUserRole: req.user!.role,
+        note: validatedData.note
       });
       res.json(result.quotation);
     } catch (error: any) {

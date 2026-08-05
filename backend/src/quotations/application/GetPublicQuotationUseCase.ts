@@ -6,6 +6,14 @@ export interface PublicQuotationLine {
 }
 
 export interface PublicQuotationView {
+  /**
+   * Deliberately NOT part of the public JSON response — the route builds its
+   * own body and omits these. They live on the view because responding to a
+   * quotation (accept/reject) needs the tenant-scoped identity the mutation
+   * use cases require, and the token is the only handle a public caller has.
+   */
+  quotationId: string;
+  tenantId: string;
   reference: string;
   status: string;
   issuedAt: Date;

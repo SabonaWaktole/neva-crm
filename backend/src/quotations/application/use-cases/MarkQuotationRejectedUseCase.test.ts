@@ -77,4 +77,19 @@ describe('MarkQuotationRejectedUseCase', () => {
       tenantId: 'tenant-1', quotationId: 'q1', actingUserId: 'owner-1', actingUserRole: UserRole.BUSINESS_OWNER
     })).rejects.toThrow('Invalid state transition');
   });
+
+  it('should accept a null actingUserId — the client, via the public quotation link', async () => {
+    const quotation = makeQuotation(QuotationStatus.Sent, 'user-1');
+    quotationRepo.findById.mockResolvedValue(quotation);
+
+    const result = await useCase.execute({
+      tenantId: 'tenant-1', quotationId: 'q1', actingUserId: null, actingUserRole: null,
+      note: 'Please requote with a larger reception counter'
+    });
+
+    expect(result.quotation.status).toBe(QuotationStatus.Rejected);
+    const savedHistory = historyRepo.save.mock.calls[0][0];
+    expect(savedHistory.changedByUserId).toBeNull();
+    expect(savedHistory.note).toBe('Please requote with a larger reception counter');
+  });
 });

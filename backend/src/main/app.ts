@@ -79,6 +79,7 @@ import { PrismaPublicQuotationReader } from '../quotations/infrastructure/Prisma
 import { QuotationPdfRenderer } from '../quotations/infrastructure/QuotationPdfRenderer';
 import { QuotationDeliveryService } from '../quotations/application/QuotationDeliveryService';
 import { GetPublicQuotationUseCase } from '../quotations/application/GetPublicQuotationUseCase';
+import { RespondToPublicQuotationUseCase } from '../quotations/application/use-cases/RespondToPublicQuotationUseCase';
 import { createPublicQuotationRouter } from '../quotations/interfaces/http/publicQuotationRoutes';
 
 export interface AppDependencies {
@@ -504,6 +505,13 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
   const { PrismaInvoiceRepository: PrismaInvoiceRepositoryForQuotationDetail } = require('../invoices/infrastructure/repositories/PrismaInvoiceRepository');
   const invoiceRepoForQuotationDetail = new PrismaInvoiceRepositoryForQuotationDetail(prisma);
 
+  // Named rather than inlined: Accept and Reject are also how the client
+  // responds from the public link (RespondToPublicQuotationUseCase below), so
+  // both callers share the one instance instead of each holding its own
+  // wiring of the same dependencies.
+  const markQuotationAcceptedUseCase = new MarkQuotationAcceptedUseCase(quotationRepo, quotationLineItemRepo, quotationHistoryRepo, stockLevelRepo, stockTxManager, quotationWriteTx, userRepository, notificationEmailDispatcher);
+  const markQuotationRejectedUseCase = new MarkQuotationRejectedUseCase(quotationWriteTx, userRepository, notificationEmailDispatcher);
+
   const quotationsController = new QuotationsController(
     new CreateQuotationUseCase(quotationRepo, quotationLineItemRepo, quotationHistoryRepo, prismaClientRepository, productRepo, warehouseRepo),
     new UpdateQuotationUseCase(quotationRepo, quotationLineItemRepo, productRepo, warehouseRepo),
@@ -514,8 +522,8 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
     new SubmitQuotationUseCase(quotationWriteTx, userRepository, notificationEmailDispatcher, quotationDelivery),
     new ApproveQuotationUseCase(quotationWriteTx, userRepository, notificationEmailDispatcher, quotationDelivery),
     new ReturnQuotationToDraftUseCase(quotationWriteTx, userRepository, notificationEmailDispatcher),
-    new MarkQuotationAcceptedUseCase(quotationRepo, quotationLineItemRepo, quotationHistoryRepo, stockLevelRepo, stockTxManager, quotationWriteTx, userRepository, notificationEmailDispatcher),
-    new MarkQuotationRejectedUseCase(quotationWriteTx, userRepository, notificationEmailDispatcher),
+    markQuotationAcceptedUseCase,
+    markQuotationRejectedUseCase,
     new ExpireQuotationUseCase(quotationWriteTx, userRepository, notificationEmailDispatcher),
     new SearchQuotationsUseCase(quotationRepo),
     new GetQuotationDetailUseCase(quotationRepo, quotationLineItemRepo, quotationHistoryRepo, invoiceRepoForQuotationDetail),
@@ -523,24 +531,27 @@ export const createApp = (overrides?: Partial<AppDependencies>) => {
     settingsService
   );
 
-  const quotationRoutes = createQuotationRouter(quotationsController, tokenService, tenantRepository);
-  app.use('/api/:tenantSlug/quotations', quotationRoutes);
-
   /*
    * The customer-facing quotation view — no tenant prefix and no auth.
    *
-   * Mounted before nothing in particular but kept next to its sibling above so
-   * the pair is legible: /api/:tenantSlug/quotations is the staff view of a
-   * quotation, /api/public/quotations is the recipient's. See
-   * publicQuotationRoutes for what stands in for authentication.
+   * Mounted BEFORE its tenant-scoped sibling below: Express matches routes in
+   * registration order, and `/api/:tenantSlug/quotations` is a wildcard that
+   * would otherwise match `/api/public/quotations/<token>` too (with
+   * tenantSlug="public"), routing it into the authenticated staff router and
+   * 401'ing every customer who opens their link. See publicQuotationRoutes for
+   * what stands in for authentication here instead.
    */
   app.use(
     '/api/public/quotations',
     createPublicQuotationRouter(
       new GetPublicQuotationUseCase(publicQuotationReader),
-      new QuotationPdfRenderer()
+      new QuotationPdfRenderer(),
+      new RespondToPublicQuotationUseCase(publicQuotationReader, markQuotationAcceptedUseCase, markQuotationRejectedUseCase)
     )
   );
+
+  const quotationRoutes = createQuotationRouter(quotationsController, tokenService, tenantRepository);
+  app.use('/api/:tenantSlug/quotations', quotationRoutes);
 
   // Invoices Routes
   //

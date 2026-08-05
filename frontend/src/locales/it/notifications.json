@@ -10,7 +10,8 @@
   "unreadBadge": "Nuovo",
   "breadcrumb": "Notifiche",
   "actor": {
-    "system": "Il sistema"
+    "system": "Il sistema",
+    "client": "Il cliente"
   },
   "type": {
     "QUOTATION_SUBMITTED_FOR_APPROVAL": "{{actor}} ha inviato il preventivo {{reference}} per la tua approvazione",

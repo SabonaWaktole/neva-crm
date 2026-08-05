@@ -99,6 +99,47 @@ describe('NotificationBell', () => {
     expect(screen.getByText(/assigned Acme Corp to you/)).toBeDefined();
   });
 
+  it('reads a NULL actor on Accept/Reject as the client, not the system', async () => {
+    // These two types only ever have a NULL actorUserId when the client
+    // responded through their public quotation link — nobody else can
+    // produce that combination (see RespondToPublicQuotationUseCase).
+    setup(
+      [
+        notification({
+          id: 'n2',
+          type: 'QUOTATION_REJECTED',
+          params: { reference: 'ABC123' },
+          actorUserId: null,
+          entityType: 'QUOTATION' as const,
+        }),
+      ],
+      1
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: /notifications/i }));
+
+    expect(screen.getByText('Quotation ABC123 was marked rejected by The client')).toBeDefined();
+  });
+
+  it('keeps a NULL actor as the system for events nobody chose, like expiry', async () => {
+    setup(
+      [
+        notification({
+          id: 'n3',
+          type: 'QUOTATION_EXPIRED',
+          params: { reference: 'ABC123' },
+          actorUserId: null,
+          entityType: 'QUOTATION' as const,
+        }),
+      ],
+      1
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: /notifications/i }));
+
+    expect(screen.getByText('Quotation ABC123 has expired')).toBeDefined();
+  });
+
   it('marks a notification read and navigates to its target when clicked', async () => {
     setup([notification()], 1);
 

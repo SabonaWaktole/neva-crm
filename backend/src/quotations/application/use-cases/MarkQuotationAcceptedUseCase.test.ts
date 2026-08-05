@@ -203,4 +203,38 @@ describe('MarkQuotationAcceptedUseCase', () => {
 
     expect(result.quotation.status).toBe(QuotationStatus.Accepted);
   });
+
+  it('should attribute the stock movement to the quotation owner when accepted by the client (null actingUserId)', async () => {
+    const quotation = makeQuotation(QuotationStatus.Sent, 'owner-1');
+    quotationRepo.findById.mockResolvedValue(quotation);
+    lineItemRepo.findByQuotationId.mockResolvedValue(quotation.lineItems);
+
+    const stock1 = StockLevel.create({
+      id: 'sl1', tenantId: 'tenant-1', productId: 'p1', productTenantId: 'tenant-1', warehouseId: 'w1', warehouseTenantId: 'tenant-1', quantity: 10
+    });
+    const stock2 = StockLevel.create({
+      id: 'sl2', tenantId: 'tenant-1', productId: 'p2', productTenantId: 'tenant-1', warehouseId: 'w2', warehouseTenantId: 'tenant-1', quantity: 10
+    });
+
+    stockLevelRepo.findByProductAndWarehouse
+      .mockResolvedValueOnce(stock1)
+      .mockResolvedValueOnce(stock2);
+
+    transactionStockLevelRepo.findByProductAndWarehouse
+      .mockResolvedValueOnce(stock1)
+      .mockResolvedValueOnce(stock2);
+
+    const result = await useCase.execute({
+      tenantId: 'tenant-1', quotationId: 'q1', actingUserId: null, actingUserRole: null
+    });
+
+    expect(result.quotation.status).toBe(QuotationStatus.Accepted);
+    const savedHistory = historyRepo.save.mock.calls[0][0];
+    expect(savedHistory.changedByUserId).toBeNull();
+
+    const movement1 = transactionStockMovementRepo.save.mock.calls[0][0];
+    // No user initiated this, but StockMovement.createdBy has a not-null FK —
+    // it falls back to whoever owns the quotation.
+    expect(movement1.createdBy).toBe('owner-1');
+  });
 });
