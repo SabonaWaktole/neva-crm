@@ -257,7 +257,7 @@ export const QuotationFormContent: React.FC<QuotationFormProps> = ({ mode }) => 
                                 type="number"
                                 min="1"
                                 value={value}
-                                onChange={onChange}
+                                onChange={(e) => onChange(e.target.valueAsNumber)}
                                 error={errors.lineItems?.[index]?.quantity?.message}
                               />
                             )}
@@ -277,7 +277,7 @@ export const QuotationFormContent: React.FC<QuotationFormProps> = ({ mode }) => 
                                 min="0"
                                 step="0.01"
                                 value={value}
-                                onChange={onChange}
+                                onChange={(e) => onChange(e.target.valueAsNumber)}
                                 error={errors.lineItems?.[index]?.unitPrice?.message}
                               />
                             )}
