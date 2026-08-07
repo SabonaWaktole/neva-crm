@@ -74,7 +74,7 @@ export const ForgotPasswordPage = () => {
             
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <Link 
-                to={`/${tenantSlug || 'admin'}/login`}
+                to="/login"
                 style={{ 
                   fontFamily: 'var(--font-family-base)', 
                   fontSize: 'var(--font-size-label-md)', 
