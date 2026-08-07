@@ -170,5 +170,24 @@ describe('Quotation', () => {
       quotation.submit({ requiresApproval: true });
       expect(() => quotation.accept()).toThrow('Invalid state transition from PENDING_APPROVAL to Accepted');
     });
+
+    it('should transition Rejected -> Sent (resend), clear respondedAt, and keep the same share token', () => {
+      quotation.submit({ requiresApproval: false });
+      quotation.issueShareToken('tok-1');
+      quotation.reject();
+      expect(quotation.respondedAt).toBeInstanceOf(Date);
+
+      quotation.resend();
+
+      expect(quotation.status).toBe(QuotationStatus.Sent);
+      expect(quotation.respondedAt).toBeNull();
+      expect(quotation.sentAt).toBeInstanceOf(Date);
+      // The customer's original link must keep working after a revision.
+      expect(quotation.shareToken).toBe('tok-1');
+    });
+
+    it('should reject resend from anything other than Rejected', () => {
+      expect(() => quotation.resend()).toThrow('Invalid state transition from DRAFT to Sent');
+    });
   });
 });

@@ -54,7 +54,7 @@ export const clientHandlers = [
     const newClient = {
       id: `c${Date.now()}`,
       name: body.name,
-      contactInfo: body.contactInfo || {},
+      contactInfo: { email: body.email, phone: body.phone },
       status: body.status || ClientStatus.PROSPECT,
       assignedUserId: body.assignedUserId || null,
       customFieldValues: body.customFieldValues || {},
@@ -76,7 +76,10 @@ export const clientHandlers = [
     const updatedClient = {
       ...existingClient,
       ...body,
-      contactInfo: { ...existingClient.contactInfo, ...body.contactInfo },
+      contactInfo: {
+        email: body.email !== undefined ? body.email : existingClient.contactInfo.email,
+        phone: body.phone !== undefined ? body.phone : existingClient.contactInfo.phone,
+      },
       customFieldValues: { ...existingClient.customFieldValues, ...body.customFieldValues },
       updatedAt: new Date().toISOString()
     };

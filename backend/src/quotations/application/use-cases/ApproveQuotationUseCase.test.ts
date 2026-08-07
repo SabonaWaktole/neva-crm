@@ -1,8 +1,11 @@
 import { ApproveQuotationUseCase } from './ApproveQuotationUseCase';
 import { IQuotationRepository } from '../../domain/IQuotationRepository';
 import { IQuotationStatusHistoryRepository } from '../../domain/IQuotationStatusHistoryRepository';
+import { IQuotationLineItemRepository } from '../../domain/IQuotationLineItemRepository';
+import { IStockLevelRepository } from '../../../inventory/domain/repositories';
 import { Quotation, QuotationStatus } from '../../domain/Quotation';
 import { QuotationLineItem } from '../../domain/QuotationLineItem';
+import { StockLevel } from '../../../inventory/domain/StockLevel';
 import { UserRole } from '../../../auth/domain/enums/UserRole';
 import { makeQuotationWriteHarness } from '../../../../tests/support/fakeQuotationWriteTransaction';
 
@@ -12,6 +15,8 @@ describe('ApproveQuotationUseCase', () => {
   let historyRepo: jest.Mocked<IQuotationStatusHistoryRepository>;
   let writeTx: ReturnType<typeof makeQuotationWriteHarness>['writeTx'];
   let userRepo: ReturnType<typeof makeQuotationWriteHarness>['userRepo'];
+  let lineItemRepo: jest.Mocked<IQuotationLineItemRepository>;
+  let stockLevelRepo: jest.Mocked<IStockLevelRepository>;
 
   beforeEach(() => {
     const harness = makeQuotationWriteHarness();
@@ -19,8 +24,17 @@ describe('ApproveQuotationUseCase', () => {
     historyRepo = harness.historyRepo;
     writeTx = harness.writeTx;
     userRepo = harness.userRepo;
+    lineItemRepo = { findByQuotationId: jest.fn(), save: jest.fn(), saveMany: jest.fn(), deleteManyByQuotationId: jest.fn() };
+    stockLevelRepo = { findById: jest.fn(), findByProductAndWarehouse: jest.fn(), findByProductId: jest.fn(), save: jest.fn(), countByWarehouseId: jest.fn() };
 
-    useCase = new ApproveQuotationUseCase(writeTx, userRepo);
+    lineItemRepo.findByQuotationId.mockResolvedValue([
+      QuotationLineItem.create({ id: 'li1', tenantId: 'tenant-1', quotationId: 'q1', productId: 'p1', warehouseId: 'w1', quantity: 1, unitPrice: 10 }),
+    ]);
+    stockLevelRepo.findByProductAndWarehouse.mockResolvedValue(
+      StockLevel.create({ id: 'sl1', tenantId: 'tenant-1', productId: 'p1', productTenantId: 'tenant-1', warehouseId: 'w1', warehouseTenantId: 'tenant-1', quantity: 10 })
+    );
+
+    useCase = new ApproveQuotationUseCase(writeTx, userRepo, lineItemRepo, stockLevelRepo);
   });
 
   function makeQuotation(status: QuotationStatus): Quotation {
@@ -70,5 +84,20 @@ describe('ApproveQuotationUseCase', () => {
     await expect(useCase.execute({
       tenantId: 'tenant-1', quotationId: 'q1', actingUserId: 'owner-1', actingUserRole: UserRole.BUSINESS_OWNER
     })).rejects.toThrow('Invalid state transition');
+  });
+
+  it('should refuse to approve when a line item exceeds on-hand stock, and never mint a share token', async () => {
+    const quotation = makeQuotation(QuotationStatus.PendingApproval);
+    quotationRepo.findById.mockResolvedValue(quotation);
+    stockLevelRepo.findByProductAndWarehouse.mockResolvedValue(
+      StockLevel.create({ id: 'sl1', tenantId: 'tenant-1', productId: 'p1', productTenantId: 'tenant-1', warehouseId: 'w1', warehouseTenantId: 'tenant-1', quantity: 0 })
+    );
+
+    await expect(useCase.execute({
+      tenantId: 'tenant-1', quotationId: 'q1', actingUserId: 'owner-1', actingUserRole: UserRole.BUSINESS_OWNER
+    })).rejects.toThrow('Insufficient stock for product p1 at warehouse w1');
+
+    expect(quotationRepo.save).not.toHaveBeenCalled();
+    expect(quotation.shareToken).toBeNull();
   });
 });

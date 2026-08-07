@@ -7,11 +7,16 @@ import { quotationReference } from '../../domain/quotationReference';
 import { runWithPostCommitEmail, IPostCommitEmailDispatcher } from '../runWithPostCommitEmail';
 import { generateShareToken } from '../../domain/shareToken';
 import { IQuotationDeliveryService } from '../QuotationDeliveryService';
+import { IQuotationLineItemRepository } from '../../domain/IQuotationLineItemRepository';
+import { IStockLevelRepository } from '../../../inventory/domain/repositories';
+import { assertQuotationStockAvailable } from '../assertQuotationStockAvailable';
 
 export class ApproveQuotationUseCase {
   constructor(
     private writeTx: IQuotationWriteTransaction,
     private userRepo: IUserRepository,
+    private lineItemRepo: IQuotationLineItemRepository,
+    private stockLevelRepo: IStockLevelRepository,
     private emailDispatcher?: IPostCommitEmailDispatcher,
     private delivery?: IQuotationDeliveryService
   ) {}
@@ -37,6 +42,12 @@ export class ApproveQuotationUseCase {
 
       const fromStatus = quotation.status;
       quotation.approve();
+
+      // The other route into SENT, so it runs the same pre-flight stock check
+      // Submit does on its own direct route there — stock can have moved in
+      // the time a quotation sat waiting for approval. Before
+      // `issueShareToken`, so a refusal here never mints a customer link.
+      await assertQuotationStockAvailable(input.tenantId, input.quotationId, this.lineItemRepo, this.stockLevelRepo);
 
       // Approval is the other route into SENT, so it mints the customer link
       // too. Both routes call the same guarded method rather than one of them

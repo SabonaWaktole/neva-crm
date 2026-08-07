@@ -117,6 +117,29 @@ describe('useQuotations Hooks', () => {
       expect(result.current.error).toBeNull();
     });
 
+    it('updateQuotation surfaces the server\'s actual reason, not the generic axios status text', async () => {
+      // e.g. UpdateQuotationUseCase refusing a non-Draft quotation. Previously
+      // the form showed "Request failed with status code 400" for every
+      // failure, which told the user nothing they could act on.
+      server.use(
+        http.put('http://localhost:3000/api/tenant-1/quotations/q1', () => {
+          return HttpResponse.json({ error: 'Only Draft quotations can be updated' }, { status: 400 });
+        })
+      );
+
+      const { result } = renderHook(() => useQuotations());
+
+      await act(async () => {
+        await expect(
+          result.current.updateQuotation('q1', {
+            lineItems: [{ productId: 'p1', warehouseId: 'w1', quantity: 10, unitPrice: 200 }]
+          })
+        ).rejects.toThrow('Only Draft quotations can be updated');
+      });
+
+      expect(result.current.error).toBe('Only Draft quotations can be updated');
+    });
+
     it('fetchQuotationDetail returns detail data', async () => {
       server.use(
         http.get('http://localhost:3000/api/tenant-1/quotations/q1', () => {
@@ -269,7 +292,11 @@ describe('useQuotations Hooks', () => {
         }
       });
 
-      expect(result.current.error).toBeTruthy();
+      // Regression: this used to be the generic axios message ("Request
+      // failed with status code 403") instead of the server's actual reason,
+      // because the catch blocks read `err.message` instead of
+      // `err.response.data.error`.
+      expect(result.current.error).toBe('Forbidden');
       expect(result.current.loading).toBe(false);
     });
   });

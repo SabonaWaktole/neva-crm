@@ -10,7 +10,8 @@
   "unreadBadge": "Νέο",
   "breadcrumb": "Ειδοποιήσεις",
   "actor": {
-    "system": "Το σύστημα"
+    "system": "Το σύστημα",
+    "client": "Ο πελάτης"
   },
   "type": {
     "QUOTATION_SUBMITTED_FOR_APPROVAL": "Ο/Η {{actor}} υπέβαλε την προσφορά {{reference}} για έγκρισή σας",

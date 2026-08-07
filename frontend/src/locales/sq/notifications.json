@@ -10,7 +10,8 @@
   "unreadBadge": "E re",
   "breadcrumb": "Njoftimet",
   "actor": {
-    "system": "Sistemi"
+    "system": "Sistemi",
+    "client": "Klienti"
   },
   "type": {
     "QUOTATION_SUBMITTED_FOR_APPROVAL": "{{actor}} dorëzoi ofertën {{reference}} për miratimin tuaj",

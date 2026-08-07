@@ -13,11 +13,22 @@ export class MarkQuotationRejectedUseCase {
     private emailDispatcher?: IPostCommitEmailDispatcher
   ) {}
 
+  /**
+   * @param input.actingUserId  NULL means the client, acting through their
+   *   public quotation link rather than a staff member — see
+   *   RespondToPublicQuotationUseCase. Unlike Accept, nothing here has a
+   *   not-null FK to a user, so NULL flows straight through to the history row
+   *   and the notification, both of which read as the client's own action.
+   * @param input.note  Shown in the quotation's status history. Used for the
+   *   client's "Re-quote" reason as well as an optional staff-entered reason
+   *   when marking a quotation rejected by hand.
+   */
   async execute(input: {
     tenantId: string;
     quotationId: string;
-    actingUserId: string;
-    actingUserRole: string;
+    actingUserId: string | null;
+    actingUserRole: string | null;
+    note?: string | null;
   }) {
     return runWithPostCommitEmail(this.writeTx, this.emailDispatcher, async (repos, notify) => {
       const quotation = await repos.quotationRepo.findById(input.tenantId, input.quotationId);
@@ -38,7 +49,8 @@ export class MarkQuotationRejectedUseCase {
         quotationId: input.quotationId,
         fromStatus,
         toStatus: quotation.status,
-        changedByUserId: input.actingUserId
+        changedByUserId: input.actingUserId,
+        note: input.note ?? null
       });
 
       await repos.quotationRepo.save(quotation);

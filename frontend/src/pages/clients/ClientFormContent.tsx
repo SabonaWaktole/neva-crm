@@ -116,7 +116,8 @@ export const ClientFormContent: React.FC = () => {
   const onSubmit = async (values: ClientFormValues) => {
     const data = {
       name: values.name,
-      contactInfo: { email: values.email || undefined, phone: values.phone || undefined },
+      email: values.email || undefined,
+      phone: values.phone || undefined,
       status: values.status as ClientStatus,
       // Empty string means Unassigned — send null so the column is cleared
       // rather than set to an invalid empty id.

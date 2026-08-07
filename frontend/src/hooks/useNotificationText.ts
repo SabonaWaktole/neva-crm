@@ -19,6 +19,14 @@ import { useDateFormat } from './useDateFormat';
  *  - **Dates are formatted here**, never stored formatted, so they follow the
  *    tenant's timezone and locale like every other date (TD-029).
  */
+/**
+ * Types whose NULL actor means "the client responded through their public
+ * quotation link", not "the system" — see RespondToPublicQuotationUseCase.
+ * Every other NULL-actor type (QUOTATION_EXPIRED, APPOINTMENT_REMINDER, …) is
+ * genuinely unattended, so only these two get the client-facing fallback.
+ */
+const CLIENT_ORIGINATED_TYPES = new Set(['QUOTATION_ACCEPTED', 'QUOTATION_REJECTED']);
+
 export const useNotificationText = (staff: DisplayablePerson[] | undefined) => {
   const { t } = useTranslation('notifications');
   const dates = useDateFormat();
@@ -30,7 +38,9 @@ export const useNotificationText = (staff: DisplayablePerson[] | undefined) => {
       // may be a user who has since been removed from the staff projection.
       const actorName = notification.actorUserId
         ? getStaffDisplayName(actor)
-        : t('actor.system');
+        : CLIENT_ORIGINATED_TYPES.has(notification.type)
+          ? t('actor.client')
+          : t('actor.system');
 
       const params: Record<string, string | number> = { ...notification.params, actor: actorName };
 

@@ -10,6 +10,7 @@ import { NotificationService } from '../../../notifications/application/Notifica
 import { IUserRepository } from '../../../auth/domain/repositories/IUserRepository';
 import { quotationReference } from '../../domain/quotationReference';
 import { runWithPostCommitEmail, IPostCommitEmailDispatcher } from '../runWithPostCommitEmail';
+import { assertStockAvailable } from '../assertQuotationStockAvailable';
 
 export class MarkQuotationAcceptedUseCase {
   constructor(
@@ -23,11 +24,20 @@ export class MarkQuotationAcceptedUseCase {
     private emailDispatcher?: IPostCommitEmailDispatcher
   ) {}
 
+  /**
+   * @param input.actingUserId  NULL means the client, acting through their
+   *   public quotation link rather than a staff member — see
+   *   RespondToPublicQuotationUseCase. Stock movements still need a real user
+   *   for their `createdBy` FK, so that write attributes to the quotation's
+   *   own creator (`stockActorId` below); only the status history and
+   *   notification, which have no such constraint, record the NULL and read
+   *   as the client's own action.
+   */
   async execute(input: {
     tenantId: string;
     quotationId: string;
-    actingUserId: string;
-    actingUserRole: string;
+    actingUserId: string | null;
+    actingUserRole: string | null;
   }) {
     const quotation = await this.quotationRepo.findById(input.tenantId, input.quotationId);
     if (!quotation) {
@@ -38,21 +48,13 @@ export class MarkQuotationAcceptedUseCase {
       throw new Error('Unauthorized: Staff can only act on their own quotations');
     }
 
+    const stockActorId = input.actingUserId ?? quotation.createdByUserId;
+
     const fromStatus = quotation.status;
     quotation.accept(); // Throws if not Sent
 
     const lineItems = await this.lineItemRepo.findByQuotationId(input.tenantId, input.quotationId);
-
-    // Pre-validate all stock levels
-    for (const li of lineItems) {
-      const stock = await this.stockLevelRepo.findByProductAndWarehouse(input.tenantId, li.productId, li.warehouseId);
-      if (!stock) {
-        throw new Error(`Stock level not found for product ${li.productId} at warehouse ${li.warehouseId}`);
-      }
-      if (stock.quantity < li.quantity) {
-        throw new Error(`Insufficient stock for product ${li.productId} at warehouse ${li.warehouseId}`);
-      }
-    }
+    await assertStockAvailable(input.tenantId, lineItems, this.stockLevelRepo);
 
     await this.transactionManager.executeTransaction(async (repos) => {
       for (const li of lineItems) {
@@ -74,7 +76,7 @@ export class MarkQuotationAcceptedUseCase {
           quantity: -li.quantity,
           type: StockMovementType.ADJUSTMENT,
           reason: `Quotation ${input.quotationId} accepted`,
-          createdBy: input.actingUserId
+          createdBy: stockActorId
         });
         await repos.stockMovementRepository.save(movement);
       }

@@ -44,6 +44,8 @@ export class PrismaPublicQuotationReader implements IPublicQuotationReader {
     }));
 
     return {
+      quotationId: row.id,
+      tenantId: row.tenantId,
       reference: quotationReference(row.id),
       status: row.status,
       issuedAt: row.createdAt,

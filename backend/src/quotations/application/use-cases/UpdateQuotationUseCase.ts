@@ -1,16 +1,23 @@
 import { IQuotationRepository } from '../../domain/IQuotationRepository';
 import { IQuotationLineItemRepository } from '../../domain/IQuotationLineItemRepository';
-import { IProductRepository, IWarehouseRepository } from '../../../inventory/domain/repositories';
+import { IProductRepository, IWarehouseRepository, IStockLevelRepository } from '../../../inventory/domain/repositories';
 import { QuotationLineItem } from '../../domain/QuotationLineItem';
 import { QuotationStatus } from '../../domain/Quotation';
+import { QuotationStatusHistory } from '../../domain/QuotationStatusHistory';
 import { UserRole } from '../../../auth/domain/enums/UserRole';
+import { IQuotationWriteTransaction } from '../ports/IQuotationWriteTransaction';
+import { IQuotationDeliveryService } from '../QuotationDeliveryService';
+import { assertStockAvailable } from '../assertQuotationStockAvailable';
 
 export class UpdateQuotationUseCase {
   constructor(
     private quotationRepo: IQuotationRepository,
     private lineItemRepo: IQuotationLineItemRepository,
     private productRepo: IProductRepository,
-    private warehouseRepo: IWarehouseRepository
+    private warehouseRepo: IWarehouseRepository,
+    private stockLevelRepo: IStockLevelRepository,
+    private writeTx: IQuotationWriteTransaction,
+    private delivery?: IQuotationDeliveryService
   ) {}
 
   async execute(input: {
@@ -29,8 +36,16 @@ export class UpdateQuotationUseCase {
       throw new Error('Unauthorized: Staff can only act on their own quotations');
     }
 
-    if (quotation.status !== QuotationStatus.Draft) {
-      throw new Error('Only Draft quotations can be updated');
+    /*
+     * Rejected is editable too, on top of Draft — the client said no to
+     * something, and the fix for that is revising it, not starting over. When
+     * it is Rejected, a successful save also puts it back in front of the
+     * client (see `isResend` below): that is what "the client rejected it, I
+     * fixed it, they should see the fix" means in practice, and matches what
+     * the SRS calls "Re-quote" (§6.5).
+     */
+    if (quotation.status !== QuotationStatus.Draft && quotation.status !== QuotationStatus.Rejected) {
+      throw new Error('Only Draft or Rejected quotations can be updated');
     }
 
     if (!input.lineItems || input.lineItems.length === 0) {
@@ -69,11 +84,48 @@ export class UpdateQuotationUseCase {
       );
     }
 
+    const isResend = quotation.status === QuotationStatus.Rejected;
+
+    // Refuses the resend before anything is written, same as Submit/Approve —
+    // a revision that goes back out to the client must reflect what can
+    // actually be fulfilled with today's pricing AND today's stock.
+    if (isResend) {
+      await assertStockAvailable(input.tenantId, newLineItems, this.stockLevelRepo);
+    }
+
     quotation.lineItems = newLineItems;
 
     await this.lineItemRepo.deleteManyByQuotationId(input.tenantId, input.quotationId);
     await this.lineItemRepo.saveMany(newLineItems);
-    await this.quotationRepo.save(quotation);
+
+    if (isResend) {
+      const fromStatus = quotation.status;
+      quotation.resend(); // Rejected -> Sent
+
+      const history = QuotationStatusHistory.create({
+        id: crypto.randomUUID(),
+        tenantId: input.tenantId,
+        quotationId: input.quotationId,
+        fromStatus,
+        toStatus: quotation.status,
+        changedByUserId: input.actingUserId
+      });
+
+      // Quotation and history commit together, same as every other status
+      // transition — otherwise a failure between the two writes would leave a
+      // quotation reading SENT with no record of how it got there.
+      await this.writeTx.run(async (repos) => {
+        await repos.quotationRepo.save(quotation);
+        await repos.historyRepo.save(history);
+      });
+
+      // The token is never reissued (`issueShareToken`'s own guard) and
+      // resolves to current state, so the client's original link already
+      // shows the revision — this email is what tells them to go look again.
+      await this.delivery?.deliverToClient(quotation.shareToken);
+    } else {
+      await this.quotationRepo.save(quotation);
+    }
 
     return { quotation };
   }

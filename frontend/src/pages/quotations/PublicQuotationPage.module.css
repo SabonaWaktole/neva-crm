@@ -180,6 +180,122 @@
   text-align: center;
 }
 
+.responseSection {
+  margin-top: var(--spacing-xl, 2rem);
+  padding-top: var(--spacing-lg, 1.5rem);
+  border-top: 1px solid var(--border-hairline, #e5e7eb);
+}
+
+.actionButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.actionButtons button,
+.confirmButtons button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  border-radius: var(--radius-md, 8px);
+  border: 1px solid transparent;
+  font-size: 0.9rem;
+  font-weight: 550;
+  cursor: pointer;
+}
+
+.actionButtons button:disabled,
+.confirmButtons button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.acceptButton {
+  background-color: var(--color-success, #16a34a);
+  color: #fff;
+}
+
+.acceptButton:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.rejectButton {
+  background-color: #fff;
+  color: var(--color-error, #dc2626);
+  border-color: var(--color-error, #dc2626);
+}
+
+.rejectButton:hover:not(:disabled) {
+  background-color: rgb(220 38 38 / 6%);
+}
+
+.requoteButton {
+  background-color: #fff;
+  color: var(--color-primary, #4f46e5);
+  border-color: var(--color-primary, #4f46e5);
+}
+
+.requoteButton:hover:not(:disabled) {
+  background-color: rgb(79 70 229 / 6%);
+}
+
+.secondaryButton {
+  background-color: transparent;
+  color: var(--text-secondary, #4a5060);
+}
+
+.secondaryButton:hover:not(:disabled) {
+  background-color: var(--color-surface-container, #f4f5f7);
+}
+
+.confirmPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  max-width: 32rem;
+}
+
+.confirmPanel p,
+.confirmPanel label {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-primary, #16181c);
+}
+
+.requoteInput {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-md, 8px);
+  border: 1px solid var(--border-subtle, #d1d5db);
+  font: inherit;
+  resize: vertical;
+}
+
+.confirmButtons {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.actionError {
+  margin: 0.75rem 0 0;
+  font-size: 0.85rem;
+  color: var(--color-error, #dc2626);
+}
+
+.responseBanner {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 550;
+  color: var(--text-primary, #16181c);
+}
+
+@media print {
+  .responseSection {
+    display: none;
+  }
+}
+
 /*
  * Fallback values are spelled out on every custom property above because this
  * page renders for someone who never loaded the app shell — if the token

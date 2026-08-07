@@ -9,9 +9,12 @@ import {
   useReducedMotion,
   useMotionValueEvent,
 } from 'framer-motion';
-import { Network, ArrowRight, Building2, ShieldCheck, Zap } from 'lucide-react';
-import { Button } from '../../components/ui/Button/Button';
+import { Building2, Construction, ShieldCheck, Zap } from 'lucide-react';
 import { ThemeToggle } from '../../components/ui/ThemeToggle';
+import { useThemeStore } from '../../store/useThemeStore';
+import nevaLogo from '../../assets/nevacrm-logo.png';
+import nevaLogoDark from '../../assets/nevacrm-logo-dark.png';
+import nevaIcon from '../../assets/nevacrm-icon.png';
 import {
   headlineContainerVariants,
   headlineWordVariants,
@@ -80,6 +83,7 @@ export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const prefersReducedMotion = useReducedMotion();
   const [isScrolled, setIsScrolled] = useState(false);
+  const resolvedTheme = useThemeStore((state) => state.resolved);
 
   const { scrollY, scrollYProgress } = useScroll();
 
@@ -136,17 +140,18 @@ export const LandingPage: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: marketingEase }}
         >
-          {/* The mark settles into place rather than simply appearing. */}
-          <motion.span
-            className={styles.brandMark}
-            initial={prefersReducedMotion ? false : { rotate: -25, scale: 0.8 }}
-            animate={{ rotate: 0, scale: 1 }}
-            transition={{ duration: 0.7, ease: marketingEase }}
-            whileHover={prefersReducedMotion ? undefined : { rotate: 8, scale: 1.08 }}
-          >
-            <Network size={28} color="var(--color-primary)" />
-          </motion.span>
-          <span className={styles.brandText}>{t('appName')}</span>
+          {/*
+            The wordmark's "nëva" text is baked in dark navy, so on the dark
+            theme it swaps for a pre-generated white-text variant. Only the
+            text recolors — the purple icon square and "crm" gradient are
+            identical pixels in both files, so the swap is invisible aside
+            from the text going legible.
+          */}
+          <img
+            src={resolvedTheme === 'dark' ? nevaLogoDark : nevaLogo}
+            alt={t('appName')}
+            className={styles.brandLogo}
+          />
         </motion.div>
 
         <motion.div
@@ -157,14 +162,14 @@ export const LandingPage: React.FC = () => {
         >
           <ThemeToggle />
           {/*
-            The "Get Started" button used to open self-serve signup. Workspaces
-            are now provisioned by a platform administrator, so there is nothing
-            for a visitor to start — sign-in is the only action this page can
-            honestly offer.
+            Workspaces are provisioned by a platform administrator, not
+            self-serve — while the site is under construction this stays a
+            quiet text link for people who already have access, not a
+            prominent CTA inviting new signups.
           */}
-          <Button variant="primary" onClick={() => navigate('/login')}>
+          <button type="button" className={styles.signInLink} onClick={() => navigate('/login')}>
             {t('landing.signIn')}
-          </Button>
+          </button>
         </motion.div>
 
         {/* Reading-progress rail pinned to the nav's lower edge. */}
@@ -195,8 +200,27 @@ export const LandingPage: React.FC = () => {
           animate="visible"
         >
           <motion.div className={styles.badge} variants={itemVariants}>
-            <Zap size={14} />
+            <Construction size={14} />
             <span>{t('landing.versionBanner')}</span>
+          </motion.div>
+
+          {/*
+            The brand mark, enlarged into a centerpiece rather than tucked in
+            the nav. A soft pulsing ring stands in for the marketing hero
+            image this page doesn't have yet — it reads as "actively being
+            built", not "broken" or "empty".
+          */}
+          <motion.div className={styles.markStage} variants={itemVariants} aria-hidden="true">
+            <motion.span
+              className={styles.markRing}
+              animate={
+                prefersReducedMotion
+                  ? undefined
+                  : { scale: [1, 1.12, 1], opacity: [0.5, 0.15, 0.5] }
+              }
+              transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <img src={nevaIcon} alt="" className={styles.markIcon} />
           </motion.div>
 
           {/*
@@ -229,28 +253,18 @@ export const LandingPage: React.FC = () => {
           <motion.p className={styles.subtitle} variants={itemVariants}>
             {t('landing.subtitle')}
           </motion.p>
-
-          <motion.div className={styles.ctaRow} variants={itemVariants}>
-            <motion.div
-              className={styles.ctaWrap}
-              whileHover={prefersReducedMotion ? undefined : { scale: 1.03 }}
-              whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            >
-              <Button
-                variant="primary"
-                icon={<ArrowRight size={18} />}
-                iconPosition="right"
-                onClick={() => navigate('/login')}
-                className={styles.ctaButton}
-              >
-                {t('landing.signIn')}
-              </Button>
-            </motion.div>
-          </motion.div>
         </motion.div>
 
         {/* Feature Grid */}
+        <motion.p
+          className={styles.featuresIntro}
+          variants={sectionVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={revealViewport}
+        >
+          {t('landing.featuresIntro')}
+        </motion.p>
         <motion.div
           className={styles.featureGrid}
           variants={prefersReducedMotion ? noopVariants : revealContainerVariants}

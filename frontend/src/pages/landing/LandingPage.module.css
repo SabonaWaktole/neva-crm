@@ -76,27 +76,52 @@
   gap: 10px;
 }
 
-.brandMark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  /* Framer Motion drives rotate/scale here; keeping it its own element means
-     the text beside it never inherits the transform. */
-  transform-origin: center;
+/* The full wordmark, sized to the nav row. Height-constrained rather than
+   width-constrained so it stays crisp regardless of the source aspect
+   ratio, and never pushes the nav taller on narrow screens. */
+.brandLogo {
+  display: block;
+  height: 26px;
+  width: auto;
 }
 
-.brandText {
-  font-family: var(--font-family-display);
-  font-size: 19px;
-  font-weight: 660;
-  letter-spacing: -0.028em;
-  color: var(--text-primary);
+@media (min-width: 768px) {
+  .brandLogo {
+    height: 30px;
+  }
 }
 
 .navActions {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-lg);
+}
+
+/*
+ * Deliberately not a Button: while the site is under construction, sign-in
+ * is for people who already have a workspace, not a call to action for new
+ * visitors. A quiet text link says that without competing with the badge.
+ */
+.signInLink {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-md);
+  font-weight: 560;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color var(--transition-normal);
+}
+
+.signInLink:hover {
+  color: var(--color-primary);
+}
+
+.signInLink:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 4px;
+  border-radius: var(--radius-sm);
 }
 
 /* ------------------------------------------------------------------- hero */
@@ -175,7 +200,54 @@
     inset 0 0 0 1px var(--border-subtle);
 }
 
-/* Entrance for .badge/.title/.subtitle/.ctaRow is owned by Framer Motion in
+/*
+ * The brand mark, promoted to a hero-scale centerpiece with a soft pulsing
+ * ring behind it. This is the page's one purpose-built visual, standing in
+ * for the marketing screenshot a still-building product doesn't have yet.
+ */
+.markStage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 112px;
+  height: 112px;
+  margin-bottom: var(--spacing-lg);
+}
+
+.markRing {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-3xl);
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--color-primary) 35%, transparent),
+    transparent 72%
+  );
+  will-change: transform, opacity;
+}
+
+.markIcon {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-lg);
+}
+
+@media (min-width: 768px) {
+  .markStage {
+    width: 132px;
+    height: 132px;
+  }
+
+  .markIcon {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+/* Entrance for .badge/.title/.subtitle is owned by Framer Motion in
    LandingPage.tsx (see heroContainerVariants). The former CSS `heroIn`
    keyframes were removed so the two systems can't animate the same element. */
 .title {
@@ -235,36 +307,31 @@
   }
 }
 
-.ctaRow {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--spacing-base);
-  align-items: center;
-}
-
-/* Motion wrapper around the Button. Scaling this instead of the button itself
-   leaves the Button primitive's own :active press intact. */
-.ctaWrap {
-  display: inline-flex;
-  border-radius: var(--radius-full);
-  will-change: transform;
-}
-
-.ctaButton {
-  height: 48px !important;
-  padding: 0 var(--spacing-xl) !important;
-  font-size: var(--font-size-body-md) !important;
-  border-radius: var(--radius-full) !important;
-}
-
 /* --------------------------------------------------------------- features */
+
+.featuresIntro {
+  width: 100%;
+  max-width: 1200px;
+  margin: var(--spacing-2xl) 0 var(--spacing-sm) 0;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-sm);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+@media (min-width: 640px) {
+  .featuresIntro {
+    margin-top: var(--spacing-4xl);
+  }
+}
 
 .featureGrid {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--spacing-md);
-  margin-top: var(--spacing-2xl);
+  margin-top: var(--spacing-md);
   width: 100%;
   max-width: 1200px;
   text-align: left;
@@ -274,7 +341,7 @@
   .featureGrid {
     grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
     gap: var(--spacing-lg);
-    margin-top: var(--spacing-4xl);
+    margin-top: var(--spacing-md);
   }
 }
 

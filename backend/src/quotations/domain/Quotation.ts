@@ -223,4 +223,26 @@ export class Quotation {
     }
     this.status = QuotationStatus.Expired;
   }
+
+  /**
+   * Puts a Rejected quotation back in front of the client, after staff has
+   * revised it (`UpdateQuotationUseCase`, which is also what allows editing a
+   * Rejected quotation's line items at all — Draft is not the only editable
+   * status).
+   *
+   * `respondedAt` resets to null: it means "the client's answer to what they
+   * are looking at now", and a Rejected verdict on the old pricing has nothing
+   * to say about the revised offer. `sentAt` moves forward for the same
+   * reason. `shareToken` is untouched — `issueShareToken`'s own "never
+   * reissued" guard already means the customer's original link keeps
+   * resolving to whatever is current, which is exactly what a revision needs.
+   */
+  resend() {
+    if (this.status !== QuotationStatus.Rejected) {
+      throw new Error(`Invalid state transition from ${this.status} to Sent`);
+    }
+    this.status = QuotationStatus.Sent;
+    this.sentAt = new Date();
+    this.respondedAt = null;
+  }
 }

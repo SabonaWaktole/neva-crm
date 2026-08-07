@@ -1,7 +1,37 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import rateLimit from 'express-rate-limit';
-import { GetPublicQuotationUseCase } from '../../application/GetPublicQuotationUseCase';
+import { z } from 'zod';
+import { GetPublicQuotationUseCase, PublicQuotationView } from '../../application/GetPublicQuotationUseCase';
 import { QuotationPdfRenderer } from '../../infrastructure/QuotationPdfRenderer';
+import {
+  RespondToPublicQuotationUseCase,
+  RespondToPublicQuotationResult,
+} from '../../application/use-cases/RespondToPublicQuotationUseCase';
+
+const respondSchema = z.object({
+  note: z.string().trim().max(2000).optional(),
+});
+
+/** The same shape the GET route returns — keeps the two in one place. */
+const toPublicJson = (view: PublicQuotationView) => ({
+  reference: view.reference,
+  status: view.status,
+  issuedAt: view.issuedAt,
+  sentAt: view.sentAt,
+  respondedAt: view.respondedAt,
+  clientName: view.clientName,
+  company: {
+    name: view.companyName,
+    logoUrl: view.companyLogoUrl,
+    address: view.companyAddress,
+    contactEmail: view.companyContactEmail,
+    contactPhone: view.companyContactPhone,
+  },
+  currency: view.currency,
+  locale: view.locale,
+  lines: view.lines,
+  subtotal: view.subtotal,
+});
 
 /**
  * The customer-facing quotation view (§6.5).
@@ -25,7 +55,8 @@ import { QuotationPdfRenderer } from '../../infrastructure/QuotationPdfRenderer'
  */
 export const createPublicQuotationRouter = (
   getPublicQuotation: GetPublicQuotationUseCase,
-  pdfRenderer: QuotationPdfRenderer
+  pdfRenderer: QuotationPdfRenderer,
+  respondToQuotation: RespondToPublicQuotationUseCase
 ): Router => {
   const router = Router();
 
@@ -59,26 +90,45 @@ export const createPublicQuotationRouter = (
       // are real, which is exactly the signal the token length exists to deny.
       if (!view) return res.status(404).json({ error: 'Quotation not found' });
 
-      res.json({
-        reference: view.reference,
-        status: view.status,
-        issuedAt: view.issuedAt,
-        sentAt: view.sentAt,
-        respondedAt: view.respondedAt,
-        clientName: view.clientName,
-        company: {
-          name: view.companyName,
-          logoUrl: view.companyLogoUrl,
-          address: view.companyAddress,
-          contactEmail: view.companyContactEmail,
-          contactPhone: view.companyContactPhone,
-        },
-        currency: view.currency,
-        locale: view.locale,
-        lines: view.lines,
-        subtotal: view.subtotal,
-      });
+      res.json(toPublicJson(view));
     } catch (error) {
+      next(error);
+    }
+  });
+
+  /*
+   * Accept / Reject / Re-quote — the client's response to a Sent quotation.
+   *
+   * "Re-quote" is not a separate endpoint: it is `/reject` with a `note`,
+   * enforced client-side (the button opens a required comment box). Both
+   * routes return the freshly-read view so the page updates from the response
+   * instead of firing a second GET.
+   */
+  router.post('/:token/accept', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await respondToQuotation.execute({
+        token: String(req.params.token),
+        decision: 'accept',
+      });
+      await sendRespondResult(res, getPublicQuotation, String(req.params.token), result);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post('/:token/reject', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const body = respondSchema.parse(req.body ?? {});
+      const result = await respondToQuotation.execute({
+        token: String(req.params.token),
+        decision: 'reject',
+        note: body.note,
+      });
+      await sendRespondResult(res, getPublicQuotation, String(req.params.token), result);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: 'Invalid request' });
+      }
       next(error);
     }
   });
@@ -106,3 +156,51 @@ export const createPublicQuotationRouter = (
 
   return router;
 };
+
+/**
+ * Turns a `RespondToPublicQuotationUseCase` outcome into a response.
+ *
+ * On success, re-reads the view rather than reusing the pre-mutation one —
+ * cheap (one indexed lookup) and it guarantees the JSON the client renders
+ * next is the actual committed state, not a hand-assembled guess at it.
+ */
+async function sendRespondResult(
+  res: Response,
+  getPublicQuotation: GetPublicQuotationUseCase,
+  token: string,
+  result: RespondToPublicQuotationResult
+): Promise<void> {
+  if (result.outcome === 'not_found') {
+    res.status(404).json({ error: 'Quotation not found' });
+    return;
+  }
+
+  if (result.outcome === 'invalid_state') {
+    // The client already responded (or raced another tab into doing so).
+    // Not a token problem, so the current, real state is returned rather than
+    // a bare error — the page reconciles to it instead of getting stuck.
+    const view = await getPublicQuotation.execute(token);
+    if (!view) {
+      res.status(404).json({ error: 'Quotation not found' });
+      return;
+    }
+    res.status(409).json(toPublicJson(view));
+    return;
+  }
+
+  if (result.outcome === 'failed') {
+    // A real failure (e.g. Accept's stock check), not a state race — the
+    // quotation is unchanged. Returned as a bare error, deliberately NOT
+    // shaped like the quotation view, so the page shows the message instead
+    // of quietly re-rendering the same buttons as if nothing had happened.
+    res.status(422).json({ error: result.message });
+    return;
+  }
+
+  const view = await getPublicQuotation.execute(token);
+  if (!view) {
+    res.status(404).json({ error: 'Quotation not found' });
+    return;
+  }
+  res.json(toPublicJson(view));
+}

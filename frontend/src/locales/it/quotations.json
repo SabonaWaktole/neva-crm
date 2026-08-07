@@ -61,6 +61,7 @@
     "warehouse": "Magazzino: {{warehouse}}",
     "breadcrumb": "CRM > Preventivi > {{reference}}",
     "unknownUser": "Utente sconosciuto",
+    "client": "Il cliente",
     "unknownClient": "Sconosciuto",
     "notes": "Note"
   },
@@ -102,6 +103,21 @@
     "lineTotal": "Totale",
     "subtotal": "Subtotale",
     "download": "Scarica PDF",
-    "privateNotice": "Questo è un link privato. Ti preghiamo di non inoltrarlo."
+    "privateNotice": "Questo è un link privato. Ti preghiamo di non inoltrarlo.",
+    "actions": {
+      "accept": "Accetta",
+      "reject": "Rifiuta",
+      "requote": "Richiedi modifiche",
+      "confirmAccept": "Accettare questo preventivo? Il mittente verrà avvisato.",
+      "confirmReject": "Rifiutare questo preventivo? Il mittente verrà avvisato.",
+      "confirm": "Conferma",
+      "cancel": "Annulla",
+      "send": "Invia",
+      "requotePrompt": "Cosa vorresti che venisse cambiato?",
+      "requotePlaceholder": "es. Potreste includere uno sconto sulla quantità?",
+      "accepted": "Hai accettato questo preventivo. Il mittente è stato avvisato.",
+      "rejected": "Hai rifiutato questo preventivo. Il mittente è stato avvisato.",
+      "error": "Qualcosa è andato storto. Riprova."
+    }
   }
 }
